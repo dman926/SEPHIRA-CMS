@@ -1,6 +1,6 @@
 # Flask-API
 
-Fixed and minimal documented version of [this guide](https://dev.to/paurakhsharma/series/3672). Code is pretty self explanatory since most of it is handled by Flask and its extensions.
+Fixed and minimally documented version of [this guide](https://dev.to/paurakhsharma/series/3672). Code is pretty self explanatory since most of it is handled by Flask and its extensions.
 
 Works great as a Flask API skeleton, complete with authentication, password hashing, JSON Web Tokens, and emailing.
 
