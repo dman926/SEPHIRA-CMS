@@ -22,7 +22,7 @@ if PRODUCTION:
 	app.config['MAIL_USERNAME'] = "support@movie-bag.com"
 	app.config['MAIL_PASSWORD'] = ""
 	app.config['MONGODB_SETTINGS'] = {
-    	'host': 'mongodb://localhost/movie-bag'
+		'host': 'mongodb://localhost/movie-bag'
 	}
 else:
 	app.config['JWT_SECRET_KEY'] = 'super-secret'
@@ -31,7 +31,7 @@ else:
 	app.config['MAIL_USERNAME'] = "support@movie-bag.com"
 	app.config['MAIL_PASSWORD'] = ""
 	app.config['MONGODB_SETTINGS'] = {
-	    'host': 'mongodb://localhost/movie-bag-test'
+		'host': 'mongodb://localhost/movie-bag-test'
 	}
 mail = Mail(app)
 
