@@ -6,6 +6,7 @@ from flask import Flask
 from flask_restful import Api
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
+from flask_socketio import SocketIO
 from flask_mail import Mail
 
 from database.db import initialize_db
@@ -38,9 +39,11 @@ mail = Mail(app)
 api = Api(app, errors=errors)
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
+socketio = SocketIO(app)
 
 initialize_db(app)
 initialize_routes(api)
 
 if __name__ == '__main__':
-	app.run(debug=True, port=5000)
+	#app.run(debug=True, port=5000)
+	socketio.run(app)
