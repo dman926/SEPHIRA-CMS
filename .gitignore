@@ -1,3 +1,3 @@
-.vscode/
 venv/
+**/.vscode/
 **/__pycache__/
