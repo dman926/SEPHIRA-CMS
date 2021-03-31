@@ -10,31 +10,31 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { NavComponent } from './nav.component';
 
 describe('NavComponent', () => {
-  let component: NavComponent;
-  let fixture: ComponentFixture<NavComponent>;
+	let component: NavComponent;
+	let fixture: ComponentFixture<NavComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [NavComponent],
-      imports: [
-        NoopAnimationsModule,
-        LayoutModule,
-        MatButtonModule,
-        MatIconModule,
-        MatListModule,
-        MatSidenavModule,
-        MatToolbarModule,
-      ]
-    }).compileComponents();
-  }));
+	beforeEach(waitForAsync(() => {
+		TestBed.configureTestingModule({
+			declarations: [NavComponent],
+			imports: [
+				NoopAnimationsModule,
+				LayoutModule,
+				MatButtonModule,
+				MatIconModule,
+				MatListModule,
+				MatSidenavModule,
+				MatToolbarModule,
+			]
+		}).compileComponents();
+	}));
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(NavComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+	beforeEach(() => {
+		fixture = TestBed.createComponent(NavComponent);
+		component = fixture.componentInstance;
+		fixture.detectChanges();
+	});
 
-  it('should compile', () => {
-    expect(component).toBeTruthy();
-  });
+	it('should compile', () => {
+		expect(component).toBeTruthy();
+	});
 });

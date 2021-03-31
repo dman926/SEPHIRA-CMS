@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { AuthGuard } from './auth/auth.guard';
 import { LandingComponent } from './core/landing/landing.component';
 
 const routes: Routes = [
@@ -8,8 +9,9 @@ const routes: Routes = [
 		component: LandingComponent
 	},
 	{
-		path: 'auth',
-		loadChildren: () => import('./core/auth/auth.module').then(m => m.AuthModule)
+		path: 'dashboard',
+		loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule),
+		canActivate: [AuthGuard]
 	}
 ];
 
