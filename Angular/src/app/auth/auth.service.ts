@@ -32,6 +32,7 @@ export class AuthService {
 			this.getUser().toPromise().then(res => {
 				this.setUser(res);
 			}).catch(err => {
+				this.setUser(null);
 				console.error('Error fetching user (token expiration error): ' + err);
 			});
 			setInterval(() =>

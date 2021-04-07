@@ -1,5 +1,8 @@
 <div class="grid-container">
 	<h1 class="mat-h1">Dashboard</h1>
+	<button mat-raised-button color="primary" (click)="selectingMedia = !selectingMedia">{{ selectingMedia ? 'Close' : 'Open' }} Media Browser</button>
+	<app-media-browser *ngIf="selectingMedia" (selectedImage)="onSelectedImage($event)"></app-media-browser>
+	<br />
 	<button mat-raised-button color="primary" (click)="addCard()">Add Card</button>
 	<mat-grid-list cols="2" rowHeight="350px">
 		<mat-grid-tile *ngFor="let card of cards" [colspan]="card.width" [rowspan]="card.height">

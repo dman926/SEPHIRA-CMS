@@ -2,6 +2,8 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
+import { HttpClientModule } from '@angular/common/http';
+
 import { NavComponent } from './nav/nav.component';
 import { LayoutModule } from '@angular/cdk/layout';
 
@@ -13,6 +15,7 @@ import { MatListModule } from '@angular/material/list';
 
 import { LandingComponent } from './landing/landing.component';
 import { AuthModule } from '../auth/auth.module';
+import { FileService } from './services/file.service';
 
 
 
@@ -23,6 +26,8 @@ import { AuthModule } from '../auth/auth.module';
 		RouterModule,
 		LayoutModule,
 
+		HttpClientModule,
+
 		AuthModule,
 
 		MatToolbarModule,
@@ -30,6 +35,9 @@ import { AuthModule } from '../auth/auth.module';
 		MatSidenavModule,
 		MatIconModule,
 		MatListModule
+	],
+	providers: [
+		FileService
 	],
 	exports: [
 		NavComponent
