@@ -37,7 +37,7 @@ export class MediaBrowserComponent implements OnInit {
 	}
 
 	selectFile(index: number) {
-		this.selected = index;		
+		this.selected = index;
 		this.selectedImage.emit(window.location.origin + this.files[index]);
 	}
 

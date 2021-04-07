@@ -1,0 +1,10 @@
+<div id="loader-spinner" *ngIf="gettingUsers">
+	<mat-spinner></mat-spinner>
+</div>
+<section id="users-wrapper" *ngIf="!gettingUsers">
+	<div *ngFor="let user of users">
+		<p>Email: {{ user.email }}</p>
+		<p>Is Admin: {{ user.admin ? 'True' : 'False' }}</p>
+		<hr />
+	</div>
+</section>

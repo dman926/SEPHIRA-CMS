@@ -33,6 +33,7 @@ export class AuthService {
 				this.setUser(res);
 			}).catch(err => {
 				this.setUser(null);
+				localStorage.removeItem('accessToken');
 				console.error('Error fetching user (token expiration error): ' + err);
 			});
 			setInterval(() =>
@@ -98,13 +99,23 @@ export class AuthService {
 		}
 	}
 
-	public updateUser(user: User): Observable<User> {
+	public updateUser(user: User): Observable<string> {
 		const accessToken = localStorage.getItem('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
-			return this.http.put<User>(this.authBase + 'user', user, { headers });
+			return this.http.put<string>(this.authBase + 'user', user, { headers });
 		} else {
-			return new Observable<User>();
+			return new Observable<string>();
+		}
+	}
+
+	public deleteUser(): Observable<string> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
+			return this.http.delete<string>(this.authBase + 'user', { headers });
+		} else {
+			return new Observable<string>();
 		}
 	}
 

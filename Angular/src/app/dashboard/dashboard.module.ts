@@ -20,7 +20,7 @@ import { MediaBrowserModule } from '../media-browser/media-browser.module';
 	imports: [
 		CommonModule,
 		DashboardRoutingModule,
-		
+
 		MatGridListModule,
 		MatCardModule,
 		MatMenuModule,

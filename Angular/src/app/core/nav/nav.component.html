@@ -9,6 +9,7 @@
 				<app-login></app-login>
 			</div>
 			<mat-nav-list>
+				<a *ngIf="user?.admin" mat-list-item routerLink="/admin/home">Admin Settings</a>
 				<a *ngFor="let link of links" mat-list-item [routerLink]="[link.link]">{{ link.text }}</a>
 			</mat-nav-list>
 			<span class="spacer"></span>
