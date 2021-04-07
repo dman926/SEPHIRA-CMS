@@ -1,0 +1,9 @@
+div#loader-spinner, section#users-wrapper {
+	display: grid;
+	justify-content: center;
+}
+
+div#loader-spinner {
+	height: 100%;
+	align-items: center;
+}

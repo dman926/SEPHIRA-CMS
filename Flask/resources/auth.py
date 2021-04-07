@@ -23,7 +23,7 @@ class SignupApi(Resource):
 		try:
 			body = request.get_json()
 			user =  User(**body)
-			if len(User.objects) > 0:
+			if len(User.objects) == 0:
 				user.admin = True
 			user.hash_password()
 			user.save()
@@ -156,7 +156,7 @@ class UserApi(Resource):
 	def get(self):
 		try:
 			user = User.objects.get(id=get_jwt_identity())
-			return jsonify(user)
+			return jsonify(user.getPasswordLess())
 		except Exception:
 			raise InternalServerError
 	'''

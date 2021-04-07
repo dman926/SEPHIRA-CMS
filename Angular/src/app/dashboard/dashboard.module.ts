@@ -12,6 +12,7 @@ import { DashboardRoutingModule } from './dashboard-routing.module';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { CardComponent } from './card/card.component';
 import { CardService } from './card.service';
+import { MediaBrowserModule } from '../media-browser/media-browser.module';
 
 
 @NgModule({
@@ -19,12 +20,15 @@ import { CardService } from './card.service';
 	imports: [
 		CommonModule,
 		DashboardRoutingModule,
+
 		MatGridListModule,
 		MatCardModule,
 		MatMenuModule,
 		MatIconModule,
 		MatButtonModule,
-		LayoutModule
+		LayoutModule,
+
+		MediaBrowserModule
 	],
 	providers: [
 		CardService

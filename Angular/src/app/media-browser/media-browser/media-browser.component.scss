@@ -1,0 +1,17 @@
+img {
+	width: 12em;
+	height: 12em;
+	object-fit: cover;
+}
+
+.round-button {
+	border-radius: 50%;
+	min-width: unset;
+	width: 3em;
+	height: 3em;
+	padding: 0;
+}
+
+.hidden {
+	display: none;
+}

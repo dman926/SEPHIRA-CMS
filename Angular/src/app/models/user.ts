@@ -1,5 +1,7 @@
 export interface User {
 	id?: { $oid?: string };
-	username?: string;
+	email?: string;
 	password?: string;
+	admin?: boolean;
+	cards?: any[];
 }

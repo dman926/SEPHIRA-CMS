@@ -9,8 +9,18 @@ const routes: Routes = [
 		component: LandingComponent
 	},
 	{
+		path: 'settings',
+		loadChildren: () => import('./settings/settings.module').then(m => m.SettingsModule),
+		canActivate: [AuthGuard]
+	},
+	{
 		path: 'dashboard',
 		loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule),
+		canActivate: [AuthGuard]
+	},
+	{
+		path: 'admin',
+		loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule),
 		canActivate: [AuthGuard]
 	}
 ];

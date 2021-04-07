@@ -13,12 +13,14 @@ export class DashboardComponent implements OnInit {
 
 	isHandset: boolean;
 	gettingCards: boolean;
+	selectingMedia: boolean;
 
 	cards: Card[];
 
 	constructor(private breakpointObserver: BreakpointObserver, private cardService: CardService) {
 		this.isHandset = false;
 		this.gettingCards = true;
+		this.selectingMedia = false;
 		this.cards = [];
 		this.breakpointObserver.observe(Breakpoints.Handset).pipe(
 			map(({ matches }) => {
@@ -61,6 +63,10 @@ export class DashboardComponent implements OnInit {
 				});
 			}
 		});
+	}
+
+	onSelectedImage(url: string) {
+		console.log(url);
 	}
 
 }

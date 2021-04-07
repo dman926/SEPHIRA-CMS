@@ -1,0 +1,16 @@
+<div id="loader-spinner" *ngIf="gettingInformation">
+	<mat-spinner></mat-spinner>
+</div>
+<section id="media-browser-wrapper">
+	<div id="uploader">
+		<p>Uploader</p>
+		<input type=file class="hidden" (change)="onFileUploaderSelected($event)" #fileUpload />
+		<button mat-raised-button class="round-button" type="button" color="primary" (click)="fileUpload.click()"><mat-icon>attach_file</mat-icon></button>
+	</div>
+	<div id="browser">
+		<div *ngFor="let image of files; index as i">
+			<img [src]="getOrigin() + image" (click)="selectFile(i)" [style]="'border: 4px solid ' + ((i == selected) ? '#673ab7' : 'transparent') + ';'" />
+			<button mat-icon-button (click)="deleteFile(i)"><mat-icon>clear</mat-icon></button>
+		</div>	
+	</div>
+</section>
