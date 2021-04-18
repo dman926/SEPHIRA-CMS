@@ -22,10 +22,9 @@ class User(db.Document):
 	cards = db.ListField(db.ReferenceField('Card', reverse_delete_rule=db.PULL))
 
 	def hash_password(self):
-		if not self.salt:
-			chars = string.ascii_letters + string.punctuation
-			size = 12
-			self.salt = ''.join(random.choice(chars) for x in range(size))
+		chars = string.ascii_letters + string.punctuation
+		size = 12
+		self.salt = ''.join(random.choice(chars) for x in range(size))
 		self.password = generate_password_hash(self.password + self.salt).decode('utf8')
 
 	def check_password(self, password):

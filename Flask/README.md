@@ -2,7 +2,7 @@
 
 Fixed and minimally documented version of [this guide](https://dev.to/paurakhsharma/series/3672). Code is pretty self explanatory since most of it is handled by Flask and its extensions.
 
-Works great as a Flask API skeleton, complete with authentication, password hashing, JSON Web Tokens, websocket server, mongodb integration, and emailing.
+Works great as a Flask API skeleton, complete with authentication, password salting and hashing, JSON Web Tokens, websocket server, mongodb integration, and emailing.
 
 (Preferably) In a virtual python environment:
 
@@ -10,7 +10,7 @@ Works great as a Flask API skeleton, complete with authentication, password hash
 
 To run the local Flask server
 
-`flask run`
+`python run.py`
 
 To run the production server
 
