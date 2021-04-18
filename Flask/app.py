@@ -14,7 +14,6 @@ from flask_limiter.util import get_remote_address
 from flask_restful_swagger import swagger
 
 from database.db import initialize_db
-from resources.routes import initialize_routes
 from resources.errors import errors
 
 import os
@@ -56,9 +55,8 @@ jwt = JWTManager(app)
 # socketio = SocketIO(app)
 limiter = Limiter(app, key_func=get_remote_address, default_limits=["2500 per day", "250 per hour"])
 
+from resources.routes import initialize_routes
+
 initialize_db(app)
 initialize_routes(api, base)
 
-if __name__ == '__main__':
-	app.run(debug=True)
-	# socketio.run(app)
