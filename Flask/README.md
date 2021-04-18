@@ -14,7 +14,7 @@ To run the local Flask server
 
 To run the production server
 
-`gunicorn --bind 0.0.0.0:5000 app:app` with 5000 being the port of the api. Use gunicorn in conjunction with the web server (Apache, NGINX) using a reverse proxy.
+You should run this as a uWSGI instance with NGINX. [Read more here](https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-uwsgi-and-nginx-on-ubuntu-20-04)
 
 ## Documentations
 
