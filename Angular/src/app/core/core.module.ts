@@ -16,6 +16,7 @@ import { MatListModule } from '@angular/material/list';
 import { LandingComponent } from './landing/landing.component';
 import { AuthModule } from '../auth/auth.module';
 import { FileService } from './services/file.service';
+import { WebsocketService } from './services/websocket.service';
 
 
 
@@ -37,7 +38,8 @@ import { FileService } from './services/file.service';
 		MatListModule
 	],
 	providers: [
-		FileService
+		FileService,
+		WebsocketService
 	],
 	exports: [
 		NavComponent

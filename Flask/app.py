@@ -7,7 +7,7 @@ from flask_cors import CORS
 from flask_restful import Api
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
-# from flask_socketio import SocketIO
+from flask_socketio import SocketIO
 from flask_mail import Mail
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -32,6 +32,7 @@ if PRODUCTION:
 		'host': 'mongodb://localhost/flask-api'
 	}
 	resources = {r"/*": {"origins": "https://api.website.com"}}
+	socketResources = "api.website.com"
 	base = '/'
 else:
 	app.config['JWT_SECRET_KEY'] = 'super-secret'
@@ -43,7 +44,8 @@ else:
 	app.config['MONGODB_SETTINGS'] = {
 		'host': 'mongodb://localhost/flask-api-test'
 	}
-	resources = {r"/api/*": {"origins": "http://localhost:4200"}}
+	resources = {r"/*": {"origins": "http://localhost:4200"}}
+	socketResources = "http://localhost:4200"
 	base = '/api/'
 
 mail = Mail(app)
@@ -52,11 +54,10 @@ cors = CORS(app, resources=resources)
 api = swagger.docs(Api(app, errors=errors), apiVersion='1.0')
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
-# socketio = SocketIO(app)
+socketio = SocketIO(app, cors_allowed_origins=socketResources)
 limiter = Limiter(app, key_func=get_remote_address, default_limits=["2500 per day", "250 per hour"])
 
 from resources.routes import initialize_routes
 
 initialize_db(app)
 initialize_routes(api, base)
-
