@@ -57,14 +57,7 @@ jwt = JWTManager(app)
 socketio = SocketIO(app, cors_allowed_origins=socketResources)
 limiter = Limiter(app, key_func=get_remote_address, default_limits=["2500 per day", "250 per hour"])
 
-if PRODUCTION:
-	from uwsgidecorators import postfork
-
-	@postfork
-	def initialization():
-		initialize_db(app)
-else:
-	initialize_db(app)
+initialize_db(app)
 
 from resources.routes import initialize_routes
 

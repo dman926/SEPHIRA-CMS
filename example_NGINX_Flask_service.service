@@ -1,0 +1,13 @@
+[Unit]
+Description=uWSGI instance to serve the Flask API
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/path/to/site
+Environment="PATH=/path/to/site/venv/bin"
+ExecStart=/path/to/site/venv/bin/uwsgi --ini app.ini
+
+[Install]
+WantedBy=multi-user.target
