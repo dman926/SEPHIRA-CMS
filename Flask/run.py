@@ -1,5 +1,4 @@
-from app import app, PRODUCTION
+from app import socketio, app, PRODUCTION
 
 if __name__ == '__main__':
-	app.run(debug=not PRODUCTION)
-	# socketio.run(app)
+	socketio.run(app, debug=not PRODUCTION)

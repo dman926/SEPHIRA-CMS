@@ -7,6 +7,7 @@ from .card import CardsApi, CardApi
 from .file import UploaderApi, MediaApi, SingleMediaApi
 
 from .admin import AdminApi, AdminUsersApi, AdminUserApi
+from .sockets import SocketApi
 
 def initialize_routes(api, base):
 	api.add_resource(SignupApi, base + 'auth/signup')
@@ -27,3 +28,5 @@ def initialize_routes(api, base):
 	api.add_resource(AdminApi, base + 'admin/admin')
 	api.add_resource(AdminUsersApi, base + 'admin/users')
 	api.add_resource(AdminUserApi, base + 'admin/user/<id>')
+
+	api.add_resource(SocketApi, base + 'socketio')
