@@ -8,13 +8,17 @@ Works great as a Flask API skeleton, complete with authentication, password salt
 
 `pip install -r requirements.txt`
 
-To run the local Flask server
+To run the local (nonproduction) Flask server
 
-`python run.py`
+`python wsgi.py`
 
 To run the production server
 
-You should run this as a uWSGI instance with NGINX. [Read more here](https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-uwsgi-and-nginx-on-ubuntu-20-04)
+`pip install wheel`
+
+`pip install uwsgi`
+
+Included are the app.ini configuration, NGINX example Location config, and a systemd service to start the server with systemd.
 
 ## Documentations
 
