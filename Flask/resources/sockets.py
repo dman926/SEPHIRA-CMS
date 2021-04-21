@@ -7,7 +7,7 @@ from app import socketio
 
 @socketio.on('connect')
 def test_connect():
-	print('client-connected')
+	print('Client Connected')
 	emit('connection', {'data': 'Connected'})
 
 @socketio.on('disconnect')
