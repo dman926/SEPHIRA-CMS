@@ -1,3 +1,3 @@
 # Flask/Angular Starter
 
-Other dependencies: MongoDB, ffmpeg
+Other dependencies: MongoDB, ffmpeg, HandbrakeCLI

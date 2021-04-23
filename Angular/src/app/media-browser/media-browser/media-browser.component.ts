@@ -1,5 +1,5 @@
 import { HttpEventType } from '@angular/common/http';
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
 import { FileService } from 'src/app/core/services/file.service';
 
 @Component({
@@ -11,6 +11,8 @@ export class MediaBrowserComponent implements OnInit {
 
 	@Output() selectedImage = new EventEmitter();
 
+	@ViewChild('fileUpload') fileUpload: ElementRef | null;
+
 	files: string[];
 	selected: number;
 
@@ -19,6 +21,7 @@ export class MediaBrowserComponent implements OnInit {
 	uploading: boolean;
 
 	constructor(private fileService: FileService) {
+		this.fileUpload = null;
 		this.files = [];
 		this.gettingInformation = true;
 		this.selected = -1;
@@ -68,10 +71,13 @@ export class MediaBrowserComponent implements OnInit {
 			this.fileService.upload(file).subscribe(res => {
 				if (res.type === HttpEventType.Response) {
 					// Done uploading
+					if (this.fileUpload) {
+						this.fileUpload.nativeElement.value = '';
+					}
+					this.uploading = false;
 					if (res) {
 						this.getFiles();
 					}
-					this.uploading = false;
 				} else if (res.type === HttpEventType.UploadProgress) {
 					// Update progress
 					if (res.total) {
