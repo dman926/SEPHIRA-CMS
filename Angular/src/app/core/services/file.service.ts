@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -12,15 +12,15 @@ export class FileService {
 
 	constructor(private http: HttpClient) { }
 
-	public upload(file: File): Observable<string> {
+	public upload(file: File): Observable<HttpEvent<string>> {
 		const accessToken = localStorage.getItem('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			const body = new FormData();
 			body.append('file', file);
-			return this.http.post<string>(this.fileBase + 'uploader', body, { headers });
+			return this.http.post<string>(this.fileBase + 'uploader', body, { headers, reportProgress: true, observe: 'events' });
 		} else {
-			return new Observable<string>();
+			return new Observable<HttpEvent<string>>();
 		}
 	}
 

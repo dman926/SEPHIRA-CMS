@@ -6,6 +6,7 @@
 		<p>Uploader</p>
 		<input type=file class="hidden" (change)="onFileUploaderSelected($event)" #fileUpload />
 		<button mat-raised-button class="round-button" type="button" color="primary" (click)="fileUpload.click()"><mat-icon>attach_file</mat-icon></button>
+		<mat-progress-bar *ngIf="uploading" mode="determinate" [value]="uploadPercent"></mat-progress-bar>
 	</div>
 	<div id="browser">
 		<div *ngFor="let image of files; index as i">

@@ -8,7 +8,8 @@ from .errors import InternalServerError, SchemaValidationError, FileNotFoundErro
 
 import os
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mkv'}
+ALLOWED_VIDEO_EXTENSIONS = {'mp4', 'mkv'}
 
 def allowed_file(filename):
 	return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -26,6 +27,12 @@ class UploaderApi(Resource):
 			if file.filename == '':
 				raise SchemaValidationError
 			if file and allowed_file(file.filename):
+				# Check if it's a video file
+				if file.filename.rsplit('.', 1)[1].lower() in ALLOWED_VIDEO_EXTENSIONS:
+					# Is a video
+					# TODO: call an os service similar to the email service so I can dispatch an ffmpeg command to convert to webm
+					pass
+
 				filename = secure_filename(file.filename)
 				# Make sure upload folder exists
 				path = current_app.config['UPLOAD_FOLDER']
