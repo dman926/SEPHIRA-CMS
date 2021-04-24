@@ -10,6 +10,14 @@ const routes: Routes = [
 		component: LandingComponent
 	},
 	{
+		path: 'cart',
+		loadChildren: () => import('./payment/cart/cart.module').then(m => m.CartModule)
+	},
+	{
+		path: 'checkout',
+		loadChildren: () => import('./payment/checkout/checkout.module').then(m => m.CheckoutModule)
+	},
+	{
 		path: 'settings',
 		loadChildren: () => import('./settings/settings.module').then(m => m.SettingsModule),
 		canActivate: [AuthGuard]

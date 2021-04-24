@@ -1,0 +1,16 @@
+<mat-card *ngIf="product">
+	<mat-card-header>
+		<mat-card-title>{{ product?.name }}</mat-card-title>
+		<mat-card-subtitle>{{ product?.price }}</mat-card-subtitle>
+	</mat-card-header>
+	<mat-card-content *ngIf="product">
+		{{ product?.shortDescription }}
+	</mat-card-content>
+	<mat-card-content *ngIf="!product">
+		Product description
+	</mat-card-content>
+	<mat-card-actions>
+		<button mat-raised-button [color]="color" (click)="addToCart(product)">Buy</button>
+		<!-- <button mat-raised-button [color]="color" [routerLink]="['/product', product.slug]">Buy</button> -->
+	</mat-card-actions>
+</mat-card>

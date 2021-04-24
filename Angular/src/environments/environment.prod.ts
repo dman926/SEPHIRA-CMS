@@ -1,4 +1,6 @@
 export const environment = {
-  production: true,
-  apiServer: ''
+	production: true,
+	apiServer: '',
+	socketServer: '',
+	stripeKey: ''
 };

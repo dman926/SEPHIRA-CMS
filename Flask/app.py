@@ -16,9 +16,16 @@ from flask_restful_swagger import swagger
 from database.db import initialize_db
 from resources.errors import errors
 
+import stripe
+from coinbase_commerce.client import Client
+from secret import stripe_sk, coinbase_commerce_api_key
+
 import os
 
 PRODUCTION = False
+
+stripe.api_key = stripe_sk
+ccClient = Client(api_key=coinbase_commerce_api_key)
 
 app = Flask(__name__)
 if PRODUCTION:

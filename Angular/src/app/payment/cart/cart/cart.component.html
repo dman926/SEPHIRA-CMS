@@ -1,0 +1,16 @@
+<section id="button-display" *ngIf="appearance === 'button'">
+	<button mat-icon-button [matMenuTriggerFor]="menu">
+		<mat-icon [matBadge]="cartSize" [matBadgeHidden]="cartSize === 0">shopping_cart</mat-icon>
+	</button>
+	<mat-menu #menu="matMenu" yPosition="above" xPosition="before">
+		<span *ngFor="let product of products" (click)="$event.stopPropagation()" mat-menu-item>
+			<button (click)="reduceProduct(product.id, $event)" mat-icon-button><mat-icon>clear</mat-icon></button>
+			<span>{{ product.name }} x{{ product.qty }}</span>
+		</span>
+		<p mat-menu-item *ngIf="cartSize === 0">No items in cart!</p>
+		<button mat-flat-button routerLink="/cart">View Cart</button>
+	</mat-menu>
+</section>
+<section id="page-display" *ngIf="appearance !== 'button'">
+	<p>cart page</p>
+</section>

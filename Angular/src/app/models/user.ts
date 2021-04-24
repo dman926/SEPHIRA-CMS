@@ -1,7 +1,8 @@
+import { Product } from "./product";
+
 export interface User {
-	id?: { $oid?: string };
+	id?: string;
 	email?: string;
-	password?: string;
 	admin?: boolean;
-	cards?: any[];
+	cart: Product[];
 }
