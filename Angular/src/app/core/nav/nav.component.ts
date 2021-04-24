@@ -6,7 +6,6 @@ import { MatSidenav } from '@angular/material/sidenav';
 import { AuthService } from 'src/app/auth/auth.service';
 import { User } from 'src/app/models/user';
 import { Router } from '@angular/router';
-import { CartService } from 'src/app/payment/cart/cart.service';
 
 interface LinkPair {
 	link: string;
@@ -35,9 +34,10 @@ export class NavComponent {
 	private swipeCoord: number[];
 	private swipeTime: number;
 
-	constructor(private breakpointObserver: BreakpointObserver, private auth: AuthService, private router: Router, private cartService: CartService) {
+	constructor(private breakpointObserver: BreakpointObserver, private auth: AuthService, private router: Router) {
 		this.user = null;
 		this.auth.user$.subscribe(user => {
+			console.log(user);
 			this.user = user;
 		});
 		this.links = [];
@@ -52,7 +52,6 @@ export class NavComponent {
 	logout(): void {
 		this.auth.setUser(null);
 		localStorage.clear();
-		this.cartService.clearCart();
 		this.router.navigate(['/']);
 	}
 

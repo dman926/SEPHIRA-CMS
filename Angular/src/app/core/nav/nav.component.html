@@ -9,21 +9,20 @@
 				<app-login></app-login>
 			</div>
 			<mat-nav-list>
-				<a *ngIf="user?.admin" mat-list-item routerLink="/admin">Admin Settings</a>
+				<a *ngIf="user?.admin" mat-list-item routerLink="/admin/home">Admin Settings</a>
 				<a *ngFor="let link of links" mat-list-item [routerLink]="[link.link]">{{ link.text }}</a>
 			</mat-nav-list>
 			<span class="spacer"></span>
-			<div id="sidenav-bottom">
-				<button mat-icon-button (click)="logout()" *ngIf="isSignedIn()">
+			<div id="sidenav-bottom" *ngIf="isSignedIn()">
+				<button mat-icon-button (click)="logout()">
 					<mat-icon>logout</mat-icon>
 				</button>
-				<button mat-icon-button routerLink="/settings" *ngIf="isSignedIn()">
+				<button mat-icon-button routerLink="/settings">
 					<mat-icon>settings</mat-icon>
 				</button>
-				<button mat-icon-button routerLink="/dashboard" *ngIf="isSignedIn()">
+				<button mat-icon-button routerLink="/dashboard">
 					<mat-icon>dashboard</mat-icon>
 				</button>
-				<app-cart appearance="button"></app-cart>
 			</div>
 		</div>
 	</mat-sidenav>
