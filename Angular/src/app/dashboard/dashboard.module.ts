@@ -10,13 +10,11 @@ import { LayoutModule } from '@angular/cdk/layout';
 
 import { DashboardRoutingModule } from './dashboard-routing.module';
 import { DashboardComponent } from './dashboard/dashboard.component';
-import { CardComponent } from './card/card.component';
-import { CardService } from './card.service';
+
 import { MediaBrowserModule } from '../media-browser/media-browser.module';
 
-
 @NgModule({
-	declarations: [DashboardComponent, CardComponent],
+	declarations: [DashboardComponent],
 	imports: [
 		CommonModule,
 		DashboardRoutingModule,
@@ -30,8 +28,5 @@ import { MediaBrowserModule } from '../media-browser/media-browser.module';
 
 		MediaBrowserModule
 	],
-	providers: [
-		CardService
-	]
 })
 export class DashboardModule { }

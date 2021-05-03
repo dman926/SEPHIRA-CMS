@@ -1,8 +1,7 @@
 export interface Card {
-	_id?: { $oid?: string };
+	id?: string;
 	name?: string;
 	content?: string;
 	width?: number;
 	height?: number;
-	owner?: { $oid?: string };
 }

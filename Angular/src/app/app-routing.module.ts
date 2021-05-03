@@ -3,11 +3,16 @@ import { RouterModule, Routes } from '@angular/router';
 import { AdminGuard } from './admin/admin.guard';
 import { AuthGuard } from './auth/auth.guard';
 import { LandingComponent } from './core/landing/landing.component';
+import { SwaggerComponent } from './core/swagger/swagger.component';
 
 const routes: Routes = [
 	{
 		path: '',
 		component: LandingComponent
+	},
+	{
+		path: 'swagger',
+		component: SwaggerComponent
 	},
 	{
 		path: 'settings',

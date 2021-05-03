@@ -49,9 +49,9 @@ export class CardService {
 
 	}
 
-	public deleteCard(id: string): Observable<string> {
+	public deleteCard(id?: string): Observable<string> {
 		const accessToken = localStorage.getItem('accessToken');
-		if (accessToken) {
+		if (accessToken && id) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
 			return this.http.delete<string>(this.cardBase + 'card/' + id, { headers });
 		} else {

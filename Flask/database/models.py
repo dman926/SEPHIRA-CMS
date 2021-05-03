@@ -14,6 +14,15 @@ class Card(db.Document):
 	height = db.IntField()
 	owner = db.ReferenceField('User')
 
+	def serialize(self):
+		return {
+			'id': str(self.pk),
+			'name': self.name,
+			'content': self.content,
+			'width': self.width,
+			'height': self.height
+		}
+
 class User(db.Document):
 	email = db.EmailField(required=True, unique=True)
 	password = db.StringField(required=True, min_length=6)
@@ -30,11 +39,13 @@ class User(db.Document):
 	def check_password(self, password):
 		return check_password_hash(self.password, password + self.salt)
 
-	def getPasswordLess(self):
+	def serialize(self):
+		mappedCards = list(map(lambda c: c.serialize(), self.cards))
 		return {
+			'id': str(self.pk),
 			'email': self.email,
-			'admin': True if self.admin else False,
-			'cards': self.cards if self.cards else []
+			'admin': self.admin,
+			'cards': mappedCards
 		}
 
 User.register_delete_rule(Card, 'owner', db.CASCADE)

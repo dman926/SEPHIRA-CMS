@@ -54,8 +54,8 @@ export class DashboardComponent implements OnInit {
 		});
 	}
 
-	removeCard(id: any): void {
-		this.cardService.deleteCard(id.$oid).toPromise().then(res => {
+	removeCard(id: string | undefined): void {
+		this.cardService.deleteCard(id).toPromise().then(res => {
 			if (res) {
 				this.cardService.getCards().toPromise().then(cards => {
 					this.cards = cards;

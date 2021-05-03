@@ -18,7 +18,7 @@
 }
 
 a {
-	color: white;
+	color: black;
 	text-decoration: none;
 }
 
@@ -29,6 +29,11 @@ div#sidenav-button {
 	z-index: 999;
 }
 
+div#search {
+	display: grid;
+	place-content: center;
+}
+
 div#sidenav-wrapper {
 	display: flex;
 	flex-direction: column;
@@ -36,6 +41,6 @@ div#sidenav-wrapper {
 	div#sidenav-bottom {
 		border-top-left-radius: 0.5em;
 		border-top-right-radius: 0.5em;
-		background-color: rgba(255,255,255,0.1);
+		background-color: rgba(0,0,0,0.1);
 	}
 }

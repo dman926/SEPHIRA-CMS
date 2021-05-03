@@ -1,7 +1,8 @@
+import { Card } from "./card";
+
 export interface User {
-	id?: { $oid?: string };
+	id?: string;
 	email?: string;
-	password?: string;
 	admin?: boolean;
-	cards?: any[];
+	cards?: Card[];
 }

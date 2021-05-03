@@ -8,6 +8,15 @@ Works great as a Flask API skeleton, complete with authentication, password salt
 
 `pip install -r requirements.txt`
 
+Create a secret.py file and store it in the same folder as app.py that contains:
+
+* stripe_sk
+* coinbase_commerce_api_key
+* coinbase_commerce_shared_secret
+* braintree_merchant_id 
+* braintree_public_key 
+* braintree_private_key
+
 To run the local (nonproduction) Flask server
 
 `python wsgi.py`
@@ -22,6 +31,7 @@ Included are the app.ini configuration, NGINX example Location config, and a sys
 
 ## Documentations
 
+* API Swagger: available at endpoint `/api/spec.json`
 * [Flask Documentation](https://flask.palletsprojects.com/en/1.1.x/)
 * [Flask-RESTful Documentation](https://flask-restful.readthedocs.io/en/latest/)
 * [Flask-SocketIO Documentation](https://flask-socketio.readthedocs.io/en/latest/)

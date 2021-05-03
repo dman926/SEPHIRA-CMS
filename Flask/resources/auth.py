@@ -3,7 +3,7 @@ Auth routes
 '''
 
 from flask import jsonify, request, render_template
-from flask_restful import Resource
+from flask_restful_swagger_2 import Resource, swagger
 from flask_jwt_extended import create_access_token, create_refresh_token, decode_token, jwt_required, get_jwt_identity
 import datetime
 
@@ -16,9 +16,25 @@ from services.mail_service import send_email
 
 
 class SignupApi(Resource):
-	'''
-	Attempt to sign up
-	'''
+	@swagger.doc({
+		'tags': ['Auth'],
+		'description': 'Attempt to sign up',
+		'parameters': [
+			{
+				'name': 'User',
+				'description': 'The user object (email and password required)',
+				'in': 'body',
+				'type': 'object',
+				'schema': None,
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'Signed up'
+			}
+		}
+	})
 	def post(self):
 		try:
 			body = request.get_json()
@@ -39,6 +55,37 @@ class SignupApi(Resource):
 			raise InternalServerError
 
 class LoginApi(Resource):
+	@swagger.doc({
+		'tags': ['Auth'],
+		'description': 'Log in',
+		'parameters': [
+			{
+				'name': 'email',
+				'description': 'The email',
+				'in': 'body',
+				'type': 'string',
+				'schema': {
+					'type': 'string'
+				},
+				'required': True
+			},
+			{
+				'name': 'password',
+				'description': 'The password',
+				'in': 'body',
+				'type': 'string',
+				'schema': {
+					'type': 'string'
+				},
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'The access and refresh tokens',
+			}
+		}
+	})
 	def post(self):
 		try:
 			body = request.get_json()
@@ -57,9 +104,15 @@ class LoginApi(Resource):
 			raise InternalServerError
 
 class TokenRefresh(Resource):
-	'''
-	Refresh tokens
-	'''
+	@swagger.doc({
+		'tags': ['Auth'],
+		'description': 'Refresh tokens',
+		'responses': {
+			'200': {
+				'description': 'A new access token'
+			}
+		}
+	})
 	@jwt_required(refresh=True)
 	def get(self):
 		expires = datetime.timedelta(days=7)
@@ -67,9 +120,15 @@ class TokenRefresh(Resource):
 		return {'accessToken': access_token}, 200
 
 class CheckPassword(Resource):
-	'''
-	Check the password against the token
-	'''
+	@swagger.doc({
+		'tags': ['Auth'],
+		'description': 'Check the password against the token',
+		'responses': {
+			'200': {
+				'description': 'Password is correct'
+			}
+		}
+	})
 	@jwt_required()
 	def post(self):
 		try:
@@ -85,6 +144,27 @@ class CheckPassword(Resource):
 			raise InternalServerError
 
 class ForgotPassword(Resource):
+	@swagger.doc({
+		'tags': ['Auth'],
+		'description': 'Send a forgot password email',
+		'parameters': [
+			{
+				'name': 'email',
+				'description': 'The user\'s email',
+				'in': 'body',
+				'type': 'string',
+				'schema': {
+					'type': 'string'
+				},
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'Email sent'
+			}
+		}
+	})
 	def post(self):
 		url = request.host_url + 'reset/'
 		try:
@@ -115,6 +195,15 @@ class ForgotPassword(Resource):
 			raise InternalServerError
 
 class ResetPassword(Resource):
+	@swagger.doc({
+		'tags': ['Auth'],
+		'description': 'Reset a user\'s password',
+		'responses': {
+			'200': {
+				'description': 'Password reset'
+			}
+		}
+	})
 	def post(self):
 		url = request.host_url + 'reset/'
 		try:
@@ -149,21 +238,31 @@ class ResetPassword(Resource):
 			raise InternalServerError
 
 class UserApi(Resource):
-	'''
-	Get the current user
-	'''
+	@swagger.doc({
+		'tags': ['Auth', 'User'],
+		'description': 'Get the current user',
+		'responses': {
+			'200': {
+				'description': 'The current user'
+			}
+		}
+	})
 	@jwt_required()
 	def get(self):
 		try:
 			user = User.objects.get(id=get_jwt_identity())
-			return jsonify(user.getPasswordLess())
+			return jsonify(user.serialize())
 		except Exception:
 			raise InternalServerError
-	'''
-	Edit user
-	BODY
-	 - User
-	'''
+	@swagger.doc({
+		'tags': ['Auth', 'User'],
+		'description': 'Update the current user',
+		'responses': {
+			'200': {
+				'description': 'Current user updated.'
+			}
+		}
+	})
 	@jwt_required()
 	def put(self):
 		try:
@@ -175,9 +274,15 @@ class UserApi(Resource):
 			return 'ok', 200
 		except Exception:
 			raise InternalServerError
-	'''
-	Delete user
-	'''
+	@swagger.doc({
+		'tags': ['Auth', 'User'],
+		'description': 'Delete the current user',
+		'responses': {
+			'200': {
+				'description': 'User deleted'
+			}
+		}
+	})
 	@jwt_required()
 	def delete(self):
 		try:

@@ -16,12 +16,16 @@ import { MatListModule } from '@angular/material/list';
 import { LandingComponent } from './landing/landing.component';
 import { AuthModule } from '../auth/auth.module';
 import { FileService } from './services/file.service';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { ReactiveFormsModule } from '@angular/forms';
+import { SwaggerComponent } from './swagger/swagger.component';
 import { WebsocketService } from './services/websocket.service';
 
 
 
 @NgModule({
-	declarations: [NavComponent, LandingComponent],
+	declarations: [NavComponent, LandingComponent, SwaggerComponent],
 	imports: [
 		CommonModule,
 		RouterModule,
@@ -35,7 +39,11 @@ import { WebsocketService } from './services/websocket.service';
 		MatButtonModule,
 		MatSidenavModule,
 		MatIconModule,
-		MatListModule
+		MatListModule,
+
+		ReactiveFormsModule,
+		MatFormFieldModule,
+		MatInputModule
 	],
 	providers: [
 		FileService,

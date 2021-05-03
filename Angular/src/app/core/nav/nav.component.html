@@ -9,18 +9,18 @@
 				<app-login></app-login>
 			</div>
 			<mat-nav-list>
-				<a *ngIf="user?.admin" mat-list-item routerLink="/admin/home">Admin Settings</a>
+				<a *ngIf="user?.admin" mat-list-item routerLink="/admin">Admin Settings</a>
 				<a *ngFor="let link of links" mat-list-item [routerLink]="[link.link]">{{ link.text }}</a>
 			</mat-nav-list>
 			<span class="spacer"></span>
-			<div id="sidenav-bottom" *ngIf="isSignedIn()">
-				<button mat-icon-button (click)="logout()">
+			<div id="sidenav-bottom">
+				<button mat-icon-button (click)="logout()" *ngIf="isSignedIn()">
 					<mat-icon>logout</mat-icon>
 				</button>
-				<button mat-icon-button routerLink="/settings">
+				<button mat-icon-button routerLink="/settings" *ngIf="isSignedIn()">
 					<mat-icon>settings</mat-icon>
 				</button>
-				<button mat-icon-button routerLink="/dashboard">
+				<button mat-icon-button routerLink="/dashboard" *ngIf="isSignedIn()">
 					<mat-icon>dashboard</mat-icon>
 				</button>
 			</div>

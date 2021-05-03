@@ -3,7 +3,7 @@ Admin routes
 '''
 
 from flask import jsonify, request, render_template
-from flask_restful import Resource
+from flask_restful_swagger_2 import Resource, swagger
 from flask_jwt_extended import create_access_token, create_refresh_token, decode_token, jwt_required, get_jwt_identity
 import datetime
 
@@ -17,6 +17,15 @@ class AdminApi(Resource):
 	'''
 	Get if current user is admin
 	'''
+	@swagger.doc({
+		'tags': ['Admin'],
+		'description': 'Get if the current user is admin',
+		'responses': {
+			'200': {
+				'description': 'True if the user is admin, false otherwise'
+			}
+		}
+	})
 	@jwt_required()
 	def get(self):
 		try:
@@ -31,6 +40,15 @@ class AdminUsersApi(Resource):
 	'''
 	Get all users
 	'''
+	@swagger.doc({
+		'tags': ['Admin'],
+		'description': 'Get all users',
+		'responses': {
+			'200': {
+				'description': 'An array of User'
+			}
+		}
+	})
 	@jwt_required()
 	def get(self):
 		try:
@@ -45,9 +63,25 @@ class AdminUsersApi(Resource):
 			raise InternalServerError
 
 class AdminUserApi(Resource):
-	'''
-	Get user
-	'''
+	@swagger.doc({
+		'tags': ['Admin', 'User'],
+		'description': 'Get user',
+		'parameters': [
+			{
+				'name': 'id',
+				'description': 'The user id',
+				'in': 'path',
+				'type': 'object',
+				'schema': None,
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'The user'
+			}
+		}
+	})
 	@jwt_required()
 	def get(self, id):
 		try:
@@ -60,9 +94,25 @@ class AdminUserApi(Resource):
 			raise UnauthorizedError
 		except Exception:
 			raise InternalServerError
-	'''
-	Update user
-	'''
+	@swagger.doc({
+		'tags': ['Admin', 'User'],
+		'description': 'Update user',
+		'parameters': [
+			{
+				'name': 'id',
+				'description': 'The user id',
+				'in': 'path',
+				'type': 'object',
+				'schema': None,
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'User updated'
+			}
+		}
+	})
 	@jwt_required()
 	def put(self, id):
 		try:
@@ -76,9 +126,25 @@ class AdminUserApi(Resource):
 			raise UnauthorizedError
 		except Exception:
 			raise InternalServerError
-	'''
-	Delete user
-	'''
+	@swagger.doc({
+		'tags': ['Admin', 'User'],
+		'description': 'Delete user',
+		'parameters': [
+			{
+				'name': 'id',
+				'description': 'The user id',
+				'in': 'path',
+				'type': 'object',
+				'schema': None,
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'User deleted'
+			}
+		}
+	})
 	@jwt_required()
 	def delete(self, id):
 		try:
@@ -92,4 +158,3 @@ class AdminUserApi(Resource):
 			raise UnauthorizedError
 		except Exception:
 			raise InternalServerError
-	

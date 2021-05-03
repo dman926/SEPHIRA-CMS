@@ -1,9 +1,9 @@
 '''
-Movie routes
+Card routes
 '''
 
 from flask import jsonify, request
-from flask_restful import Resource
+from flask_restful_swagger_2 import Resource, swagger
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from mongoengine.errors import FieldDoesNotExist, NotUniqueError, DoesNotExist, ValidationError, InvalidQueryError
@@ -12,16 +12,39 @@ from resources.errors import SchemaValidationError, InternalServerError
 from database.models import Card, User
 
 class CardsApi(Resource):
-	'''
-	Get all cards owned by this user
-	'''
+	@swagger.doc({
+		'tags': ['Card'],
+		'description': 'Get all cards owned by this user',
+		'responses': {
+			'200': {
+				'description': 'Array of Card',
+			}
+		}
+	})
 	@jwt_required()
 	def get(self):
 		cards = Card.objects(owner=get_jwt_identity())
-		return jsonify(cards)
-	'''
-	Add new card
-	'''
+		mappedCards = list(map(lambda c: c.serialize(), cards))
+		return jsonify(mappedCards)
+	@swagger.doc({
+		'tags': ['Card'],
+		'description': 'Add new Card',
+		'parameters': [
+			{
+				'name': 'Card',
+				'description': 'A card object',
+				'in': 'body',
+				'type': 'object',
+				'schema': None,
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'Card added',
+			}
+		}
+	})
 	@jwt_required()
 	def post(self):
 		try:
@@ -41,9 +64,24 @@ class CardsApi(Resource):
 
 
 class CardApi(Resource):
-	'''
-	Update card
-	'''
+	@swagger.doc({
+		'tags': ['Card'],
+		'description': 'Update the Card',
+		'parameters': [
+			{
+				'name': 'id',
+				'description': 'The item id',
+				'in': 'path',
+				'type': 'string',
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'Card updated',
+			}
+		}
+	})
 	@jwt_required()
 	def put(self, id):
 		try:
@@ -58,9 +96,24 @@ class CardApi(Resource):
 			raise UpdatingMovieError
 		except Exception:
 			raise InternalServerError       
-	'''
-	Delete card
-	'''
+	@swagger.doc({
+		'tags': ['Card'],
+		'description': 'Delete the Card',
+		'parameters': [
+			{
+				'name': 'id',
+				'description': 'The item id',
+				'in': 'path',
+				'type': 'string',
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'Card deleted',
+			}
+		}
+	})
 	@jwt_required()
 	def delete(self, id):
 		try:

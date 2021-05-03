@@ -3,7 +3,10 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "types": []
+    "types": [
+		"stripe-v3",
+		"braintree-web"
+	]
   },
   "files": [
     "src/main.ts",
