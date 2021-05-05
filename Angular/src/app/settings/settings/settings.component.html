@@ -1,1 +1,18 @@
 <button mat-raised-button color="warn" (click)="deleteUser()">Delete User</button>
+
+<div *ngIf="qrVal !== null">
+	<h1>Your 2-Factor Code</h1>
+	<h3>Please scan with your 2fa app of choice</h3>
+	<ngx-qrcode
+	[elementType]="qrElementType"
+	[errorCorrectionLevel]="qrErrorCorrectionLevel"
+	[value]="qrVal"></ngx-qrcode>
+	<form [formGroup]="twoFForm" (ngSubmit)="verifyOtp()">
+		<mat-form-field appearance="fill">
+			<mat-label>Verify Code</mat-label>
+			<input matInput formControlName="otp" required />
+		</mat-form-field>	
+		<button mat-raised-button [disabled]="twoFForm.invalid">Verify OTP</button>
+	</form>
+	<p *ngIf="otpSuccess">{{ otpSuccessText }}</p>
+</div>

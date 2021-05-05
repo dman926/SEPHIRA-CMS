@@ -136,4 +136,24 @@ export class AuthService {
 		}
 	}
 
+	public getOtpQr(): Observable<string> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
+			return this.http.get<string>(this.authBase + '2fa', { headers });
+		} else {
+			return new Observable<string>();
+		}
+	}
+
+	public CheckOtp(otp: string): Observable<string> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
+			return this.http.post<string>(this.authBase + '2fa', {otp}, { headers });
+		} else {
+			return new Observable<string>();
+		}
+	}
+
 }

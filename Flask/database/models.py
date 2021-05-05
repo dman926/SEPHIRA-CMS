@@ -5,7 +5,9 @@ Models to serialize between MongoDB and Python
 from .db import db
 from flask_bcrypt import generate_password_hash, check_password_hash
 
-import random, string
+import onetimepass
+
+import base64, os, random, string
 
 class Card(db.Document):
 	name = db.StringField()
@@ -26,6 +28,7 @@ class Card(db.Document):
 class User(db.Document):
 	email = db.EmailField(required=True, unique=True)
 	password = db.StringField(required=True, min_length=6)
+	otpSecret = db.StringField()
 	salt = db.StringField()
 	admin = db.BooleanField()
 	cards = db.ListField(db.ReferenceField('Card', reverse_delete_rule=db.PULL))
@@ -35,9 +38,18 @@ class User(db.Document):
 		size = 12
 		self.salt = ''.join(random.choice(chars) for x in range(size))
 		self.password = generate_password_hash(self.password + self.salt).decode('utf8')
+		if self.otpSecret is None:
+			self.otpSecret = base64.b32encode(os.urandom(10)).decode('utf8')
 
 	def check_password(self, password):
 		return check_password_hash(self.password, password + self.salt)
+
+	def get_totp_uri(self):
+		return 'otpauth://totp/Flask-API:{0}?secret={1}&issuer=Flask-API' \
+			.format(self.email, self.otpSecret)
+
+	def verify_totp(self, token):
+		return onetimepass.valid_totp(token, self.otpSecret)
 
 	def serialize(self):
 		mappedCards = list(map(lambda c: c.serialize(), self.cards))

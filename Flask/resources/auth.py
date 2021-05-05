@@ -143,6 +143,44 @@ class CheckPassword(Resource):
 		except Exception:
 			raise InternalServerError
 
+class TwoFactorApi(Resource):
+	@swagger.doc({
+		'tags': ['Auth', '2FA'],
+		'description': 'Get the TOTP URI for this user',
+		'responses': {
+			'200': {
+				'description': 'The TOTP URI'
+			}
+		}
+	})
+	@jwt_required()
+	def get(self):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			return user.get_totp_uri()			
+		except Exception:
+			raise InternalServerError
+	@swagger.doc({
+		'tags': ['Auth', '2FA'],
+		'description': 'Verify an OTP',
+		'responses': {
+			'200': {
+				'description': 'Accepted'
+			}
+		}
+	})
+	@jwt_required()
+	def post(self):
+		try:
+			body = request.get_json()
+			user = User.objects.get(id=get_jwt_identity())
+			if user.verify_totp(body.get('otp')):
+				return 'ok'
+			raise UnauthorizedError
+		except Exception:
+			raise InternalServerError
+	
+
 class ForgotPassword(Resource):
 	@swagger.doc({
 		'tags': ['Auth'],

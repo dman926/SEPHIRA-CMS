@@ -21,6 +21,7 @@
     "@angular/platform-browser": "~11.2.12",
     "@angular/platform-browser-dynamic": "~11.2.12",
     "@angular/router": "~11.2.12",
+    "@techiediaries/ngx-qrcode": "^9.1.0",
     "@types/braintree-web": "^3.75.0",
     "@types/stripe-v3": "^3.1.23",
     "path": "^0.12.7",

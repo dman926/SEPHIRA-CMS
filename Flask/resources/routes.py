@@ -2,7 +2,7 @@
 API Endpoints
 '''
 
-from .auth import SignupApi, LoginApi, ForgotPassword, ResetPassword, TokenRefresh, CheckPassword, UserApi
+from .auth import SignupApi, LoginApi, ForgotPassword, ResetPassword, TokenRefresh, CheckPassword, UserApi, TwoFactorApi
 from .file import UploaderApi, MediaApi, SingleMediaApi
 
 from .card import CardsApi, CardApi
@@ -21,6 +21,7 @@ def initialize_routes(api, base):
 	api.add_resource(TokenRefresh, base + 'auth/refresh')
 	api.add_resource(CheckPassword, base + 'auth/checkPassword')
 	api.add_resource(UserApi, base + 'auth/user')
+	api.add_resource(TwoFactorApi, base + 'auth/2fa')
 
 	api.add_resource(UploaderApi, base + 'file/uploader')
 	api.add_resource(MediaApi, base + 'file/media')
