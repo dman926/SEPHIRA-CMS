@@ -41,7 +41,8 @@
 						"scripts": [],
 						"allowedCommonJsDependencies": [
 							"socket.io-client",
-							"swagger-ui-dist"
+							"swagger-ui-dist",
+							"qrcode"
 						]
 					},
 					"configurations": {
