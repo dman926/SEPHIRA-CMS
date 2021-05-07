@@ -14,9 +14,6 @@ from resources.errors import SchemaValidationError, EmailAlreadyExistsError, Una
 from database.models import User
 
 class AdminApi(Resource):
-	'''
-	Get if current user is admin
-	'''
 	@swagger.doc({
 		'tags': ['Admin'],
 		'description': 'Get if the current user is admin',
@@ -37,9 +34,6 @@ class AdminApi(Resource):
 			raise InternalServerError
 
 class AdminUsersApi(Resource):
-	'''
-	Get all users
-	'''
 	@swagger.doc({
 		'tags': ['Admin'],
 		'description': 'Get all users',

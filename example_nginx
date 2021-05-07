@@ -1,3 +1,6 @@
+# In the Flask site config
+# We define a dedicated route for socket io as well as the default root app and serve with NGINX uWSGI
+
 location /socket.io/ {
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
@@ -8,4 +11,11 @@ location /socket.io/ {
 location / {
     include uwsgi_params;
 	uwsgi_pass unix:/path/to/site/app.sock;
+}
+
+# In the Angular site config
+# We attempt to serve the folder, then fall back on the root index
+
+location / {
+	try_files $uri $uri/ /index.html;
 }

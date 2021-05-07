@@ -1,6 +1,10 @@
-# MovieBag
+# Angular Starter
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 11.2.1.
+
+## Installation
+
+Run `npm install` in this directory to install all required packages.
 
 ## Development server
 
