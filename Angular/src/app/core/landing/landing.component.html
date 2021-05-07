@@ -1,1 +1,11 @@
-<p>landing works!</p>
+<form [formGroup]="contactForm" (ngSubmit)="submit()">
+	<mat-form-field appearance="fill">
+		<mat-label>Email</mat-label>
+		<input matInput formControlName="email" required />
+	</mat-form-field>
+	<mat-form-field appearance="fill">
+		<mat-label>Message</mat-label>
+		<textarea matInput formControlName="message"></textarea>
+	</mat-form-field>
+	<button mat-raised-button [disabled]="contactForm.invalid" type="submit">Submit</button>
+</form>

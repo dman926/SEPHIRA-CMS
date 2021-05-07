@@ -13,6 +13,8 @@ from .admin import AdminApi, AdminUsersApi, AdminUserApi
 
 import resources.sockets
 
+from .contact import TestRecaptchaApi
+
 def initialize_routes(api, base):
 	api.add_resource(SignupApi, base + 'auth/signup')
 	api.add_resource(LoginApi, base + 'auth/login')
@@ -33,3 +35,5 @@ def initialize_routes(api, base):
 	api.add_resource(AdminApi, base + 'admin/admin')
 	api.add_resource(AdminUsersApi, base + 'admin/users')
 	api.add_resource(AdminUserApi, base + 'admin/user/<id>')
+
+	api.add_resource(TestRecaptchaApi, base + 'test')
