@@ -1,3 +1,7 @@
 # Flask/Angular Starter
 
-Other dependencies: MongoDB, ffmpeg, HandbrakeCLI
+An Angular 11 front end with a complete Flask RESTful API complete with password authentication, two-factor time-based one time passwords, JWT tokens, database CRUD, file uploading and retrieving, async emailing on-demand and async cron-style tasks, socket.io, and ReCAPTCHA V3 support, as well as an ecommerce template with Stripe Payment Intent API and webhooks integration, Braintree Hosted Fields and Payment integration, and Coinbase Commerce API and webhook integration.
+
+Please feel free to add and improve this project.
+
+External dependencies: MongoDB, ffmpeg, HandbrakeCLI
