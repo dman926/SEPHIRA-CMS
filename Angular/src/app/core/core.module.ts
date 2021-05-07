@@ -22,6 +22,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { SwaggerComponent } from './swagger/swagger.component';
 import { WebsocketService } from './services/websocket.service';
 import { RecaptchaV3Module, RECAPTCHA_V3_SITE_KEY } from 'ng-recaptcha';
+import { MatCardModule } from '@angular/material/card';
 
 
 
@@ -45,7 +46,8 @@ import { RecaptchaV3Module, RECAPTCHA_V3_SITE_KEY } from 'ng-recaptcha';
 		MatIconModule,
 		MatListModule,
 		MatFormFieldModule,
-		MatInputModule
+		MatInputModule,
+		MatCardModule
 	],
 	providers: [
 		{

@@ -45,18 +45,18 @@ export class SettingsComponent implements OnInit {
 		const otp = this.twoFForm.get('otp')?.value;
 		if (this.twoFForm.valid && otp) {
 			this.auth.CheckOtp(otp).toPromise().then(res => {
-				this.otpSuccessText = 'Pass'
+				this.otpSuccessText = 'Pass';
 				this.otpSuccess = true;
 				setTimeout(() => {
-					this.otpSuccess = false
+					this.otpSuccess = false;
 				}, 3000);
 			}).catch(err => {
 				this.otpSuccessText = 'Fail';
 				this.otpSuccess = true;
 				setTimeout(() => {
-					this.otpSuccess = false
+					this.otpSuccess = false;
 				}, 3000);
-			})
+			});
 		}
 	}
 
