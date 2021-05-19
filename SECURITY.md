@@ -1,6 +1,6 @@
 # Security Policy
 
-I, Dennis James Stelmach, offer no guarantees on the security of this application. I am not a professional developer, but I am following modern principles to keep this project as safe as possible so everyone can use it without fear of breaches.
+I, Dennis James Stelmach, offer no guarantees on the security of this application. I am not a mega-smart Google or Facebook developer, but I am following modern principles to keep this project as safe as possible so everyone can use it without fear of breaches.
 
 ## Supported Version
 
