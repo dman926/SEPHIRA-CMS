@@ -32,7 +32,7 @@ export class LoginComponent implements OnInit {
 			const email = this.loginForm.get('email')?.value;
 			const password = this.loginForm.get('password')?.value;
 			this.auth.login(email, password).toPromise().then(loginRes => {
-				this.auth.setTokens(loginRes.accessToken, loginRes.refreshToken);
+				this.auth.setTokens(true, loginRes.accessToken, loginRes.refreshToken);
 				this.auth.getUser().toPromise().then(user => {
 					this.auth.setUser(user);
 				}).catch(err => this.loggingIn = false);

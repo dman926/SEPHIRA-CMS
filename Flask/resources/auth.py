@@ -117,7 +117,8 @@ class TokenRefresh(Resource):
 	def get(self):
 		expires = datetime.timedelta(days=7)
 		access_token = create_access_token(identity=get_jwt_identity(), expires_delta=expires)
-		return {'accessToken': access_token}, 200
+		refresh_token = create_refresh_token(identity=get_jwt_identity(), expires_delta=datetime.timedelta(days=30))
+		return {'accessToken': access_token, 'refreshToken': refresh_token}, 200
 
 class CheckPassword(Resource):
 	@swagger.doc({

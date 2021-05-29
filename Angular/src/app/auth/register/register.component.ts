@@ -33,7 +33,7 @@ export class RegisterComponent implements OnInit {
 			const password = this.registerForm.get('password')?.value;
 			this.auth.signup(email, password).toPromise().then(registerRes => {
 				this.auth.login(email, password).toPromise().then(loginRes => {
-					this.auth.setTokens(loginRes.accessToken, loginRes.refreshToken);
+					this.auth.setTokens(true, loginRes.accessToken, loginRes.refreshToken);
 					this.auth.getUser().toPromise().then(user => {
 						this.auth.setUser(user);
 					}).catch(err => this.registering = false);
