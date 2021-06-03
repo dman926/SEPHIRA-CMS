@@ -42,7 +42,7 @@ pytz==2021.1
 requests==2.25.1
 six==1.15.0
 tzlocal==2.1
-urllib3==1.26.4
+urllib3==1.26.5
 Werkzeug==1.0.1
 WTForms==2.3.3
 zope.event==4.5.0
