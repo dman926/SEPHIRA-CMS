@@ -7,22 +7,30 @@ from flask_bcrypt import generate_password_hash, check_password_hash
 
 import onetimepass
 
-import base64, os, random, string
+import base64, os, random, string, datetime
 
-class Card(db.Document):
-	name = db.StringField()
+class Post(db.Document):
+	author = db.ReferenceField('User')
+	title = db.StringField()
+	slug = db.StringField(unique=True)
 	content = db.StringField()
-	width = db.IntField()
-	height = db.IntField()
-	owner = db.ReferenceField('User')
+	excerpt = db.StringField()
+	status = db.StringField()
+	
+	created = db.DateTimeField(default=datetime.datetime.now())
+	modified = db.DateTimeField(default=datetime.datetime.now())
 
 	def serialize(self):
 		return {
 			'id': str(self.pk),
-			'name': self.name,
+			'author': self.author.serialize(),
+			'title': self.title,
+			'slug': self.slug,
 			'content': self.content,
-			'width': self.width,
-			'height': self.height
+			'excerpt': self.excerpt,
+			'status': self.status,
+			'created': str(self.created),
+			'modified': str(self.modified)
 		}
 
 class User(db.Document):
@@ -31,7 +39,6 @@ class User(db.Document):
 	otpSecret = db.StringField()
 	salt = db.StringField()
 	admin = db.BooleanField()
-	cards = db.ListField(db.ReferenceField('Card', reverse_delete_rule=db.PULL))
 
 	def hash_password(self):
 		chars = string.ascii_letters + string.punctuation
@@ -52,12 +59,9 @@ class User(db.Document):
 		return onetimepass.valid_totp(token, self.otpSecret)
 
 	def serialize(self):
-		mappedCards = list(map(lambda c: c.serialize(), self.cards))
 		return {
 			'id': str(self.pk),
-			'email': self.email,
-			'admin': self.admin,
-			'cards': mappedCards
+			'admin': self.admin
 		}
 
-User.register_delete_rule(Card, 'owner', db.CASCADE)
+User.register_delete_rule(Post, 'author', db.CASCADE)

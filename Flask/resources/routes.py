@@ -5,15 +5,13 @@ API Endpoints
 from .auth import SignupApi, LoginApi, ForgotPassword, ResetPassword, TokenRefresh, CheckPassword, UserApi, TwoFactorApi
 from .file import UploaderApi, MediaApi, SingleMediaApi
 
-from .card import CardsApi, CardApi
-
-import resources.sockets
+from .post import PostsApi
 
 from .admin import AdminApi, AdminUsersApi, AdminUserApi
 
-import resources.sockets
-
 from .contact import TestRecaptchaApi
+
+import resources.sockets
 
 def initialize_routes(api, base):
 	api.add_resource(SignupApi, base + 'auth/signup')
@@ -29,8 +27,7 @@ def initialize_routes(api, base):
 	api.add_resource(MediaApi, base + 'file/media')
 	api.add_resource(SingleMediaApi, base + 'file/media/<filename>')
 
-	api.add_resource(CardsApi, base + 'card/cards')
-	api.add_resource(CardApi, base + 'card/card/<id>')
+	api.add_resource(PostsApi, base + 'post/posts')
 
 	api.add_resource(AdminApi, base + 'admin/admin')
 	api.add_resource(AdminUsersApi, base + 'admin/users')

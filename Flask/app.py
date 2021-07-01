@@ -15,7 +15,6 @@ from flask_apscheduler import APScheduler
 
 from database.db import initialize_db
 from tasks.tasks import initialize_tasks
-from resources.errors import errors
 
 import os
 
