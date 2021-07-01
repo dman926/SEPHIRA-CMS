@@ -36,8 +36,9 @@ class Post(db.Document):
 class User(db.Document):
 	email = db.EmailField(required=True, unique=True)
 	password = db.StringField(required=True, min_length=6)
-	otpSecret = db.StringField()
 	salt = db.StringField()
+	otpSecret = db.StringField()
+	twoFactorEnabled = db.BooleanField()
 	admin = db.BooleanField()
 
 	def hash_password(self):

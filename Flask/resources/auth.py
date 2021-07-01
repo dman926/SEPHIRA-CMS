@@ -9,7 +9,7 @@ import datetime
 
 from mongoengine.errors import FieldDoesNotExist, NotUniqueError, DoesNotExist
 from jwt.exceptions import ExpiredSignatureError, DecodeError, InvalidTokenError
-from resources.errors import SchemaValidationError, EmailAlreadyExistsError, UnauthorizedError, InternalServerError, EmailDoesnotExistsError, BadTokenError
+from resources.errors import SchemaValidationError, EmailAlreadyExistsError, UnauthorizedError, InternalServerError, EmailDoesnotExistsError, BadTokenError, MissingOtpError
 
 from database.models import User
 from services.mail_service import send_email
@@ -93,9 +93,15 @@ class LoginApi(Resource):
 			authorized = user.check_password(body.get('password'))
 			if not authorized:
 				raise UnauthorizedError
-
-			expires = datetime.timedelta(days=7)
-			access_token = create_access_token(identity=str(user.id), expires_delta=datetime.timedelta(hours=1))
+			if user.twoFactorEnabled:
+				otp = body.get('otp')
+				if otp:
+					authorized = user.verify_totp(otp)
+					if not authorized:
+						raise UnauthorizedError
+				else:
+					raise MissingOtpError
+			access_token = create_access_token(identity=str(user.id), expires_delta=datetime.timedelta(days=1))
 			refresh_token = create_refresh_token(identity=str(user.id), expires_delta=datetime.timedelta(days=30))
 			return {'accessToken': access_token, 'refreshToken': refresh_token}, 200
 		except (UnauthorizedError, DoesNotExist):
@@ -269,9 +275,7 @@ class ResetPassword(Resource):
 
 		except SchemaValidationError:
 			raise SchemaValidationError
-		except ExpiredSignatureError:
-			raise ExpiredTokenError
-		except (DecodeError, InvalidTokenError):
+		except (ExpiredSignatureError, DecodeError, InvalidTokenError):
 			raise BadTokenError
 		except Exception as e:
 			raise InternalServerError

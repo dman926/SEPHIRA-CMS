@@ -9,8 +9,6 @@ from .post import PostsApi
 
 from .admin import AdminApi, AdminUsersApi, AdminUserApi
 
-from .contact import TestRecaptchaApi
-
 import resources.sockets
 
 def initialize_routes(api, base):
@@ -32,5 +30,3 @@ def initialize_routes(api, base):
 	api.add_resource(AdminApi, base + 'admin/admin')
 	api.add_resource(AdminUsersApi, base + 'admin/users')
 	api.add_resource(AdminUserApi, base + 'admin/user/<id>')
-
-	api.add_resource(TestRecaptchaApi, base + 'test')
