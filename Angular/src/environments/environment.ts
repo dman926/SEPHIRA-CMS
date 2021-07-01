@@ -5,7 +5,8 @@
 export const environment = {
 	production: false,
 	apiServer: 'http://localhost:5000/api/',
-	socketServer: 'http://localhost:5000'
+	socketServer: 'http://localhost:5000',
+	recaptchaSiteKey: '6LdBXmkbAAAAAAwnoEjHhrMJUQY5mbisqB7clk_f'
 };
 
 /*
