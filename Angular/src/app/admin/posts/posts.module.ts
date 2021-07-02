@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { PostsRoutingModule } from './posts-routing.module';
 import { PostsComponent } from './posts/posts.component';
 import { PostComponent } from './post/post.component';
+import { MatButtonModule } from '@angular/material/button';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 
 
@@ -13,7 +16,11 @@ import { PostComponent } from './post/post.component';
 	],
 	imports: [
 		CommonModule,
-		PostsRoutingModule
+		PostsRoutingModule,
+
+		MatPaginatorModule,
+		MatButtonModule,
+		MatProgressSpinnerModule
 	]
 })
 export class PostsModule { }

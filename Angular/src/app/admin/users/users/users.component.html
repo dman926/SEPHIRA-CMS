@@ -5,7 +5,7 @@
     </div>
 </ng-template>
 <div *ngIf="loaded;else loaderSpinner">
-    <ng-container *ngFor="let user of shownUsers">
-        {{ user.email }} test
-    </ng-container>
+    <button mat-raised-button *ngFor="let user of shownUsers" [routerLink]="['/admin/users', user.id]">
+        {{ user.email }}
+	</button>
 </div>

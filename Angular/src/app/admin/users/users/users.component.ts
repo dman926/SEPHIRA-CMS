@@ -54,7 +54,6 @@ export class UsersComponent implements OnInit {
 		this.loaded = false;
 		this.admin.getAllUsers(this.userPageEvent.pageIndex, this.userPageEvent.pageSize).toPromise().then(users => {
 			this.users = this.users.concat(users);
-			console.log(this.users);
 			this.loaded = true;
 		}).catch(err => this.loaded = true);
 	}

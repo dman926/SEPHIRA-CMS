@@ -83,4 +83,14 @@ export class AdminService {
 		}
 	}
 
+	public getPostCount(): Observable<number> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.get<number>(this.adminBase + 'posts/count', { headers });
+		} else {
+			return new Observable<number>();
+		}
+	}
+
 }
