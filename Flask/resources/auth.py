@@ -106,6 +106,8 @@ class LoginApi(Resource):
 			return {'accessToken': access_token, 'refreshToken': refresh_token}, 200
 		except (UnauthorizedError, DoesNotExist):
 			raise UnauthorizedError
+		except MissingOtpError:
+			raise MissingOtpError
 		except Exception as e:
 			raise InternalServerError
 

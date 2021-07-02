@@ -9,6 +9,7 @@ import { NgxQRCodeModule } from '@techiediaries/ngx-qrcode';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ReactiveFormsModule } from '@angular/forms';
 
 
@@ -23,7 +24,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 
 		MatButtonModule,
 		MatFormFieldModule,
-		MatInputModule
+		MatInputModule,
+		MatSlideToggleModule
 	]
 })
 export class SettingsModule { }

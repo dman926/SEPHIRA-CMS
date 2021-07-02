@@ -23,7 +23,11 @@ class Post(db.Document):
 	def serialize(self):
 		return {
 			'id': str(self.pk),
-			'author': self.author.serialize(),
+			'author': {
+				'id': str(self.author.id),
+				'firstName': self.author.firstName,
+				'lastName': self.author.lastName
+			},
 			'title': self.title,
 			'slug': self.slug,
 			'content': self.content,
@@ -40,6 +44,8 @@ class User(db.Document):
 	otpSecret = db.StringField()
 	twoFactorEnabled = db.BooleanField()
 	admin = db.BooleanField()
+	firstName = db.StringField()
+	lastName = db.StringField()
 
 	def hash_password(self):
 		chars = string.ascii_letters + string.punctuation
@@ -62,7 +68,11 @@ class User(db.Document):
 	def serialize(self):
 		return {
 			'id': str(self.pk),
-			'admin': self.admin
+			'email': self.email,
+			'twoFactorEnabled': self.twoFactorEnabled,
+			'admin': self.admin,
+			'firstName': self.firstName,
+			'lastName': self.lastName
 		}
 
 User.register_delete_rule(Post, 'author', db.CASCADE)

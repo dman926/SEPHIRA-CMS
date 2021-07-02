@@ -15,6 +15,12 @@ interface Id {
 	id: string;
 }
 
+interface Login {
+	email: string;
+	password: string;
+	otp?: string;
+}
+
 @Injectable({
 	providedIn: 'root'
 })
@@ -48,11 +54,14 @@ export class AuthService {
 		});
 	}
 
-	public login(email: string, password: string): Observable<TokenPair> {
-		const body = {
+	public login(email: string, password: string, otp?: string): Observable<TokenPair> {
+		const body: Login = {
 			email,
 			password
 		};
+		if (otp) {
+			body.otp = otp;
+		}
 		return this.http.post<TokenPair>(this.authBase + 'login', body);
 	}
 

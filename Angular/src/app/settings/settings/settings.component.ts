@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgxQrcodeElementTypes, NgxQrcodeErrorCorrectionLevels } from '@techiediaries/ngx-qrcode';
+import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/auth.service';
+import { User } from 'src/app/models/user';
 
 @Component({
 	selector: 'app-settings',
@@ -19,6 +21,11 @@ export class SettingsComponent implements OnInit {
 	otpSuccess: boolean;
 	otpSuccessText: string;
 
+	settingsForm: FormGroup;
+	settingsSaved: boolean;
+
+	private subs: Subscription[];
+
 	constructor(private auth: AuthService, private router: Router) {
 		this.qrVal = null;
 
@@ -27,10 +34,39 @@ export class SettingsComponent implements OnInit {
 		});
 		this.otpSuccess = false;
 		this.otpSuccessText = '';
+
+		this.settingsForm = new FormGroup({
+			enableTF: new FormControl(false)
+		});
+		this.settingsSaved = false;
+
+		this.subs = [];
 	}
 
 	ngOnInit(): void {
+		this.subs.push(this.auth.user$.subscribe(user => {
+			if (user) {
+				this.settingsForm.patchValue({
+					enableTF: user.twoFactorEnabled ? true : false
+				});	
+			}
+		}));
 		this.auth.getOtpQr().toPromise().then(res => this.qrVal = res);
+	}
+
+	saveSettings(): void {
+		if (this.settingsForm.valid) {
+			const user: User = {
+				twoFactorEnabled: this.settingsForm.get('enableTF')!.value
+			}
+			this.auth.updateUser(user).toPromise().then(res => {
+				this.auth.getUser().toPromise().then(user => {
+					this.auth.setUser(user);
+					this.settingsSaved = true;
+					setTimeout(() => this.settingsSaved = false, 3000);
+				});
+			});
+		}
 	}
 
 	deleteUser(): void {
