@@ -7,7 +7,7 @@ from .file import UploaderApi, MediaApi, SingleMediaApi
 
 from .post import PostsApi
 
-from .admin import AdminApi, AdminUsersApi, AdminUserApi
+from .admin import AdminApi, AdminUsersApi, AdminUserApi, AdminUsersCountApi, AdminPostsApi, AdminPostApi, AdminPostsCountApi
 
 import resources.sockets
 
@@ -30,3 +30,7 @@ def initialize_routes(api, base):
 	api.add_resource(AdminApi, base + 'admin/admin')
 	api.add_resource(AdminUsersApi, base + 'admin/users')
 	api.add_resource(AdminUserApi, base + 'admin/user/<id>')
+	api.add_resource(AdminUsersCountApi, base + 'admin/users/count')
+	api.add_resource(AdminPostsApi, base + 'admin/posts')
+	api.add_resource(AdminPostApi, base + 'admin/post/<id>')
+	api.add_resource(AdminPostsCountApi, base + 'admin/posts/count')

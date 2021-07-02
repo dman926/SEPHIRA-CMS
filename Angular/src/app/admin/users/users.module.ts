@@ -4,6 +4,10 @@ import { UsersRoutingModule } from './users-routing.module';
 import { UsersComponent } from './users/users.component';
 import { UserComponent } from './user/user.component';
 
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @NgModule({
 	declarations: [
@@ -12,7 +16,12 @@ import { UserComponent } from './user/user.component';
 	],
 	imports: [
 		CommonModule,
-		UsersRoutingModule
+		UsersRoutingModule,
+
+		MatPaginatorModule,
+		MatButtonModule,
+		MatCardModule,
+		MatProgressSpinnerModule
 	]
 })
 export class UsersModule { }

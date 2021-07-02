@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from '../auth.service';
@@ -9,7 +9,7 @@ import { OtpDialogComponent } from './otp-dialog/otp-dialog.component';
 	templateUrl: './login.component.html',
 	styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent {
 
 	loginForm: FormGroup;
 
@@ -23,9 +23,6 @@ export class LoginComponent implements OnInit {
 			email: new FormControl('', [Validators.required, Validators.email]),
 			password: new FormControl('', [Validators.required])
 		});
-	}
-
-	ngOnInit(): void {
 	}
 
 	login(): void {

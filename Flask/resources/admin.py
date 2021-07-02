@@ -34,7 +34,25 @@ class AdminApi(Resource):
 class AdminUsersApi(Resource):
 	@swagger.doc({
 		'tags': ['Admin'],
-		'description': 'Get all users',
+		'description': 'Get all users according to pagination criteria',
+		'parameters': [
+			{
+				'name': 'page',
+				'description': 'The page index',
+				'in': 'query',
+				'type': 'int',
+				'schema': None,
+				'required': False
+			},
+			{
+				'name': 'size',
+				'description': 'The page size',
+				'in': 'query',
+				'type': 'int',
+				'schema': None,
+				'required': False
+			}
+		],
 		'responses': {
 			'200': {
 				'description': 'An array of User'
@@ -47,8 +65,10 @@ class AdminUsersApi(Resource):
 			user = User.objects.get(id=get_jwt_identity())
 			if not user.admin:
 				raise UnauthorizedError
-			users = User.objects
-			return jsonify(users)
+			page = int(request.args.get('page', 0))
+			size = int(request.args.get('size', User.objects.count()))
+			users = User.objects[page * size : page * size + size]
+			return jsonify(list(map(lambda u: u.serialize(), users)))
 		except UnauthorizedError:
 			raise UnauthorizedError
 		except Exception:
@@ -81,7 +101,7 @@ class AdminUserApi(Resource):
 			if not user.admin:
 				raise UnauthorizedError
 			user = User.objects.get(id=id)
-			return jsonify(user)
+			return jsonify(user.serialize())
 		except UnauthorizedError:
 			raise UnauthorizedError
 		except Exception:
@@ -155,7 +175,70 @@ class AdminUserApi(Resource):
 		except Exception:
 			raise InternalServerError
 
+class AdminUsersCountApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin'],
+		'description': 'Get the amount of users',
+		'responses': {
+			'200': {
+				'description': 'The amount of users'
+			}
+		}
+	})
+	@jwt_required()
+	def get(self):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			return User.objects.count()
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception:
+			raise InternalServerError
+
 class AdminPostsApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin'],
+		'description': 'Get all posts according to pagination criteria',
+		'parameters': [
+			{
+				'name': 'page',
+				'description': 'The page index',
+				'in': 'query',
+				'type': 'int',
+				'schema': None,
+				'required': False
+			},
+			{
+				'name': 'size',
+				'description': 'The page size',
+				'in': 'query',
+				'type': 'int',
+				'schema': None,
+				'required': False
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'An array of Post'
+			}
+		}
+	})
+	@jwt_required()
+	def get(self):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			page = int(request.args.get('page', 0))
+			size = int(request.args.get('size', User.objects.count()))
+			posts = Post.objects[page * size : page * size + size]
+			return jsonify(list(map(lambda p: p.serialize(), posts)))
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception:
+			raise InternalServerError
 	@swagger.doc({
 		'tags': ['Admin'],
 		'description': 'Create new Post',
@@ -274,5 +357,27 @@ class AdminPostApi(Resource):
 			raise UnauthorizedError
 		except DoesNotExist:
 			raise ResourceNotFoundError
+		except Exception:
+			raise InternalServerError
+
+class AdminPostsCountApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin'],
+		'description': 'Get the amount of posts',
+		'responses': {
+			'200': {
+				'description': 'The amount of posts'
+			}
+		}
+	})
+	@jwt_required()
+	def get(self):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			return Post.objects.count()
+		except UnauthorizedError:
+			raise UnauthorizedError
 		except Exception:
 			raise InternalServerError

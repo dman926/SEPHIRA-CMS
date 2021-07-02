@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -15,11 +15,15 @@ export class AdminService {
 
 	constructor(private http: HttpClient) { }
 
-	public getAllUsers(): Observable<User[]> {
+	public getAllUsers(page?: number, size?: number): Observable<User[]> {
 		const accessToken = localStorage.getItem('accessToken');
 		if (accessToken) {
-			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
-			return this.http.get<User[]>(this.adminBase + 'users', { headers });
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			let params = new HttpParams();
+			if (page && size) {
+				params = params.append('page', page.toString()).append('size', size.toString())
+			}
+			return this.http.get<User[]>(this.adminBase + 'users', { headers, params });
 		} else {
 			return new Observable<User[]>();
 		}
@@ -28,18 +32,32 @@ export class AdminService {
 	public getUser(id: string): Observable<User> {
 		const accessToken = localStorage.getItem('accessToken');
 		if (accessToken) {
-			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.get<User>(this.adminBase + 'user/' + id, { headers });
 		} else {
 			return new Observable<User>();
 		}
 	}
 
-	public getAllPosts(): Observable<Post[]> {
+	public getUserCount(): Observable<number> {
 		const accessToken = localStorage.getItem('accessToken');
 		if (accessToken) {
-			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
-			return this.http.get<Post[]>(this.adminBase + 'posts', { headers }).pipe(map(posts => {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.get<number>(this.adminBase + 'users/count', { headers });
+		} else {
+			return new Observable<number>();
+		}
+	}
+
+	public getAllPosts(page?: number, size?: number): Observable<Post[]> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			let params = new HttpParams();
+			if (page && size) {
+				params = params.append('page', page.toString()).append('size', size.toString())
+			}
+			return this.http.get<Post[]>(this.adminBase + 'posts', { headers, params }).pipe(map(posts => {
 				return posts.map(post => {
 					post.created = new Date(post.created!);
 					post.modified = new Date(post.modified!);

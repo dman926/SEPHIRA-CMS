@@ -5,7 +5,7 @@ Auth routes
 from flask import jsonify, request, render_template
 from flask_restful_swagger_2 import Resource, swagger
 from flask_jwt_extended import create_access_token, create_refresh_token, decode_token, jwt_required, get_jwt_identity
-import datetime
+import datetime, time
 
 from mongoengine.errors import FieldDoesNotExist, NotUniqueError, DoesNotExist
 from jwt.exceptions import ExpiredSignatureError, DecodeError, InvalidTokenError
@@ -105,6 +105,7 @@ class LoginApi(Resource):
 			refresh_token = create_refresh_token(identity=str(user.id), expires_delta=datetime.timedelta(days=30))
 			return {'accessToken': access_token, 'refreshToken': refresh_token}, 200
 		except (UnauthorizedError, DoesNotExist):
+			time.sleep(2)
 			raise UnauthorizedError
 		except MissingOtpError:
 			raise MissingOtpError
