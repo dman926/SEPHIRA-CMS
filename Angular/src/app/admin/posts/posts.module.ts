@@ -8,6 +8,8 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AngularEditorModule } from '@kolkov/angular-editor';
 import { ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 
 @NgModule({
@@ -23,6 +25,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 		MatPaginatorModule,
 		MatButtonModule,
 		MatProgressSpinnerModule,
+		MatInputModule,
+		MatFormFieldModule,
 
 		AngularEditorModule
 	]

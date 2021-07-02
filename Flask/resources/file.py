@@ -12,6 +12,8 @@ from .errors import InternalServerError, SchemaValidationError, FileNotFoundErro
 
 import os
 
+from services.logging_service import writeWarningToLog
+
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 def allowed_file(filename):
@@ -76,7 +78,8 @@ class UploaderApi(Resource):
 			raise SchemaValidationError
 		except SchemaValidationError:
 			raise SchemaValidationError
-		except Exception:
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.file.UploaderApi post', e)
 			raise InternalServerError
 
 class MediaApi(Resource):
@@ -91,12 +94,16 @@ class MediaApi(Resource):
 	})
 	@jwt_required()
 	def get(self):
-		mediaPath = os.path.join(current_app.config['UPLOAD_FOLDER'], get_jwt_identity())
-		if os.path.isdir(mediaPath):
-			_, _, filenames = next(os.walk(mediaPath))
-			mappedFilenames = map(lambda file: '/assets/uploads/' + get_jwt_identity() + '/' + file, filenames)
-			return jsonify(list(mappedFilenames))
-		return ''
+		try:
+			mediaPath = os.path.join(current_app.config['UPLOAD_FOLDER'], get_jwt_identity())
+			if os.path.isdir(mediaPath):
+				_, _, filenames = next(os.walk(mediaPath))
+				mappedFilenames = map(lambda file: '/assets/uploads/' + get_jwt_identity() + '/' + file, filenames)
+				return jsonify(list(mappedFilenames))
+			return ''
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.file.MediaApi get', e)
+			raise InternalServerError
 
 class SingleMediaApi(Resource):
 	@swagger.doc({
@@ -129,5 +136,6 @@ class SingleMediaApi(Resource):
 			raise FileNotFoundError
 		except FileNotFoundError:
 			raise FileNotFoundError
-		except Exception:
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.file.SingleMediaApi get', e)
 			raise InternalServerError

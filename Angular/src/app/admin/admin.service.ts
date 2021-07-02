@@ -93,4 +93,25 @@ export class AdminService {
 		}
 	}
 
+	public submitPost(post: Post): Observable<Post> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.post<Post>(this.adminBase + 'posts', { post }, { headers });
+		} else {
+			return new Observable<Post>();
+		}
+	}
+
+	public checkIfSlugTaken(slug: string): Observable<string> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
+			const params = new HttpParams().append('slug', slug)
+			return this.http.get<string>(this.adminBase + 'posts/slugTaken', { headers, params });
+		} else {
+			return new Observable<string>();
+		}
+	}
+
 }

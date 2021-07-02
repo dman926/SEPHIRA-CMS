@@ -16,7 +16,7 @@ from flask_apscheduler import APScheduler
 from database.db import initialize_db
 from tasks.tasks import initialize_tasks
 
-import os
+import os, logging
 
 PRODUCTION = False
 
@@ -47,6 +47,8 @@ else:
 	resources = {r"/*": {"origins": "http://localhost:4200"}}
 	socketResources = "http://localhost:4200"
 	base = '/api/'
+
+logging.basicConfig(filename="log.log", level=logging.WARNING, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
 
 app.config['SCHEDULER_API_ENABLED'] = True
 

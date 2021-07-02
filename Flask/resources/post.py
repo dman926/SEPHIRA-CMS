@@ -8,6 +8,8 @@ from flask_jwt_extended import jwt_required
 
 from database.models import Post
 
+from services.logging_service import writeWarningToLog
+
 class PostsApi(Resource):
 	@swagger.doc({
 		'tags': ['Post'],
@@ -36,7 +38,11 @@ class PostsApi(Resource):
 	})
 	@jwt_required()
 	def get(self):
-		page = int(request.args.get('page', 0))
-		size = int(request.args.get('size', 0))
-		posts = Post.objects()[page * size : page * size + size]
-		return jsonify(list(map(lambda p: p.serialize(), posts)))
+		try:
+			page = int(request.args.get('page', 0))
+			size = int(request.args.get('size', 0))
+			posts = Post.objects()[page * size : page * size + size]
+			return jsonify(list(map(lambda p: p.serialize(), posts)))
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.post.PostsApi get', e)
+			raise InternalServerError

@@ -11,6 +11,8 @@ from resources.errors import UnauthorizedError, InternalServerError, ResourceNot
 
 from database.models import User, Post
 
+from services.logging_service import writeWarningToLog
+
 class AdminApi(Resource):
 	@swagger.doc({
 		'tags': ['Admin'],
@@ -28,7 +30,8 @@ class AdminApi(Resource):
 			return user.admin
 		except UnauthorizedError:
 			raise UnauthorizedError
-		except Exception:
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminApi get', e)
 			raise InternalServerError
 
 class AdminUsersApi(Resource):
@@ -71,7 +74,8 @@ class AdminUsersApi(Resource):
 			return jsonify(list(map(lambda u: u.serialize(), users)))
 		except UnauthorizedError:
 			raise UnauthorizedError
-		except Exception:
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminUsersApi get', e)
 			raise InternalServerError
 
 class AdminUserApi(Resource):
@@ -104,7 +108,8 @@ class AdminUserApi(Resource):
 			return jsonify(user.serialize())
 		except UnauthorizedError:
 			raise UnauthorizedError
-		except Exception:
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminUserApi get', e)
 			raise InternalServerError
 	@swagger.doc({
 		'tags': ['Admin', 'User'],
@@ -138,7 +143,8 @@ class AdminUserApi(Resource):
 			raise UnauthorizedError
 		except DoesNotExist:
 			raise ResourceNotFoundError
-		except Exception:
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminUserApi put', e)
 			raise InternalServerError
 	@swagger.doc({
 		'tags': ['Admin', 'User'],
@@ -172,7 +178,8 @@ class AdminUserApi(Resource):
 			raise UnauthorizedError
 		except DoesNotExist:
 			raise ResourceNotFoundError
-		except Exception:
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminUserApi delete', e)
 			raise InternalServerError
 
 class AdminUsersCountApi(Resource):
@@ -194,7 +201,8 @@ class AdminUsersCountApi(Resource):
 			return User.objects.count()
 		except UnauthorizedError:
 			raise UnauthorizedError
-		except Exception:
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminUsersCountApi get', e)
 			raise InternalServerError
 
 class AdminPostsApi(Resource):
@@ -237,7 +245,8 @@ class AdminPostsApi(Resource):
 			return jsonify(list(map(lambda p: p.serialize(), posts)))
 		except UnauthorizedError:
 			raise UnauthorizedError
-		except Exception:
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminPostsApi get', e)
 			raise InternalServerError
 	@swagger.doc({
 		'tags': ['Admin'],
@@ -254,11 +263,13 @@ class AdminPostsApi(Resource):
 			user = User.objects.get(id=get_jwt_identity())
 			if not user.admin:
 				raise UnauthorizedError
-			post = Post(**request.get_json(), author=user)
-			return { 'id': str(post.id) }, 200
+			post = Post(**request.get_json().get('post'), author=user)
+			post.save()
+			return jsonify(post.serialize())
 		except UnauthorizedError:
 			raise UnauthorizedError
-		except Exception:
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminPostsApi post', e)
 			raise InternalServerError
 
 class AdminPostApi(Resource):
@@ -293,7 +304,8 @@ class AdminPostApi(Resource):
 			raise UnauthorizedError
 		except DoesNotExist:
 			raise ResourceNotFoundError
-		except Exception:
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminPostApi get', e)
 			raise InternalServerError
 	@swagger.doc({
 		'tags': ['Admin', 'User'],
@@ -324,7 +336,8 @@ class AdminPostApi(Resource):
 			return 'ok'
 		except UnauthorizedError:
 			raise UnauthorizedError
-		except Exception:
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminPostApi put', e)
 			raise InternalServerError
 	@swagger.doc({
 		'tags': ['Admin', 'User'],
@@ -357,7 +370,8 @@ class AdminPostApi(Resource):
 			raise UnauthorizedError
 		except DoesNotExist:
 			raise ResourceNotFoundError
-		except Exception:
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminPostApi delete', e)
 			raise InternalServerError
 
 class AdminPostsCountApi(Resource):
@@ -379,5 +393,30 @@ class AdminPostsCountApi(Resource):
 			return Post.objects.count()
 		except UnauthorizedError:
 			raise UnauthorizedError
-		except Exception:
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminPostsCountApi get', e)
+			raise InternalServerError
+
+class AdminPostSlugApi(Resource):
+	@swagger.doc({
+		'tags': ['Auth', 'Post', 'Validator'],
+		'description': 'Get if this username is taken',
+		'responses': {
+			'200': {
+				'description': 'If the username is taken'
+			}
+		}
+	})
+	@jwt_required()
+	def get(self):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			Post.objects.get(slug=request.args.get('slug'))
+			return False
+		except DoesNotExist:
+			return True
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminPostSlugApi get', e)
 			raise InternalServerError

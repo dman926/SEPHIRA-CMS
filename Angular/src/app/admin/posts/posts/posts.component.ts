@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { Post } from 'src/app/models/post';
 import { AdminService } from '../../admin.service';
 import { AngularEditorConfig } from '@kolkov/angular-editor';
-import { FormControl, FormGroup } from '@angular/forms';
+import { AbstractControl, AsyncValidatorFn, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { debounceTime, map, take } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 interface PageEvent {
 	length: number;
@@ -52,6 +54,9 @@ export class PostsComponent implements OnInit {
 		};
 		this.postCount = 0;
 		this.newPostGroup = new FormGroup({
+			title: new FormControl('', [Validators.required]),
+			slug: new FormControl('', [Validators.required], [this.slugValidator()]),
+			excerpt: new FormControl(''),
 			htmlContent: new FormControl('')
 		});
 	}
@@ -64,11 +69,17 @@ export class PostsComponent implements OnInit {
 	}
 
 	newPost(): void {
-		
-	}
-
-	submitPost(): void {
-		console.log(this.newPostGroup.get('htmlContent')!.value);
+		if (this.newPostGroup.valid) {
+			const post: Post = {
+				title: this.newPostGroup.get('title')!.value,
+				slug: this.newPostGroup.get('slug')!.value,
+				excerpt: this.newPostGroup.get('excerpt')!.value,
+				content: this.newPostGroup.get('htmlContent')!.value
+			}
+			this.admin.submitPost(post).toPromise().then(post => {
+				this.posts.unshift(post);
+			})
+		}
 	}
 
 	get shownPosts(): Post[] {
@@ -86,6 +97,20 @@ export class PostsComponent implements OnInit {
 			this.posts = this.posts.concat(posts);
 			this.loaded = true;
 		}).catch(err => this.loaded = true);
+	}
+
+	get slug(): FormControl {
+		return this.newPostGroup.get('slug')! as FormControl;
+	}
+
+	private slugValidator(): AsyncValidatorFn {
+		return (control: AbstractControl): Observable<ValidationErrors | null> => {
+			return this.admin.checkIfSlugTaken(control.value).pipe(
+				debounceTime(500),
+				take(1),
+				map(res => !res ? { slugTaken: true } : null)
+			);
+		};
 	}
 
 }

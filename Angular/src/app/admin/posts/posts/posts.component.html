@@ -1,6 +1,24 @@
 <form [formGroup]="newPostGroup" (ngSubmit)="newPost()">
+    <mat-form-field appearance="fill">
+        <mat-label>Title</mat-label>
+        <input matInput formControlName="title" autocomplete="off" required />
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+        <mat-label>Slug</mat-label>
+        <input matInput formControlName="slug" autocomplete="off" required />
+        <mat-error *ngIf="slug.hasError('slugTaken') && slug.dirty">
+            Username not available
+        </mat-error>
+        <mat-error *ngIf="slug.pending && slug.dirty">
+            Checking availability...
+        </mat-error>
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+        <mat-label>Excerpt</mat-label>
+        <textarea matInput formControlName="excerpt" autocomplete="off"></textarea>
+    </mat-form-field>
     <angular-editor formControlName="htmlContent" [config]="editorConfig"></angular-editor>
-    <button mat-raised-button color="primary" (click)="submitPost()">Submit Post</button>
+    <button mat-raised-button color="primary">Submit Post</button>
 </form>
 
 <mat-paginator [length]="postCount" [pageSize]="postPageEvent.pageSize" (page)="fetchPosts($event)"></mat-paginator>
