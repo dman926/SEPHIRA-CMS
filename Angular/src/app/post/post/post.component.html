@@ -1,0 +1,10 @@
+<section *ngIf="loaded;else loaderSpinner">
+    <ng-container *ngIf="post">
+        <div [innerHtml]="post.content"></div>
+    </ng-container>
+</section>
+<ng-template #loaderSpinner>
+    <div id="loader-spinner">
+        <mat-spinner></mat-spinner>
+    </div>
+</ng-template>

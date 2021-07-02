@@ -5,7 +5,7 @@ API Endpoints
 from .auth import SignupApi, LoginApi, ForgotPassword, ResetPassword, TokenRefresh, CheckPassword, UserApi, TwoFactorApi
 from .file import UploaderApi, MediaApi, SingleMediaApi
 
-from .post import PostsApi
+from .post import PostsApi, PostApi
 
 from .admin import AdminApi, AdminUsersApi, AdminUserApi, AdminUsersCountApi, AdminPostsApi, AdminPostApi, AdminPostsCountApi, AdminPostSlugApi
 
@@ -26,6 +26,7 @@ def initialize_routes(api, base):
 	api.add_resource(SingleMediaApi, base + 'file/media/<filename>')
 
 	api.add_resource(PostsApi, base + 'post/posts')
+	api.add_resource(PostApi, base + 'post/post')
 
 	api.add_resource(AdminApi, base + 'admin/admin')
 	api.add_resource(AdminUsersApi, base + 'admin/users')

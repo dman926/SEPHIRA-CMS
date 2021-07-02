@@ -1,3 +1,5 @@
+import { SafeStyle } from "@angular/platform-browser";
+
 export interface Post {
 	id?: string
 	author?: {
@@ -7,7 +9,7 @@ export interface Post {
 	},
 	title?: string;
 	slug?: string;
-	content?: string;
+	content?: string | SafeStyle;
 	excerpt?: string;
 	status?: string;
 	created?: Date;
