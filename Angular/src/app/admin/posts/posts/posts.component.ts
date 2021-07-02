@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Post } from 'src/app/models/post';
 import { AdminService } from '../../admin.service';
+import { AngularEditorConfig } from '@kolkov/angular-editor';
+import { FormControl, FormGroup } from '@angular/forms';
 
 interface PageEvent {
 	length: number;
@@ -10,9 +12,9 @@ interface PageEvent {
 }
 
 @Component({
-  selector: 'app-posts',
-  templateUrl: './posts.component.html',
-  styleUrls: ['./posts.component.scss']
+	selector: 'app-posts',
+	templateUrl: './posts.component.html',
+	styleUrls: ['./posts.component.scss']
 })
 export class PostsComponent implements OnInit {
 
@@ -21,6 +23,23 @@ export class PostsComponent implements OnInit {
 
 	postPageEvent: PageEvent;
 	postCount: number;
+
+	editorConfig: AngularEditorConfig = {
+		editable: true,
+		spellcheck: true,
+		height: 'auto',
+		minHeight: '0',
+		maxHeight: 'auto',
+		width: 'auto',
+		minWidth: '0',
+		translate: 'yes',
+		enableToolbar: true,
+		showToolbar: true,
+		placeholder: 'Enter text here...',
+		sanitize: false,
+		toolbarPosition: 'top',
+	};
+	newPostGroup: FormGroup;
 
 	constructor(private admin: AdminService) {
 		this.loaded = false;
@@ -32,6 +51,9 @@ export class PostsComponent implements OnInit {
 			previousPageIndex: 0
 		};
 		this.postCount = 0;
+		this.newPostGroup = new FormGroup({
+			htmlContent: new FormControl('')
+		});
 	}
 
 	ngOnInit(): void {
@@ -39,6 +61,14 @@ export class PostsComponent implements OnInit {
 			this.postCount = count;
 		});
 		this.fetchPosts();
+	}
+
+	newPost(): void {
+		
+	}
+
+	submitPost(): void {
+		console.log(this.newPostGroup.get('htmlContent')!.value);
 	}
 
 	get shownPosts(): Post[] {
@@ -54,7 +84,6 @@ export class PostsComponent implements OnInit {
 		this.loaded = false;
 		this.admin.getAllPosts(this.postPageEvent.pageIndex, this.postPageEvent.pageSize).toPromise().then(posts => {
 			this.posts = this.posts.concat(posts);
-			console.log(posts);
 			this.loaded = true;
 		}).catch(err => this.loaded = true);
 	}

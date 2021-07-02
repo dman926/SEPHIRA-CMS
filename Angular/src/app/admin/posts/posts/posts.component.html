@@ -1,3 +1,8 @@
+<form [formGroup]="newPostGroup" (ngSubmit)="newPost()">
+    <angular-editor formControlName="htmlContent" [config]="editorConfig"></angular-editor>
+    <button mat-raised-button color="primary" (click)="submitPost()">Submit Post</button>
+</form>
+
 <mat-paginator [length]="postCount" [pageSize]="postPageEvent.pageSize" (page)="fetchPosts($event)"></mat-paginator>
 <ng-template #loaderSpinner>
     <div id="loader-spinner">
