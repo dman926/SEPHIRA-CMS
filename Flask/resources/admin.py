@@ -9,7 +9,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from mongoengine.errors import DoesNotExist
 from resources.errors import UnauthorizedError, InternalServerError, ResourceNotFoundError
 
-from database.models import User, Page, Product
+from database.models import User, Page, Product, Order
 
 from services.logging_service import writeWarningToLog
 
@@ -901,4 +901,175 @@ class AdminCouponSlugAvailableApi(Resource):
 			return True
 		except Exception as e:
 			writeWarningToLog('Unhandled exception in resources.admin.AdminProductSlugAvailableApi get', e)
+			raise InternalServerError
+
+class AdminOrdersApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin', 'Order'],
+		'description': 'Get all orders according to pagination criteria',
+		'parameters': [
+			{
+				'name': 'page',
+				'description': 'The page index',
+				'in': 'query',
+				'type': 'int',
+				'schema': None,
+				'required': False
+			},
+			{
+				'name': 'size',
+				'description': 'The page size',
+				'in': 'query',
+				'type': 'int',
+				'schema': None,
+				'required': False
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'An array of Order'
+			}
+		}
+	})
+	@jwt_required()
+	def get(self):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			page = int(request.args.get('page', 0))
+			size = int(request.args.get('size', User.objects.count()))
+			orders = Orders.objects[page * size : page * size + size]
+			return jsonify(list(map(lambda o: o.serialize(), orders)))
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminOrdersApi get', e)
+			raise InternalServerError
+
+class AdminOrderApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin', 'Order'],
+		'description': 'Get the order',
+		'parameters': [
+			{
+				'name': 'id',
+				'description': 'The order id',
+				'in': 'path',
+				'type': 'string',
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'The order',
+			}
+		}
+	})
+	def get(self, id):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			order = Order.objects.get(id=id)
+			return jsonify(order.serialize())
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminOrderApi get', e)
+			raise InternalServerError
+	@swagger.doc({
+		'tags': ['Admin', 'Order'],
+		'description': 'Update the order',
+		'parameters': [
+			{
+				'name': 'id',
+				'description': 'The order id',
+				'in': 'path',
+				'type': 'string',
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'Order updated',
+			}
+		}
+	})
+	@jwt_required()
+	def put(self, id):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			Order.objects.get(id=id).update(**request.get_json())
+			return 'ok', 200
+		except InvalidQueryError:
+			raise SchemaValidationError
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminOrderApi put', e)
+			raise InternalServerError
+	@swagger.doc({
+		'tags': ['Admin', 'Coupon'],
+		'description': 'Delete the coupon',
+		'parameters': [
+			{
+				'name': 'id',
+				'description': 'The coupon id',
+				'in': 'path',
+				'type': 'string',
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'Coupon deleted',
+			}
+		}
+	})
+	@jwt_required()
+	def delete(self, id):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			Order.objects.get(id=id).delete()
+			return 'ok', 200
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminOrderApi delete', e)
+			raise InternalServerError
+
+class AdminOrderCountApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin', 'Order', 'Counter'],
+		'description': 'Get the number of orders',
+		'parameters': [
+			{
+				'name': 'status',
+				'description': 'A list of possible statuses',
+				'in': 'query',
+				'type': 'string',
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'The number of orders',
+			}
+		}
+	})
+	def get(self):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			return Order.objects(status__in=list(request.args['status'])).count()
+		except UnauthorizedError:
+			return UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminOrderCountApi get', e)
 			raise InternalServerError
