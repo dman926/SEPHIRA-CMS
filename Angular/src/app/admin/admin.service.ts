@@ -3,7 +3,10 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { Coupon } from '../models/coupon';
+import { Order } from '../models/order';
 import { Page } from '../models/page';
+import { Product } from '../models/product';
 import { User } from '../models/user';
 
 @Injectable({
@@ -72,7 +75,7 @@ export class AdminService {
 	public getPage(id: string): Observable<Page> {
 		const accessToken = localStorage.getItem('accessToken');
 		if (accessToken) {
-			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.get<Page>(this.adminBase + 'page/' + id, { headers }).pipe(map(page => {
 				page.created = new Date(page.created!);
 				page.modified = new Date(page.modified!);
@@ -109,6 +112,178 @@ export class AdminService {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
 			const params = new HttpParams().append('slug', slug)
 			return this.http.get<string>(this.adminBase + 'pages/slugTaken', { headers, params });
+		} else {
+			return new Observable<string>();
+		}
+	}
+
+	public getAllProducts(page?: number, size?: number): Observable<Product[]> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			let params = new HttpParams();
+			if (page && size) {
+				params = params.append('page', page.toString()).append('size', size.toString())
+			}
+			return this.http.get<Product[]>(this.adminBase + 'products', { headers, params }).pipe(map(products => {
+				return products.map(product => {
+					product.created = new Date(product.created!);
+					product.modified = new Date(product.modified!);
+					return product;
+				});
+			}));
+		} else {
+			return new Observable<Product[]>();
+		}
+	}
+
+	public getProduct(id: string): Observable<Product> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.get<Product>(this.adminBase + 'product/' + id, { headers }).pipe(map(page => {
+				page.created = new Date(page.created!);
+				page.modified = new Date(page.modified!);
+				return page;
+			}));
+		} else {
+			return new Observable<Page>();
+		}
+	}
+
+	public getProductCount(): Observable<number> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.get<number>(this.adminBase + 'products/count', { headers });
+		} else {
+			return new Observable<number>();
+		}
+	}
+
+	public submitProduct(product: Product): Observable<Product> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.post<Product>(this.adminBase + 'products', { product }, { headers });
+		} else {
+			return new Observable<Product>();
+		}
+	}
+
+	public deleteProduct(id: string): Observable<string> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.delete<string>(this.adminBase + 'product/' + id, { headers });
+		} else {
+			return new Observable<string>();
+		}
+	}
+
+	public getAllCoupons(page?: number, size?: number): Observable<Coupon[]> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			let params = new HttpParams();
+			if (page && size) {
+				params = params.append('page', page.toString()).append('size', size.toString())
+			}
+			return this.http.get<Coupon[]>(this.adminBase + 'coupons', { headers, params }).pipe(map(coupons => {
+				return coupons.map(coupon => {
+					coupon.created = new Date(coupon.created!);
+					coupon.modified = new Date(coupon.modified!);
+					return coupon;
+				});
+			}));
+		} else {
+			return new Observable<Coupon[]>();
+		}
+	}
+
+	public getCoupon(id: string): Observable<Coupon> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.get<Coupon>(this.adminBase + 'coupon/' + id, { headers }).pipe(map(coupon => {
+				coupon.created = new Date(coupon.created!);
+				coupon.modified = new Date(coupon.modified!);
+				return coupon;
+			}));
+		} else {
+			return new Observable<Page>();
+		}
+	}
+
+	public getCouponCount(): Observable<number> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.get<number>(this.adminBase + 'coupons/count', { headers });
+		} else {
+			return new Observable<number>();
+		}
+	}
+
+	public submitCoupon(coupon: Coupon): Observable<Coupon> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.post<Coupon>(this.adminBase + 'coupons', { coupon }, { headers });
+		} else {
+			return new Observable<Coupon>();
+		}
+	}
+
+	public deleteCoupon(id: string): Observable<string> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.delete<string>(this.adminBase + 'coupon/' + id, { headers });
+		} else {
+			return new Observable<string>();
+		}
+	}
+
+	public getAllOrders(page?: number, size?: number): Observable<Order[]> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			let params = new HttpParams();
+			if (page && size) {
+				params = params.append('page', page.toString()).append('size', size.toString())
+			}
+			return this.http.get<Order[]>(this.adminBase + 'orders', { headers, params });
+		} else {
+			return new Observable<Order[]>();
+		}
+	}
+
+	public getOrder(id: string): Observable<Order> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.get<Order>(this.adminBase + 'orders/' + id, { headers });
+		} else {
+			return new Observable<Order>();
+		}
+	}
+
+	public getOrderCount(): Observable<number> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.get<number>(this.adminBase + 'orders/count', { headers });
+		} else {
+			return new Observable<number>();
+		}
+	}
+
+	public deleteOrder(id: string): Observable<string> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.delete<string>(this.adminBase + 'order/' + id, { headers });
 		} else {
 			return new Observable<string>();
 		}

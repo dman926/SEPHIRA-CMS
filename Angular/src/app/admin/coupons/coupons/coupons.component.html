@@ -1,0 +1,11 @@
+<mat-paginator [length]="couponCount" [pageSize]="couponPageEvent.pageSize" (page)="fetchCoupons($event)"></mat-paginator>
+<ng-template #loaderSpinner>
+    <div id="loader-spinner">
+        <mat-spinner></mat-spinner>
+    </div>
+</ng-template>
+<div *ngIf="loaded;else loaderSpinner">
+    <button mat-raised-button *ngFor="let coupon of shownCoupons" [routerLink]="['/admin/coupons', coupon.id]">
+        {{ coupon.id }}
+	</button>
+</div>

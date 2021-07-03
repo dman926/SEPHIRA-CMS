@@ -6,8 +6,9 @@ from .auth import SignupApi, LoginApi, ForgotPassword, ResetPassword, TokenRefre
 from .file import UploaderApi, MediaApi, SingleMediaApi
 
 from .page import PagesApi, PageApi
+from .product import ProductsApi, ProductApi
 
-from .admin import AdminApi, AdminUsersApi, AdminUserApi, AdminUsersCountApi, AdminPagesApi, AdminPageApi, AdminPagesCountApi, AdminPageSlugApi
+from .admin import AdminApi, AdminUsersApi, AdminUserApi, AdminUsersCountApi, AdminPagesApi, AdminPageApi, AdminPagesCountApi, AdminPageSlugApi, AdminProductsApi, AdminProductApi, AdminCountApi, AdminProductSlugAvailableApi
 
 import resources.sockets
 
@@ -36,3 +37,7 @@ def initialize_routes(api, base):
 	api.add_resource(AdminPageApi, base + 'admin/page/<id>')
 	api.add_resource(AdminPagesCountApi, base + 'admin/pages/count')
 	api.add_resource(AdminPageSlugApi, base + 'admin/pages/slugTaken')
+	api.add_resource(AdminProductsApi, base + 'admin/products')
+	api.add_resource(AdminProductApi, base + 'admin/product/<id>')
+	api.add_resource(AdminProductsCountApi, base + 'admin/products/count')
+	api.add_resource(AdminProductSlugAvailableApi, base + 'admin/products/slugTaken')

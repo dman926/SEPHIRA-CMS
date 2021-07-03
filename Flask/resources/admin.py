@@ -36,7 +36,7 @@ class AdminApi(Resource):
 
 class AdminUsersApi(Resource):
 	@swagger.doc({
-		'tags': ['Admin'],
+		'tags': ['Admin', 'User'],
 		'description': 'Get all users according to pagination criteria',
 		'parameters': [
 			{
@@ -184,7 +184,7 @@ class AdminUserApi(Resource):
 
 class AdminUsersCountApi(Resource):
 	@swagger.doc({
-		'tags': ['Admin'],
+		'tags': ['Admin', 'User', 'Counter'],
 		'description': 'Get the amount of users',
 		'responses': {
 			'200': {
@@ -207,7 +207,223 @@ class AdminUsersCountApi(Resource):
 
 class AdminPagesApi(Resource):
 	@swagger.doc({
-		'tags': ['Admin'],
+		'tags': ['Admin', 'Page'],
+		'description': 'Get all pages according to pagination criteria',
+		'parameters': [
+			{
+				'name': 'page',
+				'description': 'The page index',
+				'in': 'query',
+				'type': 'int',
+				'schema': None,
+				'required': False
+			},
+			{
+				'name': 'size',
+				'description': 'The page size',
+				'in': 'query',
+				'type': 'int',
+				'schema': None,
+				'required': False
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'An array of Page'
+			}
+		}
+	})
+	@jwt_required()
+	def get(self):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			page = int(request.args.get('page', 0))
+			size = int(request.args.get('size', Page.objects.count()))
+			pages = Page.objects[page * size : page * size + size]
+			return jsonify(list(map(lambda p: p.serialize(), pages)))
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminPagesApi get', e)
+			raise InternalServerError
+	@swagger.doc({
+		'tags': ['Admin', 'Page'],
+		'description': 'Create new Page',
+		'responses': {
+			'200': {
+				'description': 'Page added'
+			}
+		}
+	})
+	@jwt_required()
+	def post(self):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			page = Page(**request.get_json()['page'], author=user)
+			page.save()
+			return jsonify(page.serialize())
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminPagesApi post', e)
+			raise InternalServerError
+
+class AdminPageApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin', 'Page'],
+		'description': 'Get page',
+		'parameters': [
+			{
+				'name': 'id',
+				'description': 'The page id',
+				'in': 'path',
+				'type': 'string',
+				'schema': None,
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'The page'
+			}
+		}
+	})
+	@jwt_required()
+	def get(self, id):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			page = Page.objects.get(id=id)
+			return jsonify(page)
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except DoesNotExist:
+			raise ResourceNotFoundError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminPostApi get', e)
+			raise InternalServerError
+	@swagger.doc({
+		'tags': ['Admin', 'Page'],
+		'description': 'Update page',
+		'parameters': [
+			{
+				'name': 'id',
+				'description': 'The page id',
+				'in': 'path',
+				'type': 'object',
+				'schema': None,
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'Page updated'
+			}
+		}
+	})
+	@jwt_required()
+	def put(self, id):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			Page.objects.get(id=id).update(**request.get_json())
+			return 'ok'
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminPageApi put', e)
+			raise InternalServerError
+	@swagger.doc({
+		'tags': ['Admin', 'Page'],
+		'description': 'Delete page',
+		'parameters': [
+			{
+				'name': 'id',
+				'description': 'The page id',
+				'in': 'path',
+				'type': 'string',
+				'schema': None,
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'Page deleted'
+			}
+		}
+	})
+	@jwt_required()
+	def delete(self, id):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			Page.objects.get(id=id).delete()
+			return 'ok'
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except DoesNotExist:
+			raise ResourceNotFoundError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminPageApi delete', e)
+			raise InternalServerError
+
+class AdminPagesCountApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin', 'Page'],
+		'description': 'Get the amount of pages',
+		'responses': {
+			'200': {
+				'description': 'The amount of pages'
+			}
+		}
+	})
+	@jwt_required()
+	def get(self):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			return Page.objects.count()
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminPagesCountApi get', e)
+			raise InternalServerError
+
+class AdminPageSlugApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin', 'Page', 'Validator'],
+		'description': 'Get if this page slug is taken',
+		'responses': {
+			'200': {
+				'description': 'If the slug is taken'
+			}
+		}
+	})
+	@jwt_required()
+	def get(self):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			Page.objects.get(slug=request.args.get('slug'))
+			return False
+		except DoesNotExist:
+			return True
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminPageSlugApi get', e)
+			raise InternalServerError
+
+class AdminProductsApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin', 'Page'],
 		'description': 'Get all pages according to pagination criteria',
 		'parameters': [
 			{
@@ -246,184 +462,10 @@ class AdminPagesApi(Resource):
 		except UnauthorizedError:
 			raise UnauthorizedError
 		except Exception as e:
-			writeWarningToLog('Unhandled exception in resources.admin.AdminPagesApi get', e)
+			writeWarningToLog('Unhandled exception in resources.admin.AdminProductsApi get', e)
 			raise InternalServerError
 	@swagger.doc({
-		'tags': ['Admin'],
-		'description': 'Create new Page',
-		'responses': {
-			'200': {
-				'description': 'Page added'
-			}
-		}
-	})
-	@jwt_required()
-	def post(self):
-		try:
-			user = User.objects.get(id=get_jwt_identity())
-			if not user.admin:
-				raise UnauthorizedError
-			page = Page(**request.get_json()['page'], author=user)
-			page.save()
-			return jsonify(page.serialize())
-		except UnauthorizedError:
-			raise UnauthorizedError
-		except Exception as e:
-			writeWarningToLog('Unhandled exception in resources.admin.AdminPagesApi post', e)
-			raise InternalServerError
-
-class AdminPageApi(Resource):
-	@swagger.doc({
-		'tags': ['Admin'],
-		'description': 'Get page',
-		'parameters': [
-			{
-				'name': 'id',
-				'description': 'The page id',
-				'in': 'path',
-				'type': 'string',
-				'schema': None,
-				'required': True
-			}
-		],
-		'responses': {
-			'200': {
-				'description': 'The page'
-			}
-		}
-	})
-	@jwt_required()
-	def get(self, id):
-		try:
-			user = User.objects.get(id=get_jwt_identity())
-			if not user.admin:
-				raise UnauthorizedError
-			page = Page.objects.get(id=id)
-			return jsonify(page)
-		except UnauthorizedError:
-			raise UnauthorizedError
-		except DoesNotExist:
-			raise ResourceNotFoundError
-		except Exception as e:
-			writeWarningToLog('Unhandled exception in resources.admin.AdminPostApi get', e)
-			raise InternalServerError
-	@swagger.doc({
-		'tags': ['Admin'],
-		'description': 'Update page',
-		'parameters': [
-			{
-				'name': 'id',
-				'description': 'The page id',
-				'in': 'path',
-				'type': 'object',
-				'schema': None,
-				'required': True
-			}
-		],
-		'responses': {
-			'200': {
-				'description': 'Page updated'
-			}
-		}
-	})
-	@jwt_required()
-	def put(self, id):
-		try:
-			user = User.objects.get(id=get_jwt_identity())
-			if not user.admin:
-				raise UnauthorizedError
-			Page.objects.get(id=id).update(**request.get_json())
-			return 'ok'
-		except UnauthorizedError:
-			raise UnauthorizedError
-		except Exception as e:
-			writeWarningToLog('Unhandled exception in resources.admin.AdminPageApi put', e)
-			raise InternalServerError
-	@swagger.doc({
-		'tags': ['Admin'],
-		'description': 'Delete page',
-		'parameters': [
-			{
-				'name': 'id',
-				'description': 'The page id',
-				'in': 'path',
-				'type': 'string',
-				'schema': None,
-				'required': True
-			}
-		],
-		'responses': {
-			'200': {
-				'description': 'Page deleted'
-			}
-		}
-	})
-	@jwt_required()
-	def delete(self, id):
-		try:
-			user = User.objects.get(id=get_jwt_identity())
-			if not user.admin:
-				raise UnauthorizedError
-			Page.objects.get(id=id).delete()
-			return 'ok'
-		except UnauthorizedError:
-			raise UnauthorizedError
-		except DoesNotExist:
-			raise ResourceNotFoundError
-		except Exception as e:
-			writeWarningToLog('Unhandled exception in resources.admin.AdminPageApi delete', e)
-			raise InternalServerError
-
-class AdminPagesCountApi(Resource):
-	@swagger.doc({
-		'tags': ['Admin'],
-		'description': 'Get the amount of pages',
-		'responses': {
-			'200': {
-				'description': 'The amount of pages'
-			}
-		}
-	})
-	@jwt_required()
-	def get(self):
-		try:
-			user = User.objects.get(id=get_jwt_identity())
-			if not user.admin:
-				raise UnauthorizedError
-			return Page.objects.count()
-		except UnauthorizedError:
-			raise UnauthorizedError
-		except Exception as e:
-			writeWarningToLog('Unhandled exception in resources.admin.AdminPagesCountApi get', e)
-			raise InternalServerError
-
-class AdminPageSlugApi(Resource):
-	@swagger.doc({
-		'tags': ['Auth', 'Post', 'Validator'],
-		'description': 'Get if this page slug is taken',
-		'responses': {
-			'200': {
-				'description': 'If the slug is taken'
-			}
-		}
-	})
-	@jwt_required()
-	def get(self):
-		try:
-			user = User.objects.get(id=get_jwt_identity())
-			if not user.admin:
-				raise UnauthorizedError
-			Page.objects.get(slug=request.args.get('slug'))
-			return False
-		except DoesNotExist:
-			return True
-		except Exception as e:
-			writeWarningToLog('Unhandled exception in resources.admin.AdminPageSlugApi get', e)
-			raise InternalServerError
-
-class AdminProductsApi(Resource):
-	@swagger.doc({
-		'tags': ['Product'],
+		'tags': ['Admin', 'Product'],
 		'description': 'Add new product',
 		'parameters': [
 			{
@@ -460,4 +502,403 @@ class AdminProductsApi(Resource):
 			raise UnauthorizedError
 		except Exception as e:
 			writeWarningToLog('Unhandled exception in resources.admin.AdminProductsApi post', e)
+			raise InternalServerError
+
+class AdminProductApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin', 'Product'],
+		'description': 'Get the product',
+		'parameters': [
+			{
+				'name': 'id',
+				'description': 'The item id',
+				'in': 'path',
+				'type': 'string',
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'The product',
+			}
+		}
+	})
+	def get(self, id):
+		try:
+			product = Product.objects.get(id=id)
+			if product.active or product.vendor.owner == get_jwt_identity:
+				return jsonify(product.serialize())
+			raise UnauthorizedError
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminProductApi get', e)
+			raise InternalServerError
+	@swagger.doc({
+		'tags': ['Admin', 'Product'],
+		'description': 'Update the product',
+		'parameters': [
+			{
+				'name': 'id',
+				'description': 'The item id',
+				'in': 'path',
+				'type': 'string',
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'Product updated',
+			}
+		}
+	})
+	@jwt_required()
+	def put(self, id):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			product = Product.objects.get(id=id)
+			product.update(**request.get_json())
+			if product.price and product.price < 0:
+				product.price = 0
+			product.nameNgrams = u' '.join(make_ngrams(product.name.lower()))
+			product.namePrefixNgrams = u' '.join(make_ngrams(product.name.lower(), True))
+			product.categoriesPrefixNgrams = list(map(lambda c: u' '.join(make_ngrams(c.lower(), True)), product.categories))
+			product.save()
+			return 'ok', 200
+		except InvalidQueryError:
+			raise SchemaValidationError
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminProductApi put', e)
+			raise InternalServerError
+	@swagger.doc({
+		'tags': ['Admin', 'Product'],
+		'description': 'Delete the product',
+		'parameters': [
+			{
+				'name': 'id',
+				'description': 'The item id',
+				'in': 'path',
+				'type': 'string',
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'Product deleted',
+			}
+		}
+	})
+	@jwt_required()
+	def delete(self, id):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			product = Product.objects.get(id=id)
+			product.active = False
+			product.save()
+			return 'ok', 200
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminProductApi delete', e)
+			raise InternalServerError
+
+class AdminProductCountApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin', 'Product', 'Counter'],
+		'description': 'Get the number of products',
+		'parameters': [
+			{
+				'name': 'status',
+				'description': 'A list of possible statuses',
+				'in': 'query',
+				'type': 'string',
+				'required': False
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'The number of products',
+			}
+		}
+	})
+	def get(self):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			return Product.objects(status__in=list(request.args['status'])).count()
+		except UnauthorizedError:
+			return UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminProductCountApi get', e)
+			raise InternalServerError
+
+class AdminProductSlugAvailableApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin', 'Product', 'Validator'],
+		'description': 'Get if this product slug is taken',
+		'parameters': [
+			{
+				'name': 'slug',
+				'description': 'The product slug',
+				'in': 'body',
+				'schema': None,
+				'type': 'string',
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'If the product slug is taken',
+			}
+		}
+	})
+	@jwt_required()
+	def get(self):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			Product.objects.get(slug=request.args.get('slug'))
+			return False
+		except DoesNotExist:
+			return True
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminProductSlugAvailableApi get', e)
+			raise InternalServerError
+
+class AdminCouponsApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin', 'Coupon'],
+		'description': 'Get all coupons according to pagination criteria',
+		'parameters': [
+			{
+				'name': 'page',
+				'description': 'The page index',
+				'in': 'query',
+				'type': 'int',
+				'schema': None,
+				'required': False
+			},
+			{
+				'name': 'size',
+				'description': 'The page size',
+				'in': 'query',
+				'type': 'int',
+				'schema': None,
+				'required': False
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'An array of Coupon'
+			}
+		}
+	})
+	@jwt_required()
+	def get(self):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			page = int(request.args.get('page', 0))
+			size = int(request.args.get('size', User.objects.count()))
+			coupons = Page.objects[page * size : page * size + size]
+			return jsonify(list(map(lambda c: c.serialize(), coupons)))
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminCouponsApi get', e)
+			raise InternalServerError
+	@swagger.doc({
+		'tags': ['Admin', 'Coupon'],
+		'description': 'Add new coupon',
+		'responses': {
+			'200': {
+				'description': 'Coupon added',
+			}
+		}
+	})
+	@jwt_required()
+	def post(self):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.isVendor:
+				raise UnauthorizedError
+			coupon = Product(**request.get_json(), author=user)
+			coupon.save()
+			return jsonify(coupon.serialize())
+		except (FieldDoesNotExist, ValidationError):
+			raise SchemaValidationError
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminCouponsApi post', e)
+			raise InternalServerError
+
+class AdminCouponApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin', 'Coupon'],
+		'description': 'Get the coupon',
+		'parameters': [
+			{
+				'name': 'id',
+				'description': 'The coupon id',
+				'in': 'path',
+				'type': 'string',
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'The coupon',
+			}
+		}
+	})
+	def get(self, id):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			coupon = Coupon.objects.get(id=id)
+			return jsonify(coupon.serialize())
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminCouponApi get', e)
+			raise InternalServerError
+	@swagger.doc({
+		'tags': ['Admin', 'Coupon'],
+		'description': 'Update the coupon',
+		'parameters': [
+			{
+				'name': 'id',
+				'description': 'The coupon id',
+				'in': 'path',
+				'type': 'string',
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'Coupon updated',
+			}
+		}
+	})
+	@jwt_required()
+	def put(self, id):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			Coupon.objects.get(id=id).update(**request.get_json())
+			return 'ok', 200
+		except InvalidQueryError:
+			raise SchemaValidationError
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminProductApi put', e)
+			raise InternalServerError
+	@swagger.doc({
+		'tags': ['Admin', 'Coupon'],
+		'description': 'Delete the coupon',
+		'parameters': [
+			{
+				'name': 'id',
+				'description': 'The coupon id',
+				'in': 'path',
+				'type': 'string',
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'Coupon deleted',
+			}
+		}
+	})
+	@jwt_required()
+	def delete(self, id):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			Coupon.objects.get(id=id).delete()
+			return 'ok', 200
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminCouponApi delete', e)
+			raise InternalServerError
+
+class AdminCouponCountApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin', 'Coupon', 'Counter'],
+		'description': 'Get the number of coupons',
+		'parameters': [
+			{
+				'name': 'status',
+				'description': 'A list of possible statuses',
+				'in': 'query',
+				'type': 'string',
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'The number of coupons',
+			}
+		}
+	})
+	def get(self):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			return Coupon.objects(status__in=list(request.args['status'])).count()
+		except UnauthorizedError:
+			return UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminCouponCountApi get', e)
+			raise InternalServerError
+
+class AdminCouponSlugAvailableApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin', 'Coupon', 'Validator'],
+		'description': 'Get if this coupon slug is taken',
+		'parameters': [
+			{
+				'name': 'slug',
+				'description': 'The coupon slug',
+				'in': 'body',
+				'schema': None,
+				'type': 'string',
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'If the coupon slug is taken',
+			}
+		}
+	})
+	@jwt_required()
+	def get(self):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			Coupon.objects.get(slug=request.args.get('slug'))
+			return False
+		except DoesNotExist:
+			return True
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminProductSlugAvailableApi get', e)
 			raise InternalServerError
