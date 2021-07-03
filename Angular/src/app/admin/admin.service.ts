@@ -211,7 +211,7 @@ export class AdminService {
 				return coupon;
 			}));
 		} else {
-			return new Observable<Page>();
+			return new Observable<Coupon>();
 		}
 	}
 

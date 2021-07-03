@@ -9,6 +9,5 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from mongoengine.errors import FieldDoesNotExist, NotUniqueError, DoesNotExist, ValidationError, InvalidQueryError
 from resources.errors import SchemaValidationError, InternalServerError, UnauthorizedError
 
-from database.models import Product, User, Vendor, Review
 from services.logging_service import writeWarningToLog
 

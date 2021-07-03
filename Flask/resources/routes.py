@@ -6,9 +6,8 @@ from .auth import SignupApi, LoginApi, ForgotPassword, ResetPassword, TokenRefre
 from .file import UploaderApi, MediaApi, SingleMediaApi
 
 from .page import PagesApi, PageApi
-from .product import ProductsApi, ProductApi
 
-from .admin import AdminApi, AdminUsersApi, AdminUserApi, AdminUsersCountApi, AdminPagesApi, AdminPageApi, AdminPagesCountApi, AdminPageSlugApi, AdminProductsApi, AdminProductApi, AdminCountApi, AdminProductSlugAvailableApi
+from .admin import AdminApi, AdminUsersApi, AdminUserApi, AdminUsersCountApi, AdminPagesApi, AdminPageApi, AdminPagesCountApi, AdminPageSlugApi, AdminProductsApi, AdminProductApi, AdminProductCountApi, AdminProductSlugAvailableApi, AdminCouponsApi, AdminCouponApi, AdminCouponCountApi, AdminCouponSlugAvailableApi, AdminOrdersApi, AdminOrderApi, AdminOrderCountApi
 
 import resources.sockets
 
@@ -39,13 +38,12 @@ def initialize_routes(api, base):
 	api.add_resource(AdminPageSlugApi, base + 'admin/pages/slugTaken')
 	api.add_resource(AdminProductsApi, base + 'admin/products')
 	api.add_resource(AdminProductApi, base + 'admin/product/<id>')
-	api.add_resource(AdminProductsCountApi, base + 'admin/products/count')
+	api.add_resource(AdminProductCountApi, base + 'admin/products/count')
 	api.add_resource(AdminProductSlugAvailableApi, base + 'admin/products/slugTaken')
 	api.add_resource(AdminCouponsApi, base + 'admin/coupons')
 	api.add_resource(AdminCouponApi, base + 'admin/coupon/<id>')
-	api.add_resource(AdminCouponsCountApi, base + 'admin/coupons/count')
+	api.add_resource(AdminCouponCountApi, base + 'admin/coupons/count')
 	api.add_resource(AdminCouponSlugAvailableApi, base + 'admin/coupons/slugTaken')
 	api.add_resource(AdminOrdersApi, base + 'admin/orders')
 	api.add_resource(AdminOrderApi, base + 'admin/order/<id>')
-	api.add_resource(AdminOrdersCountApi, base + 'admin/orders/count')
-	api.add_resource(AdminOrderSlugAvailableApi, base + 'admin/orders/slugTaken')
+	api.add_resource(AdminOrderCountApi, base + 'admin/orders/count')

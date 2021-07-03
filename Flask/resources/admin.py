@@ -457,8 +457,8 @@ class AdminProductsApi(Resource):
 				raise UnauthorizedError
 			page = int(request.args.get('page', 0))
 			size = int(request.args.get('size', User.objects.count()))
-			pages = Page.objects[page * size : page * size + size]
-			return jsonify(list(map(lambda p: p.serialize(), pages)))
+			products = Product.objects[page * size : page * size + size]
+			return jsonify(list(map(lambda p: p.serialize(), products)))
 		except UnauthorizedError:
 			raise UnauthorizedError
 		except Exception as e:
@@ -523,12 +523,14 @@ class AdminProductApi(Resource):
 			}
 		}
 	})
+	@jwt_required()
 	def get(self, id):
 		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
 			product = Product.objects.get(id=id)
-			if product.active or product.vendor.owner == get_jwt_identity:
-				return jsonify(product.serialize())
-			raise UnauthorizedError
+			return jsonify(product.serialize())
 		except UnauthorizedError:
 			raise UnauthorizedError
 		except Exception as e:
@@ -627,6 +629,7 @@ class AdminProductCountApi(Resource):
 			}
 		}
 	})
+	@jwt_required()
 	def get(self):
 		try:
 			user = User.objects.get(id=get_jwt_identity())
@@ -709,7 +712,7 @@ class AdminCouponsApi(Resource):
 				raise UnauthorizedError
 			page = int(request.args.get('page', 0))
 			size = int(request.args.get('size', User.objects.count()))
-			coupons = Page.objects[page * size : page * size + size]
+			coupons = Coupon.objects[page * size : page * size + size]
 			return jsonify(list(map(lambda c: c.serialize(), coupons)))
 		except UnauthorizedError:
 			raise UnauthorizedError
@@ -939,7 +942,7 @@ class AdminOrdersApi(Resource):
 				raise UnauthorizedError
 			page = int(request.args.get('page', 0))
 			size = int(request.args.get('size', User.objects.count()))
-			orders = Orders.objects[page * size : page * size + size]
+			orders = Order.objects[page * size : page * size + size]
 			return jsonify(list(map(lambda o: o.serialize(), orders)))
 		except UnauthorizedError:
 			raise UnauthorizedError
