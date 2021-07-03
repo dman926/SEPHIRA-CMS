@@ -5,9 +5,9 @@ API Endpoints
 from .auth import SignupApi, LoginApi, ForgotPassword, ResetPassword, TokenRefresh, CheckPassword, UserApi, TwoFactorApi
 from .file import UploaderApi, MediaApi, SingleMediaApi
 
-from .post import PostsApi, PostApi
+from .page import PagesApi, PageApi
 
-from .admin import AdminApi, AdminUsersApi, AdminUserApi, AdminUsersCountApi, AdminPostsApi, AdminPostApi, AdminPostsCountApi, AdminPostSlugApi
+from .admin import AdminApi, AdminUsersApi, AdminUserApi, AdminUsersCountApi, AdminPagesApi, AdminPageApi, AdminPagesCountApi, AdminPageSlugApi
 
 import resources.sockets
 
@@ -25,14 +25,14 @@ def initialize_routes(api, base):
 	api.add_resource(MediaApi, base + 'file/media')
 	api.add_resource(SingleMediaApi, base + 'file/media/<filename>')
 
-	api.add_resource(PostsApi, base + 'post/posts')
-	api.add_resource(PostApi, base + 'post/post')
+	api.add_resource(PagesApi, base + 'page/pages')
+	api.add_resource(PageApi, base + 'page/page')
 
 	api.add_resource(AdminApi, base + 'admin/admin')
 	api.add_resource(AdminUsersApi, base + 'admin/users')
 	api.add_resource(AdminUserApi, base + 'admin/user/<id>')
 	api.add_resource(AdminUsersCountApi, base + 'admin/users/count')
-	api.add_resource(AdminPostsApi, base + 'admin/posts')
-	api.add_resource(AdminPostApi, base + 'admin/post/<id>')
-	api.add_resource(AdminPostsCountApi, base + 'admin/posts/count')
-	api.add_resource(AdminPostSlugApi, base + 'admin/posts/slugTaken')
+	api.add_resource(AdminPagesApi, base + 'admin/pages')
+	api.add_resource(AdminPageApi, base + 'admin/page/<id>')
+	api.add_resource(AdminPagesCountApi, base + 'admin/pages/count')
+	api.add_resource(AdminPageSlugApi, base + 'admin/pages/slugTaken')

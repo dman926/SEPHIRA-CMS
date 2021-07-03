@@ -9,14 +9,14 @@ from flask_jwt_extended import jwt_required
 from mongoengine.errors import DoesNotExist
 from resources.errors import ResourceNotFoundError, InternalServerError
 
-from database.models import Post
+from database.models import Page
 
 from services.logging_service import writeWarningToLog
 
-class PostsApi(Resource):
+class PagesApi(Resource):
 	@swagger.doc({
-		'tags': ['Post'],
-		'description': 'Get all posts according to pagination criteria',
+		'tags': ['Page'],
+		'description': 'Get all pages according to pagination criteria',
 		'parameters': [
 			{
 				'name': 'page',
@@ -43,16 +43,16 @@ class PostsApi(Resource):
 		try:
 			page = int(request.args.get('page', 0))
 			size = int(request.args.get('size', 0))
-			posts = Post.objects()[page * size : page * size + size]
-			return jsonify(list(map(lambda p: p.serialize(), posts)))
+			pages = Page.objects()[page * size : page * size + size]
+			return jsonify(list(map(lambda p: p.serialize(), pages)))
 		except Exception as e:
-			writeWarningToLog('Unhandled exception in resources.post.PostsApi get', e)
+			writeWarningToLog('Unhandled exception in resources.page.PagesApi get', e)
 			raise InternalServerError
 
-class PostApi(Resource):
+class PageApi(Resource):
 	@swagger.doc({
-		'tags': ['Post'],
-		'description': 'Get the post with associated slug',
+		'tags': ['Page'],
+		'description': 'Get the page with associated slug',
 		'parameters': [
 			{
 				'name': 'slug',
@@ -64,16 +64,16 @@ class PostApi(Resource):
 		],
 		'responses': {
 			'200': {
-				'description': 'A Post',
+				'description': 'A Page',
 			}
 		}
 	})
 	def get(self):
 		try:
-			post = Post.objects.get(slug=request.args.get('slug'))
-			return jsonify(post.serialize())
+			page = Page.objects.get(slug=request.args.get('slug'))
+			return jsonify(page.serialize())
 		except DoesNotExist:
 			raise ResourceNotFoundError
 		except Exception as e:
-			writeWarningToLog('Unhandled exception in resources.post.PostsApi get', e)
+			writeWarningToLog('Unhandled exception in resources.page.PageApi get', e)
 			raise InternalServerError

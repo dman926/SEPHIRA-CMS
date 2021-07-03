@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { Post } from '../models/post';
+import { Page } from '../models/page';
 import { User } from '../models/user';
 
 @Injectable({
@@ -49,7 +49,7 @@ export class AdminService {
 		}
 	}
 
-	public getAllPosts(page?: number, size?: number): Observable<Post[]> {
+	public getAllPages(page?: number, size?: number): Observable<Page[]> {
 		const accessToken = localStorage.getItem('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
@@ -57,49 +57,49 @@ export class AdminService {
 			if (page && size) {
 				params = params.append('page', page.toString()).append('size', size.toString())
 			}
-			return this.http.get<Post[]>(this.adminBase + 'posts', { headers, params }).pipe(map(posts => {
-				return posts.map(post => {
-					post.created = new Date(post.created!);
-					post.modified = new Date(post.modified!);
-					return post;
+			return this.http.get<Page[]>(this.adminBase + 'pages', { headers, params }).pipe(map(pages => {
+				return pages.map(page => {
+					page.created = new Date(page.created!);
+					page.modified = new Date(page.modified!);
+					return page;
 				});
 			}));
 		} else {
-			return new Observable<Post[]>();
+			return new Observable<Page[]>();
 		}
 	}
 
-	public getPost(id: string): Observable<Post> {
+	public getPage(id: string): Observable<Page> {
 		const accessToken = localStorage.getItem('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
-			return this.http.get<Post>(this.adminBase + 'post/' + id, { headers }).pipe(map(post => {
-				post.created = new Date(post.created!);
-				post.modified = new Date(post.modified!);
-				return post;
+			return this.http.get<Page>(this.adminBase + 'page/' + id, { headers }).pipe(map(page => {
+				page.created = new Date(page.created!);
+				page.modified = new Date(page.modified!);
+				return page;
 			}));
 		} else {
-			return new Observable<Post>();
+			return new Observable<Page>();
 		}
 	}
 
-	public getPostCount(): Observable<number> {
+	public getPageCount(): Observable<number> {
 		const accessToken = localStorage.getItem('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
-			return this.http.get<number>(this.adminBase + 'posts/count', { headers });
+			return this.http.get<number>(this.adminBase + 'pages/count', { headers });
 		} else {
 			return new Observable<number>();
 		}
 	}
 
-	public submitPost(post: Post): Observable<Post> {
+	public submitPage(page: Page): Observable<Page> {
 		const accessToken = localStorage.getItem('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
-			return this.http.post<Post>(this.adminBase + 'posts', { post }, { headers });
+			return this.http.post<Page>(this.adminBase + 'pages', { page }, { headers });
 		} else {
-			return new Observable<Post>();
+			return new Observable<Page>();
 		}
 	}
 
@@ -108,7 +108,7 @@ export class AdminService {
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
 			const params = new HttpParams().append('slug', slug)
-			return this.http.get<string>(this.adminBase + 'posts/slugTaken', { headers, params });
+			return this.http.get<string>(this.adminBase + 'pages/slugTaken', { headers, params });
 		} else {
 			return new Observable<string>();
 		}

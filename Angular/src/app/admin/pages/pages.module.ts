@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PostsRoutingModule } from './posts-routing.module';
-import { PostsComponent } from './posts/posts.component';
-import { PostComponent } from './post/post.component';
+import { PagesRoutingModule } from './pages-routing.module';
+import { PagesComponent } from './pages/pages.component';
+import { PageComponent } from './page/page.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -14,12 +14,12 @@ import { MatInputModule } from '@angular/material/input';
 
 @NgModule({
 	declarations: [
-		PostsComponent,
-  PostComponent
+		PagesComponent,
+		PageComponent
 	],
 	imports: [
 		CommonModule,
-		PostsRoutingModule,
+		PagesRoutingModule,
 		ReactiveFormsModule,
 
 		MatPaginatorModule,
@@ -31,4 +31,4 @@ import { MatInputModule } from '@angular/material/input';
 		AngularEditorModule
 	]
 })
-export class PostsModule { }
+export class PagesModule { }

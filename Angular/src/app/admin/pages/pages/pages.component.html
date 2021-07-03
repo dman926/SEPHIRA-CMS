@@ -1,4 +1,4 @@
-<form [formGroup]="newPostGroup" (ngSubmit)="newPost()">
+<form [formGroup]="newPageGroup" (ngSubmit)="newPage()">
     <mat-form-field appearance="fill">
         <mat-label>Title</mat-label>
         <input matInput formControlName="title" autocomplete="off" required />
@@ -18,17 +18,17 @@
         <textarea matInput formControlName="excerpt" autocomplete="off"></textarea>
     </mat-form-field>
     <angular-editor formControlName="htmlContent" [config]="editorConfig"></angular-editor>
-    <button mat-raised-button color="primary">Submit Post</button>
+    <button mat-raised-button color="primary">Submit Page</button>
 </form>
 
-<mat-paginator [length]="postCount" [pageSize]="postPageEvent.pageSize" (page)="fetchPosts($event)"></mat-paginator>
+<mat-paginator [length]="pageCount" [pageSize]="pagePageEvent.pageSize" (page)="fetchPages($event)"></mat-paginator>
 <ng-template #loaderSpinner>
     <div id="loader-spinner">
         <mat-spinner></mat-spinner>
     </div>
 </ng-template>
 <div *ngIf="loaded;else loaderSpinner">
-    <button mat-raised-button *ngFor="let post of shownPosts" [routerLink]="['/admin/posts', post.id]">
-        {{ post.id }}
+    <button mat-raised-button *ngFor="let page of shownPages" [routerLink]="['/admin/pages', page.id]">
+        {{ page.id }}
 	</button>
 </div>

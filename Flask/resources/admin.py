@@ -9,7 +9,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from mongoengine.errors import DoesNotExist
 from resources.errors import UnauthorizedError, InternalServerError, ResourceNotFoundError
 
-from database.models import User, Post
+from database.models import User, Page, Product
 
 from services.logging_service import writeWarningToLog
 
@@ -205,10 +205,10 @@ class AdminUsersCountApi(Resource):
 			writeWarningToLog('Unhandled exception in resources.admin.AdminUsersCountApi get', e)
 			raise InternalServerError
 
-class AdminPostsApi(Resource):
+class AdminPagesApi(Resource):
 	@swagger.doc({
 		'tags': ['Admin'],
-		'description': 'Get all posts according to pagination criteria',
+		'description': 'Get all pages according to pagination criteria',
 		'parameters': [
 			{
 				'name': 'page',
@@ -229,7 +229,7 @@ class AdminPostsApi(Resource):
 		],
 		'responses': {
 			'200': {
-				'description': 'An array of Post'
+				'description': 'An array of Page'
 			}
 		}
 	})
@@ -241,19 +241,19 @@ class AdminPostsApi(Resource):
 				raise UnauthorizedError
 			page = int(request.args.get('page', 0))
 			size = int(request.args.get('size', User.objects.count()))
-			posts = Post.objects[page * size : page * size + size]
-			return jsonify(list(map(lambda p: p.serialize(), posts)))
+			pages = Page.objects[page * size : page * size + size]
+			return jsonify(list(map(lambda p: p.serialize(), pages)))
 		except UnauthorizedError:
 			raise UnauthorizedError
 		except Exception as e:
-			writeWarningToLog('Unhandled exception in resources.admin.AdminPostsApi get', e)
+			writeWarningToLog('Unhandled exception in resources.admin.AdminPagesApi get', e)
 			raise InternalServerError
 	@swagger.doc({
 		'tags': ['Admin'],
-		'description': 'Create new Post',
+		'description': 'Create new Page',
 		'responses': {
 			'200': {
-				'description': 'Post added'
+				'description': 'Page added'
 			}
 		}
 	})
@@ -263,32 +263,32 @@ class AdminPostsApi(Resource):
 			user = User.objects.get(id=get_jwt_identity())
 			if not user.admin:
 				raise UnauthorizedError
-			post = Post(**request.get_json().get('post'), author=user)
-			post.save()
-			return jsonify(post.serialize())
+			page = Page(**request.get_json()['page'], author=user)
+			page.save()
+			return jsonify(page.serialize())
 		except UnauthorizedError:
 			raise UnauthorizedError
 		except Exception as e:
-			writeWarningToLog('Unhandled exception in resources.admin.AdminPostsApi post', e)
+			writeWarningToLog('Unhandled exception in resources.admin.AdminPagesApi post', e)
 			raise InternalServerError
 
-class AdminPostApi(Resource):
+class AdminPageApi(Resource):
 	@swagger.doc({
-		'tags': ['Admin', 'User'],
-		'description': 'Get user',
+		'tags': ['Admin'],
+		'description': 'Get page',
 		'parameters': [
 			{
 				'name': 'id',
-				'description': 'The post id',
+				'description': 'The page id',
 				'in': 'path',
-				'type': 'object',
+				'type': 'string',
 				'schema': None,
 				'required': True
 			}
 		],
 		'responses': {
 			'200': {
-				'description': 'The post'
+				'description': 'The page'
 			}
 		}
 	})
@@ -298,8 +298,8 @@ class AdminPostApi(Resource):
 			user = User.objects.get(id=get_jwt_identity())
 			if not user.admin:
 				raise UnauthorizedError
-			post = Post.objects.get(id=id)
-			return jsonify(post)
+			page = Page.objects.get(id=id)
+			return jsonify(page)
 		except UnauthorizedError:
 			raise UnauthorizedError
 		except DoesNotExist:
@@ -308,12 +308,12 @@ class AdminPostApi(Resource):
 			writeWarningToLog('Unhandled exception in resources.admin.AdminPostApi get', e)
 			raise InternalServerError
 	@swagger.doc({
-		'tags': ['Admin', 'User'],
-		'description': 'Update user',
+		'tags': ['Admin'],
+		'description': 'Update page',
 		'parameters': [
 			{
 				'name': 'id',
-				'description': 'The user id',
+				'description': 'The page id',
 				'in': 'path',
 				'type': 'object',
 				'schema': None,
@@ -322,7 +322,7 @@ class AdminPostApi(Resource):
 		],
 		'responses': {
 			'200': {
-				'description': 'User updated'
+				'description': 'Page updated'
 			}
 		}
 	})
@@ -332,29 +332,29 @@ class AdminPostApi(Resource):
 			user = User.objects.get(id=get_jwt_identity())
 			if not user.admin:
 				raise UnauthorizedError
-			Post.objects.get(id=id).update(**request.get_json())
+			Page.objects.get(id=id).update(**request.get_json())
 			return 'ok'
 		except UnauthorizedError:
 			raise UnauthorizedError
 		except Exception as e:
-			writeWarningToLog('Unhandled exception in resources.admin.AdminPostApi put', e)
+			writeWarningToLog('Unhandled exception in resources.admin.AdminPageApi put', e)
 			raise InternalServerError
 	@swagger.doc({
-		'tags': ['Admin', 'User'],
-		'description': 'Delete user',
+		'tags': ['Admin'],
+		'description': 'Delete page',
 		'parameters': [
 			{
 				'name': 'id',
-				'description': 'The user id',
+				'description': 'The page id',
 				'in': 'path',
-				'type': 'object',
+				'type': 'string',
 				'schema': None,
 				'required': True
 			}
 		],
 		'responses': {
 			'200': {
-				'description': 'User deleted'
+				'description': 'Page deleted'
 			}
 		}
 	})
@@ -364,23 +364,23 @@ class AdminPostApi(Resource):
 			user = User.objects.get(id=get_jwt_identity())
 			if not user.admin:
 				raise UnauthorizedError
-			Post.objects.get(id=id).delete()
+			Page.objects.get(id=id).delete()
 			return 'ok'
 		except UnauthorizedError:
 			raise UnauthorizedError
 		except DoesNotExist:
 			raise ResourceNotFoundError
 		except Exception as e:
-			writeWarningToLog('Unhandled exception in resources.admin.AdminPostApi delete', e)
+			writeWarningToLog('Unhandled exception in resources.admin.AdminPageApi delete', e)
 			raise InternalServerError
 
-class AdminPostsCountApi(Resource):
+class AdminPagesCountApi(Resource):
 	@swagger.doc({
 		'tags': ['Admin'],
-		'description': 'Get the amount of posts',
+		'description': 'Get the amount of pages',
 		'responses': {
 			'200': {
-				'description': 'The amount of posts'
+				'description': 'The amount of pages'
 			}
 		}
 	})
@@ -390,20 +390,20 @@ class AdminPostsCountApi(Resource):
 			user = User.objects.get(id=get_jwt_identity())
 			if not user.admin:
 				raise UnauthorizedError
-			return Post.objects.count()
+			return Page.objects.count()
 		except UnauthorizedError:
 			raise UnauthorizedError
 		except Exception as e:
-			writeWarningToLog('Unhandled exception in resources.admin.AdminPostsCountApi get', e)
+			writeWarningToLog('Unhandled exception in resources.admin.AdminPagesCountApi get', e)
 			raise InternalServerError
 
-class AdminPostSlugApi(Resource):
+class AdminPageSlugApi(Resource):
 	@swagger.doc({
 		'tags': ['Auth', 'Post', 'Validator'],
-		'description': 'Get if this username is taken',
+		'description': 'Get if this page slug is taken',
 		'responses': {
 			'200': {
-				'description': 'If the username is taken'
+				'description': 'If the slug is taken'
 			}
 		}
 	})
@@ -413,10 +413,51 @@ class AdminPostSlugApi(Resource):
 			user = User.objects.get(id=get_jwt_identity())
 			if not user.admin:
 				raise UnauthorizedError
-			Post.objects.get(slug=request.args.get('slug'))
+			Page.objects.get(slug=request.args.get('slug'))
 			return False
 		except DoesNotExist:
 			return True
 		except Exception as e:
-			writeWarningToLog('Unhandled exception in resources.admin.AdminPostSlugApi get', e)
+			writeWarningToLog('Unhandled exception in resources.admin.AdminPageSlugApi get', e)
+			raise InternalServerError
+
+class AdminProductsApi(Resource):
+	@swagger.doc({
+		'tags': ['Product'],
+		'description': 'Add new product',
+		'parameters': [
+			{
+				'name': 'product',
+				'description': 'A product object',
+				'in': 'body',
+				'type': 'object',
+				'schema': None,
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'Product added',
+			}
+		}
+	})
+	@jwt_required()
+	def post(self):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.isVendor:
+				raise UnauthorizedError
+			vendor = Vendor.objects.get(owner=user)
+			product = Product(**request.get_json().get('product'), author=user)
+			product.nameNgrams = u' '.join(make_ngrams(product.name.lower()))
+			product.namePrefixNgrams = u' '.join(make_ngrams(product.name.lower(), True))
+			product.categoriesPrefixNgrams = list(map(lambda c: u' '.join(make_ngrams(c.lower(), True)), product.categories))
+			product.save()
+			return jsonify(product.serialize())
+		except (FieldDoesNotExist, ValidationError):
+			raise SchemaValidationError
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminProductsApi post', e)
 			raise InternalServerError
