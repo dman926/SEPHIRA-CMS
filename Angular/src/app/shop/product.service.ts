@@ -37,8 +37,12 @@ export class ProductService {
 		}));
 	}
 
-	public getProductCount(): Observable<number> {
-		return this.http.get<number>(this.productBase + 'products/count');
+	public getProductCount(status?: string[]): Observable<number> {
+		if (!status) {
+			status = ['publish', 'draft'];
+		}
+		const params = new HttpParams().append('status', status.toString());
+		return this.http.get<number>(this.productBase + 'products/count', { params });
 	}
 
 }

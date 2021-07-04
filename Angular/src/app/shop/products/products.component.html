@@ -5,7 +5,7 @@
     </div>
 </ng-template>
 <div *ngIf="loaded;else loaderSpinner">
-    <button mat-raised-button *ngFor="let product of shownProducts" [routerLink]="['/admin/products', product.id]">
+    <button mat-raised-button *ngFor="let product of shownProducts" [routerLink]="['/shop' + product.slug]">
         {{ product.id }}
 	</button>
 </div>
