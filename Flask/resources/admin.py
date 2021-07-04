@@ -6,11 +6,12 @@ from flask import jsonify, request
 from flask_restful_swagger_2 import Resource, swagger
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from mongoengine.errors import DoesNotExist
+from mongoengine.errors import DoesNotExist, FieldDoesNotExist, ValidationError
 from resources.errors import UnauthorizedError, InternalServerError, ResourceNotFoundError
 
 from database.models import User, Page, Product, Order
 
+from services.util_service import make_ngrams
 from services.logging_service import writeWarningToLog
 
 class AdminApi(Resource):
@@ -263,7 +264,7 @@ class AdminPagesApi(Resource):
 			user = User.objects.get(id=get_jwt_identity())
 			if not user.admin:
 				raise UnauthorizedError
-			page = Page(**request.get_json()['page'], author=user)
+			page = Page(**request.get_json(), author=user)
 			page.save()
 			return jsonify(page.serialize())
 		except UnauthorizedError:
@@ -423,7 +424,7 @@ class AdminPageSlugApi(Resource):
 
 class AdminProductsApi(Resource):
 	@swagger.doc({
-		'tags': ['Admin', 'Page'],
+		'tags': ['Admin', 'Product'],
 		'description': 'Get all pages according to pagination criteria',
 		'parameters': [
 			{
@@ -469,7 +470,7 @@ class AdminProductsApi(Resource):
 		'description': 'Add new product',
 		'parameters': [
 			{
-				'name': 'product',
+				'name': '',
 				'description': 'A product object',
 				'in': 'body',
 				'type': 'object',
@@ -487,13 +488,10 @@ class AdminProductsApi(Resource):
 	def post(self):
 		try:
 			user = User.objects.get(id=get_jwt_identity())
-			if not user.isVendor:
+			if not user.admin:
 				raise UnauthorizedError
-			vendor = Vendor.objects.get(owner=user)
-			product = Product(**request.get_json().get('product'), author=user)
-			product.nameNgrams = u' '.join(make_ngrams(product.name.lower()))
-			product.namePrefixNgrams = u' '.join(make_ngrams(product.name.lower(), True))
-			product.categoriesPrefixNgrams = list(map(lambda c: u' '.join(make_ngrams(c.lower(), True)), product.categories))
+			product = Product(**request.get_json(), author=user)
+			product.generateNgrams()
 			product.save()
 			return jsonify(product.serialize())
 		except (FieldDoesNotExist, ValidationError):
@@ -732,7 +730,7 @@ class AdminCouponsApi(Resource):
 	def post(self):
 		try:
 			user = User.objects.get(id=get_jwt_identity())
-			if not user.isVendor:
+			if not user.admin:
 				raise UnauthorizedError
 			coupon = Product(**request.get_json(), author=user)
 			coupon.save()

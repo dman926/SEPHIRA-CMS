@@ -13,7 +13,7 @@ from resources.errors import InternalServerError, UnauthorizedError, SchemaValid
 from database.models import Order, User, CartItem, Coupon, Vendor
 
 from app import socketio
-from services.util_servive import calculate_order_amount, calculate_discount_price
+from services.price_servive import calculate_order_amount, calculate_discount_price
 from services.logging_service import writeWarningToLog
 
 import json

@@ -1,4 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { AbstractControl, AsyncValidatorFn, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { AngularEditorConfig } from '@kolkov/angular-editor';
+import { Observable } from 'rxjs';
+import { debounceTime, take, map } from 'rxjs/operators';
 import { Product } from 'src/app/models/product';
 import { AdminService } from '../../admin.service';
 
@@ -22,6 +26,23 @@ export class ProductsComponent implements OnInit {
 	productPageEvent: PageEvent;
 	productCount: number;
 
+	readonly editorConfig: AngularEditorConfig = {
+		editable: true,
+		spellcheck: true,
+		height: 'auto',
+		minHeight: '0',
+		maxHeight: 'auto',
+		width: 'auto',
+		minWidth: '0',
+		translate: 'yes',
+		enableToolbar: true,
+		showToolbar: true,
+		placeholder: 'Enter text here...',
+		sanitize: false,
+		toolbarPosition: 'top',
+	};
+	newProductGroup: FormGroup;
+
 	constructor(private admin: AdminService) {
 		this.loaded = false;
 		this.products = [];
@@ -32,6 +53,13 @@ export class ProductsComponent implements OnInit {
 			previousPageIndex: 0
 		};
 		this.productCount = 0;
+		this.newProductGroup = new FormGroup({
+			title: new FormControl('', [Validators.required]),
+			slug: new FormControl('', [Validators.required], [this.slugValidator()]),
+			excerpt: new FormControl(''),
+			htmlContent: new FormControl(''),
+			price: new FormControl('', [Validators.required])
+		});
 	}
 
 	ngOnInit(): void {
@@ -47,6 +75,24 @@ export class ProductsComponent implements OnInit {
 		return this.products.slice(index * size, index * size + size);
 	}
 
+	newProduct(): void {
+		if (this.newProductGroup.valid) {
+			const product: Product = {
+				title: this.newProductGroup.get('title')!.value,
+				slug: this.newProductGroup.get('slug')!.value,
+				excerpt: this.newProductGroup.get('excerpt')!.value,
+				content: this.newProductGroup.get('htmlContent')!.value,
+				price: this.newProductGroup.get('price')!.value
+			}
+			if (product.slug!.substr(0, 1) !== '/') {
+				product.slug = '/' + product.slug;
+			}
+			this.admin.submitProduct(product).toPromise().then(product => {
+				this.products.unshift(product);
+			})
+		}
+	}
+
 	fetchProducts(event?: PageEvent): void {
 		if (event) {
 			this.productPageEvent = event;
@@ -56,6 +102,20 @@ export class ProductsComponent implements OnInit {
 			this.products = this.products.concat(products);
 			this.loaded = true;
 		}).catch(err => this.loaded = true);
+	}
+
+	get slug(): FormControl {
+		return this.newProductGroup.get('slug')! as FormControl;
+	}
+
+	private slugValidator(): AsyncValidatorFn {
+		return (control: AbstractControl): Observable<ValidationErrors | null> => {
+			return this.admin.checkProductSlugTaken(control.value).pipe(
+				debounceTime(500),
+				take(1),
+				map(res => !res ? { slugTaken: true } : null)
+			);
+		};
 	}
 
 }

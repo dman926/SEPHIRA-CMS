@@ -26,7 +26,7 @@ export class PagesComponent implements OnInit {
 	pagePageEvent: PageEvent;
 	pageCount: number;
 
-	editorConfig: AngularEditorConfig = {
+	readonly editorConfig: AngularEditorConfig = {
 		editable: true,
 		spellcheck: true,
 		height: 'auto',
@@ -108,7 +108,7 @@ export class PagesComponent implements OnInit {
 
 	private slugValidator(): AsyncValidatorFn {
 		return (control: AbstractControl): Observable<ValidationErrors | null> => {
-			return this.admin.checkIfSlugTaken(control.value).pipe(
+			return this.admin.checkPageSlugTaken(control.value).pipe(
 				debounceTime(500),
 				take(1),
 				map(res => !res ? { slugTaken: true } : null)

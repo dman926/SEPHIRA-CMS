@@ -4,8 +4,9 @@ Models to serialize between MongoDB and Python
 
 from .db import db
 from flask_bcrypt import generate_password_hash, check_password_hash
-
 import onetimepass
+
+from services.util_service import make_ngrams
 
 import base64, os, random, string, datetime
 
@@ -16,13 +17,29 @@ class Post(db.Document):
 	content = db.StringField()
 	excerpt = db.StringField()
 	status = db.StringField(choices=['publish', 'draft'])
+	categories = db.ListField(db.StringField())
 	
+	categoriesPrefixNgrams = db.ListField(db.StringField())
+	titleNgrams = db.StringField()
+	titlePrefixNgrams = db.StringField()
+
 	created = db.DateTimeField(default=datetime.datetime.now())
 	modified = db.DateTimeField(default=datetime.datetime.now())
 
 	meta = {
 		'allow_inheritance': True,
+		'indexes': [
+			{
+				'fields': ['$titleNgrams', '$titlePrefixNgrams', '$categoriesPrefixNgrams'],
+				'default_language': 'english',
+				'weights': { 'titleNgrams': 100, 'titlePrefixNgrams': 200, 'categoriesPrefixNgrams': 20 }
+			}
+		]
 	}
+
+	def generateNgrams(self):
+		self.titleNgrams = u' '.join(make_ngrams(self.title.lower()))
+		self.titlePrefixNgrams = u' '.join(make_ngrams(self.title.lower(), True))			
 
 	def serialize(self):
 		return {
@@ -37,6 +54,7 @@ class Post(db.Document):
 			'content': self.content,
 			'excerpt': self.excerpt,
 			'status': self.status,
+			'categories': self.categories,
 			'created': str(self.created),
 			'modified': str(self.modified)
 		}
@@ -106,22 +124,6 @@ class Product(Post):
 
 	totalReviews = db.IntField(default=0)
 	avgReviewScore = db.FloatField(default=0)
-	categories = db.ListField(db.StringField(), max_length=20)
-	
-	categoriesPrefixNgrams = db.ListField(db.StringField(), max_length=20)
-	nameNgrams = db.StringField()
-	namePrefixNgrams = db.StringField()
-
-	# Add a text index for more efficient searching
-	meta = {
-		'indexes': [
-			{
-				'fields': ['$nameNgrams', '$namePrefixNgrams', '$categoriesPrefixNgrams'],
-				'default_language': 'english',
-				'weights': { 'nameNgrams': 100, 'namePrefixNgrams': 200, 'categoriesPrefixNgrams': 20 }
-			}
-		]
-	}
 
 	def addReview(self, score):
 		self.avgReviewScore = ((self.avgReviewScore * self.totalReviews) + int(score)) / (self.totalReviews + 1)
@@ -142,14 +144,14 @@ class Product(Post):
 			'content': self.content,
 			'excerpt': self.excerpt,
 			'status': self.status,
+			'categories': self.categories,
 			'created': str(self.created),
 			'modified': str(self.modified),
 			'sku': self.sku,
 			'img': self.img,
 			'price': float(self.price),
 			'totalReviews': self.totalReviews,
-			'avgReviewScore': round(self.avgReviewScore, 1), # Round to 1 decimal place
-			'categories': self.categories
+			'avgReviewScore': round(self.avgReviewScore, 1) # Round to 1 decimal place
 		}
 
 class Order(db.Document):
