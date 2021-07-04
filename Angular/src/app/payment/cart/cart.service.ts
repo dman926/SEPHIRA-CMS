@@ -76,7 +76,7 @@ export class CartService {
 				}
 			}
 			if (!flag) {
-				cart.push({id: product.id, name: product.name ? product.name : '', price: product.price ? product.price : 0, vendor: product.vendor!.id!, qty: 1});
+				cart.push({id: product.id, name: product.title ? product.title : '', price: product.price ? product.price : 0, qty: 1});
 			}
 			localStorage.setItem('cart', JSON.stringify(cart));
 

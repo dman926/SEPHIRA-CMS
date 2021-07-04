@@ -119,7 +119,7 @@ export class CheckoutComponent implements OnInit {
 
 		this.scriptLoader.load('stripe').then(data => {
 			if (data[0].loaded) {
-				this.stripe = Stripe(environment.stripeKey);
+				this.stripe = Stripe(environment.stripePublicKey);
 				const elements = this.stripe!.elements();
 				const style = {
 					base: {
@@ -142,7 +142,7 @@ export class CheckoutComponent implements OnInit {
 				setTimeout(() => {
 					card.mount('#card-element');
 
-					card.on('change', function (event) {
+					card.on('change', event => {
 						// Disable the Pay button if there are no card details in the Element
 						const button = document.querySelector('button');
 						const cardError = document.querySelector('#card-error');
@@ -208,16 +208,15 @@ export class CheckoutComponent implements OnInit {
 	}
 
 	addCoupon(event: MatChipInputEvent): void {
-		console.log(event.value.trim());
 		for (let i = 0; i < this.coupons.length; i++) {
 			if (this.coupons[i].code === event.value.trim()) {
 				return;
 			}
 		}
-		this.http.post<Coupon[]>(environment.apiServer + 'cart/couponCheck', { code: event.value.trim(), cart: this.products }).toPromise().then(coupons => {
-			coupons.forEach(coupon => {
+		this.http.post<Coupon>(environment.apiServer + 'cart/couponCheck', { code: event.value.trim(), cart: this.products }).toPromise().then(coupon => {
+			if (coupon) {
 				this.coupons.push(coupon);
-			});
+			}
 			event.chipInput!.clear();
 		});
 	}
@@ -238,30 +237,8 @@ export class CheckoutComponent implements OnInit {
 	}
 
 	calcDiscountPrice(): number {
-		let totals: {[key: string]: number} = {};
-		this.products.forEach(product => {
-			if (!(product.vendor in totals)) {
-				totals[product.vendor] = 0;
-			}
-			totals[product.vendor] += product.price * product.qty;
-		});
-		this.coupons.forEach(coupon => {
-			if (coupon.discountType === 'dollar') {
-				totals[coupon.owningVendor!] -= coupon.discount;
-			}
-		});
-		this.coupons.forEach(coupon => {
-			if (coupon.discountType === 'percent') {
-				totals[coupon.owningVendor!] -= totals[coupon.owningVendor!] * coupon.discount / 100;
-			}
-		});
 		let total = 0;
-		Object.keys(totals).forEach(key => {
-			total += totals[key];
-		});
-		if (total < .5) {
-			total = .5;
-		}
+		// TODO
 		return total;
 	}
 

@@ -7,6 +7,8 @@ from .file import UploaderApi, MediaApi, SingleMediaApi
 
 from .page import PagesApi, PageApi
 
+from .cart import CartApi, CouponCheckApi
+
 from .admin import AdminApi, AdminUsersApi, AdminUserApi, AdminUsersCountApi, AdminPagesApi, AdminPageApi, AdminPagesCountApi, AdminPageSlugApi, AdminProductsApi, AdminProductApi, AdminProductCountApi, AdminProductSlugAvailableApi, AdminCouponsApi, AdminCouponApi, AdminCouponCountApi, AdminCouponSlugAvailableApi, AdminOrdersApi, AdminOrderApi, AdminOrderCountApi
 
 import resources.sockets
@@ -27,6 +29,9 @@ def initialize_routes(api, base):
 
 	api.add_resource(PagesApi, base + 'page/pages')
 	api.add_resource(PageApi, base + 'page/page')
+
+	api.add_resource(CartApi, base + 'cart/cart')
+	api.add_resource(CouponCheckApi, base + 'cart/couponCheck')
 
 	api.add_resource(AdminApi, base + 'admin/admin')
 	api.add_resource(AdminUsersApi, base + 'admin/users')

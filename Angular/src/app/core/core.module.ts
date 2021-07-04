@@ -23,6 +23,7 @@ import { SwaggerComponent } from './swagger/swagger.component';
 import { WebsocketService } from './services/websocket.service';
 import { RecaptchaV3Module, RECAPTCHA_V3_SITE_KEY } from 'ng-recaptcha';
 import { MatCardModule } from '@angular/material/card';
+import { CartModule } from '../payment/cart/cart.module';
 
 
 
@@ -39,6 +40,7 @@ import { MatCardModule } from '@angular/material/card';
 		RecaptchaV3Module,
 
 		AuthModule,
+		CartModule,
 
 		MatToolbarModule,
 		MatButtonModule,

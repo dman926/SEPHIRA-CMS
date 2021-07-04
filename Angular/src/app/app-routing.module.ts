@@ -10,6 +10,10 @@ const routes: Routes = [
 		component: SwaggerComponent
 	},
 	{
+		path: 'checkout',
+		loadChildren: () => import('./payment/checkout/checkout.module').then(m => m.CheckoutModule)
+	},
+	{
 		path: 'settings',
 		loadChildren: () => import('./settings/settings.module').then(m => m.SettingsModule),
 		canActivate: [AuthGuard]

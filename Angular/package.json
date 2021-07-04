@@ -23,7 +23,6 @@
     "@angular/router": "^12.1.1",
     "@kolkov/angular-editor": "^1.2.0",
     "@techiediaries/ngx-qrcode": "^9.1.0",
-    "@types/braintree-web": "^3.75.3",
     "@types/stripe-v3": "^3.1.24",
     "ng-recaptcha": "^7.0.1",
     "path": "^0.12.7",

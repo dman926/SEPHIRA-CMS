@@ -1,28 +1,15 @@
 '''
-Stripe routes
+PayPal routes
 '''
 
 from flask import jsonify, request
 from flask_restful_swagger_2 import Resource, swagger
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from stripe.api_resources import payment_method
 
-from mongoengine.errors import DoesNotExist
-from resources.errors import InternalServerError, UnauthorizedError, SchemaValidationError
+from app import paypal_client
+from paypalcheckoutsdk.orders import OrdersCreateRequest
 
-from database.models import Order, User, CartItem, Coupon, Vendor
-
-from app import socketio
-from services.util_servive import calculate_order_amount, calculate_discount_price
-from services.logging_service import writeWarningToLog
-
-import json
-import os
-
-import stripe
-from secret import stripe_vendor_price_id
-
-class StripePaymentApi(Resource):
+class PayPalPaymentApi(Resource):
 	@jwt_required(optional=True)
 	def post(self):
 		try:
@@ -47,7 +34,7 @@ class StripePaymentApi(Resource):
 			order = Order(orderer=get_jwt_identity(), orderStatus='not placed', products=products, coupons=coupons, addresses=body['addresses'])
 			order.save()
 			amount = calculate_discount_price(order.products, order.coupons)
-			amount = round(amount * 100) # Convert for stripe
+			amount = round(amount * 100.0) / 100.0
 			intent = None
 			if get_jwt_identity():
 				user = User.objects.get(id=get_jwt_identity())
@@ -92,7 +79,7 @@ class StripePaymentApi(Resource):
 			writeWarningToLog('Unhandled exception in resources.stripe.CheckoutPaymentApi post: ' + str(e))
 			raise InternalServerError
 
-class StripeApi(Resource):
+class PayPalApi(Resource):
 	@swagger.doc({
 		'tags': ['Stripe'],
 		'description': 'Stripe webhook endpoint. Do not use.',

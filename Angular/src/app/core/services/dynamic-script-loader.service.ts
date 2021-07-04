@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { environment } from 'src/environments/environment';
 
 interface Scripts {
 	name: string;
@@ -7,6 +8,7 @@ interface Scripts {
 
 export const ScriptStore: Scripts[] = [
 	{ name: 'stripe', src: 'https://js.stripe.com/v3/' },
+	{ name: 'paypal', src: 'https://www.paypal.com/sdk/js?client-id=' + environment.paypalClientID + '&currency=USD' }
 ];
 
 @Injectable({
