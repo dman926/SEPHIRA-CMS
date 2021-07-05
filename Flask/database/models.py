@@ -197,9 +197,9 @@ class Review(db.Document):
 		}
 
 class Coupon(Post):
-	code = db.StringField(required=True)
-	discountType = db.StringField(required=True) # Can be 'percent' or 'dollar'
-	discount = db.FloatField(required=True)
+	code = db.StringField()
+	discountType = db.StringField() # Can be 'percent' or 'dollar'
+	discount = db.FloatField()
 	storeWide = db.BooleanField(default=False)
 	applicableProducts = db.ListField(db.ReferenceField('Product'))
 	uses = db.IntField(default=0)
@@ -218,6 +218,7 @@ class Coupon(Post):
 			'content': self.content,
 			'excerpt': self.excerpt,
 			'status': self.status,
+			'categories': self.categories,
 			'created': str(self.created),
 			'modified': str(self.modified),
 			'code': self.code,

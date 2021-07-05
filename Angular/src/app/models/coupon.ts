@@ -1,11 +1,11 @@
 import { Post } from "./post";
 
 export interface Coupon extends Post {
-	code: string;
-	discountType: string;
-	discount: number;
-	owningVendor?: string;
+	code?: string;
+	discountType?: string;
+	discount?: number;
+	storeWide?: boolean;
+	applicableProducts?: string[];
 	uses?: number;
-	adminCoupon?: boolean;
-	created?: Date;
+	maxUses?: number;
 }

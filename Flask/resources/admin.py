@@ -7,7 +7,7 @@ from flask_restful_swagger_2 import Resource, swagger
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from mongoengine.errors import DoesNotExist, FieldDoesNotExist, ValidationError, InvalidQueryError
-from resources.errors import UnauthorizedError, InternalServerError, ResourceNotFoundError
+from resources.errors import UnauthorizedError, InternalServerError, ResourceNotFoundError, SchemaValidationError
 
 from database.models import User, Page, Product, Order, Coupon
 
@@ -739,7 +739,7 @@ class AdminCouponsApi(Resource):
 			user = User.objects.get(id=get_jwt_identity())
 			if not user.admin:
 				raise UnauthorizedError
-			coupon = Product(**request.get_json(), author=user)
+			coupon = Coupon(**request.get_json(), author=user)
 			coupon.save()
 			return jsonify(coupon.serialize())
 		except (FieldDoesNotExist, ValidationError):

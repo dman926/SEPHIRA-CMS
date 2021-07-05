@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { FormControl, AsyncValidatorFn, AbstractControl, ValidationErrors, FormGroup, Validators } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { debounceTime, take, map } from 'rxjs/operators';
 import { Coupon } from 'src/app/models/coupon';
 import { AdminService } from '../../admin.service';
 
@@ -22,6 +25,8 @@ export class CouponsComponent implements OnInit {
 	couponPageEvent: PageEvent;
 	couponCount: number;
 
+	newCouponGroup: FormGroup;
+	
 	constructor(private admin: AdminService) {
 		this.loaded = false;
 		this.coupons = [];
@@ -32,6 +37,10 @@ export class CouponsComponent implements OnInit {
 			previousPageIndex: 0
 		};
 		this.couponCount = 0;
+		this.newCouponGroup = new FormGroup({
+			title: new FormControl('', [Validators.required]),
+			slug: new FormControl('', [Validators.required], [this.slugValidator()])
+		});
 	}
 
 	ngOnInit(): void {
@@ -39,6 +48,21 @@ export class CouponsComponent implements OnInit {
 			this.couponCount = count;
 		});
 		this.fetchCoupons();
+	}
+
+	newCoupon(): void {
+		if (this.newCouponGroup.valid) {
+			const coupon: Coupon = {
+				title: this.newCouponGroup.get('title')!.value,
+				slug: this.newCouponGroup.get('slug')!.value
+			}
+			if (coupon.slug!.substr(0, 1) !== '/') {
+				coupon.slug = '/' + coupon.slug;
+			}
+			this.admin.submitCoupon(coupon).toPromise().then(coupon => {
+				this.coupons.unshift(coupon);
+			})
+		}
 	}
 
 	get shownCoupons(): Coupon[] {
@@ -56,6 +80,20 @@ export class CouponsComponent implements OnInit {
 			this.coupons = this.coupons.concat(coupons);
 			this.loaded = true;
 		}).catch(err => this.loaded = true);
+	}
+
+	get slug(): FormControl {
+		return this.newCouponGroup.get('slug')! as FormControl;
+	}
+
+	private slugValidator(): AsyncValidatorFn {
+		return (control: AbstractControl): Observable<ValidationErrors | null> => {
+			return this.admin.checkPageSlugTaken(control.value).pipe(
+				debounceTime(500),
+				take(1),
+				map(res => !res ? { slugTaken: true } : null)
+			);
+		};
 	}
 
 }

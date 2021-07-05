@@ -288,11 +288,32 @@ export class AdminService {
 		}
 	}
 
+	public editCoupon(coupon: Coupon): Observable<string> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.put<string>(this.adminBase + 'coupon/' + coupon.id, coupon, { headers });
+		} else {
+			return new Observable<string>();
+		}
+	}
+
 	public deleteCoupon(id: string): Observable<string> {
 		const accessToken = localStorage.getItem('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.delete<string>(this.adminBase + 'coupon/' + id, { headers });
+		} else {
+			return new Observable<string>();
+		}
+	}
+
+	public checkCouponSlugTaken(slug: string): Observable<string> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
+			const params = new HttpParams().append('slug', slug)
+			return this.http.get<string>(this.adminBase + 'coupons/slugTaken', { headers, params });
 		} else {
 			return new Observable<string>();
 		}
