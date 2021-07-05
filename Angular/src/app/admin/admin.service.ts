@@ -110,6 +110,26 @@ export class AdminService {
 		}
 	}
 
+	public editPage(page: Page): Observable<string> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.put<string>(this.adminBase + 'page/' + page.id, page, { headers });
+		} else {
+			return new Observable<string>();
+		}
+	}
+
+	public deletePage(id: string): Observable<string> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.delete<string>(this.adminBase + 'page/' + id, { headers });
+		} else {
+			return new Observable<string>();
+		}
+	}
+
 	public checkPageSlugTaken(slug: string): Observable<string> {
 		const accessToken = localStorage.getItem('accessToken');
 		if (accessToken) {

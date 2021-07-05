@@ -12,6 +12,7 @@ export interface Post {
 	content?: string | SafeStyle;
 	excerpt?: string;
 	status?: string;
+	categories?: string[];
 	created?: Date;
 	modified?: Date;
 }

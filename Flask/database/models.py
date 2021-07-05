@@ -161,6 +161,7 @@ class Order(db.Document):
 	addresses = db.DictField()
 	paymentIntentID = db.StringField()
 	createdAt = db.DateTimeField(default=datetime.datetime.now)
+	modified = db.DateTimeField(default=datetime.datetime.now)
 
 	def serialize(self):
 		mappedProducts = list(map(lambda p: p.serialize(), self.products))
@@ -196,7 +197,7 @@ class Review(db.Document):
 		}
 
 class Coupon(Post):
-	code = db.StringField(unique=True, required=True)
+	code = db.StringField(required=True)
 	discountType = db.StringField(required=True) # Can be 'percent' or 'dollar'
 	discount = db.FloatField(required=True)
 	storeWide = db.BooleanField(default=False)

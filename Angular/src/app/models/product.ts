@@ -6,5 +6,4 @@ export interface Product extends Post {
 	price?: number;
 	totalReviews?: number;
 	avgReviewScore?: number;
-	categories?: string[];
 }

@@ -13,6 +13,7 @@ import { MatInputModule } from '@angular/material/input';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MediaBrowserModule } from 'src/app/media-browser/media-browser.module';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSelectModule } from '@angular/material/select';
 
 
 @NgModule({
@@ -33,6 +34,7 @@ import { MatIconModule } from '@angular/material/icon';
 		MatInputModule,
 		MatFormFieldModule,
 		MatIconModule,
+		MatSelectModule,
 
 		AngularEditorModule
 	]

@@ -26,21 +26,6 @@ export class ProductsComponent implements OnInit {
 	productPageEvent: PageEvent;
 	productCount: number;
 
-	readonly editorConfig: AngularEditorConfig = {
-		editable: true,
-		spellcheck: true,
-		height: 'auto',
-		minHeight: '0',
-		maxHeight: 'auto',
-		width: 'auto',
-		minWidth: '0',
-		translate: 'yes',
-		enableToolbar: true,
-		showToolbar: true,
-		placeholder: 'Enter text here...',
-		sanitize: false,
-		toolbarPosition: 'top',
-	};
 	newProductGroup: FormGroup;
 
 	constructor(private admin: AdminService) {
@@ -56,9 +41,6 @@ export class ProductsComponent implements OnInit {
 		this.newProductGroup = new FormGroup({
 			title: new FormControl('', [Validators.required]),
 			slug: new FormControl('', [Validators.required], [this.slugValidator()]),
-			excerpt: new FormControl(''),
-			htmlContent: new FormControl(''),
-			price: new FormControl('', [Validators.required])
 		});
 	}
 
@@ -80,9 +62,6 @@ export class ProductsComponent implements OnInit {
 			const product: Product = {
 				title: this.newProductGroup.get('title')!.value,
 				slug: this.newProductGroup.get('slug')!.value,
-				excerpt: this.newProductGroup.get('excerpt')!.value,
-				content: this.newProductGroup.get('htmlContent')!.value,
-				price: this.newProductGroup.get('price')!.value
 			}
 			if (product.slug!.substr(0, 1) !== '/') {
 				product.slug = '/' + product.slug;

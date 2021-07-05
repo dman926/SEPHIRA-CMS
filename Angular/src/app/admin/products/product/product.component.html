@@ -26,6 +26,15 @@
         <span matPrefix>$</span>
         <input matInput formControlName="price" />
     </mat-form-field>
+    <mat-form-field appearance="fill">
+        <mat-label>Status</mat-label>
+        <mat-select formControlName="status">
+            <mat-option value="publish">Publish</mat-option>
+            <mat-option value="private">Private</mat-option>
+            <mat-option value="draft">Draft</mat-option>
+            <mat-option value="deactivated">Deactivated</mat-option>
+        </mat-select>
+    </mat-form-field>
     <div>
         <p>Categories</p>
         <button mat-icon-button type="button" (click)="addCategory()"><mat-icon>add</mat-icon></button>
@@ -37,6 +46,7 @@
     </div>
     <button type="button" mat-raised-button color="primary" (click)="imgBrowserOpen = !imgBrowserOpen">{{ imgBrowserOpen ? 'Close' : 'Open' }} Browser</button>
     <app-media-browser *ngIf="imgBrowserOpen" (selectedImage)="setImage($event)" [defaultSelected]="product.img ? product.img : ''" [isThumbnail]="true" [multipleSelect]="true"></app-media-browser>
+    <button mat-raised-button color="primary" type="button" routerLink="/admin/products">Back</button>
     <button mat-raised-button color="warn" type="button" (click)="deleteProduct()">Delete</button>
     <button mat-raised-button color="primary" type="submit" [disabled]="productGroup.invalid || saving">Save</button>
     <p *ngIf="saved">Saved</p>

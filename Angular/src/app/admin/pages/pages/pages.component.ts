@@ -26,21 +26,6 @@ export class PagesComponent implements OnInit {
 	pagePageEvent: PageEvent;
 	pageCount: number;
 
-	readonly editorConfig: AngularEditorConfig = {
-		editable: true,
-		spellcheck: true,
-		height: 'auto',
-		minHeight: '0',
-		maxHeight: 'auto',
-		width: 'auto',
-		minWidth: '0',
-		translate: 'yes',
-		enableToolbar: true,
-		showToolbar: true,
-		placeholder: 'Enter text here...',
-		sanitize: false,
-		toolbarPosition: 'top',
-	};
 	newPageGroup: FormGroup;
 
 	constructor(private admin: AdminService) {
@@ -55,9 +40,7 @@ export class PagesComponent implements OnInit {
 		this.pageCount = 0;
 		this.newPageGroup = new FormGroup({
 			title: new FormControl('', [Validators.required]),
-			slug: new FormControl('', [Validators.required], [this.slugValidator()]),
-			excerpt: new FormControl(''),
-			htmlContent: new FormControl('')
+			slug: new FormControl('', [Validators.required], [this.slugValidator()])
 		});
 	}
 
@@ -72,9 +55,7 @@ export class PagesComponent implements OnInit {
 		if (this.newPageGroup.valid) {
 			const page: Page = {
 				title: this.newPageGroup.get('title')!.value,
-				slug: this.newPageGroup.get('slug')!.value,
-				excerpt: this.newPageGroup.get('excerpt')!.value,
-				content: this.newPageGroup.get('htmlContent')!.value
+				slug: this.newPageGroup.get('slug')!.value
 			}
 			if (page.slug!.substr(0, 1) !== '/') {
 				page.slug = '/' + page.slug;

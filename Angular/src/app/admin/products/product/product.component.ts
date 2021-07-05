@@ -62,7 +62,6 @@ export class ProductComponent implements OnInit, OnDestroy {
 		this.subs.push(this.route.params.subscribe(params => {
 			this.adminService.getProduct(params.id).toPromise().then(product => {
 				this.product = product;
-				console.log(product);
 				this.productGroup.patchValue({
 					title: product.title,
 					slug: product.slug,
@@ -94,7 +93,6 @@ export class ProductComponent implements OnInit, OnDestroy {
 				price: this.productGroup.get('price')!.value,
 				categories: this.productGroup.get('categories')!.value,
 			};
-			console.log(product);
 			this.saving = true;
 			this.adminService.editProduct(product).toPromise().then(res => {
 				this.saving = false;

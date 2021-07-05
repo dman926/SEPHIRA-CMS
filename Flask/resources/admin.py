@@ -14,6 +14,8 @@ from database.models import User, Page, Product, Order
 from services.util_service import make_ngrams
 from services.logging_service import writeWarningToLog
 
+import datetime
+
 class AdminApi(Resource):
 	@swagger.doc({
 		'tags': ['Admin'],
@@ -300,7 +302,7 @@ class AdminPageApi(Resource):
 			if not user.admin:
 				raise UnauthorizedError
 			page = Page.objects.get(id=id)
-			return jsonify(page)
+			return jsonify(page.serialize())
 		except UnauthorizedError:
 			raise UnauthorizedError
 		except DoesNotExist:
@@ -333,7 +335,12 @@ class AdminPageApi(Resource):
 			user = User.objects.get(id=get_jwt_identity())
 			if not user.admin:
 				raise UnauthorizedError
-			Page.objects.get(id=id).update(**request.get_json())
+			page = Page.objects.get(id=id)
+			page.update(**request.get_json())
+			page.reload()
+			page.modified = datetime.datetime.now
+			page.generateNgrams()
+			page.save()
 			return 'ok'
 		except UnauthorizedError:
 			raise UnauthorizedError
@@ -560,8 +567,10 @@ class AdminProductApi(Resource):
 				raise UnauthorizedError
 			product = Product.objects.get(id=id)
 			product.update(**request.get_json())
+			product.reload()
 			if product.price and product.price < 0:
 				product.price = 0
+			product.modified = datetime.datetime.now
 			product.generateNgrams()
 			product.save()
 			return 'ok', 200
@@ -796,7 +805,12 @@ class AdminCouponApi(Resource):
 			user = User.objects.get(id=get_jwt_identity())
 			if not user.admin:
 				raise UnauthorizedError
-			Coupon.objects.get(id=id).update(**request.get_json())
+			coupon = Coupon.objects.get(id=id)
+			coupon.update(**request.get_json())
+			coupon.reload()
+			coupon.modified = datetime.datetime.now
+			coupon.generateNgrams()
+			coupon.save()
 			return 'ok', 200
 		except InvalidQueryError:
 			raise SchemaValidationError
@@ -829,7 +843,9 @@ class AdminCouponApi(Resource):
 			user = User.objects.get(id=get_jwt_identity())
 			if not user.admin:
 				raise UnauthorizedError
-			Coupon.objects.get(id=id).delete()
+			coupon = Coupon.objects.get(id=id)
+			coupon.status = 'deactivated'
+			coupon.save()
 			return 'ok', 200
 		except UnauthorizedError:
 			raise UnauthorizedError
@@ -1001,7 +1017,11 @@ class AdminOrderApi(Resource):
 			user = User.objects.get(id=get_jwt_identity())
 			if not user.admin:
 				raise UnauthorizedError
-			Order.objects.get(id=id).update(**request.get_json())
+			order = Order.objects.get(id=id)
+			order.update(**request.get_json())
+			order.reload()
+			order.modified = datetime.datetime.now
+			order.save()
 			return 'ok', 200
 		except InvalidQueryError:
 			raise SchemaValidationError
