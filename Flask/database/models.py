@@ -40,6 +40,7 @@ class Post(db.Document):
 	def generateNgrams(self):
 		self.titleNgrams = u' '.join(make_ngrams(self.title.lower()))
 		self.titlePrefixNgrams = u' '.join(make_ngrams(self.title.lower(), True))			
+		self.categoriesPrefixNgrams = list(map(lambda c: u' '.join(make_ngrams(c.lower(), True)), self.categories))
 
 	def serialize(self):
 		return {
