@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Product } from 'src/app/models/product';
+import { CartService } from 'src/app/payment/cart/cart.service';
 import { ProductService } from '../product.service';
 
 @Component({
@@ -13,8 +14,11 @@ export class ProductComponent implements OnInit {
 	loaded: boolean;
 	product: Product | undefined;
 
-	constructor(private productService: ProductService, private router: Router) {
+	selectedImg: number;
+
+	constructor(private productService: ProductService, private router: Router, public cartService: CartService) {
 		this.loaded = false;
+		this.selectedImg = 0;
 	}
 
 	ngOnInit(): void {

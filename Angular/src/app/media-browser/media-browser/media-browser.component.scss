@@ -1,17 +1,34 @@
-img {
-	width: 12em;
-	height: 12em;
-	object-fit: cover;
-}
-
-.round-button {
-	border-radius: 50%;
-	min-width: unset;
-	width: 3em;
-	height: 3em;
-	padding: 0;
-}
-
-.hidden {
-	display: none;
+section#media-browser-wrapper {
+    img {
+        width: 12em;
+        height: 12em;
+        object-fit: cover;
+    }
+    .round-button {
+        border-radius: 50%;
+        min-width: unset;
+        width: 3em;
+        height: 3em;
+        padding: 0;
+    }
+    .hidden {
+        display: none;
+    }
+    div#browser {
+        display: flex;
+        gap: 1em;
+        div {
+            position: relative;
+            width: 12em;
+            height: 12em;
+            button {
+                position: absolute;
+                top: 0.5em;
+                right: 0;
+                z-index: 999;
+                background-color: white;
+                border-radius: 50%;
+            }
+        }
+    }
 }

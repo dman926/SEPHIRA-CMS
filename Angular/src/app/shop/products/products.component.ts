@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Product } from 'src/app/models/product';
+import { CartService } from 'src/app/payment/cart/cart.service';
 import { ProductService } from '../product.service';
 
 interface PageEvent {
@@ -21,7 +22,7 @@ export class ProductsComponent implements OnInit {
 	productPageEvent: PageEvent;
 	productCount: number;
 
-	constructor(private productService: ProductService) {
+	constructor(private productService: ProductService, public cartService: CartService) {
 		this.loaded = false;
 		this.products = [];
 		this.productPageEvent = {

@@ -18,7 +18,7 @@ export class PageComponent implements OnInit, OnDestroy {
 
 	private subs: Subscription[];
 
-	constructor(private pageService: PageService, private router: Router, private sanitizer: DomSanitizer) {
+	constructor(private pageService: PageService, private router: Router) {
 		this.loaded = false;
 		this.subs = [];
 	}

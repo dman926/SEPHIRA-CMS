@@ -5,7 +5,25 @@
 </ng-template>
 <div *ngIf="loaded;else loaderSpinner">
     <div *ngIf="product;else notFound">
-        <p>{{ product.title }}</p>
+        <div id="product-head">
+            <div id="img-gallery">
+                <img id="product-img" [src]="product.img && product.img.length > 0 ? product.img[selectedImg] : '../../assets/img/placeholder.png'" />
+                <!-- Attribution for placeholder.png: Missing-image-232x150.png by DJKA | CC BY-SA 4.0 -->
+                <div id="img-subgallery" *ngIf="product.img">
+                    <img *ngFor="let img of product.img;index as i" [ngClass]="{selected: selectedImg == i}" [src]="img" (click)="selectedImg = i" />
+                </div>
+            </div>
+            <div>
+                <h2>{{ product.title }}</h2>
+                <p>{{ product.price | currency }}</p>
+                <button mat-raised-button color="primary" (click)="cartService.addToCart(product)">Add to cart</button>
+            </div>
+        </div>
+        <mat-tab-group mat-align-tabs="center">
+            <mat-tab label="Description">
+                <div [innerHTML]="product.content"></div>
+            </mat-tab>
+        </mat-tab-group>
     </div>
     <ng-template #notFound>
         <p>404</p>

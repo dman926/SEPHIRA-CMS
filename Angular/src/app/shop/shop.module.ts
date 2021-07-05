@@ -7,6 +7,8 @@ import { ProductComponent } from './product/product.component';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatTabsModule } from '@angular/material/tabs';
 
 
 @NgModule({
@@ -20,7 +22,9 @@ import { MatButtonModule } from '@angular/material/button';
 
 	MatPaginatorModule,
 	MatProgressSpinnerModule,
-	MatButtonModule
+	MatButtonModule,
+	MatCardModule,
+	MatTabsModule
   ]
 })
 export class ShopModule { }

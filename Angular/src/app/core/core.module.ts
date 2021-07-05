@@ -13,7 +13,6 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 
-import { LandingComponent } from './landing/landing.component';
 import { AuthModule } from '../auth/auth.module';
 import { FileService } from './services/file.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -28,7 +27,7 @@ import { CartModule } from '../payment/cart/cart.module';
 
 
 @NgModule({
-	declarations: [NavComponent, LandingComponent, SwaggerComponent],
+	declarations: [NavComponent, SwaggerComponent],
 	imports: [
 		CommonModule,
 		RouterModule,
