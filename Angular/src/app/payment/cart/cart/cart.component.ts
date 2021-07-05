@@ -36,7 +36,6 @@ export class CartComponent implements OnInit, OnDestroy {
 	ngOnInit(): void {
 		this.subs.push(this.cartService.cart$.subscribe(cart => {
 			this.cartSize = 0;
-			console.log(cart);
 			if (cart) {
 				for (let i = 0; i < cart.length; i++) {
 					this.cartSize += cart[i].qty;

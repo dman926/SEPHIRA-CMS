@@ -23,7 +23,6 @@ export class ProductComponent implements OnInit {
 
 	ngOnInit(): void {
 		this.productService.getProduct(this.router.url.substr(5)).toPromise().then(product => {
-			console.log(product);
 			this.product = product;
 			this.loaded = true;
 		}).catch(err => this.loaded = true);
