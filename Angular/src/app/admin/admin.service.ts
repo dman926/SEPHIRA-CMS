@@ -155,6 +155,16 @@ export class AdminService {
 		}
 	}
 
+	public editProduct(product: Product): Observable<string> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.put<string>(this.adminBase + 'product/' + product.id, product, { headers });
+		} else {
+			return new Observable<string>();
+		}
+	}
+
 	public getProductCount(status?: string[]): Observable<number> {
 		const accessToken = localStorage.getItem('accessToken');
 		if (accessToken) {

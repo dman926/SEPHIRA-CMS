@@ -11,6 +11,8 @@ import { AngularEditorModule } from '@kolkov/angular-editor';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ReactiveFormsModule } from '@angular/forms';
+import { MediaBrowserModule } from 'src/app/media-browser/media-browser.module';
+import { MatIconModule } from '@angular/material/icon';
 
 
 @NgModule({
@@ -23,11 +25,14 @@ import { ReactiveFormsModule } from '@angular/forms';
 		ProductsRoutingModule,
 		ReactiveFormsModule,
 
+		MediaBrowserModule,
+
 		MatPaginatorModule,
 		MatButtonModule,
 		MatProgressSpinnerModule,
 		MatInputModule,
 		MatFormFieldModule,
+		MatIconModule,
 
 		AngularEditorModule
 	]

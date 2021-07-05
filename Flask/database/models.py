@@ -16,7 +16,7 @@ class Post(db.Document):
 	slug = db.StringField(unique_with='_cls')
 	content = db.StringField()
 	excerpt = db.StringField()
-	status = db.StringField(choices=['publish', 'draft'])
+	status = db.StringField(choices=['publish', 'draft', 'private', 'deactivated'], default='draft')
 	categories = db.ListField(db.StringField())
 	
 	categoriesPrefixNgrams = db.ListField(db.StringField())

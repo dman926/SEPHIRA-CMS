@@ -6,7 +6,7 @@ from flask import jsonify, request
 from flask_restful_swagger_2 import Resource, swagger
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from mongoengine.errors import DoesNotExist, FieldDoesNotExist, ValidationError
+from mongoengine.errors import DoesNotExist, FieldDoesNotExist, ValidationError, InvalidQueryError
 from resources.errors import UnauthorizedError, InternalServerError, ResourceNotFoundError
 
 from database.models import User, Page, Product, Order
@@ -562,9 +562,7 @@ class AdminProductApi(Resource):
 			product.update(**request.get_json())
 			if product.price and product.price < 0:
 				product.price = 0
-			product.nameNgrams = u' '.join(make_ngrams(product.name.lower()))
-			product.namePrefixNgrams = u' '.join(make_ngrams(product.name.lower(), True))
-			product.categoriesPrefixNgrams = list(map(lambda c: u' '.join(make_ngrams(c.lower(), True)), product.categories))
+			product.generateNgrams()
 			product.save()
 			return 'ok', 200
 		except InvalidQueryError:
@@ -599,7 +597,7 @@ class AdminProductApi(Resource):
 			if not user.admin:
 				raise UnauthorizedError
 			product = Product.objects.get(id=id)
-			product.active = False
+			product.status = 'deactivated'
 			product.save()
 			return 'ok', 200
 		except UnauthorizedError:

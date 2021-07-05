@@ -1,1 +1,43 @@
-<p>product works!</p>
+<ng-template #loaderSpinner>
+    <div id="loader-spinner">
+        <mat-spinner></mat-spinner>
+    </div>
+</ng-template>
+<form *ngIf="product;else loaderSpinner" [formGroup]="productGroup" (ngSubmit)="editProduct()">
+    <mat-form-field appearance="fill">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="title" required />
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+        <mat-label>Slug</mat-label>
+        <input matInput formControlName="slug" required />
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+        <mat-label>Excerpt</mat-label>
+        <textarea matInput formControlName="excerpt" required></textarea>
+    </mat-form-field>
+    <angular-editor formControlName="content" [config]="editorConfig"></angular-editor>
+    <mat-form-field appearance="fill">
+        <mat-label>SKU</mat-label>
+        <input matInput formControlName="sku" />
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+        <mat-label>Price</mat-label>
+        <span matPrefix>$</span>
+        <input matInput formControlName="price" />
+    </mat-form-field>
+    <div>
+        <p>Categories</p>
+        <button mat-icon-button type="button" (click)="addCategory()"><mat-icon>add</mat-icon></button>
+        <button mat-icon-button type="button" (click)="removeCategory()"><mat-icon>delete</mat-icon></button>
+        <mat-form-field *ngFor="let categoryControl of categoriesArray.controls;index as i" appearance="fill">
+            <mat-label>Category {{ i + 1 }}</mat-label>
+            <input matInput [formControl]="$any(categoryControl)" required />
+        </mat-form-field>
+    </div>
+    <button type="button" mat-raised-button color="primary" (click)="imgBrowserOpen = !imgBrowserOpen">{{ imgBrowserOpen ? 'Close' : 'Open' }} Browser</button>
+    <app-media-browser *ngIf="imgBrowserOpen" (selectedImage)="setImage($event)" [defaultSelected]="product.img ? product.img : ''" [isThumbnail]="true" [multipleSelect]="true"></app-media-browser>
+    <button mat-raised-button color="warn" type="button" (click)="deleteProduct()">Delete</button>
+    <button mat-raised-button color="primary" type="submit" [disabled]="productGroup.invalid || saving">Save</button>
+    <p *ngIf="saved">Saved</p>
+</form>
