@@ -1069,15 +1069,6 @@ class AdminOrderCountApi(Resource):
 	@swagger.doc({
 		'tags': ['Admin', 'Order', 'Counter'],
 		'description': 'Get the number of orders',
-		'parameters': [
-			{
-				'name': 'status',
-				'description': 'A list of possible statuses',
-				'in': 'query',
-				'type': 'string',
-				'required': True
-			}
-		],
 		'responses': {
 			'200': {
 				'description': 'The number of orders',
@@ -1090,7 +1081,7 @@ class AdminOrderCountApi(Resource):
 			user = User.objects.get(id=get_jwt_identity())
 			if not user.admin:
 				raise UnauthorizedError
-			return Order.objects(status__in=list(request.args['status'])).count()
+			return Order.objects().count()
 		except UnauthorizedError:
 			return UnauthorizedError
 		except Exception as e:
