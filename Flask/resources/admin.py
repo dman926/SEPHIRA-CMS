@@ -9,7 +9,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from mongoengine.errors import DoesNotExist, FieldDoesNotExist, ValidationError, InvalidQueryError
 from resources.errors import UnauthorizedError, InternalServerError, ResourceNotFoundError
 
-from database.models import User, Page, Product, Order
+from database.models import User, Page, Product, Order, Coupon
 
 from services.util_service import make_ngrams
 from services.logging_service import writeWarningToLog
@@ -769,6 +769,7 @@ class AdminCouponApi(Resource):
 			}
 		}
 	})
+	@jwt_required()
 	def get(self, id):
 		try:
 			user = User.objects.get(id=get_jwt_identity())
@@ -872,6 +873,7 @@ class AdminCouponCountApi(Resource):
 			}
 		}
 	})
+	@jwt_required()
 	def get(self):
 		try:
 			user = User.objects.get(id=get_jwt_identity())
@@ -981,6 +983,7 @@ class AdminOrderApi(Resource):
 			}
 		}
 	})
+	@jwt_required()
 	def get(self, id):
 		try:
 			user = User.objects.get(id=get_jwt_identity())
@@ -1081,6 +1084,7 @@ class AdminOrderCountApi(Resource):
 			}
 		}
 	})
+	@jwt_required()
 	def get(self):
 		try:
 			user = User.objects.get(id=get_jwt_identity())
