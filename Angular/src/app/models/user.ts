@@ -1,5 +1,3 @@
-import { Card } from './card';
-
 export interface User {
 	id?: string;
 	email?: string;

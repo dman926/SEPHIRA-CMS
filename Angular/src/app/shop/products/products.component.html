@@ -6,6 +6,6 @@
 </ng-template>
 <div *ngIf="loaded;else loaderSpinner">
     <button mat-raised-button *ngFor="let product of shownProducts" [routerLink]="['/shop' + product.slug]">
-        {{ product.id }}
+        {{ product.title }}
 	</button>
 </div>

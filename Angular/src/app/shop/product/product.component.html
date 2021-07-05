@@ -1,1 +1,13 @@
-<p>product works!</p>
+<ng-template #loaderSpinner>
+    <div id="loader-spinner">
+        <mat-spinner></mat-spinner>
+    </div>
+</ng-template>
+<div *ngIf="loaded;else loaderSpinner">
+    <div *ngIf="product;else notFound">
+        <p>{{ product.title }}</p>
+    </div>
+    <ng-template #notFound>
+        <p>404</p>
+    </ng-template>
+</div>
