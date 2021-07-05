@@ -34,34 +34,28 @@ export class CartComponent implements OnInit, OnDestroy {
 	}
 
 	ngOnInit(): void {
-		if (this.appearance === 'button') {
-			this.subs.push(this.cartService.cart$.subscribe(cart => {
-				this.cartSize = 0;
-				if (cart) {
-					for (let i = 0; i < cart.length; i++) {
-						this.cartSize += cart[i].qty;
-					}
-					if (this.firstPass) {
-						this.firstPass = false;
-						const builtLocalStorage: CartItem[] = [];
-						this.cartService.getCart().toPromise().then(products => {
-							if (products) {
-								this.products = products;
-								localStorage.setItem('cart', JSON.stringify(products));
-							}
-						}).catch(err => localStorage.setItem('cart', '[]'));
-					} else {
-						this.products = cart;
-					}
-				} else {
-					this.products = [];
+		this.subs.push(this.cartService.cart$.subscribe(cart => {
+			this.cartSize = 0;
+			console.log(cart);
+			if (cart) {
+				for (let i = 0; i < cart.length; i++) {
+					this.cartSize += cart[i].qty;
 				}
-			}));
-		} else {
-			this.subs.push(this.cartService.cart$.subscribe(cart => {
-				this.products = cart;
-			}));
-		}
+				if (this.firstPass) {
+					this.firstPass = false;
+					this.cartService.getCart().toPromise().then(products => {
+						if (products) {
+							this.products = products;
+							localStorage.setItem('cart', JSON.stringify(products));
+						}
+					}).catch(err => localStorage.setItem('cart', '[]'));
+				} else {
+					this.products = cart;
+				}
+			} else {
+				this.products = [];
+			}
+		}));
 	}
 
 	ngOnDestroy(): void {
