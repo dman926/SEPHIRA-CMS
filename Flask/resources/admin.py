@@ -464,7 +464,7 @@ class AdminProductsApi(Resource):
 			if not user.admin:
 				raise UnauthorizedError
 			page = int(request.args.get('page', 0))
-			size = int(request.args.get('size', User.objects.count()))
+			size = int(request.args.get('size', Product.objects.count()))
 			products = Product.objects[page * size : page * size + size]
 			return jsonify(list(map(lambda p: p.serialize(), products)))
 		except UnauthorizedError:
@@ -619,15 +619,6 @@ class AdminProductCountApi(Resource):
 	@swagger.doc({
 		'tags': ['Admin', 'Product', 'Counter'],
 		'description': 'Get the number of products',
-		'parameters': [
-			{
-				'name': 'status',
-				'description': 'A list of possible statuses',
-				'in': 'query',
-				'type': 'string',
-				'required': False
-			}
-		],
 		'responses': {
 			'200': {
 				'description': 'The number of products',
@@ -640,7 +631,7 @@ class AdminProductCountApi(Resource):
 			user = User.objects.get(id=get_jwt_identity())
 			if not user.admin:
 				raise UnauthorizedError
-			return Product.objects(status__in=list(request.args['status'])).count()
+			return Product.objects.count()
 		except UnauthorizedError:
 			return UnauthorizedError
 		except Exception as e:
@@ -716,7 +707,7 @@ class AdminCouponsApi(Resource):
 			if not user.admin:
 				raise UnauthorizedError
 			page = int(request.args.get('page', 0))
-			size = int(request.args.get('size', User.objects.count()))
+			size = int(request.args.get('size', Coupon.objects.count()))
 			coupons = Coupon.objects[page * size : page * size + size]
 			return jsonify(list(map(lambda c: c.serialize(), coupons)))
 		except UnauthorizedError:
@@ -807,7 +798,10 @@ class AdminCouponApi(Resource):
 			if not user.admin:
 				raise UnauthorizedError
 			coupon = Coupon.objects.get(id=id)
-			coupon.update(**request.get_json())
+			body = request.get_json()
+			if body.get('applicableProducts'):
+				body['applicableProducts'] = list(map(lambda p: Product.objects.get(id=p), list(body['applicableProducts'])))
+			coupon.update(**body)
 			coupon.reload()
 			coupon.modified = datetime.datetime.now
 			coupon.generateNgrams()
@@ -858,15 +852,6 @@ class AdminCouponCountApi(Resource):
 	@swagger.doc({
 		'tags': ['Admin', 'Coupon', 'Counter'],
 		'description': 'Get the number of coupons',
-		'parameters': [
-			{
-				'name': 'status',
-				'description': 'A list of possible statuses',
-				'in': 'query',
-				'type': 'string',
-				'required': True
-			}
-		],
 		'responses': {
 			'200': {
 				'description': 'The number of coupons',
@@ -879,7 +864,7 @@ class AdminCouponCountApi(Resource):
 			user = User.objects.get(id=get_jwt_identity())
 			if not user.admin:
 				raise UnauthorizedError
-			return Coupon.objects(status__in=list(request.args['status'])).count()
+			return Coupon.objects.count()
 		except UnauthorizedError:
 			return UnauthorizedError
 		except Exception as e:
@@ -955,7 +940,7 @@ class AdminOrdersApi(Resource):
 			if not user.admin:
 				raise UnauthorizedError
 			page = int(request.args.get('page', 0))
-			size = int(request.args.get('size', User.objects.count()))
+			size = int(request.args.get('size', Order.objects.count()))
 			orders = Order.objects[page * size : page * size + size]
 			return jsonify(list(map(lambda o: o.serialize(), orders)))
 		except UnauthorizedError:
@@ -1081,7 +1066,7 @@ class AdminOrderCountApi(Resource):
 			user = User.objects.get(id=get_jwt_identity())
 			if not user.admin:
 				raise UnauthorizedError
-			return Order.objects().count()
+			return Order.objects.count()
 		except UnauthorizedError:
 			return UnauthorizedError
 		except Exception as e:

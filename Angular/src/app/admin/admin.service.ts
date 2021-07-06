@@ -86,15 +86,11 @@ export class AdminService {
 		}
 	}
 
-	public getPageCount(status?: string[]): Observable<number> {
+	public getPageCount(): Observable<number> {
 		const accessToken = localStorage.getItem('accessToken');
 		if (accessToken) {
-			if (!status) {
-				status = ['publish', 'draft'];
-			}
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
-			const params = new HttpParams().append('status', status.toString());
-			return this.http.get<number>(this.adminBase + 'pages/count', { headers, params });
+			return this.http.get<number>(this.adminBase + 'pages/count', { headers });
 		} else {
 			return new Observable<number>();
 		}
@@ -185,15 +181,11 @@ export class AdminService {
 		}
 	}
 
-	public getProductCount(status?: string[]): Observable<number> {
+	public getProductCount(): Observable<number> {
 		const accessToken = localStorage.getItem('accessToken');
 		if (accessToken) {
-			if (!status) {
-				status = ['publish', 'draft'];
-			}
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
-			const params = new HttpParams().append('status', status.toString());
-			return this.http.get<number>(this.adminBase + 'products/count', { headers, params });
+			return this.http.get<number>(this.adminBase + 'products/count', { headers });
 		} else {
 			return new Observable<number>();
 		}
@@ -264,15 +256,11 @@ export class AdminService {
 		}
 	}
 
-	public getCouponCount(status?: string[]): Observable<number> {
+	public getCouponCount(): Observable<number> {
 		const accessToken = localStorage.getItem('accessToken');
 		if (accessToken) {
-			if (!status) {
-				status = ['publish', 'draft'];
-			}
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
-			const params = new HttpParams().append('status', status.toString());
-			return this.http.get<number>(this.adminBase + 'coupons/count', { headers, params });
+			return this.http.get<number>(this.adminBase + 'coupons/count', { headers });
 		} else {
 			return new Observable<number>();
 		}

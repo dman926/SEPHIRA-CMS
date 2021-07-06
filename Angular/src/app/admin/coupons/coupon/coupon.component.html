@@ -36,7 +36,19 @@
         </mat-form-field>
     </div>
     <mat-checkbox formControlName="storeWide" color="primary">Store Wide?</mat-checkbox>
-    <!-- TODO: applicable products -->
+    <div *ngIf="!storeWide">
+        <mat-paginator [length]="productCount" [pageSize]="productPageEvent.pageSize" (page)="fetchProducts($event)"></mat-paginator>
+        <ng-template #loaderSpinner>
+            <div id="loader-spinner">
+                <mat-spinner></mat-spinner>
+            </div>
+        </ng-template>
+        <div *ngIf="loaded;else loaderSpinner">
+            <div *ngFor="let product of products">
+                <mat-checkbox (change)="productSelectedChange($event, product)" color="primary" [checked]="applicableProducts.indexOf(product.id!) !== -1">{{ product.title }} ({{ product.slug }}) ({{ product.status | titlecase }})</mat-checkbox>
+            </div>
+        </div>
+    </div>
     <button mat-raised-button color="primary" type="button" routerLink="/admin/coupons">Back</button>
     <button mat-raised-button color="warn" type="button" (click)="deleteCoupon()">Delete</button>
     <button mat-raised-button color="primary" type="submit" [disabled]="couponGroup.invalid || saving">Save</button>
