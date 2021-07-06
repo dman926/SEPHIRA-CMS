@@ -17,8 +17,6 @@ from paypalcheckoutsdk.orders import OrdersCreateRequest, OrdersCaptureRequest, 
 from services.logging_service import writeWarningToLog
 from services.price_service import calculate_order_amount, calculate_discount_price
 
-from pprint import pprint
-
 class PayPalCreateTransactionApi(Resource):
 	@jwt_required(optional=True)
 	def post(self):
