@@ -109,7 +109,6 @@ class StripeApi(Resource):
 			return '', 400
 
 		if event.type == 'payment_intent.succeeded':
-			# TODO: attach card to customer object
 			payment_intent = event.data.object # contains a stripe.PaymentIntent
 			order = Order(id=payment_intent['metadata']['Order object'])
 			order.orderStatus = 'paid'

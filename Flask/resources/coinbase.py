@@ -69,11 +69,9 @@ class CoinbaseApi(Resource):
 		except (WebhookInvalidPayload, SignatureVerificationError) as e:
 			return str(e), 400
 		
-		print('Received event: id={id}, type={type}'.format(id=event.id, type=event.type))
-
 		if event.type == 'charge:pending':
 			order = Order(id=event.data.metadata.order)
-			order.orderStatus = 'pending'
+			order.orderStatus = 'placed'
 			order.save()
 		elif event.type == 'charge:confirmed':
 			order = Order(id=event.data.metadata.order)
