@@ -35,8 +35,26 @@
             <input matInput [formControl]="$any(categoryControl)" required />
         </mat-form-field>
     </div>
+    <mat-form-field appearance="fill">
+        <mat-label>Code</mat-label>
+        <input matInput formControlName="code" required />
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+        <mat-label>Discount</mat-label>
+        <input matInput type="number" formControlName="discount" />
+        <span *ngIf="discountType === 'percent'" matSuffix>%</span>
+        <span *ngIf="discountType === 'dollar'" matPrefix>$</span>
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+        <mat-label>Discount Type</mat-label>
+        <mat-select formControlName="discountType">
+            <mat-option value="dollar">Dollar</mat-option>
+            <mat-option value="percent">Percent</mat-option>
+        </mat-select>
+    </mat-form-field>
     <mat-checkbox formControlName="storeWide" color="primary">Store Wide?</mat-checkbox>
     <div *ngIf="!storeWide">
+        <p>Applicable Products</p>
         <mat-paginator [length]="productCount" [pageSize]="productPageEvent.pageSize" (page)="fetchProducts($event)"></mat-paginator>
         <ng-template #loaderSpinner>
             <div id="loader-spinner">

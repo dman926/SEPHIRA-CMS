@@ -44,6 +44,14 @@ class OrdersApi(Resource):
 				'type': 'object',
 				'schema': None,
 				'required': True
+			},
+			{
+				'name': 'coupons',
+				'description': 'A list of coupons',
+				'in': 'body',
+				'type': 'object',
+				'schema': None,
+				'required': True
 			}
 		],
 		'responses': {
@@ -56,21 +64,11 @@ class OrdersApi(Resource):
 	def post(self):
 		try:
 			body = request.get_json()
-			items = body.get('products')
-			couponItems = body.get('coupons')
-			print(couponItems)
-			products = []
-			for item in items:
-				product = Product.objects.get(id=item['id'])
-				products.append(CartItem(product=product, qty=item['qty']))
-			coupons = []
-			for item in couponItems:
-				coupon = Coupon.objects.get(id=item['id'])
-				coupons.append(coupon)
+			products = list(map(lambda p: CartItem(product=p['id'], qty=p['qty']), body['products']))
+			coupons = list(map(lambda c: Coupon.objects.get(id=c['id']), body['coupons']))
 			order = Order(orderer=get_jwt_identity(), orderStatus='not placed', addresses=body['addresses'], products=products, coupons=coupons)
 			order.save()
-			id = order.id
-			return {'id': str(id)}, 200
+			return str(order.id), 200
 		except (FieldDoesNotExist, ValidationError):
 			raise SchemaValidationError
 		except UnauthorizedError:

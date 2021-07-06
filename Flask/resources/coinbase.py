@@ -12,12 +12,12 @@ from coinbase_commerce.webhook import Webhook
 from database.models import Order
 
 from app import socketio
-from services.price_service import calculate_order_amount
+from services.price_service import calculate_discount_price
 
 import json
 
 from app import ccClient
-from secret import coinbase_commerce_shared_secret, coinbase_commerce_redirect_url
+from secret import coinbase_commerce_shared_secret
 
 class CoinbaseCheckoutApi(Resource):
 	@swagger.doc({
@@ -31,26 +31,24 @@ class CoinbaseCheckoutApi(Resource):
 	})
 	@jwt_required(optional=True)
 	def post(self):
-		data = request.get_json()
-		if not data:
-			return ''
-		order = Order.objects.get(id=data.get('order'))
-		amount = calculate_order_amount(order.products)
+		body = request.get_json()
+		order = Order.objects.get(id=body['orderID'], orderer=get_jwt_identity())
+		amount = calculate_discount_price(order.products, order.coupons)
 		charge_info = {
-			'name': 'Test Charge',
-			'description': 'Test Description',
+			'name': 'Test Charge', # TODO: Change this
+			'description': 'Test Description', # TODO: Change this
 			'local_price': {
 				'amount': amount,
 				'currency': 'USD'
 			},
 			'pricing_type': 'fixed_price',
-			'redirect_url': coinbase_commerce_redirect_url + str(order.pk),
+			'redirect_url': body['location'] + '/checkout/placed?id=' + str(order.id),
 			'metadata': {
-				'order': str(order.pk)
+				'order': str(order.id)
 			}
 		}
 		charge = ccClient.charge.create(**charge_info)
-		return jsonify(charge)
+		return jsonify({ 'expires_at': charge['expires_at'], 'hosted_url': charge['hosted_url'] })
 
 class CoinbaseApi(Resource):
 	@swagger.doc({
@@ -79,7 +77,7 @@ class CoinbaseApi(Resource):
 			order.save()
 		elif event.type == 'charge:confirmed':
 			order = Order(id=event.data.metadata.order)
-			order.orderStatus = 'confirmed'
+			order.orderStatus = 'paid'
 			order.save()
 		elif event.type == 'charge:failed':
 			order = Order(id=event.data.metadata.order)

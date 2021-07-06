@@ -26,8 +26,9 @@ class StripeCheckoutApi(Resource):
 	def post(self):
 		try:
 			body = request.get_json()
+			order = Order.objects.get(id=body['orderID'], orderer=get_jwt_identity())
 			paymentMethodID = body['paymentMethodID']
-			shipping = body['addresses']['shipping']
+			shipping = order.addresses['shipping']
 			shipping = {
 				'address': {
 					'line1': shipping['street1'],
@@ -41,10 +42,6 @@ class StripeCheckoutApi(Resource):
 				'phone': shipping['phoneNumber']
 			}
 			email = body['email']
-			products = list(map(lambda p: CartItem(product=p['id'], qty=p['qty']), body['products']))
-			coupons = list(map(lambda c: Coupon.objects.get(id=c['id']), body['coupons']))
-			order = Order(orderer=get_jwt_identity(), orderStatus='not placed', products=products, coupons=coupons, addresses=body['addresses'])
-			order.save()
 			amount = calculate_discount_price(order.products, order.coupons)
 			amount = round(amount * 100) # Convert for stripe
 			intent = None
@@ -81,6 +78,7 @@ class StripeCheckoutApi(Resource):
 					metadata={order: str(order.pk)}
 				)
 			order.paymentIntentID = intent['id']
+			order.orderStatus = 'placed'
 			order.save()
 			return str(order.id)
 		except DoesNotExist:
@@ -129,11 +127,6 @@ class StripeApi(Resource):
 		elif event.type == 'invoice.payment_failed':
 			# TODO: create order with details
 			pass
-		elif event.type == 'customer.subscription.deleted':
-			# Vendor subscription has ended and isn't renewed.
-			# Delete from User document
-			User.objects.get(stripeSubscriptionID=event.data['id'])
-			user.update(unset__stripeSubscriptionID)
 		else:
 			writeWarningToLog('Unhandled Stripe webhook event type {}'.format(event.type))
 			print('Unhandled Strip webhook event type {}'.format(event.type))

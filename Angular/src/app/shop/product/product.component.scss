@@ -21,6 +21,7 @@ div#product-head {
                 height: 3em;
                 object-fit: cover;
                 object-position: center;
+                border: 2px solid transparent;
             }
             img.selected {
                 border: 2px solid blue;

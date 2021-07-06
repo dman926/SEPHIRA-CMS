@@ -8,6 +8,7 @@ from .file import UploaderApi, MediaApi, SingleMediaApi
 from .page import PagesApi, PageApi
 from .product import ProductsApi, ProductApi, ProductCountApi
 
+from .order import OrdersApi, OrderApi
 from .cart import CartApi, CouponCheckApi
 
 from .stripe import StripeCheckoutApi, StripeApi
@@ -38,6 +39,8 @@ def initialize_routes(api, base):
 	api.add_resource(ProductApi, base + 'product/product')
 	api.add_resource(ProductCountApi, base + 'product/products/count')
 
+	api.add_resource(OrdersApi, base + 'order/orders')
+	api.add_resource(OrderApi, base + 'order/order/<id>')
 	api.add_resource(CartApi, base + 'cart/cart')
 	api.add_resource(CouponCheckApi, base + 'cart/couponCheck')
 

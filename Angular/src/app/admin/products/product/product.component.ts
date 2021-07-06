@@ -72,6 +72,9 @@ export class ProductComponent implements OnInit, OnDestroy {
 					price: product.price,
 					categories: product.categories!.map(cat => new FormControl(cat, [Validators.required]))
 				});
+				if (product.img) {
+					this.images = product.img;
+				}
 			}).catch(err => this.router.navigate(['/admin/products']));
 		}));
 	}
@@ -92,6 +95,7 @@ export class ProductComponent implements OnInit, OnDestroy {
 				sku: this.productGroup.get('sku')!.value,
 				price: this.productGroup.get('price')!.value,
 				categories: this.productGroup.get('categories')!.value,
+				img: this.images
 			};
 			this.saving = true;
 			this.adminService.editProduct(product).toPromise().then(res => {

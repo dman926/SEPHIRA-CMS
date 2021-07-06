@@ -24,8 +24,9 @@ class PayPalCreateTransactionApi(Resource):
 	def post(self):
 		try:
 			body = request.get_json()
+			order = Order.objects.get(id=body['orderID'], orderer=get_jwt_identity())
 			location = body['location']
-			shipping = body['addresses']['shipping']
+			shipping = order.addresses['shipping']
 			shipping = {
 				"method": "United States Postal Service",
 				"address": {
@@ -40,10 +41,6 @@ class PayPalCreateTransactionApi(Resource):
 					"country_code": shipping['country']
 				}
 			}
-			products = list(map(lambda p: CartItem(product=p['id'], qty=p['qty']), body['products']))
-			coupons = list(map(lambda c: Coupon.objects.get(id=c['id']), body['coupons']))
-			order = Order(orderer=get_jwt_identity(), orderStatus='not placed', products=products, coupons=coupons, addresses=body['addresses'])
-			order.save()
 			total = calculate_discount_price(order.products, order.coupons)
 			discount = calculate_order_amount(order.products) - total
 			amount = total - discount
@@ -54,8 +51,8 @@ class PayPalCreateTransactionApi(Resource):
 					"landing_page": 'BILLING',
 					"shipping_preference": "SET_PROVIDED_ADDRESS",
 					"user_action": "PAY_NOW",
-					"return_url": location + "/checkout/placed?id=" + str(order.id), # TODO: Change this
-					"cancel_url": location + "/checkout", # TODO: Change this
+					"return_url": location + "/checkout/placed?id=" + str(order.id),
+					"cancel_url": location + "/checkout",
 				},
 				"purchase_units": [
 					{
@@ -125,6 +122,7 @@ class PayPalCaptureTransactionApi(Resource):
 		orderResponse = paypal_client.execute(OrdersGetRequest(orderID))
 		order = Order.objects.get(id=orderResponse.result.purchase_units[0].custom_id)
 		order.paypalCaptureID = response.result.purchase_units[0].payments.captures[0].id
+		order.orderStatus = 'placed'
 		order.save()
 		return jsonify(orderResponse.result.purchase_units[0].custom_id)
 

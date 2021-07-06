@@ -71,6 +71,9 @@ export class CouponComponent implements OnInit, OnDestroy {
 			excerpt: new FormControl(''),
 			status: new FormControl(''),
 			categories: new FormArray([]),
+			code: new FormControl('', [Validators.required]),
+			discount: new FormControl('', [Validators.required]),
+			discountType: new FormControl('', [Validators.required]),
 			storeWide: new FormControl('')
 		});
 		this.applicableProducts = [];
@@ -89,10 +92,12 @@ export class CouponComponent implements OnInit, OnDestroy {
 					excerpt: coupon.excerpt,
 					status: coupon.status,
 					categories: coupon.categories!.map(cat => new FormControl(cat, [Validators.required])),
+					code: coupon.code,
+					discount: coupon.discount,
+					discountType: coupon.discountType,
 					storeWide: coupon.storeWide
 				});
 				this.applicableProducts = coupon.applicableProducts!;
-				console.log(this.applicableProducts);
 			}).catch(err => this.router.navigate(['/admin/coupons']));
 		}));
 		this.adminService.getProductCount().toPromise().then(count => this.productCount = count);
@@ -119,6 +124,9 @@ export class CouponComponent implements OnInit, OnDestroy {
 				excerpt: this.couponGroup.get('excerpt')!.value,
 				status: this.couponGroup.get('status')!.value,
 				categories: this.couponGroup.get('categories')!.value,
+				code: this.couponGroup.get('code')!.value,
+				discount: this.couponGroup.get('discount')!.value,
+				discountType: this.couponGroup.get('discountType')!.value,
 				storeWide: this.couponGroup.get('storeWide')!.value
 			};
 			if (!coupon.storeWide) {
@@ -190,6 +198,10 @@ export class CouponComponent implements OnInit, OnDestroy {
 
 	get storeWide(): boolean {
 		return this.couponGroup.get('storeWide')!.value;
+	}
+
+	get discountType(): string {
+		return this.couponGroup.get('discountType')!.value;
 	}
 
 	private slugValidator(): AsyncValidatorFn {

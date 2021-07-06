@@ -25,8 +25,9 @@ interface CountryPair {
 	code: string;
 }
 
-interface Id {
-	id: string;
+interface CoinbaseRes {
+	expires_at: string | Date;
+	hosted_url: string;
 }
 
 @Component({
@@ -40,6 +41,8 @@ export class CheckoutComponent implements OnInit {
 	products: CartItem[];
 	coupons: Coupon[];
 	stripeIntent: Intent | null;
+
+	coinbaseCommerceRes: CoinbaseRes | null;
 
 	addressForm: FormGroup;
 	billingForm: FormGroup;
@@ -57,6 +60,8 @@ export class CheckoutComponent implements OnInit {
 		this.products = [];
 		this.coupons = [];
 		this.stripeIntent = null;
+
+		this.coinbaseCommerceRes = null;
 
 		this.cantEdit = false;
 
@@ -198,18 +203,27 @@ export class CheckoutComponent implements OnInit {
 		if (accessToken) {
 			headers = headers.append('Authorization', 'Bearer ' + accessToken);
 		}
-		document.getElementById('paypal-button-container')!.innerHTML = '';
-		paypal.Buttons({
-			createOrder: async (data: any, actions: any) => {
-				const res = await this.http.post(environment.apiServer + 'payment/paypal/checkout', { addresses: this.getAddressDetails(), location: window.location.protocol + '//' + window.location.hostname + ':' + window.location.port, products: this.products, coupons: this.coupons }, { headers }).toPromise();
+		this.http.post(environment.apiServer + 'order/orders', { addresses: this.getAddressDetails(), products: this.products, coupons: this.coupons }, { headers }).toPromise().then(orderID => {
+			document.getElementById('paypal-button-container')!.innerHTML = '';
+			paypal.Buttons({
+				createOrder: async (data: any, actions: any) => {
+					const res = await this.http.post(environment.apiServer + 'payment/paypal/checkout', { orderID, location: window.location.protocol + '//' + window.location.hostname + ':' + window.location.port }, { headers }).toPromise();
+					return res;
+				},
+				onApprove: async (data: any, actions: any) => {
+					const res = await this.http.post(environment.apiServer + 'payment/paypal/capture', { orderID: data.orderID }, { headers }).toPromise();
+					this.cartService.clearCart();
+					this.router.navigate(['/checkout/placed'], { queryParams: { id: res } });
+				}
+			}).render('#paypal-button-container');	
+			this.http.post<CoinbaseRes>(environment.apiServer + 'payment/coinbase/checkout', { orderID, location: window.location.protocol + '//' + window.location.hostname + ':' + window.location.port }, { headers }).pipe(map(res => {
+				res.expires_at = new Date(res.expires_at);
 				return res;
-			},
-			onApprove: async (data: any, actions: any) => {
-				const res = await this.http.post(environment.apiServer + 'payment/paypal/capture', { orderID: data.orderID }, { headers }).toPromise();
-				this.cartService.clearCart();
-				this.router.navigate(['/checkout/placed'], { queryParams: { id: res } });
-			}
-		}).render('#paypal-button-container');
+			})).toPromise().then(res => {
+				console.log(res);
+				this.coinbaseCommerceRes = res
+			})
+		});
 	}
 
 	private submitPaymentMethod(paymentMethodID: any): Observable<any> {
@@ -230,6 +244,7 @@ export class CheckoutComponent implements OnInit {
 			}
 		}
 		this.http.post<Coupon>(environment.apiServer + 'cart/couponCheck', { code: event.value.trim(), cart: this.products }).toPromise().then(coupon => {
+			console.log(coupon);
 			if (coupon) {
 				this.coupons.push(coupon);
 			}
@@ -287,6 +302,10 @@ export class CheckoutComponent implements OnInit {
 			}
 		});
 		return total;
+	}
+
+	get now(): Date {
+		return new Date();
 	}
 
 	private getAddressDetails() {

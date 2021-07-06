@@ -92,6 +92,7 @@
         <mat-step>
             <button mat-button matStepperPrevious>Back</button>
             <section id="payment-forms">
+                <a *ngIf="coinbaseCommerceRes && coinbaseCommerceRes.expires_at > now" [href]="coinbaseCommerceRes.hosted_url">Pay with Coinbase</a>
                 <div id="paypal-button-container"></div>
                 <form id="stripe-payment-form">
                     <div id="card-element">

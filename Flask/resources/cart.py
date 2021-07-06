@@ -110,17 +110,17 @@ class CouponCheckApi(Resource):
 			coupon = Coupon.objects.get(code=code)
 			if coupon.storeWide:
 				return jsonify(coupon.serialize())
+			if coupon.maxUses != -1 and coupon.maxUses < coupon.uses:
+				return False
 			else:
-				flag = False
 				for item in cart:
-					product = Product.objects.get(id=item['id'])
-					if product in coupon.applicableProducts:
-						flag = True
-						break
-				if flag:
-					return jsonify(coupon.serialize())
-				else:
-					return False
+					try:
+						product = Product.objects.get(id=item['id'])
+						if product in coupon.applicableProducts:
+							return jsonify(coupon.serialize())
+					except Exception:
+						continue
+				return False
 		except DoesNotExist:
 			return False
 		except Exception as e:
