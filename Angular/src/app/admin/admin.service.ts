@@ -343,15 +343,11 @@ export class AdminService {
 		}
 	}
 
-	public getOrderCount(status?: string[]): Observable<number> {
+	public getOrderCount(): Observable<number> {
 		const accessToken = localStorage.getItem('accessToken');
 		if (accessToken) {
-			if (!status) {
-				status = ['publish', 'draft'];
-			}
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
-			const params = new HttpParams().append('status', status.toString());
-			return this.http.get<number>(this.adminBase + 'orders/count', { headers, params });
+			return this.http.get<number>(this.adminBase + 'orders/count', { headers });
 		} else {
 			return new Observable<number>();
 		}

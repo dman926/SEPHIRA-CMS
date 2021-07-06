@@ -86,6 +86,7 @@ class User(db.Document):
 	lastName = db.StringField()
 
 	cart = db.EmbeddedDocumentListField('CartItem')
+	stripeCustomerID = db.StringField()
 
 	def hash_password(self):
 		chars = string.ascii_letters + string.punctuation
@@ -121,6 +122,8 @@ class Product(Post):
 	sku = db.StringField()
 	img = db.ListField(db.StringField())
 	price = db.DecimalField(precision=2)
+	digital = db.BooleanField(default=False)
+	tax = db.FloatField()
 
 	totalReviews = db.IntField(default=0)
 	avgReviewScore = db.FloatField(default=0)
@@ -150,6 +153,8 @@ class Product(Post):
 			'sku': self.sku,
 			'img': self.img,
 			'price': float(self.price),
+			"digital": self.digital,
+			"tax": self.tax,
 			'totalReviews': self.totalReviews,
 			'avgReviewScore': round(self.avgReviewScore, 1) # Round to 1 decimal place
 		}
@@ -161,6 +166,7 @@ class Order(db.Document):
 	coupons = db.ListField(db.ReferenceField('Coupon'))
 	addresses = db.DictField()
 	paymentIntentID = db.StringField()
+	paypalCaptureID = db.StringField()
 	createdAt = db.DateTimeField(default=datetime.datetime.now)
 	modified = db.DateTimeField(default=datetime.datetime.now)
 

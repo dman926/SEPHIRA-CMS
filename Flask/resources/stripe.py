@@ -10,19 +10,18 @@ from stripe.api_resources import payment_method
 from mongoengine.errors import DoesNotExist
 from resources.errors import InternalServerError, UnauthorizedError, SchemaValidationError
 
-from database.models import Order, User, CartItem, Coupon, Vendor
+from database.models import Order, User, CartItem, Coupon
 
 from app import socketio
-from services.price_servive import calculate_order_amount, calculate_discount_price
+from services.price_service import calculate_order_amount, calculate_discount_price
 from services.logging_service import writeWarningToLog
 
 import json
 import os
 
 import stripe
-from secret import stripe_vendor_price_id
 
-class StripePaymentApi(Resource):
+class StripeCheckoutApi(Resource):
 	@jwt_required(optional=True)
 	def post(self):
 		try:
@@ -70,7 +69,6 @@ class StripePaymentApi(Resource):
 					confirm=True,
 					payment_method=paymentMethodID,
 					shipping=shipping,
-					transfer_group=str(order.pk),
 					metadata={order: str(order.pk)}
 				)
 			else:
@@ -80,7 +78,6 @@ class StripePaymentApi(Resource):
 					confirm=True,
 					payment_method=paymentMethodID,
 					shipping=shipping,
-					transfer_group=str(order.pk),
 					metadata={order: str(order.pk)}
 				)
 			order.paymentIntentID = intent['id']

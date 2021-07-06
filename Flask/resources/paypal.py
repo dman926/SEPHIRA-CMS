@@ -6,83 +6,132 @@ from flask import jsonify, request
 from flask_restful_swagger_2 import Resource, swagger
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from app import paypal_client
-from paypalcheckoutsdk.orders import OrdersCreateRequest
+from mongoengine.errors import DoesNotExist
+from resources.errors import UnauthorizedError, InternalServerError
 
-class PayPalPaymentApi(Resource):
+from database.models import CartItem, Order
+
+from app import paypal_client
+from paypalcheckoutsdk.orders import OrdersCreateRequest, OrdersCaptureRequest, OrdersGetRequest
+
+from services.logging_service import writeWarningToLog
+from services.price_service import calculate_order_amount, calculate_discount_price
+
+from pprint import pprint
+
+class PayPalCreateTransactionApi(Resource):
 	@jwt_required(optional=True)
 	def post(self):
 		try:
 			body = request.get_json()
-			paymentMethodID = body['paymentMethodID']
+			location = body['location']
 			shipping = body['addresses']['shipping']
 			shipping = {
-				'address': {
-					'line1': shipping['street1'],
-					'city': shipping['city'],
-					'country': shipping['country'],
-					'line2': shipping['street2'],
-					'postal_code': shipping['zip'],
-					'state': shipping['region']
-				},
-				'name': shipping['name'],
-				'phone': shipping['phoneNumber']
+				"method": "United States Postal Service",
+				"address": {
+					"name": {
+						"full_name": shipping['name']
+					},
+					"address_line_1": shipping['street1'],
+					"address_line_2": shipping['street2'],
+					"admin_area_2": shipping['city'],
+					"admin_area_1": shipping['region'],
+					"postal_code": shipping['zip'],
+					"country_code": shipping['country']
+				}
 			}
-			email = body['email']
 			products = list(map(lambda p: CartItem(product=p['id'], qty=p['qty']), body['products']))
 			coupons = list(map(lambda c: Coupon.objects.get(id=c['id']), body['coupons']))
 			order = Order(orderer=get_jwt_identity(), orderStatus='not placed', products=products, coupons=coupons, addresses=body['addresses'])
 			order.save()
-			amount = calculate_discount_price(order.products, order.coupons)
-			amount = round(amount * 100.0) / 100.0
-			intent = None
-			if get_jwt_identity():
-				user = User.objects.get(id=get_jwt_identity())
-				cust = None
-				if user.stripeCustomerID:
-					cust = stripe.Customer.retrieve(user.stripeCustomerID)
-				else:
-					cust = stripe.Customer.create(
-						email=email,
-						shipping=shipping,
-						phone=order.addresses['billing']['phoneNumber'],
-						name=order.addresses['billing']['name']
-					)
-					user.stripeCustomerID = cust['id']
-					user.save()
-				intent = stripe.PaymentIntent.create(
-					amount=amount,
-					currency='usd',
-					customer=cust['id'],
-					confirm=True,
-					payment_method=paymentMethodID,
-					shipping=shipping,
-					transfer_group=str(order.pk),
-					metadata={order: str(order.pk)}
-				)
-			else:
-				intent = stripe.PaymentIntent.create(
-					amount=amount,
-					currency='usd',
-					confirm=True,
-					payment_method=paymentMethodID,
-					shipping=shipping,
-					transfer_group=str(order.pk),
-					metadata={order: str(order.pk)}
-				)
-			order.paymentIntentID = intent['id']
-			order.save()
-			return str(order.id)
+			total = calculate_discount_price(order.products, order.coupons)
+			discount = calculate_order_amount(order.products) - total
+			amount = total - discount
+			requestBody = {
+				"intent": "CAPTURE",
+				"application_context": {
+					"brand_name": "brand inc", # TODO: Change this
+					"landing_page": 'BILLING',
+					"shipping_preference": "SET_PROVIDED_ADDRESS",
+					"user_action": "PAY_NOW",
+					"return_url": location + "/checkout/placed?id=" + str(order.id), # TODO: Change this
+					"cancel_url": location + "/checkout", # TODO: Change this
+				},
+				"purchase_units": [
+					{
+#						"reference_id": "",
+#						"description": "",
+						"custom_id": str(order.id),
+#						"soft_descriptor": "",
+						"amount": {
+							"currency_code": "USD",
+							"value": '{:.2f}'.format(round(total, 2)),
+							"breakdown": {
+								"item_total": {
+									"currency_code": "USD",
+									"value": '{:.2f}'.format(round(amount, 2))
+								},
+								"shipping": {
+									"currency_code": "USD",
+									"value": '{:.2f}'.format(round(0, 2)) # TODO
+								},
+								"tax_total": {
+									"currency_code": "USD",
+									"value": '{:.2f}'.format(round(0, 2)) # TODO
+								},
+								"discount": {
+									"currency_code": "USD",
+									"value": '{:.2f}'.format(round(discount, 2))
+								}
+							}
+						},
+						"items": [],
+						"shipping": shipping
+					}
+				]
+			}
+			for item in order.products:
+				requestBody['purchase_units'][0]['items'].append({
+					"name": item.product.title,
+					"unit_amount": {
+						"currency_code": "USD",
+						"value": str(item.product.price)
+					},
+					"tax": {
+						"currency_code": "USD",
+						"value": 0 # TODO
+					},
+					"quantity": str(item.qty),
+					"description": item.product.excerpt,
+					"sku": item.product.sku,
+					"category": "DIGITAL_GOODS" if item.product.digital else "PHYSICAL_GOODS"
+				})
+			requestArgs = OrdersCreateRequest()
+			requestArgs.prefer('return=representation')
+			requestArgs.request_body(requestBody)
+			response = paypal_client.execute(requestArgs)
+			return jsonify(response.result.id)
 		except DoesNotExist:
 			raise UnauthorizedError
 		except Exception as e:
-			writeWarningToLog('Unhandled exception in resources.stripe.CheckoutPaymentApi post: ' + str(e))
+			writeWarningToLog('Unhandled exception in resources.stripe.CheckoutPaymentApi post', str(e))
 			raise InternalServerError
+
+class PayPalCaptureTransactionApi(Resource):
+	@jwt_required(optional=True)
+	def post(self):
+		orderID = request.get_json()['orderID']
+		response = paypal_client.execute(OrdersCaptureRequest(orderID))
+		orderResponse = paypal_client.execute(OrdersGetRequest(orderID))
+		order = Order.objects.get(id=orderResponse.result.purchase_units[0].custom_id)
+		order.paypalCaptureID = response.result.purchase_units[0].payments.captures[0].id
+		order.save()
+		return jsonify(orderResponse.result.purchase_units[0].custom_id)
 
 class PayPalApi(Resource):
 	@swagger.doc({
-		'tags': ['Stripe'],
-		'description': 'Stripe webhook endpoint. Do not use.',
+		'tags': ['PayPal'],
+		'description': 'PayPal webhook endpoint. Do not use.',
 		'responses': {
 			'200': {
 				'description': 'always'
@@ -91,42 +140,7 @@ class PayPalApi(Resource):
 	})
 	def post(self):
 		payload = request.get_json()
-		event = None
-
-		try:
-			event = stripe.Event.construct_from(
-				payload, stripe.api_key
-			)
-		except ValueError:
-			return '', 400
-
-		if event.type == 'payment_intent.succeeded':
-			# TODO: attach card to customer object
-			payment_intent = event.data.object # contains a stripe.PaymentIntent
-			order = Order(id=payment_intent['metadata']['Order object'])
-			order.orderStatus = 'paid'
-			order.save()
-			socketio.emit('order ' + str(order.pk), order.orderStatus, namespace='/')
-		elif event.type == 'payment_intent.failed':
-			payment_intent = event.data.object # contains a stripe.PaymentIntent
-			order = Order(id=payment_intent['metadata']['Order object'])
-			order.orderStatus = 'failed'
-			order.save()
-			socketio.emit('order ' + str(order.pk), order.orderStatus, namespace='/')
-		elif event.type == 'invoice.paid':
-			# TODO: create order with details
-			pass
-		elif event.type == 'invoice.payment_failed':
-			# TODO: create order with details
-			pass
-		elif event.type == 'customer.subscription.deleted':
-			# Vendor subscription has ended and isn't renewed.
-			# Delete from User document
-			User.objects.get(stripeSubscriptionID=event.data['id'])
-			user.update(unset__stripeSubscriptionID)
-		else:
-			writeWarningToLog('Unhandled Stripe webhook event type {}'.format(event.type))
-			print('Unhandled Strip webhook event type {}'.format(event.type))
-			return 'ok', 200
+		
+		# TODO
 
 		return 'ok', 200

@@ -86,11 +86,13 @@
                     <input matInput formControlName="phoneNumber" autocomplete="tel" required />
                 </mat-form-field>
                 <button mat-button type="button" matStepperPrevious>Back</button>
-                <button mat-button type="button" matStepperNext>Next</button>
+                <button mat-button type="button" matStepperNext (click)="renderPaypalCoinbase()">Next</button>
             </form>
         </mat-step>
         <mat-step>
+            <button mat-button matStepperPrevious>Back</button>
             <section id="payment-forms">
+                <div id="paypal-button-container"></div>
                 <form id="stripe-payment-form">
                     <div id="card-element">
                         <!--Stripe.js injects the Card Element-->
@@ -100,11 +102,6 @@
 						<span id="button-text">Pay with Stripe</span>
 					</button>
                     <p id="card-error" role="alert"></p>
-                    <p class="result-message hidden">
-                        Payment succeeded, see the result in your
-                        <a href="" target="_blank">Stripe dashboard.</a> Refresh the page to pay again.
-                    </p>
-                    <button mat-button type="button" matStepperPrevious>Back</button>
                 </form>
             </section>
         </mat-step>
@@ -125,7 +122,7 @@
                     {{ coupon.code }}
                     <mat-icon matChipRemove>cancel</mat-icon>
                 </mat-chip>
-                <input placeholder="Add Coupon..." [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="addCoupon($event)">
+                <input placeholder="Add Coupon..." [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="addCoupon($event)" [disabled]="stepper.selectedIndex === 2">
             </mat-chip-list>
         </mat-form-field>
     </div>

@@ -12,6 +12,8 @@ import { DynamicScriptLoaderService } from 'src/app/core/services/dynamic-script
 import { Coupon } from 'src/app/models/coupon';
 import { MatChipInputEvent } from '@angular/material/chips';
 
+declare var paypal: any;
+
 interface Intent {
 	clientSecret?: string;
 	hosted_url?: string;
@@ -117,7 +119,7 @@ export class CheckoutComponent implements OnInit {
 			this.products = cart;
 		});
 
-		this.scriptLoader.load('stripe').then(data => {
+		this.scriptLoader.load('stripe', 'paypal').then(data => {
 			if (data[0].loaded) {
 				this.stripe = Stripe(environment.stripePublicKey);
 				const elements = this.stripe!.elements();
@@ -163,6 +165,9 @@ export class CheckoutComponent implements OnInit {
 			} else {
 				throw new Error('\'stripe\' failed to load');
 			}
+			if(!data[1].loaded) {
+				throw new Error('\'paypal\' failed to load');
+			}
 		});
 	}
 
@@ -195,6 +200,25 @@ export class CheckoutComponent implements OnInit {
 		});
 	}
 
+	renderPaypalCoinbase(): void {
+		let headers = new HttpHeaders();
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			headers = headers.append('Authorization', 'Bearer ' + accessToken);
+		}
+		document.getElementById('paypal-button-container')!.innerHTML = '';
+		paypal.Buttons({
+			createOrder: async (data: any, actions: any) => {
+				const res = await this.http.post(environment.apiServer + 'payment/paypal/checkout', { addresses: this.getAddressDetails(), location: window.location.protocol + '//' + window.location.hostname + ':' + window.location.port, products: this.products, coupons: this.coupons }, { headers }).toPromise();
+				return res;
+			},
+			onApprove: async (data: any, actions: any) => {
+				const res = await this.http.post(environment.apiServer + 'payment/paypal/capture', { orderID: data.orderID }, { headers }).toPromise();
+				this.router.navigate(['/checkout/placed'], { queryParams: { id: res } });
+			}
+		}).render('#paypal-button-container');
+	}
+
 	private submitPaymentMethod(paymentMethodID: any): Observable<any> {
 		const accessToken = localStorage.getItem('accessToken');
 		let headers = new HttpHeaders();	
@@ -204,7 +228,7 @@ export class CheckoutComponent implements OnInit {
 		const email = this.billingForm.get('email')!.value;
 		const addresses = this.getAddressDetails();
 		console.log({ paymentMethodID, email, addresses, products: this.products, coupons: this.coupons });
-		return this.http.post<string>(environment.apiServer + 'payment/checkoutPayment', { paymentMethodID, email, addresses, products: this.products, coupons: this.coupons }, { headers });
+		return this.http.post<string>(environment.apiServer + 'payment/stripe/checkout', { paymentMethodID, email, addresses, products: this.products, coupons: this.coupons }, { headers });
 	}
 
 	addCoupon(event: MatChipInputEvent): void {

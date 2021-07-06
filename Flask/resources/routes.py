@@ -10,6 +10,10 @@ from .product import ProductsApi, ProductApi, ProductCountApi
 
 from .cart import CartApi, CouponCheckApi
 
+from .stripe import StripeCheckoutApi, StripeApi
+from .paypal import PayPalCreateTransactionApi, PayPalCaptureTransactionApi, PayPalApi
+from .coinbase import CoinbaseCheckoutApi, CoinbaseApi
+
 from .admin import AdminApi, AdminUsersApi, AdminUserApi, AdminUsersCountApi, AdminPagesApi, AdminPageApi, AdminPagesCountApi, AdminPageSlugApi, AdminProductsApi, AdminProductApi, AdminProductCountApi, AdminProductSlugAvailableApi, AdminCouponsApi, AdminCouponApi, AdminCouponCountApi, AdminCouponSlugAvailableApi, AdminOrdersApi, AdminOrderApi, AdminOrderCountApi
 
 import resources.sockets
@@ -36,6 +40,14 @@ def initialize_routes(api, base):
 
 	api.add_resource(CartApi, base + 'cart/cart')
 	api.add_resource(CouponCheckApi, base + 'cart/couponCheck')
+
+	api.add_resource(StripeCheckoutApi, base + 'payment/stripe/checkout')
+	api.add_resource(StripeApi, base + 'payment/stripe/webhook')
+	api.add_resource(PayPalCreateTransactionApi, base + 'payment/paypal/checkout')
+	api.add_resource(PayPalCaptureTransactionApi, base + 'payment/paypal/capture')
+	api.add_resource(PayPalApi, base + 'payment/paypal/webhook')
+	api.add_resource(CoinbaseCheckoutApi, base + 'payment/coinbase/checkout')
+	api.add_resource(CoinbaseApi, base + 'payment/coinbase/webhook')
 
 	api.add_resource(AdminApi, base + 'admin/admin')
 	api.add_resource(AdminUsersApi, base + 'admin/users')

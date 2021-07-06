@@ -8,7 +8,7 @@ interface Scripts {
 
 export const ScriptStore: Scripts[] = [
 	{ name: 'stripe', src: 'https://js.stripe.com/v3/' },
-	{ name: 'paypal', src: 'https://www.paypal.com/sdk/js?client-id=' + environment.paypalClientID + '&currency=USD' }
+	{ name: 'paypal', src: 'https://www.paypal.com/sdk/js?client-id=' + environment.paypalClientID + '&currency=USD&intent=capture' }
 ];
 
 @Injectable({

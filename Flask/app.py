@@ -19,12 +19,14 @@ from tasks.tasks import initialize_tasks
 import os, logging
 
 import stripe
+from coinbase_commerce.client import Client
 from paypalcheckoutsdk.core import PayPalHttpClient, SandboxEnvironment, LiveEnvironment
-from secret import stripe_sk, paypal_client_id, paypal_secret
+from secret import stripe_sk, paypal_client_id, paypal_secret, coinbase_commerce_api_key
 
 PRODUCTION = False
 
 stripe.api_key = stripe_sk
+ccClient = Client(api_key=coinbase_commerce_api_key)
 paypal_client = None
 
 app = Flask(__name__)
