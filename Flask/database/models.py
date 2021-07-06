@@ -131,8 +131,6 @@ class Product(Post):
 	def addReview(self, score):
 		self.avgReviewScore = ((self.avgReviewScore * self.totalReviews) + int(score)) / (self.totalReviews + 1)
 		self.totalReviews = self.totalReviews + 1
-		self.vendor.addReview(score)
-		self.vendor.save()
 
 	def serialize(self):
 		return {

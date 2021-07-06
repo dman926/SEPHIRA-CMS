@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Product } from '../models/product';
+import { Review } from '../models/review';
 
 @Injectable({
 	providedIn: 'root'
@@ -40,12 +41,41 @@ export class ProductService {
 		}));
 	}
 
-	public getProductCount(status?: string[]): Observable<number> {
-		if (!status) {
-			status = ['publish', 'draft'];
-		}
-		const params = new HttpParams().append('status', status.toString());
-		return this.http.get<number>(this.productBase + 'products/count', { params });
+	public getProductCount(): Observable<number> {
+		return this.http.get<number>(this.productBase + 'products/count');
 	}
+
+	public getReviews(id: string, page?: number, size?: number): Observable<Review[]> {
+		let params = new HttpParams();
+		if (page && size) {
+			params = params.append('page', page.toString()).append('size', size.toString())
+		}
+		return this.http.get<Review[]>(this.productBase + 'product/' + id + '/reviews', { params });
+	}
+
+	public submitReview(review: Review): Observable<Review> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.post<Review>(this.productBase + 'product/' + review.product + '/reviews', review, { headers });
+		} else {
+			return new Observable<Review>();
+		}
+	}
+
+	public reviewAllowed(id: string): Observable<boolean> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.get<boolean>(this.productBase + 'product/' + id + '/reviewAllowed', { headers });
+		} else {
+			return new Observable<boolean>();
+		}
+	}
+
+	public getReviewCount(id: string): Observable<number> {
+		return this.http.get<number>(this.productBase + 'product/' + id + '/reviews/count');
+	}
+
 
 }

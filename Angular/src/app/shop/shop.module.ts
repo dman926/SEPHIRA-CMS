@@ -9,6 +9,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
+import { ReactiveFormsModule } from '@angular/forms';
+import { StarRatingModule } from '../star-rating/star-rating.module';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 
 @NgModule({
@@ -19,12 +23,17 @@ import { MatTabsModule } from '@angular/material/tabs';
   imports: [
     CommonModule,
     ShopRoutingModule,
+	ReactiveFormsModule,
 
 	MatPaginatorModule,
 	MatProgressSpinnerModule,
 	MatButtonModule,
 	MatCardModule,
-	MatTabsModule
+	MatTabsModule,
+	MatFormFieldModule,
+	MatInputModule,
+
+	StarRatingModule
   ]
 })
 export class ShopModule { }

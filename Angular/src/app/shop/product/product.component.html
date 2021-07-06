@@ -23,6 +23,24 @@
             <mat-tab label="Description">
                 <div [innerHTML]="product.content"></div>
             </mat-tab>
+            <mat-tab [label]="'Reviews (' + product.totalReviews + ')'">
+                <form *ngIf="reviewAllowed" [formGroup]="reviewForm" (ngSubmit)="submitReview()">
+                    <app-star-rating (ratingUpdated)="ratingUpdated($event)"></app-star-rating>
+                    <mat-form-field appearance="fill">
+                        <mat-label>Review</mat-label>
+                        <input matInput formControlName="review" />
+                    </mat-form-field>
+                    <button mat-raised-button type="submit" color="primary" [disabled]="reviewForm.invalid">Submit Review</button>
+                </form>
+                <mat-paginator [length]="reviewCount" [pageSize]="reviewPageEvent.pageSize" (page)="fetchReviews($event)"></mat-paginator>
+                <div id="reviews">
+                    <p *ngIf="reviews.length == 0">No reviews yet</p>
+                    <div *ngFor="let review of shownReviews">
+                        <p>{{ review.reviewer!.firstName }} {{ review.score }}</p>
+                    </div>
+                </div>
+            </mat-tab>
+
         </mat-tab-group>
     </div>
     <ng-template #notFound>

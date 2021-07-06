@@ -25,11 +25,11 @@ export class PageComponent implements OnInit, OnDestroy {
 
 	ngOnInit(): void {
 		this.fetchPage();
-		this.router.events.subscribe(ev => {
+		this.subs.push(this.router.events.subscribe(ev => {
 			if (ev instanceof NavigationEnd) {
 				this.fetchPage();
 			}
-		})
+		}));
 	}
 
 	ngOnDestroy(): void {
