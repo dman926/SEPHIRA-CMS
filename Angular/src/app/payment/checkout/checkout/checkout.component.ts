@@ -244,7 +244,6 @@ export class CheckoutComponent implements OnInit {
 			}
 		}
 		this.http.post<Coupon>(environment.apiServer + 'cart/couponCheck', { code: event.value.trim(), cart: this.products }).toPromise().then(coupon => {
-			console.log(coupon);
 			if (coupon) {
 				this.coupons.push(coupon);
 			}
