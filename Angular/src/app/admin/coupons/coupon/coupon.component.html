@@ -35,6 +35,8 @@
             <input matInput [formControl]="$any(categoryControl)" required />
         </mat-form-field>
     </div>
+    <mat-checkbox formControlName="storeWide" color="primary">Store Wide?</mat-checkbox>
+    <!-- TODO: applicable products -->
     <button mat-raised-button color="primary" type="button" routerLink="/admin/coupons">Back</button>
     <button mat-raised-button color="warn" type="button" (click)="deleteCoupon()">Delete</button>
     <button mat-raised-button color="primary" type="submit" [disabled]="couponGroup.invalid || saving">Save</button>

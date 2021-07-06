@@ -11,32 +11,25 @@ def calculate_order_amount(items):
 
 def calculate_discount_price(items, coupons):
 	sortedCoupons = []
-	for type in ['dollar', 'percent']:
-		for coupon in coupons:
-			if coupon.discountType == type:
-				sortedCoupons.append(coupon)
+	for storeWide in [False, True]:
+		for type in ['dollar', 'percent']:
+			for coupon in coupons:
+				if coupon.discountType == type and coupon.storeWide == storeWide:
+					sortedCoupons.append(coupon)
 	total = 0
 	for item in items:
 		currentPrice = float(item.product.price)
 		for coupon in sortedCoupons:
-			if str(item.product.id) in coupon.applicableProducts:
+			if str(item.product.id) in coupon.applicableProducts and not coupon.storeWide:
 				if coupon.discountType == 'dollar':
 					currentPrice -= coupon.discount
 				elif coupon.discountType == 'percent':
 					currentPrice -= currentPrice * (coupon.discount / 100.0)
 		total += currentPrice * item.qty
-	return total	
-
-def make_ngrams(word, min_size=2, prefix_only=False):
-	length = len(word)
-	size_range = range(min_size, max(length, min_size) + 1)
-	if prefix_only:
-		return [
-			word[0:size]
-			for size in size_range
-		]
-	return list(set(
-		word[i:i + size]
-		for size in size_range
-		for i in range(0, max(0, length - size) + 1)
-	))
+	for coupon in sortedCoupons:
+		if coupon.storeWide:
+			if coupon.discountType == 'dollar':
+				total -= coupon.discount
+			elif coupon.discountType == 'percent':
+				total -= total * (coupon.discount / 100.0)
+	return total

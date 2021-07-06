@@ -111,9 +111,9 @@
             <mat-list-item *ngFor="let product of products">
                 {{ product.name }} {{ product.price }} x{{ product.qty }}
             </mat-list-item>
-            <mat-list-item>Subtotal: {{ currencyFormatter.format(calcSubtotal()) }}</mat-list-item>
-            <mat-list-item>Discount: {{ currencyFormatter.format(calcSubtotal() - calcDiscountPrice()) }}</mat-list-item>
-            <mat-list-item>Total: {{ currencyFormatter.format(calcDiscountPrice()) }}</mat-list-item>
+            <mat-list-item>Subtotal: {{ calcSubtotal() | currency }}</mat-list-item>
+            <mat-list-item>Discount: {{ calcSubtotal() - calcDiscountPrice() | currency }}</mat-list-item>
+            <mat-list-item>Total: {{ calcDiscountPrice() | currency }}</mat-list-item>
         </mat-list>
         <mat-form-field appearance="fill">
             <mat-label>Coupons</mat-label>

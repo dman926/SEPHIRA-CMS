@@ -46,7 +46,8 @@ export class CouponComponent implements OnInit, OnDestroy {
 			content: new FormControl(''),
 			excerpt: new FormControl(''),
 			status: new FormControl(''),
-			categories: new FormArray([])
+			categories: new FormArray([]),
+			storeWide: new FormControl('')
 		});
 		this.saving = false;
 		this.saved = false;
@@ -62,7 +63,8 @@ export class CouponComponent implements OnInit, OnDestroy {
 					content: coupon.content,
 					excerpt: coupon.excerpt,
 					status: coupon.status,
-					categories: coupon.categories!.map(cat => new FormControl(cat, [Validators.required]))
+					categories: coupon.categories!.map(cat => new FormControl(cat, [Validators.required])),
+					storeWide: coupon.storeWide
 				});
 			}).catch(err => this.router.navigate(['/admin/coupons']));
 		}));
@@ -88,6 +90,7 @@ export class CouponComponent implements OnInit, OnDestroy {
 				excerpt: this.couponGroup.get('excerpt')!.value,
 				status: this.couponGroup.get('status')!.value,
 				categories: this.couponGroup.get('categories')!.value,
+				storeWide: this.couponGroup.get('storeWide')!.value
 			};
 			this.saving = true;
 			this.adminService.editCoupon(coupon).toPromise().then(res => {

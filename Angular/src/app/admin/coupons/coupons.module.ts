@@ -12,6 +12,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { AngularEditorModule } from '@kolkov/angular-editor';
 
 
@@ -32,6 +33,7 @@ import { AngularEditorModule } from '@kolkov/angular-editor';
 		MatIconModule,
 		MatFormFieldModule,
 		MatInputModule,
+		MatCheckboxModule,
 
 		AngularEditorModule
 	]

@@ -50,14 +50,7 @@ export class CheckoutComponent implements OnInit {
 
 	cantEdit: boolean;
 
-	currencyFormatter = new Intl.NumberFormat(undefined, {
-		style: 'currency',
-		currency: 'USD'
-	})
-
 	readonly separatorKeysCodes = [ENTER, COMMA] as const;
-
-	private orderID: string;
 
 	constructor(private scriptLoader: DynamicScriptLoaderService, private http: HttpClient, private cartService: CartService, private router: Router) {
 		this.stripe = null;
@@ -66,8 +59,6 @@ export class CheckoutComponent implements OnInit {
 		this.stripeIntent = null;
 
 		this.cantEdit = false;
-
-		this.orderID = '';
 
 		this.addressForm = new FormGroup({
 			fullName: new FormControl('', [Validators.required]),
@@ -194,6 +185,7 @@ export class CheckoutComponent implements OnInit {
 				console.log('failed');
 			} else {
 				this.submitPaymentMethod(res.paymentMethod!.id).toPromise().then(paymentRes => {
+					this.cartService.clearCart();
 					this.router.navigate(['/checkout/placed'], { queryParams: { id: paymentRes }});
 				});
 			}
@@ -214,6 +206,7 @@ export class CheckoutComponent implements OnInit {
 			},
 			onApprove: async (data: any, actions: any) => {
 				const res = await this.http.post(environment.apiServer + 'payment/paypal/capture', { orderID: data.orderID }, { headers }).toPromise();
+				this.cartService.clearCart();
 				this.router.navigate(['/checkout/placed'], { queryParams: { id: res } });
 			}
 		}).render('#paypal-button-container');
@@ -227,7 +220,6 @@ export class CheckoutComponent implements OnInit {
 		}
 		const email = this.billingForm.get('email')!.value;
 		const addresses = this.getAddressDetails();
-		console.log({ paymentMethodID, email, addresses, products: this.products, coupons: this.coupons });
 		return this.http.post<string>(environment.apiServer + 'payment/stripe/checkout', { paymentMethodID, email, addresses, products: this.products, coupons: this.coupons }, { headers });
 	}
 
@@ -261,8 +253,39 @@ export class CheckoutComponent implements OnInit {
 	}
 
 	calcDiscountPrice(): number {
+		const sortedCoupons: Coupon[] = [];
+		[false, true].forEach(storeWide => {
+			['dollar', 'percent'].forEach(type => {
+				this.coupons.forEach(coupon => {
+					if (coupon.discountType === type && coupon.storeWide === storeWide) {
+						sortedCoupons.push(coupon);
+					} 
+				});	
+			});
+		});
 		let total = 0;
-		// TODO
+		this.products.forEach(product => {
+			let currentPrice = product.price;
+			sortedCoupons.forEach(coupon => {
+				if (coupon.applicableProducts!.indexOf(product.id) !== -1 && !coupon.storeWide) {
+					if (coupon.discountType === 'dollar') {
+						currentPrice -= coupon.discount!;
+					} else if (coupon.discountType === 'percent') {
+						currentPrice -= currentPrice * (coupon.discount! / 100.0);
+					}
+				}
+			});
+			total += currentPrice * product.qty;
+		});
+		sortedCoupons.forEach(coupon => {
+			if (coupon.storeWide) {
+				if (coupon.discountType === 'dollar') {
+					total -= coupon.discount!;
+				} else if (coupon.discountType === 'percent') {
+					total -= total * (coupon.discount! / 100.0);
+				}
+			}
+		});
 		return total;
 	}
 
