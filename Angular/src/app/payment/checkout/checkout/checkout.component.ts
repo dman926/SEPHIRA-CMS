@@ -1,12 +1,12 @@
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { CartService } from '../../cart/cart.service';
 import { CartItem } from 'src/app/models/cart-item';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { map, startWith } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { debounceTime, map, startWith } from 'rxjs/operators';
+import { Observable, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { DynamicScriptLoaderService } from 'src/app/core/services/dynamic-script-loader.service';
 import { Coupon } from 'src/app/models/coupon';
@@ -30,12 +30,24 @@ interface CoinbaseRes {
 	hosted_url: string;
 }
 
+interface TaxRate {
+	estimatedCityRate: number;
+	estimatedCombinedRate: number;
+	esimatedCountyRate: number;
+	estimatedSpecialRate: number;
+	riskLevel: number;
+	state: string;
+	stateRate: number;
+	taxRegion: string;
+	zip: string;
+}
+
 @Component({
 	selector: 'app-checkout',
 	templateUrl: './checkout.component.html',
 	styleUrls: ['./checkout.component.scss']
 })
-export class CheckoutComponent implements OnInit {
+export class CheckoutComponent implements OnInit, OnDestroy {
 
 	stripe: stripe.Stripe | null;
 	products: CartItem[];
@@ -50,10 +62,13 @@ export class CheckoutComponent implements OnInit {
 	countries: CountryPair[];
 	filteredCountries: Observable<CountryPair[]>;
 	filteredCountries2: Observable<CountryPair[]>;
+	taxRate: TaxRate | null;
 
 	cantEdit: boolean;
 
 	readonly separatorKeysCodes = [ENTER, COMMA] as const;
+
+	private subs: Subscription[];
 
 	constructor(private scriptLoader: DynamicScriptLoaderService, private http: HttpClient, private cartService: CartService, private router: Router) {
 		this.stripe = null;
@@ -72,7 +87,7 @@ export class CheckoutComponent implements OnInit {
 			street2: new FormControl(''),
 			stateProvidenceRegion: new FormControl('', [Validators.required]),
 			city: new FormControl('', [Validators.required]),
-			zip: new FormControl('', [Validators.required]),
+			zip: new FormControl('', [Validators.required, Validators.pattern('[0-9]{5}')]),
 			phoneNumber: new FormControl('', [Validators.required])
 		});
 
@@ -84,7 +99,7 @@ export class CheckoutComponent implements OnInit {
 			street2: new FormControl(''),
 			stateProvidenceRegion: new FormControl('', [Validators.required]),
 			city: new FormControl('', [Validators.required]),
-			zip: new FormControl('', [Validators.required]),
+			zip: new FormControl('', [Validators.required, Validators.pattern('[0-9]{5}')]),
 			phoneNumber: new FormControl('', [Validators.required])
 		});
 
@@ -104,6 +119,8 @@ export class CheckoutComponent implements OnInit {
 			this.filteredCountries = new Observable<CountryPair[]>();
 			this.filteredCountries2 = new Observable<CountryPair[]>();
 		}
+		this.taxRate = null;
+		this.subs = [];
 	}
 
 	ngOnInit(): void {
@@ -165,6 +182,21 @@ export class CheckoutComponent implements OnInit {
 				throw new Error('\'paypal\' failed to load');
 			}
 		});
+
+		this.subs.push(this.addressForm.get('zip')!.valueChanges.pipe(debounceTime(500)).subscribe(val => {
+			if (this.addressForm.get('zip')!.valid) {
+				const params = new HttpParams().append('zip', val);
+				this.http.get<TaxRate>(environment.apiServer + 'tax/us', { params }).toPromise().then(taxRate => {
+					this.taxRate = taxRate;
+				}).catch(err => this.taxRate = null);
+			} else {
+				this.taxRate = null;
+			}
+		}));
+	}
+
+	ngOnDestroy(): void {
+		this.subs.forEach(sub => sub.unsubscribe());
 	}
 
 	createStripePaymentMethod(card: any): void {

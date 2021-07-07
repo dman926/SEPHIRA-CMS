@@ -10,6 +10,7 @@ from .product import ProductsApi, ProductApi, ProductCountApi, ProductReviewsApi
 
 from .order import OrdersApi, OrderApi
 from .cart import CartApi, CouponCheckApi
+from .usTaxJurisdiction import UsTaxJurisdictionAPI
 
 from .stripe import StripeCheckoutApi, StripeApi
 from .paypal import PayPalCreateTransactionApi, PayPalCaptureTransactionApi, PayPalApi
@@ -46,6 +47,7 @@ def initialize_routes(api, base):
 	api.add_resource(OrderApi, base + 'order/order/<id>')
 	api.add_resource(CartApi, base + 'cart/cart')
 	api.add_resource(CouponCheckApi, base + 'cart/couponCheck')
+	api.add_resource(UsTaxJurisdictionAPI, base + 'tax/us')
 
 	api.add_resource(StripeCheckoutApi, base + 'payment/stripe/checkout')
 	api.add_resource(StripeApi, base + 'payment/stripe/webhook')

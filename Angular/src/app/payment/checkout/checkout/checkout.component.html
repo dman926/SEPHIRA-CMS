@@ -114,7 +114,8 @@
             </mat-list-item>
             <mat-list-item>Subtotal: {{ calcSubtotal() | currency }}</mat-list-item>
             <mat-list-item>Discount: {{ calcSubtotal() - calcDiscountPrice() | currency }}</mat-list-item>
-            <mat-list-item>Total: {{ calcDiscountPrice() | currency }}</mat-list-item>
+            <mat-list-item>Estimated Tax: {{ calcDiscountPrice() * (taxRate ? taxRate.estimatedCombinedRate : 0) | currency }}</mat-list-item>
+            <mat-list-item>Total: {{ calcDiscountPrice() + (calcDiscountPrice() * (taxRate ? taxRate.estimatedCombinedRate : 0)) | currency }}</mat-list-item>
         </mat-list>
         <mat-form-field appearance="fill">
             <mat-label>Coupons</mat-label>

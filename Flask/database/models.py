@@ -236,4 +236,34 @@ class Coupon(Post):
 			'created': str(self.created)
 		}
 
+class UsTaxJurisdiction(db.Document):
+	zip = db.StringField(primary_key=True)
+	state = db.StringField()
+	taxRegion = db.StringField()
+	stateRate = db.FloatField()
+	estimatedCombinedRate = db.FloatField()
+	estimatedCountyRate = db.FloatField()
+	estimatedCityRate = db.FloatField()
+	estimatedSpecialRate = db.FloatField()
+	riskLevel = db.IntField()
+
+	meta = {
+		'indexes': [
+			'state'
+		]
+	}
+
+	def serialize(self):
+		return {
+			'zip': self.zip,
+			'state': self.state,
+			'taxRegion': self.taxRegion,
+			'stateRate': self.stateRate,
+			'estimatedCombinedRate': self.estimatedCombinedRate,
+			'estimatedCountyRate': self.estimatedCountyRate,
+			'estimatedCityRate': self.estimatedCityRate,
+			'estimatedSpecialRate': self.estimatedSpecialRate,
+			'riskLevel': self.riskLevel
+		}
+
 User.register_delete_rule(Post, 'author', db.CASCADE)
