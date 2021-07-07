@@ -4,7 +4,7 @@ def calculate_order_amount(items):
 	total = 0
 	for item in items:
 		try:
-			total += float(item.product.price) * item.qty
+			total += float(item.price) * item.qty
 		except Exception as e:
 			writeWarningToLog('Unhandled exception in services.util_service.calculate_order_amount', e)
 	return total
@@ -18,7 +18,7 @@ def calculate_discount_price(items, coupons):
 					sortedCoupons.append(coupon)
 	total = 0
 	for item in items:
-		currentPrice = float(item.product.price)
+		currentPrice = float(item.price)
 		for coupon in sortedCoupons:
 			if str(item.product.id) in coupon.applicableProducts and not coupon.storeWide:
 				if coupon.discountType == 'dollar':

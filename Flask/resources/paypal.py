@@ -42,6 +42,7 @@ class PayPalCreateTransactionApi(Resource):
 			total = calculate_discount_price(order.products, order.coupons)
 			discount = calculate_order_amount(order.products) - total
 			amount = total - discount
+			amount += amount * order.taxRate
 			requestBody = {
 				"intent": "CAPTURE",
 				"application_context": {

@@ -9,7 +9,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from mongoengine.errors import FieldDoesNotExist, NotUniqueError, DoesNotExist, ValidationError, InvalidQueryError
 from resources.errors import SchemaValidationError, InternalServerError, UnauthorizedError
 
-from database.models import Order, CartItem, Product, Coupon
+from database.models import Order, CartItem, Product, Coupon, UsTaxJurisdiction
 from services.logging_service import writeWarningToLog
 
 class OrdersApi(Resource):
@@ -64,12 +64,17 @@ class OrdersApi(Resource):
 	def post(self):
 		try:
 			body = request.get_json()
-			products = list(map(lambda p: CartItem(product=p['id'], qty=p['qty']), body['products']))
+			products = []
+			#products = list(map(lambda p: CartItem(product=p['id'], qty=p['qty']), body['products']))
+			for p in body['products']:
+				product = Product.objects.get(id=p['id'])
+				products.append(CartItem(product=product, qty=p['qty'], price=product.price))
 			coupons = list(map(lambda c: Coupon.objects.get(id=c['id']), body['coupons']))
-			order = Order(orderer=get_jwt_identity(), orderStatus='not placed', addresses=body['addresses'], products=products, coupons=coupons)
+			taxJurisdiction = UsTaxJurisdiction.objects.get(zip=str(int(body['addresses']['shipping']['zip'])))
+			order = Order(orderer=get_jwt_identity(), orderStatus='not placed', addresses=body['addresses'], products=products, coupons=coupons, taxRate=taxJurisdiction.estimatedCombinedRate)
 			order.save()
 			return str(order.id), 200
-		except (FieldDoesNotExist, ValidationError):
+		except (FieldDoesNotExist, ValidationError, DoesNotExist):
 			raise SchemaValidationError
 		except UnauthorizedError:
 			raise UnauthorizedError
@@ -107,8 +112,9 @@ class OrderApi(Resource):
 				except DoesNotExist:
 					order = Order.objects.get(id=id)
 					return { 'orderStatus': order.orderStatus }
-				except Exception:
-					raise InternalServerError		
+				except Exception as e:
+					writeWarningToLog('Unhandled exception in resources.order.OrderApi get internal try/catch block', e)
+					raise InternalServerError
 			else:
 				order = Order.objects.get(id=id)
 				return { 'orderStatus': order.orderStatus }

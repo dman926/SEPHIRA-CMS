@@ -43,6 +43,7 @@ class StripeCheckoutApi(Resource):
 			}
 			email = body['email']
 			amount = calculate_discount_price(order.products, order.coupons)
+			amount += amount * order.taxRate
 			amount = round(amount * 100) # Convert for stripe
 			intent = None
 			if get_jwt_identity():
@@ -84,7 +85,7 @@ class StripeCheckoutApi(Resource):
 		except DoesNotExist:
 			raise UnauthorizedError
 		except Exception as e:
-			writeWarningToLog('Unhandled exception in resources.stripe.CheckoutPaymentApi post: ' + str(e))
+			writeWarningToLog('Unhandled exception in resources.stripe.CheckoutPaymentApi post', str(e))
 			raise InternalServerError
 
 class StripeApi(Resource):

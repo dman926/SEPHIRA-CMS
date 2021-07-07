@@ -34,6 +34,7 @@ class CoinbaseCheckoutApi(Resource):
 		body = request.get_json()
 		order = Order.objects.get(id=body['orderID'], orderer=get_jwt_identity())
 		amount = calculate_discount_price(order.products, order.coupons)
+		amount += amount * order.taxRate
 		charge_info = {
 			'name': 'Test Charge', # TODO: Change this
 			'description': 'Test Description', # TODO: Change this

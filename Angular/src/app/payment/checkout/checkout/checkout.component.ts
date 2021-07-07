@@ -63,6 +63,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 	filteredCountries: Observable<CountryPair[]>;
 	filteredCountries2: Observable<CountryPair[]>;
 	taxRate: TaxRate | null;
+	orderID: string | null;
 
 	cantEdit: boolean;
 
@@ -120,6 +121,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 			this.filteredCountries2 = new Observable<CountryPair[]>();
 		}
 		this.taxRate = null;
+		this.orderID = null;
 		this.subs = [];
 	}
 
@@ -235,8 +237,10 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 		if (accessToken) {
 			headers = headers.append('Authorization', 'Bearer ' + accessToken);
 		}
-		this.http.post(environment.apiServer + 'order/orders', { addresses: this.getAddressDetails(), products: this.products, coupons: this.coupons }, { headers }).toPromise().then(orderID => {
-			document.getElementById('paypal-button-container')!.innerHTML = '';
+		document.getElementById('paypal-button-container')!.innerHTML = '';
+		this.coinbaseCommerceRes = null;
+		this.http.post<string>(environment.apiServer + 'order/orders', { addresses: this.getAddressDetails(), products: this.products, coupons: this.coupons }, { headers }).toPromise().then(orderID => {
+			this.orderID = orderID;
 			paypal.Buttons({
 				createOrder: async (data: any, actions: any) => {
 					const res = await this.http.post(environment.apiServer + 'payment/paypal/checkout', { orderID, location: window.location.protocol + '//' + window.location.hostname + ':' + window.location.port }, { headers }).toPromise();
@@ -252,7 +256,6 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 				res.expires_at = new Date(res.expires_at);
 				return res;
 			})).toPromise().then(res => {
-				console.log(res);
 				this.coinbaseCommerceRes = res
 			})
 		});
@@ -266,7 +269,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 		}
 		const email = this.billingForm.get('email')!.value;
 		const addresses = this.getAddressDetails();
-		return this.http.post<string>(environment.apiServer + 'payment/stripe/checkout', { paymentMethodID, email, addresses, products: this.products, coupons: this.coupons }, { headers });
+		return this.http.post<string>(environment.apiServer + 'payment/stripe/checkout', { paymentMethodID, email, addresses, orderID: this.orderID  }, { headers });
 	}
 
 	addCoupon(event: MatChipInputEvent): void {

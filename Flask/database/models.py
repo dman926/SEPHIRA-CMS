@@ -44,7 +44,7 @@ class Post(db.Document):
 
 	def serialize(self):
 		return {
-			'id': str(self.pk),
+			'id': str(self.id),
 			'author': {
 				'id': str(self.author.id),
 				'firstName': self.author.firstName,
@@ -67,13 +67,24 @@ class CartItem(db.EmbeddedDocument):
 	product = db.ReferenceField('Product')
 	qty = db.IntField()
 
-	def serialize(self):
-		return {
-			'id': str(self.product.pk),
-			'name': self.product.title,
-			'price': float(self.product.price),
-			'qty': self.qty
-		}
+	# For orders
+	price = db.DecimalField(precision=2)
+
+	def serialize(self, order=False):
+		if order:
+			return {
+				'id': str(self.product.id),
+				'product': self.product.serialize(),
+				'qty': self.qty,
+				'price': float(self.price)
+			}
+		else:
+			return {
+				'id': str(self.product.id),
+				'name': self.product.title,
+				'price': float(self.product.price),
+				'qty': self.qty
+			}
 
 class User(db.Document):
 	email = db.EmailField(required=True, unique=True)
@@ -108,7 +119,7 @@ class User(db.Document):
 
 	def serialize(self):
 		return {
-			'id': str(self.pk),
+			'id': str(self.id),
 			'email': self.email,
 			'twoFactorEnabled': self.twoFactorEnabled,
 			'admin': self.admin,
@@ -123,7 +134,7 @@ class Product(Post):
 	img = db.ListField(db.StringField())
 	price = db.DecimalField(precision=2)
 	digital = db.BooleanField(default=False)
-	tax = db.FloatField()
+	taxable = db.DictField()
 
 	totalReviews = db.IntField(default=0)
 	avgReviewScore = db.FloatField(default=0)
@@ -134,7 +145,7 @@ class Product(Post):
 
 	def serialize(self):
 		return {
-			'id': str(self.pk),
+			'id': str(self.id),
 			'author': {
 				'id': str(self.author.id),
 				'firstName': self.author.firstName,
@@ -152,7 +163,7 @@ class Product(Post):
 			'img': self.img,
 			'price': float(self.price),
 			"digital": self.digital,
-			"tax": self.tax,
+			"taxable": self.taxable,
 			'totalReviews': self.totalReviews,
 			'avgReviewScore': round(self.avgReviewScore, 1) # Round to 1 decimal place
 		}
@@ -162,24 +173,32 @@ class Order(db.Document):
 	orderStatus = db.StringField() # can be 'not placed', 'pending', 'paid', 'shipped', 'completed', 'failed'
 	products = db.EmbeddedDocumentListField('CartItem')
 	coupons = db.ListField(db.ReferenceField('Coupon'))
+	taxRate = db.FloatField()
 	addresses = db.DictField()
 	paymentIntentID = db.StringField()
 	paypalCaptureID = db.StringField()
 	createdAt = db.DateTimeField(default=datetime.datetime.now)
 	modified = db.DateTimeField(default=datetime.datetime.now)
 
+	meta = {
+		'indexes': [
+			'orderer'
+		]
+	}
+
 	def serialize(self):
-		mappedProducts = list(map(lambda p: p.serialize(), self.products))
+		mappedProducts = list(map(lambda p: p.serialize(True), self.products))
 		mappedCoupons = list(map(lambda c: c.serialize(), self.coupons))
 		orderer = None
 		if self.orderer:
-			orderer = str(self.orderer.pk)
+			orderer = str(self.orderer.id)
 		return {
-			'id': str(self.pk),
+			'id': str(self.id),
 			'orderer': orderer,
 			'orderStatus': self.orderStatus,
 			'products': mappedProducts,
 			'coupons': mappedCoupons,
+			'taxRate': self.taxRate,
 			'addresses': self.addresses,
 			'createdAt': str(self.createdAt)
 		}
@@ -192,11 +211,11 @@ class Review(db.Document):
 
 	def serialize(self):
 		return {
-			'id': str(self.pk),
+			'id': str(self.id),
 			'reviewer': {
 				'firstName': self.reviewer.firstName
 			},
-			'product': str(self.product.pk),
+			'product': str(self.product.id),
 			'score': float(self.score),
 			'review': self.review
 		}
@@ -212,7 +231,7 @@ class Coupon(Post):
 
 	def serialize(self):
 		return {
-			'id': str(self.pk),
+			'id': str(self.id),
 			'author': {
 				'id': str(self.author.id),
 				'firstName': self.author.firstName,
