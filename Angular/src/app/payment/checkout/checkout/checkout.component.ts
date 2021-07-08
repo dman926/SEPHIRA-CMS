@@ -132,57 +132,66 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
 		this.cartService.getCart().toPromise().then(cart => {
 			this.products = cart;
-		});
 
-		this.scriptLoader.load('stripe', 'paypal').then(data => {
-			if (data[0].loaded) {
-				this.stripe = Stripe(environment.stripePublicKey);
-				const elements = this.stripe!.elements();
-				const style = {
-					base: {
-						color: '#32325d',
-						fontFamily: 'Arial, sans-serif',
-						fontSmoothing: 'antialiased',
-						fontSize: '16px',
-						'::placeholder': {
-							color: '#32325d'
+			this.scriptLoader.load('stripe', 'paypal').then(data => {
+				if (data[0].loaded) {
+					this.stripe = Stripe(environment.stripePublicKey);
+					const elements = this.stripe!.elements();
+					const style = {
+						base: {
+							color: '#32325d',
+							fontFamily: 'Arial, sans-serif',
+							fontSmoothing: 'antialiased',
+							fontSize: '16px',
+							'::placeholder': {
+								color: '#32325d'
+							}
+						},
+						invalid: {
+							fontFamily: 'Arial, sans-serif',
+							color: '#fa755a',
+							iconColor: '#fa755a'
 						}
-					},
-					invalid: {
-						fontFamily: 'Arial, sans-serif',
-						color: '#fa755a',
-						iconColor: '#fa755a'
-					}
-				};
-				const card = elements.create('card', { style });
+					};
+					const card = elements.create('card', { style });
 
-				setTimeout(() => {
-					card.mount('#card-element');
+					setTimeout(() => {
+						card.mount('#card-element');
 
-					card.on('change', event => {
-						// Disable the Pay button if there are no card details in the Element
-						const button = document.querySelector('button');
-						const cardError = document.querySelector('#card-error');
-						if (event && event.error && button && cardError) {
-							button.disabled = event.empty;
-							cardError.textContent = event.error ? event.error.message ? event.error.message : null : '';
-						}
-					});
-					const form = document.getElementById('stripe-payment-form');
-					if (form) {
-						form.addEventListener('submit', event => {
-							event.preventDefault();
-							// Complete payment when the submit button is clicked
-							this.createStripePaymentMethod(card);
+						card.on('change', event => {
+							// Disable the Pay button if there are no card details in the Element
+							const button = document.querySelector('button');
+							const cardError = document.querySelector('#card-error');
+							if (event && event.error && button && cardError) {
+								button.disabled = event.empty;
+								cardError.textContent = event.error ? event.error.message ? event.error.message : null : '';
+							}
 						});
-					}
-				}, 250);
-			} else {
-				throw new Error('\'stripe\' failed to load');
-			}
-			if(!data[1].loaded) {
-				throw new Error('\'paypal\' failed to load');
-			}
+						const form = document.getElementById('stripe-payment-form');
+						if (form) {
+							form.addEventListener('submit', event => {
+								event.preventDefault();
+								// Complete payment when the submit button is clicked
+								this.createStripePaymentMethod(card);
+							});
+						}
+					}, 250);
+				} else {
+					throw new Error('\'stripe\' failed to load');
+				}
+				if (!data[1].loaded) {
+					throw new Error('\'paypal\' failed to load');
+				}
+
+				let headers = new HttpHeaders();
+				const accessToken = localStorage.getItem('accessToken');
+				if (accessToken) {
+					headers = headers.append('Authorization', 'Bearer ' + accessToken);
+				}
+				this.http.post<string>(environment.apiServer + 'order/orders', { products: this.products }, { headers }).toPromise().then(orderID => {
+					this.orderID = orderID
+				});
+			});
 		});
 
 		this.subs.push(this.addressForm.get('zip')!.valueChanges.pipe(debounceTime(500)).subscribe(val => {
@@ -225,7 +234,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 			} else {
 				this.submitPaymentMethod(res.paymentMethod!.id).toPromise().then(paymentRes => {
 					this.cartService.clearCart();
-					this.router.navigate(['/checkout/placed'], { queryParams: { id: paymentRes }});
+					this.router.navigate(['/checkout/placed'], { queryParams: { id: paymentRes } });
 				});
 			}
 		});
@@ -239,8 +248,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 		}
 		document.getElementById('paypal-button-container')!.innerHTML = '';
 		this.coinbaseCommerceRes = null;
-		this.http.post<string>(environment.apiServer + 'order/orders', { addresses: this.getAddressDetails(), products: this.products, coupons: this.coupons }, { headers }).toPromise().then(orderID => {
-			this.orderID = orderID;
+		const orderID = this.orderID;
+		this.http.put<string>(environment.apiServer + 'order/order/' + orderID, { addresses: this.getAddressDetails(), coupons: this.coupons }, { headers }).toPromise().then(res => {
 			paypal.Buttons({
 				createOrder: async (data: any, actions: any) => {
 					const res = await this.http.post(environment.apiServer + 'payment/paypal/checkout', { orderID, location: window.location.protocol + '//' + window.location.hostname + ':' + window.location.port }, { headers }).toPromise();
@@ -251,25 +260,25 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 					this.cartService.clearCart();
 					this.router.navigate(['/checkout/placed'], { queryParams: { id: res } });
 				}
-			}).render('#paypal-button-container');	
+			}).render('#paypal-button-container');
 			this.http.post<CoinbaseRes>(environment.apiServer + 'payment/coinbase/checkout', { orderID, location: window.location.protocol + '//' + window.location.hostname + ':' + window.location.port }, { headers }).pipe(map(res => {
 				res.expires_at = new Date(res.expires_at);
 				return res;
 			})).toPromise().then(res => {
 				this.coinbaseCommerceRes = res
-			})
+			});
 		});
 	}
 
 	private submitPaymentMethod(paymentMethodID: any): Observable<any> {
 		const accessToken = localStorage.getItem('accessToken');
-		let headers = new HttpHeaders();	
+		let headers = new HttpHeaders();
 		if (accessToken) {
 			headers = headers.append('Authorization', 'Bearer ' + accessToken);
 		}
 		const email = this.billingForm.get('email')!.value;
 		const addresses = this.getAddressDetails();
-		return this.http.post<string>(environment.apiServer + 'payment/stripe/checkout', { paymentMethodID, email, addresses, orderID: this.orderID  }, { headers });
+		return this.http.post<string>(environment.apiServer + 'payment/stripe/checkout', { paymentMethodID, email, addresses, orderID: this.orderID }, { headers });
 	}
 
 	addCoupon(event: MatChipInputEvent): void {
@@ -308,8 +317,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 				this.coupons.forEach(coupon => {
 					if (coupon.discountType === type && coupon.storeWide === storeWide) {
 						sortedCoupons.push(coupon);
-					} 
-				});	
+					}
+				});
 			});
 		});
 		let total = 0;

@@ -44,14 +44,6 @@ class OrdersApi(Resource):
 				'type': 'object',
 				'schema': None,
 				'required': True
-			},
-			{
-				'name': 'coupons',
-				'description': 'A list of coupons',
-				'in': 'body',
-				'type': 'object',
-				'schema': None,
-				'required': True
 			}
 		],
 		'responses': {
@@ -65,13 +57,10 @@ class OrdersApi(Resource):
 		try:
 			body = request.get_json()
 			products = []
-			#products = list(map(lambda p: CartItem(product=p['id'], qty=p['qty']), body['products']))
 			for p in body['products']:
 				product = Product.objects.get(id=p['id'])
 				products.append(CartItem(product=product, qty=p['qty'], price=product.price))
-			coupons = list(map(lambda c: Coupon.objects.get(id=c['id']), body['coupons']))
-			taxJurisdiction = UsTaxJurisdiction.objects.get(zip=str(int(body['addresses']['shipping']['zip'])))
-			order = Order(orderer=get_jwt_identity(), orderStatus='not placed', addresses=body['addresses'], products=products, coupons=coupons, taxRate=taxJurisdiction.estimatedCombinedRate)
+			order = Order(orderer=get_jwt_identity(), orderStatus='not placed', products=products)
 			order.save()
 			return str(order.id), 200
 		except (FieldDoesNotExist, ValidationError, DoesNotExist):
@@ -109,7 +98,7 @@ class OrderApi(Resource):
 				try:
 					order = Order.objects.get(id=id, orderer=get_jwt_identity())
 					return jsonify(order.serialize())
-				except DoesNotExist:
+				except DoesNotExist: # Shouldn't happed, but just in case
 					order = Order.objects.get(id=id)
 					return { 'orderStatus': order.orderStatus }
 				except Exception as e:
@@ -121,3 +110,52 @@ class OrderApi(Resource):
 		except Exception as e:
 			writeWarningToLog('Unhandled exception in resources.order.OrderApi get', e)
 			raise InternalServerError
+	@swagger.doc({
+		'tags': ['Order'],
+		'description': 'Update the order addresses and/or coupons. Must be signed in as the orderer',
+		'parameters': [
+			{
+				'name': 'id',
+				'description': 'The item id',
+				'in': 'path',
+				'type': 'string',
+				'required': True
+			},
+			{
+				'name': 'addresses',
+				'description': 'The addresses',
+				'in': 'body',
+				'type': 'object',
+				'schema': None,
+				'required': False
+			},
+			{
+				'name': 'coupons',
+				'description': 'The coupons',
+				'in': 'body',
+				'type': 'object',
+				'schema': None,
+				'required': False
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'Order updated',
+			}
+		}
+	})
+	@jwt_required(optional=True)
+	def put(self, id):
+		try:
+			body = request.get_json()
+			order = Order.objects.get(id=id, orderer=get_jwt_identity())
+			if (body.get('addresses')):
+				taxJurisdiction = UsTaxJurisdiction.objects.get(zip=str(int(body['addresses']['shipping']['zip'])))
+				order.update(addresses=body['addresses'], taxRate=taxJurisdiction.estimatedCombinedRate)
+			if (body.get('coupons')):
+				coupons = list(map(lambda c: Coupon.objects.get(id=c['id']), body['coupons']))
+				order.update(coupons=coupons)
+			return 'ok', 200
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.order.OrderApi put', e)
+			raise InternalServerError()

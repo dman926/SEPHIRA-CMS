@@ -16,6 +16,7 @@ import { CheckoutRedirectComponent } from './checkout-redirect/checkout-redirect
 import { MatListModule } from '@angular/material/list';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @NgModule({
 	declarations: [
@@ -37,7 +38,8 @@ import { MatIconModule } from '@angular/material/icon';
 		MatButtonModule,
 		MatListModule,
 		MatChipsModule,
-		MatIconModule
+		MatIconModule,
+		MatProgressSpinnerModule
 	]
 })
 export class CheckoutModule { }

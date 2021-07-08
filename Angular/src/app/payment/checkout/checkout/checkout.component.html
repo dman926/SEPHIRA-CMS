@@ -1,4 +1,9 @@
-<section id="checkout-wrapper">
+<ng-template #loaderSpinner *ngIf="!orderID">
+    <div id="loader-spinner">
+        <mat-spinner></mat-spinner>
+    </div>
+</ng-template>
+<section id="checkout-wrapper" [hidden]="!orderID">
     <mat-vertical-stepper [linear]="true" #stepper>
         <mat-step [editable]="!cantEdit" [stepControl]="addressForm" label="Shipping Address">
             <form [formGroup]="addressForm">
