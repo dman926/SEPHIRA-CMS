@@ -83,7 +83,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
 		this.addressForm = new FormGroup({
 			fullName: new FormControl('', [Validators.required]),
-			country: new FormControl('', [Validators.required]),
+			country: new FormControl({ value: 'US', disabled: true }, [Validators.required]),
 			street1: new FormControl('', [Validators.required]),
 			street2: new FormControl(''),
 			stateProvidenceRegion: new FormControl('', [Validators.required]),
@@ -95,7 +95,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 		this.billingForm = new FormGroup({
 			email: new FormControl('', [Validators.required, Validators.email]),
 			fullName: new FormControl('', [Validators.required]),
-			country: new FormControl('', [Validators.required]),
+			country: new FormControl({ value: 'US', disabled: true }, [Validators.required]),
 			street1: new FormControl('', [Validators.required]),
 			street2: new FormControl(''),
 			stateProvidenceRegion: new FormControl('', [Validators.required]),

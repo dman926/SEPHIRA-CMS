@@ -110,7 +110,7 @@
     <div id="checkout-right">
         <mat-list id="products">
             <mat-list-item *ngFor="let product of products">
-                {{ product.name }} {{ product.price }} x{{ product.qty }}
+                {{ product.name }} {{ product.price | currency }} x{{ product.qty }}
             </mat-list-item>
             <mat-list-item>Subtotal: {{ calcSubtotal() | currency }}</mat-list-item>
             <mat-list-item>Discount: {{ calcSubtotal() - calcDiscountPrice() | currency }}</mat-list-item>
