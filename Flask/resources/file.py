@@ -2,7 +2,7 @@
 File Endpoints
 '''
 
-from flask import jsonify, request, url_for, current_app
+from flask import jsonify, request, current_app
 from flask_restful_swagger_2 import Resource, swagger
 from flask_jwt_extended import jwt_required, get_jwt_identity
 

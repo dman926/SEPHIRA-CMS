@@ -6,7 +6,7 @@ from flask import jsonify, request
 from flask_restful_swagger_2 import Resource, swagger
 
 from mongoengine.errors import DoesNotExist
-from resources.errors import SchemaValidationError, InternalServerError, ResourceNotFoundError
+from resources.errors import InternalServerError, ResourceNotFoundError
 
 from database.models import UsTaxJurisdiction
 

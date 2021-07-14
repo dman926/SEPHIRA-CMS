@@ -9,7 +9,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from mongoengine.errors import DoesNotExist
 from resources.errors import UnauthorizedError, InternalServerError
 
-from database.models import CartItem, Order
+from database.models import Order
 
 from app import paypal_client
 from paypalcheckoutsdk.orders import OrdersCreateRequest, OrdersCaptureRequest, OrdersGetRequest

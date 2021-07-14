@@ -4,7 +4,6 @@ Post routes
 
 from flask import jsonify, request
 from flask_restful_swagger_2 import Resource, swagger
-from flask_jwt_extended import jwt_required
 
 from mongoengine.errors import DoesNotExist
 from resources.errors import ResourceNotFoundError, InternalServerError

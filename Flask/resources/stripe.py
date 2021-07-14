@@ -2,18 +2,17 @@
 Stripe routes
 '''
 
-from flask import jsonify, request
+from flask import request
 from flask_restful_swagger_2 import Resource, swagger
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from stripe.api_resources import payment_method
 
 from mongoengine.errors import DoesNotExist
-from resources.errors import InternalServerError, UnauthorizedError, SchemaValidationError
+from resources.errors import InternalServerError, UnauthorizedError
 
-from database.models import Order, User, CartItem, Coupon
+from database.models import Order, User
 
 from app import socketio
-from services.price_service import calculate_order_amount, calculate_discount_price
+from services.price_service import calculate_discount_price
 from services.logging_service import writeWarningToLog
 
 import json

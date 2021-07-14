@@ -11,7 +11,6 @@ from resources.errors import UnauthorizedError, InternalServerError, ResourceNot
 
 from database.models import User, Page, Product, Order, Coupon
 
-from services.util_service import make_ngrams
 from services.logging_service import writeWarningToLog
 
 import datetime
