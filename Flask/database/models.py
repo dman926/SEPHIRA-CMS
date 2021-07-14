@@ -285,4 +285,35 @@ class UsTaxJurisdiction(db.Document):
 			'riskLevel': self.riskLevel
 		}
 
+class ShippingRate(db.EmbeddedDocument):
+	rate = db.FloatField()
+	type = db.StringField(choices=['dollar', 'percent'])
+	minCutoff = db.FloatField()
+	maxCutoff = db.FloatField()
+
+	def serialize(self):
+		return {
+			'rate': self.rate,
+			'type': self.type,
+			'minCutoff': self.minCutoff,
+			'maxCutoff': self.maxCutoff
+		}
+
+class UsShippingZone(db.Document):
+	applicableStates = db.ListField(db.StringField(unique=True, choices=[
+		"AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA", 
+		"HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", 
+		"MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", 
+		"NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", 
+		"SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
+	]))
+	rates = db.EmbeddedDocumentListField('ShippingRate')
+
+	def serialize(self):
+		mappedRates = list(map(lambda r: r.serialize(), self.rates))
+		return {
+			'applicableStates': self.applicableStates,
+			'rates': mappedRates
+		}
+
 User.register_delete_rule(Post, 'author', db.CASCADE)

@@ -10,13 +10,14 @@ from .product import ProductsApi, ProductApi, ProductCountApi, ProductReviewsApi
 
 from .order import OrdersApi, OrderApi
 from .cart import CartApi, CouponCheckApi
-from .usTaxJurisdiction import UsTaxJurisdictionAPI
+from .usTaxJurisdiction import UsTaxJurisdictionApi
+from .usShippingZone import UsShippingZoneApi
 
 from .stripe import StripeCheckoutApi, StripeApi
 from .paypal import PayPalCreateTransactionApi, PayPalCaptureTransactionApi, PayPalApi
 from .coinbase import CoinbaseCheckoutApi, CoinbaseApi
 
-from .admin import AdminApi, AdminUsersApi, AdminUserApi, AdminUsersCountApi, AdminPagesApi, AdminPageApi, AdminPagesCountApi, AdminPageSlugApi, AdminProductsApi, AdminProductApi, AdminProductCountApi, AdminProductSlugAvailableApi, AdminCouponsApi, AdminCouponApi, AdminCouponCountApi, AdminCouponSlugAvailableApi, AdminOrdersApi, AdminOrderApi, AdminOrderCountApi
+from .admin import AdminApi, AdminUsersApi, AdminUserApi, AdminUsersCountApi, AdminPagesApi, AdminPageApi, AdminPagesCountApi, AdminPageSlugApi, AdminProductsApi, AdminProductApi, AdminProductCountApi, AdminProductSlugAvailableApi, AdminCouponsApi, AdminCouponApi, AdminCouponCountApi, AdminCouponSlugAvailableApi, AdminOrdersApi, AdminOrderApi, AdminOrderCountApi,AdminUsShippingZonesApi, AdminUsShippingZoneApi, AdminUsShippingZoneCountApi
 
 import resources.sockets
 
@@ -47,7 +48,8 @@ def initialize_routes(api, base):
 	api.add_resource(OrderApi, base + 'order/order/<id>')
 	api.add_resource(CartApi, base + 'cart/cart')
 	api.add_resource(CouponCheckApi, base + 'cart/couponCheck')
-	api.add_resource(UsTaxJurisdictionAPI, base + 'tax/us')
+	api.add_resource(UsTaxJurisdictionApi, base + 'tax/us')
+	api.add_resource(UsShippingZoneApi, base + 'shipping/us')
 
 	api.add_resource(StripeCheckoutApi, base + 'payment/stripe/checkout')
 	api.add_resource(StripeApi, base + 'payment/stripe/webhook')
@@ -76,3 +78,6 @@ def initialize_routes(api, base):
 	api.add_resource(AdminOrdersApi, base + 'admin/orders')
 	api.add_resource(AdminOrderApi, base + 'admin/order/<id>')
 	api.add_resource(AdminOrderCountApi, base + 'admin/orders/count')
+	api.add_resource(AdminUsShippingZonesApi, base + 'admin/usShippingZones')
+	api.add_resource(AdminUsShippingZoneApi, base + 'admin/usShippingZone/<id>')
+	api.add_resource(AdminUsShippingZoneCountApi, base + 'admin/usShippingZone/count')

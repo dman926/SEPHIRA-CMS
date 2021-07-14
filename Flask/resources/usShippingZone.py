@@ -1,5 +1,5 @@
 '''
-US Tax Jurisdiction routes
+US Shipping Zone routes
 '''
 
 from flask import jsonify, request
@@ -8,18 +8,18 @@ from flask_restful_swagger_2 import Resource, swagger
 from mongoengine.errors import DoesNotExist
 from resources.errors import InternalServerError, ResourceNotFoundError
 
-from database.models import UsTaxJurisdiction
+from database.models import UsShippingZone
 
 from services.logging_service import writeWarningToLog
 
-class UsTaxJurisdictionApi(Resource):
+class UsShippingZoneApi(Resource):
 	@swagger.doc({
-		'tags': ['Tax'],
-		'description': 'Get the tax rates for the given ZIP',
+		'tags': ['Shipping'],
+		'description': 'Get the shipping rates for the given state code',
 		'parameters': [
 			{
-				'name': 'zip',
-				'description': 'The requested ZIP',
+				'name': 'state',
+				'description': 'The requested state code',
 				'in': 'query',
 				'type': 'string',
 				'schema': None,
@@ -28,16 +28,16 @@ class UsTaxJurisdictionApi(Resource):
 		],
 		'responses': {
 			'200': {
-				'description': 'The tax rates'
+				'description': 'The shipping rates'
 			}
 		}
 	})
 	def get(self):
 		try:
-			taxJurisdiction = UsTaxJurisdiction.objects.get(zip=str(int(request.args['zip']))) # strip leading 0s if present
-			return jsonify(taxJurisdiction.serialize())
+			shippingZone = UsShippingZone.objects.get(applicableStates=request.args['state']) # strip leading 0s if present
+			return jsonify(shippingZone.serialize())
 		except DoesNotExist:
 			raise ResourceNotFoundError
 		except Exception as e:
-			writeWarningToLog('Unhandled exception in resources.usTaxJurisdiction.UsTaxJurisdictionAPI get', e)
+			writeWarningToLog('Unhandled exception in resources.usShippingZone.UsShippingZoneApi get', e)
 			raise InternalServerError

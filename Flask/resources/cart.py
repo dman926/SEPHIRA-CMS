@@ -33,7 +33,7 @@ class CartApi(Resource):
 			products = list(map(lambda p: p.serialize(), user.cart))
 			return jsonify(products)
 		except Exception as e:
-			writeWarningToLog('Unhandled exception in resources.cart.CartApi get: ' + str(e))
+			writeWarningToLog('Unhandled exception in resources.cart.CartApi get', e)
 			raise InternalServerError
 	@swagger.doc({
 		'tags': ['Cart'],
@@ -71,7 +71,7 @@ class CartApi(Resource):
 			user.save()
 			return 'ok', 200
 		except Exception as e:
-			writeWarningToLog('Unhandled exception in resources.cart.CartApi put: ' + str(e))
+			writeWarningToLog('Unhandled exception in resources.cart.CartApi put', e)
 			raise InternalServerError
 
 class CouponCheckApi(Resource):
@@ -124,5 +124,5 @@ class CouponCheckApi(Resource):
 		except DoesNotExist:
 			return False
 		except Exception as e:
-			writeWarningToLog('Unhandled exception in resources.cart.CouponCheckApi post: ' + str(e))
+			writeWarningToLog('Unhandled exception in resources.cart.CouponCheckApi post', e)
 			raise InternalServerError

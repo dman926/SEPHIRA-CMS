@@ -9,7 +9,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from mongoengine.errors import DoesNotExist, FieldDoesNotExist, ValidationError, InvalidQueryError
 from resources.errors import UnauthorizedError, InternalServerError, ResourceNotFoundError, SchemaValidationError
 
-from database.models import User, Page, Product, Order, Coupon
+from database.models import User, Page, Product, Order, Coupon, UsShippingZone
 
 from services.logging_service import writeWarningToLog
 
@@ -1018,12 +1018,12 @@ class AdminOrderApi(Resource):
 			writeWarningToLog('Unhandled exception in resources.admin.AdminOrderApi put', e)
 			raise InternalServerError
 	@swagger.doc({
-		'tags': ['Admin', 'Coupon'],
-		'description': 'Delete the coupon',
+		'tags': ['Admin', 'Order'],
+		'description': 'Delete the Order',
 		'parameters': [
 			{
 				'name': 'id',
-				'description': 'The coupon id',
+				'description': 'The order id',
 				'in': 'path',
 				'type': 'string',
 				'required': True
@@ -1031,7 +1031,7 @@ class AdminOrderApi(Resource):
 		],
 		'responses': {
 			'200': {
-				'description': 'Coupon deleted',
+				'description': 'Order deleted',
 			}
 		}
 	})
@@ -1070,4 +1070,168 @@ class AdminOrderCountApi(Resource):
 			return UnauthorizedError
 		except Exception as e:
 			writeWarningToLog('Unhandled exception in resources.admin.AdminOrderCountApi get', e)
+			raise InternalServerError
+
+class AdminUsShippingZonesApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin', 'Shipping'],
+		'description': 'Get all US shipping zones according to pagination criteria',
+		'parameters': [
+			{
+				'name': 'page',
+				'description': 'The page index',
+				'in': 'query',
+				'type': 'int',
+				'schema': None,
+				'required': False
+			},
+			{
+				'name': 'size',
+				'description': 'The page size',
+				'in': 'query',
+				'type': 'int',
+				'schema': None,
+				'required': False
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'An array of UsShippingZone'
+			}
+		}
+	})
+	@jwt_required()
+	def get(self):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			page = int(request.args.get('page', 0))
+			size = int(request.args.get('size', Order.objects.count()))
+			shippingZones = UsShippingZone.objects[page * size : page * size + size]
+			return jsonify(list(map(lambda s: s.serialize(), shippingZones)))
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminUsShippingZonesApi get', e)
+			raise InternalServerError
+
+class AdminUsShippingZoneApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin', 'Shipping'],
+		'description': 'Get the US shipping zone',
+		'parameters': [
+			{
+				'name': 'id',
+				'description': 'The US shipping zone id',
+				'in': 'path',
+				'type': 'string',
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'The US shipping zone',
+			}
+		}
+	})
+	@jwt_required()
+	def get(self, id):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			shippingZone = UsShippingZone.objects.get(id=id)
+			return jsonify(shippingZone.serialize())
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminUsShippingZoneApi get', e)
+			raise InternalServerError
+	@swagger.doc({
+		'tags': ['Admin', 'Shipping'],
+		'description': 'Update the US shipping zone',
+		'parameters': [
+			{
+				'name': 'id',
+				'description': 'The us shipping zone id',
+				'in': 'path',
+				'type': 'string',
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'US shipping zone updated',
+			}
+		}
+	})
+	@jwt_required()
+	def put(self, id):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			UsShippingZone.objects.get(id=id).update(**request.get_json())
+			return 'ok', 200
+		except InvalidQueryError:
+			raise SchemaValidationError
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminUsShippingZoneApi put', e)
+			raise InternalServerError
+	@swagger.doc({
+		'tags': ['Admin', 'Shipping'],
+		'description': 'Delete the coupon',
+		'parameters': [
+			{
+				'name': 'id',
+				'description': 'The coupon id',
+				'in': 'path',
+				'type': 'string',
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'Coupon deleted',
+			}
+		}
+	})
+	@jwt_required()
+	def delete(self, id):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			UsShippingZone.objects.get(id=id).delete()
+			return 'ok', 200
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminUsShippingZoneApi delete', e)
+			raise InternalServerError
+
+class AdminUsShippingZoneCountApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin', 'Shipping', 'Counter'],
+		'description': 'Get the number of US shipping zones',
+		'responses': {
+			'200': {
+				'description': 'The number of US shipping zones',
+			}
+		}
+	})
+	@jwt_required()
+	def get(self):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			return UsShippingZone.objects.count()
+		except UnauthorizedError:
+			return UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminUsShippingZoneCountApi get', e)
 			raise InternalServerError
