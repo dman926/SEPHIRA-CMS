@@ -161,7 +161,7 @@ class Product(Post):
 			'modified': str(self.modified),
 			'sku': self.sku,
 			'img': self.img,
-			'price': float(self.price),
+			'price': float(self.price) if self.price else None,
 			"digital": self.digital,
 			"taxable": self.taxable,
 			'totalReviews': self.totalReviews,

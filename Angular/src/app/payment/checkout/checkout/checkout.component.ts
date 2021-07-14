@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
 import { DynamicScriptLoaderService } from 'src/app/core/services/dynamic-script-loader.service';
 import { Coupon } from 'src/app/models/coupon';
 import { MatChipInputEvent } from '@angular/material/chips';
+import { ShippingZone } from 'src/app/models/shipping-zone';
 
 declare var paypal: any;
 
@@ -63,6 +64,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 	filteredCountries: Observable<CountryPair[]>;
 	filteredCountries2: Observable<CountryPair[]>;
 	taxRate: TaxRate | null;
+	shippingZone: ShippingZone | null;
 	orderID: string | null;
 
 	cantEdit: boolean;
@@ -121,6 +123,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 			this.filteredCountries2 = new Observable<CountryPair[]>();
 		}
 		this.taxRate = null;
+		this.shippingZone = null;
 		this.orderID = null;
 		this.subs = [];
 	}
@@ -193,6 +196,18 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 				});
 			});
 		});
+
+		this.subs.push(this.addressForm.get('stateProvidenceRegion')!.valueChanges.pipe(debounceTime(500)).subscribe(val => {
+			if (this.addressForm.get('stateProvidenceRegion')!.valid) {
+				const params = new HttpParams().append('state', val);
+				this.http.get<ShippingZone>(environment.apiServer + 'shipping/us', { params }).toPromise().then(shippingZone => {
+					this.shippingZone = shippingZone;
+					console.log(shippingZone);
+				}).catch(err => this.shippingZone = null);
+			} else {
+				this.shippingZone = null;
+			}
+		}))
 
 		this.subs.push(this.addressForm.get('zip')!.valueChanges.pipe(debounceTime(500)).subscribe(val => {
 			if (this.addressForm.get('zip')!.valid) {
