@@ -9,7 +9,8 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from mongoengine.errors import FieldDoesNotExist, DoesNotExist, ValidationError
 from resources.errors import SchemaValidationError, InternalServerError, UnauthorizedError
 
-from database.models import Order, CartItem, Product, Coupon, UsTaxJurisdiction
+from database.models import Order, CartItem, Product, Coupon, UsTaxJurisdiction, UsShippingZone
+from services.price_service import calculate_discount_price
 from services.logging_service import writeWarningToLog
 
 class OrdersApi(Resource):
@@ -151,7 +152,28 @@ class OrderApi(Resource):
 			order = Order.objects.get(id=id, orderer=get_jwt_identity())
 			if (body.get('addresses')):
 				taxJurisdiction = UsTaxJurisdiction.objects.get(zip=str(int(body['addresses']['shipping']['zip'])))
-				order.update(addresses=body['addresses'], taxRate=taxJurisdiction.estimatedCombinedRate)
+				shippingZone = None
+				try:
+					shippingZone = UsShippingZone.objects.get(applicableStates=body['addresses']['shipping']['region'])
+				except DoesNotExist:
+					shippingZone = UsShippingZone.objects.get(default=True)
+				rateCandidates = []
+				price = calculate_discount_price(order.products, order.coupons)
+				for rate in shippingZone.rates:
+					if ((rate.minCutoff != None and rate.minCutoff < price) or rate.minCutoff == None) and ((rate.maxCutoff != None and rate.maxCutoff > price) or rate.maxCutoff == None):
+						rateCandidates.append(rate)
+				match = None
+				for candidate in rateCandidates:
+					if match == None:
+						match = candidate
+					else:
+						if match.minCutoff == None and candidate.minCutoff != None:
+							match = candidate
+						elif match.maxCutoff == None and candidate.maxCutoff != None:
+							match = candidate
+						elif match.matchCutoff - match.minCutoff > candidate.maxCutoff - candidate.minCutoff:
+							match = candidate
+				order.update(addresses=body['addresses'], taxRate=taxJurisdiction.estimatedCombinedRate, shippingType=match.type, shippnigRate=match.rate)
 			if (body.get('coupons')):
 				coupons = list(map(lambda c: Coupon.objects.get(id=c['id']), body['coupons']))
 				order.update(coupons=coupons)

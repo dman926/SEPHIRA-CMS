@@ -209,12 +209,11 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 				const params = new HttpParams().append('state', val);
 				this.http.get<ShippingZone>(environment.apiServer + 'shipping/us', { params }).toPromise().then(shippingZone => {
 					this.shippingZone = shippingZone;
-					console.log(shippingZone);
 				}).catch(err => this.shippingZone = null);
 			} else {
 				this.shippingZone = null;
 			}
-		}))
+		}));
 
 		this.subs.push(this.addressForm.get('zip')!.valueChanges.pipe(debounceTime(500)).subscribe(val => {
 			if (this.addressForm.get('zip')!.valid) {

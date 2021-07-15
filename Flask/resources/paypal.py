@@ -43,6 +43,10 @@ class PayPalCreateTransactionApi(Resource):
 			discount = calculate_order_amount(order.products) - total
 			amount = total - discount
 			amount += amount * order.taxRate
+			if order.shippingType == 'dollar':
+				amount += order.shippingRate
+			elif order.shippingType == 'percent':
+				amount += amount * order.shippingRate
 			requestBody = {
 				"intent": "CAPTURE",
 				"application_context": {

@@ -35,6 +35,10 @@ class CoinbaseCheckoutApi(Resource):
 		order = Order.objects.get(id=body['orderID'], orderer=get_jwt_identity())
 		amount = calculate_discount_price(order.products, order.coupons)
 		amount += amount * order.taxRate
+		if order.shippingType == 'dollar':
+			amount += order.shippingRate
+		elif order.shippingType == 'percent':
+			amount += amount * order.shippingRate
 		charge_info = {
 			'name': 'Test Charge', # TODO: Change this
 			'description': 'Test Description', # TODO: Change this

@@ -43,6 +43,10 @@ class StripeCheckoutApi(Resource):
 			email = body['email']
 			amount = calculate_discount_price(order.products, order.coupons)
 			amount += amount * order.taxRate
+			if order.shippingType == 'dollar':
+				amount += order.shippingRate
+			elif order.shippingType == 'percent':
+				amount += amount * order.shippingRate
 			amount = round(amount * 100) # Convert for stripe
 			intent = None
 			if get_jwt_identity():

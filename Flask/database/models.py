@@ -174,6 +174,8 @@ class Order(db.Document):
 	products = db.EmbeddedDocumentListField('CartItem')
 	coupons = db.ListField(db.ReferenceField('Coupon'))
 	taxRate = db.FloatField()
+	shippingType = db.StringField(choices=['dollar', 'percent'])
+	shippingRate = db.FloatField()
 	addresses = db.DictField()
 	paymentIntentID = db.StringField()
 	paypalCaptureID = db.StringField()
@@ -199,8 +201,11 @@ class Order(db.Document):
 			'products': mappedProducts,
 			'coupons': mappedCoupons,
 			'taxRate': self.taxRate,
+			'shippingType': self.shippingType,
+			'shippingRate': self.shippingRate,
 			'addresses': self.addresses,
-			'createdAt': str(self.createdAt)
+			'createdAt': str(self.createdAt),
+			'modified': str(self.modified)
 		}
 
 class Review(db.Document):
@@ -221,7 +226,7 @@ class Review(db.Document):
 		}
 
 class Coupon(Post):
-	code = db.StringField()
+	code = db.StringField(unique=True)
 	discountType = db.StringField() # Can be 'percent' or 'dollar'
 	discount = db.FloatField()
 	storeWide = db.BooleanField(default=False)

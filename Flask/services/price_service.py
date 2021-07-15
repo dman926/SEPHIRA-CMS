@@ -1,12 +1,7 @@
-from database.models import Product
-
 def calculate_order_amount(items):
 	total = 0
 	for item in items:
-		try:
-			total += float(item.price) * item.qty
-		except Exception as e:
-			writeWarningToLog('Unhandled exception in services.util_service.calculate_order_amount', e)
+		total += float(item.price) * item.qty
 	return total
 
 def calculate_discount_price(items, coupons):
