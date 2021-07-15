@@ -7,12 +7,11 @@
 
 Create a secret.py file and store it in the same folder as app.py that contains:
 
-* stripe_sk (Shopping-Template only)
-* coinbase_commerce_api_key (Shopping-Template only)
-* coinbase_commerce_shared_secret (Shopping-Template only)
-* braintree_merchant_id (Shopping-Template only)
-* braintree_public_key (Shopping-Template only)
-* braintree_private_key (Shopping-Template only)
+* stripe_sk
+* coinbase_commerce_api_key
+* coinbase_commerce_shared_secret
+* paypal_client_id
+* paypal_secret
 * reCAPTCHA_V3_secret 
 
 To run the local (nonproduction) Flask server
