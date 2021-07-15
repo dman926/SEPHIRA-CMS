@@ -15,11 +15,19 @@ from flask_apscheduler import APScheduler
 
 from database.db import initialize_db
 from tasks.tasks import initialize_tasks
-from resources.errors import errors
 
-import os
+import os, logging
+
+import stripe
+from coinbase_commerce.client import Client
+from paypalcheckoutsdk.core import PayPalHttpClient, SandboxEnvironment, LiveEnvironment
+from secret import stripe_sk, paypal_client_id, paypal_secret, coinbase_commerce_api_key
 
 PRODUCTION = False
+
+stripe.api_key = stripe_sk
+ccClient = Client(api_key=coinbase_commerce_api_key)
+paypal_client = None
 
 app = Flask(__name__)
 if PRODUCTION:
@@ -35,6 +43,7 @@ if PRODUCTION:
 	resources = {r"/*": {"origins": "https://api.website.com"}}
 	socketResources = "api.website.com"
 	base = '/'
+	paypal_client = PayPalHttpClient(LiveEnvironment(client_id=paypal_client_id, client_secret=paypal_secret))
 else:
 	app.config['JWT_SECRET_KEY'] = 'super-secret'
 	app.config['MAIL_SERVER'] = "localhost"
@@ -48,6 +57,9 @@ else:
 	resources = {r"/*": {"origins": "http://localhost:4200"}}
 	socketResources = "http://localhost:4200"
 	base = '/api/'
+	paypal_client = PayPalHttpClient(SandboxEnvironment(client_id=paypal_client_id, client_secret=paypal_secret))
+
+logging.basicConfig(filename="log.log", level=logging.WARNING, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
 
 app.config['SCHEDULER_API_ENABLED'] = True
 

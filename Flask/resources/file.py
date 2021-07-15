@@ -2,13 +2,18 @@
 File Endpoints
 '''
 
-from flask import jsonify, request, url_for, current_app
+from flask import jsonify, request, current_app
 from flask_restful_swagger_2 import Resource, swagger
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from werkzeug.utils import secure_filename
 
+from PIL import Image
+from fractions import Fraction
+
 from .errors import InternalServerError, SchemaValidationError, FileNotFoundError
+
+from services.logging_service import writeWarningToLog
 
 import os
 
@@ -18,9 +23,6 @@ def allowed_file(filename):
 	return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 class UploaderApi(Resource):
-	'''
-	Upload file and return it's filename
-	'''
 	@swagger.doc({
 		'tags': ['File IO'],
 		'description': 'Upload a file to this users media folder.',
@@ -32,6 +34,14 @@ class UploaderApi(Resource):
 				'type': 'file',
 				'schema': None,
 				'required': True
+			},
+			{
+				'name': 'isThumbnail',
+				'description': 'If the file is a thumbnail.',
+				'in': 'body',
+				'type': 'boolean',
+				'schema': None,
+				'required': False
 			}
 		],
 		'responses': {
@@ -53,11 +63,11 @@ class UploaderApi(Resource):
 				# Make sure upload folder exists
 				path = current_app.config['UPLOAD_FOLDER']
 				if not os.path.isdir(path):
-					os.mkdir(path)
+					os.makedirs(path)
 				# Make sure the users folder exists inside upload folder
 				path = os.path.join(current_app.config['UPLOAD_FOLDER'], get_jwt_identity())
 				if not os.path.isdir(path):
-					os.mkdir(path)
+					os.makedirs(path)
 				path = os.path.join(current_app.config['UPLOAD_FOLDER'], get_jwt_identity(), filename)
 				# Handle filename collisions
 				if os.path.isfile(path):
@@ -70,14 +80,42 @@ class UploaderApi(Resource):
 					path = newPath
 					filenameSplit = filename.rsplit('.', 1)
 					filename = filenameSplit[0] + '_' + str(counter) + '.' + filenameSplit[1]
-				file.save(path)
-				# TODO: do compression/thumbnails here
+				
+				image = Image.open(file)
+				size = image.size
+				width = size[0]
+				height = size[1]
+				quality = 75 # Shouldn't go below 65
+				# Check if it's a thumbnail and crop/extend the image height to make it regular. 16:9 for normal images and 1:1 for thumbnails (used for products and profile images)
+				if request.form.get('isThumbnail') == 'true':
+					if (width / height) != 1:
+						heightMult = 1 / (1 / (width / height))
+						newHeight = int(height * heightMult)
+						
+						background = Image.new('RGB', (width, newHeight), (0, 0, 0))
+						offset = (0, int(round(((newHeight - height) / 2), 0)))
+						background.paste(image, offset)
+						background.save(path, optimize=True, quality=quality)
+					else:
+						image.save(path, optimize=True, quality=quality)
+				else:
+					if (width / height) != (16 / 9):
+						heightMult = 1 / ((16 / 9) / (width / height))
+						newHeight = int(height * heightMult)
+						background = Image.new('RGB', (width, newHeight), (0, 0, 0))
+						offset = (0, int(round(((newHeight - height) / 2), 0)))
+						background.paste(image, offset)
+						background.save(path, optimize=True, quality=quality)
+					else:
+						image.save(path, optimize=True, quality=quality)
 				return 'uploads/' + get_jwt_identity() + '/' + filename, 200
 			raise SchemaValidationError
 		except SchemaValidationError:
 			raise SchemaValidationError
-		except Exception:
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.file.UploaderApi post: ' + str(e))
 			raise InternalServerError
+
 
 class MediaApi(Resource):
 	@swagger.doc({
@@ -91,12 +129,22 @@ class MediaApi(Resource):
 	})
 	@jwt_required()
 	def get(self):
-		mediaPath = os.path.join(current_app.config['UPLOAD_FOLDER'], get_jwt_identity())
-		if os.path.isdir(mediaPath):
-			_, _, filenames = next(os.walk(mediaPath))
-			mappedFilenames = map(lambda file: '/assets/uploads/' + get_jwt_identity() + '/' + file, filenames)
-			return jsonify(list(mappedFilenames))
-		return ''
+		try:
+			mediaPath = os.path.join(current_app.config['UPLOAD_FOLDER'], get_jwt_identity())
+			if os.path.isdir(mediaPath):
+				_, _, filenames = next(os.walk(mediaPath))
+				def mapFilenames(file):
+					image = Image.open(os.path.join(mediaPath, file))
+					return {
+						'path': '/assets/uploads/' + get_jwt_identity() + '/' + file,
+						'ratio': str(Fraction(image.size[0], image.size[1]))
+					}
+				mappedFilenames = map(mapFilenames, filenames)
+				return jsonify(list(mappedFilenames))
+			return ''
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.file.MediaApi get: ' + str(e))
+			raise InternalServerError
 
 class SingleMediaApi(Resource):
 	@swagger.doc({
@@ -129,5 +177,6 @@ class SingleMediaApi(Resource):
 			raise FileNotFoundError
 		except FileNotFoundError:
 			raise FileNotFoundError
-		except Exception:
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.file.SingleMediaApi delete: ' + str(e))
 			raise InternalServerError

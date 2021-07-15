@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 
 import { AdminRoutingModule } from './admin-routing.module';
 import { HomeComponent } from './home/home.component';
-import { UsersComponent } from './users/users.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AdminService } from './admin.service';
@@ -12,8 +11,7 @@ import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
 	declarations: [
-		HomeComponent,
-		UsersComponent
+		HomeComponent
 	],
 	imports: [
 		CommonModule,

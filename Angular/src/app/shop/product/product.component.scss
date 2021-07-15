@@ -1,0 +1,31 @@
+div#product-head {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1em;
+    place-content: center;
+    div#img-gallery {
+        img#product-img {
+            width: 10em;
+            height: 10em;
+            display: block;
+            margin: auto;
+            object-fit: cover;
+            object-position: center;
+        }
+        div#img-subgallery {
+            overflow-x: scroll;
+            display: flex;
+            justify-content: center;
+            img {
+                width: 3em;
+                height: 3em;
+                object-fit: cover;
+                object-position: center;
+                border: 2px solid transparent;
+            }
+            img.selected {
+                border: 2px solid blue;
+            }
+        }
+    }
+}

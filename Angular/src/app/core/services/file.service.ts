@@ -1,6 +1,7 @@
 import { HttpClient, HttpEvent, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { Media } from 'src/app/models/media';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -12,25 +13,26 @@ export class FileService {
 
 	constructor(private http: HttpClient) { }
 
-	public upload(file: File): Observable<HttpEvent<string>> {
+	public upload(file: File, isThumbnail?: boolean): Observable<HttpEvent<string>> {
 		const accessToken = localStorage.getItem('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			const body = new FormData();
 			body.append('file', file);
+			body.append('isThumbnail', isThumbnail ? isThumbnail.toString() : false.toString());
 			return this.http.post<string>(this.fileBase + 'uploader', body, { headers, reportProgress: true, observe: 'events' });
 		} else {
 			return new Observable<HttpEvent<string>>();
 		}
 	}
 
-	public getMedia(): Observable<string[]> {
+	public getMedia(): Observable<Media[]> {
 		const accessToken = localStorage.getItem('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
-			return this.http.get<string[]>(this.fileBase + 'media', { headers });
+			return this.http.get<Media[]>(this.fileBase + 'media', { headers });
 		} else {
-			return new Observable<string[]>();
+			return new Observable<Media[]>();
 		}
 	}
 

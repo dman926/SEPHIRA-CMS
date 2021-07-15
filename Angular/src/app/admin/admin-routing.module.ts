@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './home/home.component';
-import { UsersComponent } from './users/users.component';
 
 const routes: Routes = [
 	{
@@ -10,7 +9,27 @@ const routes: Routes = [
 	},
 	{
 		path: 'users',
-		component: UsersComponent
+		loadChildren: () => import('./users/users.module').then(m => m.UsersModule)
+	},
+	{
+		path: 'pages',
+		loadChildren: () => import('./pages/pages.module').then(m => m.PagesModule)
+	},
+	{
+		path: 'products',
+		loadChildren: () => import('./products/products.module').then(m => m.ProductsModule)
+	},
+	{
+		path: 'coupons',
+		loadChildren: () => import('./coupons/coupons.module').then(m => m.CouponsModule)
+	},
+	{
+		path: 'orders',
+		loadChildren: () => import('./orders/orders.module').then(m => m.OrdersModule)
+	},
+	{
+		path: 'shipping-zones',
+		loadChildren: () => import('./shipping-zones/shipping-zones.module').then(m => m.ShippingZonesModule)
 	}
 ];
 

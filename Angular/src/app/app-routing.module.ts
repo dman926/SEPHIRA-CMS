@@ -2,17 +2,20 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AdminGuard } from './admin/admin.guard';
 import { AuthGuard } from './auth/auth.guard';
-import { LandingComponent } from './core/landing/landing.component';
 import { SwaggerComponent } from './core/swagger/swagger.component';
 
 const routes: Routes = [
 	{
-		path: '',
-		component: LandingComponent
-	},
-	{
 		path: 'swagger',
 		component: SwaggerComponent
+	},
+	{
+		path: 'checkout',
+		loadChildren: () => import('./payment/checkout/checkout.module').then(m => m.CheckoutModule)
+	},
+	{
+		path: 'shop',
+		loadChildren: () => import('./shop/shop.module').then(m => m.ShopModule)
 	},
 	{
 		path: 'settings',
@@ -28,6 +31,10 @@ const routes: Routes = [
 		path: 'admin',
 		loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule),
 		canActivate: [AuthGuard, AdminGuard]
+	},
+	{
+		path: '**',
+		loadChildren: () => import('./page/page.module').then(m => m.PageModule)
 	}
 ];
 

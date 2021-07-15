@@ -2,54 +2,80 @@
 Create Python Exceptions to encompass server and DB errors
 '''
 
+from app import app
+
 class InternalServerError(Exception):
-	pass
+	message = 'Internal Server Error'
+	code = '500'
 
 class SchemaValidationError(Exception):
-	pass
+	message = 'Schema Validation Error'
+	code = '400'
 
 class EmailAlreadyExistsError(Exception):
-	pass
+	message = 'Email Already Exists Error'
+	code = '400'
+
+class PostAlreadyExistsError(Exception):
+	message = 'Post Already Exists Error'
+	code = '400'
 
 class UnauthorizedError(Exception):
-	pass
+	message = 'Unauthorized Error'
+	code = '401'
 
 class EmailDoesnotExistsError(Exception):
-	pass
+	message = 'Email Does Not Exist Error'
+	code = '400'
 
 class BadTokenError(Exception):
-	pass
+	message = 'Bad Token Error'
+	code = '403'
 
 class FileNotFoundError(Exception):
-	pass
+	message = 'File Not Found Error'
+	code = '404'
 
-errors = {
-	"InternalServerError": {
-		"message": "Something went wrong",
-		"status": 500
-	},
-	"SchemaValidationError": {
-		"message": "Request is missing required fields",
-		"status": 400
-	},
-	"EmailAlreadyExistsError": {
-		"message": "User with given email address already exists",
-		"status": 400
-	},
-	"UnauthorizedError": {
-		"message": "Invalid username or password",
-		"status": 401
-	},
-	"EmailDoesnotExistsError": {
-		"message": "Couldn't find the user with given email address",
-		"status": 400
-	},
-	"BadTokenError": {
-		"message": "Invalid token",
-		"status": 403
-	},
-	"FileNotFoundError": {
-		"message": "File not found",
-		"status": 404
-	}
-}
+class ResourceNotFoundError(Exception):
+	message = 'Resource Not Found Error'
+	code = '404'
+
+class MissingOtpError(Exception):
+	message = 'Missing OTP Error'
+	code = '401'
+
+@app.errorhandler(InternalServerError)
+def handle_(error):
+	return {'message': error.message}, error.code
+
+@app.errorhandler(SchemaValidationError)
+def handle_(error):
+	return {'message': error.message}, error.code
+
+@app.errorhandler(EmailAlreadyExistsError)
+def handle_(error):
+	return {'message': error.message}, error.code
+
+@app.errorhandler(UnauthorizedError)
+def handle_(error):
+	return {'message': error.message}, error.code
+
+@app.errorhandler(EmailDoesnotExistsError)
+def handle_(error):
+	return {'message': error.message}, error.code
+
+@app.errorhandler(BadTokenError)
+def handle_(error):
+	return {'message': error.message}, error.code
+
+@app.errorhandler(FileNotFoundError)
+def handle_(error):
+	return {'message': error.message}, error.code
+
+@app.errorhandler(ResourceNotFoundError)
+def handle_(error):
+	return {'message': error.message}, error.code
+
+@app.errorhandler(MissingOtpError)
+def handle_MissingOtpError(error):
+	return {'message': error.message}, error.code

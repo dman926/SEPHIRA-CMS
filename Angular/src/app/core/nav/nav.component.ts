@@ -42,7 +42,12 @@ export class NavComponent {
 		this.auth.user$.subscribe(user => {
 			this.user = user;
 		});
-		this.links = [];
+		this.links = [
+			{
+				link: 'shop',
+				text: 'Shop'
+			}
+		];
 		this.swipeCoord = [0, 0];
 		this.swipeTime = 0;
 	}

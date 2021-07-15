@@ -11,13 +11,14 @@ import { MatButtonModule } from '@angular/material/button';
 
 import { AuthRoutingModule } from './auth-routing.module';
 import { LoginComponent } from './login/login.component';
-import { RegisterComponent } from './register/register.component';
 import { MyAccountComponent } from './my-account/my-account.component';
 import { AuthService } from './auth.service';
+import { OtpDialogComponent } from './login/otp-dialog/otp-dialog.component';
+import { MatDialogModule } from '@angular/material/dialog';
 
 
 @NgModule({
-	declarations: [LoginComponent, RegisterComponent, MyAccountComponent],
+	declarations: [LoginComponent, MyAccountComponent, OtpDialogComponent],
 	imports: [
 		CommonModule,
 		AuthRoutingModule,
@@ -27,14 +28,14 @@ import { AuthService } from './auth.service';
 		MatFormFieldModule,
 		MatInputModule,
 		MatIconModule,
-		MatButtonModule
+		MatButtonModule,
+		MatDialogModule
 	],
 	providers: [
 		AuthService
 	],
 	exports: [
-		LoginComponent,
-		RegisterComponent
+		LoginComponent
 	]
 })
 export class AuthModule { }
