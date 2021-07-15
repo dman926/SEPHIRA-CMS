@@ -34,10 +34,14 @@ class UsShippingZoneApi(Resource):
 	})
 	def get(self):
 		try:
-			shippingZone = UsShippingZone.objects.get(applicableStates=request.args['state']) # strip leading 0s if present
+			shippingZone = UsShippingZone.objects.get(applicableStates=request.args['state'])
 			return jsonify(shippingZone.serialize())
 		except DoesNotExist:
-			raise ResourceNotFoundError
+			try:
+				shippingZone = UsShippingZone.objects.get(default=True)
+				return jsonify(shippingZone.serialize())
+			except DoesNotExist:
+				raise ResourceNotFoundError
 		except Exception as e:
 			writeWarningToLog('Unhandled exception in resources.usShippingZone.UsShippingZoneApi get', e)
 			raise InternalServerError
