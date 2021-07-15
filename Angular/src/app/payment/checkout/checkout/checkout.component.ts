@@ -43,6 +43,13 @@ interface TaxRate {
 	zip: string;
 }
 
+interface ShippingRate {
+	rate: number;
+	type: string;
+	minCutoff: number;
+	maxCutoff: number;
+}
+
 @Component({
 	selector: 'app-checkout',
 	templateUrl: './checkout.component.html',
@@ -364,6 +371,41 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
 	get now(): Date {
 		return new Date();
+	}
+
+	get shippingAmount(): number {
+		if (this.shippingZone) {
+			const candidates: ShippingRate[] = [];
+			const price = this.calcDiscountPrice();
+			for (let i = 0; i < this.shippingZone.rates!.length; i++) {
+				const rate = this.shippingZone.rates![i];
+				if (((rate.minCutoff !== null && rate.minCutoff < price) || rate.minCutoff === null) && ((rate.maxCutoff !== null && rate.maxCutoff > price) || rate.maxCutoff === null)) {
+					candidates.push(rate);
+				}
+			}
+			let match: any = null; // There's a bug where you can't declare this as a specific type
+			candidates.forEach(candidate => {
+				if (match === null) {
+					match = candidate;
+				} else {
+					if (match.minCutoff === null && candidate.minCutoff !== null) {
+						match = candidate;
+					} else if (match.maxCutoff === null && candidate.maxCutoff !== null) {
+						match = candidate;
+					} else if (match.maxCutoff - match.minCutoff > candidate.maxCutoff - candidate.minCutoff) {
+						match = candidate;
+					}
+				}
+			});
+			if (match) {
+				if (match.type === 'dollar') {
+					return match.rate;
+				} else if (match.type === 'percent') {
+					return price * match.rate;
+				}
+			}
+		}
+		return 0;
 	}
 
 	private getAddressDetails() {

@@ -91,12 +91,12 @@ export class CouponComponent implements OnInit, OnDestroy {
 					content: coupon.content,
 					excerpt: coupon.excerpt,
 					status: coupon.status,
-					categories: coupon.categories!.map(cat => new FormControl(cat, [Validators.required])),
 					code: coupon.code,
 					discount: coupon.discount,
 					discountType: coupon.discountType,
 					storeWide: coupon.storeWide
 				});
+				this.couponGroup.setControl('categories', new FormArray(coupon.categories!.map(cat => new FormControl(cat, [Validators.required]))));
 				this.applicableProducts = coupon.applicableProducts!;
 			}).catch(err => this.router.navigate(['/admin/coupons']));
 		}));
@@ -145,7 +145,7 @@ export class CouponComponent implements OnInit, OnDestroy {
 
 	addCategory(): void {
 		if (this.categoriesArray.length < 20) {
-			this.categoriesArray.push(new FormControl('', Validators.required));
+			this.categoriesArray.push(new FormControl('', [Validators.required]));
 		}
 	}
 
