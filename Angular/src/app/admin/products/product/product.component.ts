@@ -130,7 +130,6 @@ export class ProductComponent implements OnInit, OnDestroy {
 	deleteProduct(): void {
 		if (this.product) {
 			this.adminService.deleteProduct(this.product.id!).toPromise().then(res => {
-				console.log(res);
 				this.router.navigate(['/admin/products']);
 			})
 		}

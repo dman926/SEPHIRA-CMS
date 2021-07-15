@@ -308,12 +308,15 @@ class UsShippingZone(db.Document):
 		"SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
 	]))
 	rates = db.EmbeddedDocumentListField('ShippingRate')
+	default = db.BooleanField(unique=True)
 
 	def serialize(self):
 		mappedRates = list(map(lambda r: r.serialize(), self.rates))
 		return {
+			'id': str(self.id),
 			'applicableStates': self.applicableStates,
-			'rates': mappedRates
+			'rates': mappedRates,
+			'default': self.default
 		}
 
 User.register_delete_rule(Post, 'author', db.CASCADE)

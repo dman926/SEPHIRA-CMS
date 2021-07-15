@@ -80,4 +80,4 @@ def initialize_routes(api, base):
 	api.add_resource(AdminOrderCountApi, base + 'admin/orders/count')
 	api.add_resource(AdminUsShippingZonesApi, base + 'admin/usShippingZones')
 	api.add_resource(AdminUsShippingZoneApi, base + 'admin/usShippingZone/<id>')
-	api.add_resource(AdminUsShippingZoneCountApi, base + 'admin/usShippingZone/count')
+	api.add_resource(AdminUsShippingZoneCountApi, base + 'admin/usShippingZones/count')

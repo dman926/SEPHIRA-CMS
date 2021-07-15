@@ -7,6 +7,7 @@ import { Coupon } from '../models/coupon';
 import { Order } from '../models/order';
 import { Page } from '../models/page';
 import { Product } from '../models/product';
+import { ShippingZone } from '../models/shipping-zone';
 import { User } from '../models/user';
 
 @Injectable({
@@ -346,6 +347,70 @@ export class AdminService {
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.delete<string>(this.adminBase + 'order/' + id, { headers });
+		} else {
+			return new Observable<string>();
+		}
+	}
+
+	public getAllShippingZones(page?: number, size?: number): Observable<ShippingZone[]> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			let params = new HttpParams();
+			if (page && size) {
+				params = params.append('page', page.toString()).append('size', size.toString())
+			}
+			return this.http.get<ShippingZone[]>(this.adminBase + 'usShippingZones', { headers, params });
+		} else {
+			return new Observable<ShippingZone[]>();
+		}
+	}
+
+	public getShippingZone(id: string): Observable<ShippingZone> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.get<ShippingZone>(this.adminBase + 'usShippingZone/' + id, { headers });
+		} else {
+			return new Observable<ShippingZone>();
+		}
+	}
+
+	public getShippingZoneCount(): Observable<number> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.get<number>(this.adminBase + 'usShippingZones/count', { headers });
+		} else {
+			return new Observable<number>();
+		}
+	}
+
+	public submitShippingZone(shippingZone: ShippingZone): Observable<ShippingZone> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.post<ShippingZone>(this.adminBase + 'usShippingZones', shippingZone, { headers });
+		} else {
+			return new Observable<ShippingZone>();
+		}
+	}
+
+	public editShippingZone(shippingZone: ShippingZone): Observable<string> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.put<string>(this.adminBase + 'usShippingZone/' + shippingZone.id, shippingZone, { headers });
+		} else {
+			return new Observable<string>();
+		}
+	}
+
+	public deleteShippingZone(id: string): Observable<string> {
+		const accessToken = localStorage.getItem('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.delete<string>(this.adminBase + 'usShippingZone/' + id, { headers });
 		} else {
 			return new Observable<string>();
 		}

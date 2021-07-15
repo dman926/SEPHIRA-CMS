@@ -1,0 +1,12 @@
+<button mat-raised-button color="primary" (click)="addNewShippingZone()">New Shipping Zone</button>
+<mat-paginator [length]="shippingZoneCount" [pageSize]="shippingZonePageEvent.pageSize" (page)="fetchShippingZones($event)"></mat-paginator>
+<ng-template #loaderSpinner>
+	<div id="loader-spinner">
+		<mat-spinner></mat-spinner>
+	</div>
+</ng-template>
+<div *ngIf="loaded;else loaderSpinner">
+	<button mat-raised-button *ngFor="let zone of shownZones" [routerLink]="['/admin/shipping-zones', zone.id]">
+        {{ zone.id }}
+	</button>
+</div>

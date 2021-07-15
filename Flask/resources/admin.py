@@ -1115,6 +1115,35 @@ class AdminUsShippingZonesApi(Resource):
 		except Exception as e:
 			writeWarningToLog('Unhandled exception in resources.admin.AdminUsShippingZonesApi get', e)
 			raise InternalServerError
+	@swagger.doc({
+		'tags': ['Admin', 'Shipping'],
+		'description': 'Add new shipping zone',
+		'responses': {
+			'200': {
+				'description': 'Shipping zone added',
+			}
+		}
+	})
+	@jwt_required()
+	def post(self):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			zone = UsShippingZone(**request.get_json())
+			try:
+				UsShippingZone.objects.get(default=True)
+			except DoesNotExist:
+				zone.default = True
+			zone.save()
+			return jsonify(zone.serialize())
+		except (FieldDoesNotExist, ValidationError):
+			raise SchemaValidationError
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminUsShippingZonesApi post', e)
+			raise InternalServerError
 
 class AdminUsShippingZoneApi(Resource):
 	@swagger.doc({
