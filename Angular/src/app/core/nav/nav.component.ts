@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { WebsocketService } from '../services/websocket.service';
 import { environment } from 'src/environments/environment';
 import { io } from 'socket.io-client';
+import { PlatformService } from '../services/platform.service';
 
 interface LinkPair {
 	link: string;
@@ -37,7 +38,7 @@ export class NavComponent {
 	private swipeCoord: number[];
 	private swipeTime: number;
 
-	constructor(private breakpointObserver: BreakpointObserver, private auth: AuthService, private router: Router, private ws: WebsocketService) {
+	constructor(private breakpointObserver: BreakpointObserver, private auth: AuthService, private router: Router, private ws: WebsocketService, private platformService: PlatformService) {
 		this.user = null;
 		this.auth.user$.subscribe(user => {
 			this.user = user;
@@ -53,7 +54,11 @@ export class NavComponent {
 	}
 
 	isSignedIn(): boolean {
-		return !!localStorage.getItem('accessToken');
+		if (this.platformService.isBrowser()) {
+			return !!localStorage.getItem('accessToken');
+		} else {
+			return false;
+		}
 	}
 
 	logout(): void {

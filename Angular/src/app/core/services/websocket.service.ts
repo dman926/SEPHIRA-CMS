@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { DefaultEventsMap } from 'socket.io-client/build/typed-events';
 import { environment } from 'src/environments/environment';
+import { PlatformService } from './platform.service';
 
 @Injectable({
 	providedIn: 'root'
@@ -12,14 +13,16 @@ export class WebsocketService {
 
 	socket: Socket<DefaultEventsMap, DefaultEventsMap> | null;
 
-	constructor() {
+	constructor(private platformService: PlatformService) {
 		this.socket = null;
-		const socket = io(environment.socketServer, {
-			extraHeaders: {
-				Authorization: 'Bearer ' + localStorage.getItem('accessToken')
-			}
-		});
-		this.setSocket(socket);
+		if (this.platformService.isBrowser()) {
+			const socket = io(environment.socketServer, {
+				extraHeaders: {
+					Authorization: 'Bearer ' + localStorage.getItem('accessToken')
+				}
+			});
+			this.setSocket(socket);
+		}
 	}
 
 	setSocket(socket: Socket<DefaultEventsMap, DefaultEventsMap>) {

@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { io } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
+import { PlatformService } from '../core/services/platform.service';
 import { WebsocketService } from '../core/services/websocket.service';
 import { User } from '../models/user';
 
@@ -32,26 +33,28 @@ export class AuthService {
 
 	private readonly authBase = environment.apiServer + 'auth/';
 
-	constructor(private http: HttpClient, private ws: WebsocketService) {
+	constructor(private http: HttpClient, private ws: WebsocketService, private platformService: PlatformService) {
 		this.userSubject = new BehaviorSubject<User | null>(null);
 		this.user$ = this.userSubject.asObservable();
-		const cachedUser = localStorage.getItem('user');
-		if (cachedUser) {
-			this.setUser(JSON.parse(cachedUser));
-		}
-		this.refresh().toPromise().then(tokens => {
-			this.setTokens(false, tokens.accessToken, tokens.refreshToken);
-			this.getUser().toPromise().then(res => {
-				this.setUser(res);
-			}).catch(err => {
-				this.setUser(null);
-				localStorage.removeItem('accessToken');
-				localStorage.removeItem('refreshToken');
-				console.error('Error fetching user (token expiration error): ' + err);
+		if (this.platformService.isBrowser()) {
+			const cachedUser = localStorage.getItem('user');
+			if (cachedUser) {
+				this.setUser(JSON.parse(cachedUser));
+			}
+			this.refresh().toPromise().then(tokens => {
+				this.setTokens(false, tokens.accessToken, tokens.refreshToken);
+				this.getUser().toPromise().then(res => {
+					this.setUser(res);
+				}).catch(err => {
+					this.setUser(null);
+					localStorage.removeItem('accessToken');
+					localStorage.removeItem('refreshToken');
+					console.error('Error fetching user (token expiration error): ' + err);
+				});
+				setInterval(() =>
+					this.getUser().toPromise().then(user => this.setUser(user)), 1000 * 60 * 5); // Get the current user again every 5 minutes
 			});
-			setInterval(() =>
-				this.getUser().toPromise().then(user => this.setUser(user)), 1000 * 60 * 5); // Get the current user again every 5 minutes
-		});
+		}
 	}
 
 	public login(email: string, password: string, otp?: string): Observable<TokenPair> {

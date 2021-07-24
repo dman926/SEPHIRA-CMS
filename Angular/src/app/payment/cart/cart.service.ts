@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { AuthService } from 'src/app/auth/auth.service';
+import { PlatformService } from 'src/app/core/services/platform.service';
 import { CartItem } from 'src/app/models/cart-item';
 import { Product } from 'src/app/models/product';
 import { environment } from 'src/environments/environment';
@@ -15,7 +16,7 @@ export class CartService {
 
 	private cartSubject: BehaviorSubject<CartItem[]>;
 
-	constructor(private http: HttpClient, private auth: AuthService) {
+	constructor(private http: HttpClient, private auth: AuthService, private platformService: PlatformService) {
 		this.cartSubject = new BehaviorSubject<CartItem[]>(this.getLocalCart());
 		this.cart$ = this.cartSubject.asObservable();
 	}
@@ -25,6 +26,9 @@ export class CartService {
 	}
 
 	public getCart(): Observable<CartItem[]> {
+		if (this.platformService.isServer()) {
+			return of([]);
+		}
 		const accessToken = localStorage.getItem('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
@@ -98,17 +102,21 @@ export class CartService {
 	}
 
 	public getLocalCart(): CartItem[] {
-		const user = localStorage.getItem('user');
-		const prevCart = localStorage.getItem('cart');
-		let cart;
-		if (user) {
-			cart = JSON.parse(user).cart;
-		} else if (prevCart) {
-			cart = JSON.parse(prevCart);
+		if (this.platformService.isBrowser()) {
+			const user = localStorage.getItem('user');
+			const prevCart = localStorage.getItem('cart');
+			let cart;
+			if (user) {
+				cart = JSON.parse(user).cart;
+			} else if (prevCart) {
+				cart = JSON.parse(prevCart);
+			} else {
+				cart = [];
+			}
+			return cart;	
 		} else {
-			cart = [];
+			return [];
 		}
-		return cart;
 	}
 
 }
