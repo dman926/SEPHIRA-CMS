@@ -1,5 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { CookieService } from 'ngx-cookie';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { AuthService } from 'src/app/auth/auth.service';
 import { PlatformService } from 'src/app/core/services/platform.service';
@@ -16,20 +17,18 @@ export class CartService {
 
 	private cartSubject: BehaviorSubject<CartItem[]>;
 
-	constructor(private http: HttpClient, private auth: AuthService, private platformService: PlatformService) {
+	constructor(private http: HttpClient, private auth: AuthService, private platformService: PlatformService, private cookie: CookieService) {
 		this.cartSubject = new BehaviorSubject<CartItem[]>(this.getLocalCart());
 		this.cart$ = this.cartSubject.asObservable();
 	}
 
 	public setCart(cart: CartItem[]): void {
+		localStorage.setItem('cart', JSON.stringify(cart));
 		this.cartSubject.next(cart);
 	}
 
 	public getCart(): Observable<CartItem[]> {
-		if (this.platformService.isServer()) {
-			return of([]);
-		}
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
 			return this.http.get<CartItem[]>(environment.apiServer + 'cart/cart', { headers });
@@ -58,7 +57,7 @@ export class CartService {
 
 		this.cartSubject.next(cart);
 
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			this.http.put<string>(environment.apiServer + 'cart/cart', cart, { headers }).toPromise().then(res => {
@@ -86,7 +85,7 @@ export class CartService {
 
 			this.cartSubject.next(cart);
 
-			const accessToken = localStorage.getItem('accessToken');
+			const accessToken = this.cookie.get('accessToken');
 			if (accessToken) {
 				const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 				this.http.put<string>(environment.apiServer + 'cart/cart', cart, { headers }).toPromise().then(res => {
@@ -98,6 +97,7 @@ export class CartService {
 	}
 
 	public clearCart(): void {
+		localStorage.setItem('cart', '[]');
 		this.cartSubject.next([]);
 	}
 

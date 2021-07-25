@@ -9,7 +9,8 @@ import { Router } from '@angular/router';
 import { WebsocketService } from '../services/websocket.service';
 import { environment } from 'src/environments/environment';
 import { io } from 'socket.io-client';
-import { PlatformService } from '../services/platform.service';
+import { CookieService } from 'ngx-cookie';
+import { CartService } from 'src/app/payment/cart/cart.service';
 
 interface LinkPair {
 	link: string;
@@ -38,7 +39,7 @@ export class NavComponent {
 	private swipeCoord: number[];
 	private swipeTime: number;
 
-	constructor(private breakpointObserver: BreakpointObserver, private auth: AuthService, private router: Router, private ws: WebsocketService, private platformService: PlatformService) {
+	constructor(private breakpointObserver: BreakpointObserver, private auth: AuthService, private cartService: CartService, private router: Router, private ws: WebsocketService, private cookie: CookieService) {
 		this.user = null;
 		this.auth.user$.subscribe(user => {
 			this.user = user;
@@ -54,18 +55,16 @@ export class NavComponent {
 	}
 
 	isSignedIn(): boolean {
-		if (this.platformService.isBrowser()) {
-			return !!localStorage.getItem('accessToken');
-		} else {
-			return false;
-		}
+		return this.cookie.hasKey('accessToken');
 	}
 
 	logout(): void {
 		this.auth.setUser(null);
 		localStorage.clear();
+		this.cookie.removeAll();
+		this.cartService.clearCart(); // Remove this line if you want the cart to persist after log out
 		this.ws.killSocket();
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		let socket;
 		if (accessToken) {
 			socket = io(environment.socketServer, {

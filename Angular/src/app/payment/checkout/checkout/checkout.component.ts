@@ -12,6 +12,8 @@ import { DynamicScriptLoaderService } from 'src/app/core/services/dynamic-script
 import { Coupon } from 'src/app/models/coupon';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { ShippingZone } from 'src/app/models/shipping-zone';
+import { CookieService } from 'ngx-cookie';
+import { PlatformService } from 'src/app/core/services/platform.service';
 
 declare var paypal: any;
 
@@ -80,7 +82,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
 	private subs: Subscription[];
 
-	constructor(private scriptLoader: DynamicScriptLoaderService, private http: HttpClient, private cartService: CartService, private router: Router) {
+	constructor(private scriptLoader: DynamicScriptLoaderService, private http: HttpClient, private cartService: CartService, private router: Router, private platformService: PlatformService, private cookie: CookieService) {
 		this.stripe = null;
 		this.products = [];
 		this.coupons = [];
@@ -136,95 +138,97 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 	}
 
 	ngOnInit(): void {
-		this.http.get<CountryPair[]>(window.location.origin + '/assets/country/countries.json').toPromise().then(res => {
-			this.countries = res;
-		});
+		if (this.platformService.isBrowser()) {
+			this.http.get<CountryPair[]>(window.location.origin + '/assets/country/countries.json').toPromise().then(res => {
+				this.countries = res;
+			});
 
-		this.cartService.getCart().toPromise().then(cart => {
-			this.products = cart;
+			this.cartService.getCart().toPromise().then(cart => {
+				this.products = cart;
 
-			this.scriptLoader.load('stripe', 'paypal').then(data => {
-				if (data[0].loaded) {
-					this.stripe = Stripe(environment.stripePublicKey);
-					const elements = this.stripe!.elements();
-					const style = {
-						base: {
-							color: '#32325d',
-							fontFamily: 'Arial, sans-serif',
-							fontSmoothing: 'antialiased',
-							fontSize: '16px',
-							'::placeholder': {
-								color: '#32325d'
+				this.scriptLoader.load('stripe', 'paypal').then(data => {
+					if (data[0].loaded) {
+						this.stripe = Stripe(environment.stripePublicKey);
+						const elements = this.stripe!.elements();
+						const style = {
+							base: {
+								color: '#32325d',
+								fontFamily: 'Arial, sans-serif',
+								fontSmoothing: 'antialiased',
+								fontSize: '16px',
+								'::placeholder': {
+									color: '#32325d'
+								}
+							},
+							invalid: {
+								fontFamily: 'Arial, sans-serif',
+								color: '#fa755a',
+								iconColor: '#fa755a'
 							}
-						},
-						invalid: {
-							fontFamily: 'Arial, sans-serif',
-							color: '#fa755a',
-							iconColor: '#fa755a'
-						}
-					};
-					const card = elements.create('card', { style });
+						};
+						const card = elements.create('card', { style });
 
-					setTimeout(() => {
-						card.mount('#card-element');
+						setTimeout(() => {
+							card.mount('#card-element');
 
-						card.on('change', event => {
-							// Disable the Pay button if there are no card details in the Element
-							const button = document.querySelector('button');
-							const cardError = document.querySelector('#card-error');
-							if (event && event.error && button && cardError) {
-								button.disabled = event.empty;
-								cardError.textContent = event.error ? event.error.message ? event.error.message : null : '';
-							}
-						});
-						const form = document.getElementById('stripe-payment-form');
-						if (form) {
-							form.addEventListener('submit', event => {
-								event.preventDefault();
-								// Complete payment when the submit button is clicked
-								this.createStripePaymentMethod(card);
+							card.on('change', event => {
+								// Disable the Pay button if there are no card details in the Element
+								const button = document.querySelector('button');
+								const cardError = document.querySelector('#card-error');
+								if (event && event.error && button && cardError) {
+									button.disabled = event.empty;
+									cardError.textContent = event.error ? event.error.message ? event.error.message : null : '';
+								}
 							});
-						}
-					}, 250);
-				} else {
-					throw new Error('\'stripe\' failed to load');
-				}
-				if (!data[1].loaded) {
-					throw new Error('\'paypal\' failed to load');
-				}
+							const form = document.getElementById('stripe-payment-form');
+							if (form) {
+								form.addEventListener('submit', event => {
+									event.preventDefault();
+									// Complete payment when the submit button is clicked
+									this.createStripePaymentMethod(card);
+								});
+							}
+						}, 250);
+					} else {
+						throw new Error('\'stripe\' failed to load');
+					}
+					if (!data[1].loaded) {
+						throw new Error('\'paypal\' failed to load');
+					}
 
-				let headers = new HttpHeaders();
-				const accessToken = localStorage.getItem('accessToken');
-				if (accessToken) {
-					headers = headers.append('Authorization', 'Bearer ' + accessToken);
-				}
-				this.http.post<string>(environment.apiServer + 'order/orders', { products: this.products }, { headers }).toPromise().then(orderID => {
-					this.orderID = orderID
+					let headers = new HttpHeaders();
+					const accessToken = this.cookie.get('accessToken');
+					if (accessToken) {
+						headers = headers.append('Authorization', 'Bearer ' + accessToken);
+					}
+					this.http.post<string>(environment.apiServer + 'order/orders', { products: this.products }, { headers }).toPromise().then(orderID => {
+						this.orderID = orderID
+					});
 				});
 			});
-		});
 
-		this.subs.push(this.addressForm.get('stateProvidenceRegion')!.valueChanges.pipe(debounceTime(500)).subscribe(val => {
-			if (this.addressForm.get('stateProvidenceRegion')!.valid) {
-				const params = new HttpParams().append('state', val);
-				this.http.get<ShippingZone>(environment.apiServer + 'shipping/us', { params }).toPromise().then(shippingZone => {
-					this.shippingZone = shippingZone;
-				}).catch(err => this.shippingZone = null);
-			} else {
-				this.shippingZone = null;
-			}
-		}));
+			this.subs.push(this.addressForm.get('stateProvidenceRegion')!.valueChanges.pipe(debounceTime(500)).subscribe(val => {
+				if (this.addressForm.get('stateProvidenceRegion')!.valid) {
+					const params = new HttpParams().append('state', val);
+					this.http.get<ShippingZone>(environment.apiServer + 'shipping/us', { params }).toPromise().then(shippingZone => {
+						this.shippingZone = shippingZone;
+					}).catch(err => this.shippingZone = null);
+				} else {
+					this.shippingZone = null;
+				}
+			}));
 
-		this.subs.push(this.addressForm.get('zip')!.valueChanges.pipe(debounceTime(500)).subscribe(val => {
-			if (this.addressForm.get('zip')!.valid) {
-				const params = new HttpParams().append('zip', val);
-				this.http.get<TaxRate>(environment.apiServer + 'tax/us', { params }).toPromise().then(taxRate => {
-					this.taxRate = taxRate;
-				}).catch(err => this.taxRate = null);
-			} else {
-				this.taxRate = null;
-			}
-		}));
+			this.subs.push(this.addressForm.get('zip')!.valueChanges.pipe(debounceTime(500)).subscribe(val => {
+				if (this.addressForm.get('zip')!.valid) {
+					const params = new HttpParams().append('zip', val);
+					this.http.get<TaxRate>(environment.apiServer + 'tax/us', { params }).toPromise().then(taxRate => {
+						this.taxRate = taxRate;
+					}).catch(err => this.taxRate = null);
+				} else {
+					this.taxRate = null;
+				}
+			}));
+		}
 	}
 
 	ngOnDestroy(): void {
@@ -263,7 +267,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
 	renderPaypalCoinbase(): void {
 		let headers = new HttpHeaders();
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			headers = headers.append('Authorization', 'Bearer ' + accessToken);
 		}
@@ -292,7 +296,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 	}
 
 	private submitPaymentMethod(paymentMethodID: any): Observable<any> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		let headers = new HttpHeaders();
 		if (accessToken) {
 			headers = headers.append('Authorization', 'Bearer ' + accessToken);

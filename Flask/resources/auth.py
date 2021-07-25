@@ -128,8 +128,7 @@ class TokenRefresh(Resource):
 	@jwt_required(refresh=True)
 	def get(self):
 		try:
-			expires = datetime.timedelta(days=7)
-			access_token = create_access_token(identity=get_jwt_identity(), expires_delta=expires)
+			access_token = create_access_token(identity=get_jwt_identity(), expires_delta=datetime.timedelta(days=1))
 			refresh_token = create_refresh_token(identity=get_jwt_identity(), expires_delta=datetime.timedelta(days=30))
 			return {'accessToken': access_token, 'refreshToken': refresh_token}, 200
 		except Exception as e:

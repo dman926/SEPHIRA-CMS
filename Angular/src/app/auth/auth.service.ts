@@ -1,5 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { CookieService } from 'ngx-cookie';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { io } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
@@ -33,7 +34,7 @@ export class AuthService {
 
 	private readonly authBase = environment.apiServer + 'auth/';
 
-	constructor(private http: HttpClient, private ws: WebsocketService, private platformService: PlatformService) {
+	constructor(private http: HttpClient, private ws: WebsocketService, private platformService: PlatformService, private cookie: CookieService) {
 		this.userSubject = new BehaviorSubject<User | null>(null);
 		this.user$ = this.userSubject.asObservable();
 		if (this.platformService.isBrowser()) {
@@ -41,20 +42,22 @@ export class AuthService {
 			if (cachedUser) {
 				this.setUser(JSON.parse(cachedUser));
 			}
-			this.refresh().toPromise().then(tokens => {
-				this.setTokens(false, tokens.accessToken, tokens.refreshToken);
+		}
+		this.refresh().toPromise().then(tokens => {
+			this.setTokens(false, tokens.accessToken, tokens.refreshToken);
+			if (this.platformService.isBrowser()) {
 				this.getUser().toPromise().then(res => {
 					this.setUser(res);
 				}).catch(err => {
 					this.setUser(null);
-					localStorage.removeItem('accessToken');
-					localStorage.removeItem('refreshToken');
+					this.cookie.remove('accessToken');
+					this.cookie.remove('refreshToken');
 					console.error('Error fetching user (token expiration error): ' + err);
 				});
 				setInterval(() =>
 					this.getUser().toPromise().then(user => this.setUser(user)), 1000 * 60 * 5); // Get the current user again every 5 minutes
-			});
-		}
+			}
+		});
 	}
 
 	public login(email: string, password: string, otp?: string): Observable<TokenPair> {
@@ -77,7 +80,7 @@ export class AuthService {
 	}
 
 	public refresh(): Observable<TokenPair> {
-		const refresh = localStorage.getItem('refreshToken');
+		const refresh = this.cookie.get('refreshToken');
 		if (refresh) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + refresh);
 			return this.http.get<TokenPair>(this.authBase + 'refresh', { headers });
@@ -87,7 +90,7 @@ export class AuthService {
 	}
 
 	public checkPassword(password: string): any {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
 			return this.http.post<any>(this.authBase + 'checkPassword', { password }, { headers });
@@ -97,15 +100,15 @@ export class AuthService {
 	}
 
 	public setTokens(refreshSocket: boolean, accessToken: string, refreshToken?: string): void {
-		localStorage.setItem('accessToken', accessToken);
+		this.cookie.put('accessToken', accessToken, { expires: new Date(Date.now() + (1000 * 60 * 60 * 24 * 1)) }); // expires in 1 day
 		if (refreshToken) {
-			localStorage.setItem('refreshToken', refreshToken);
+			this.cookie.put('refreshToken', refreshToken, { expires: new Date(Date.now() + (1000 * 60 * 60 * 24 * 30)) }); // expires in 30 days
 		}
 		if (refreshSocket) {
 			this.ws.killSocket();
 			const socket = io(environment.socketServer, {
 				extraHeaders: {
-					Authorization: 'Bearer ' + localStorage.getItem('accessToken')
+					Authorization: 'Bearer ' + accessToken
 				}
 			});
 			this.ws.setSocket(socket);
@@ -113,7 +116,7 @@ export class AuthService {
 	}
 
 	public getUser(): Observable<User> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
 			return this.http.get<User>(this.authBase + 'user', { headers });
@@ -123,7 +126,7 @@ export class AuthService {
 	}
 
 	public updateUser(user: User): Observable<string> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
 			return this.http.put<string>(this.authBase + 'user', user, { headers });
@@ -133,7 +136,7 @@ export class AuthService {
 	}
 
 	public deleteUser(): Observable<string> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
 			return this.http.delete<string>(this.authBase + 'user', { headers });
@@ -152,7 +155,7 @@ export class AuthService {
 	}
 
 	public getOtpQr(): Observable<string> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
 			return this.http.get<string>(this.authBase + '2fa', { headers });
@@ -162,7 +165,7 @@ export class AuthService {
 	}
 
 	public CheckOtp(otp: string): Observable<string> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
 			return this.http.post<string>(this.authBase + '2fa', { otp }, { headers });

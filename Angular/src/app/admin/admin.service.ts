@@ -1,5 +1,6 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { CookieService } from 'ngx-cookie';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
@@ -17,10 +18,10 @@ export class AdminService {
 
 	private readonly adminBase = environment.apiServer + 'admin/';
 
-	constructor(private http: HttpClient) { }
+	constructor(private http: HttpClient, private cookie: CookieService) { }
 
 	public getAllUsers(page?: number, size?: number): Observable<User[]> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			let params = new HttpParams();
@@ -34,7 +35,7 @@ export class AdminService {
 	}
 
 	public getUser(id: string): Observable<User> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.get<User>(this.adminBase + 'user/' + id, { headers });
@@ -44,7 +45,7 @@ export class AdminService {
 	}
 
 	public getUserCount(): Observable<number> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.get<number>(this.adminBase + 'users/count', { headers });
@@ -54,7 +55,7 @@ export class AdminService {
 	}
 
 	public getAllPages(page?: number, size?: number): Observable<Page[]> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			let params = new HttpParams();
@@ -74,7 +75,7 @@ export class AdminService {
 	}
 
 	public getPage(id: string): Observable<Page> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.get<Page>(this.adminBase + 'page/' + id, { headers }).pipe(map(page => {
@@ -88,7 +89,7 @@ export class AdminService {
 	}
 
 	public getPageCount(): Observable<number> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.get<number>(this.adminBase + 'pages/count', { headers });
@@ -98,7 +99,7 @@ export class AdminService {
 	}
 
 	public submitPage(page: Page): Observable<Page> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.post<Page>(this.adminBase + 'pages', page, { headers });
@@ -108,7 +109,7 @@ export class AdminService {
 	}
 
 	public editPage(page: Page): Observable<string> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.put<string>(this.adminBase + 'page/' + page.id, page, { headers });
@@ -118,7 +119,7 @@ export class AdminService {
 	}
 
 	public deletePage(id: string): Observable<string> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.delete<string>(this.adminBase + 'page/' + id, { headers });
@@ -128,7 +129,7 @@ export class AdminService {
 	}
 
 	public checkPageSlugTaken(slug: string): Observable<string> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
 			const params = new HttpParams().append('slug', slug)
@@ -139,7 +140,7 @@ export class AdminService {
 	}
 
 	public getAllProducts(page?: number, size?: number): Observable<Product[]> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			let params = new HttpParams();
@@ -159,7 +160,7 @@ export class AdminService {
 	}
 
 	public getProduct(id: string): Observable<Product> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.get<Product>(this.adminBase + 'product/' + id, { headers }).pipe(map(page => {
@@ -173,7 +174,7 @@ export class AdminService {
 	}
 
 	public editProduct(product: Product): Observable<string> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.put<string>(this.adminBase + 'product/' + product.id, product, { headers });
@@ -183,7 +184,7 @@ export class AdminService {
 	}
 
 	public getProductCount(): Observable<number> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.get<number>(this.adminBase + 'products/count', { headers });
@@ -193,7 +194,7 @@ export class AdminService {
 	}
 
 	public submitProduct(product: Product): Observable<Product> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.post<Product>(this.adminBase + 'products', product, { headers });
@@ -203,7 +204,7 @@ export class AdminService {
 	}
 
 	public deleteProduct(id: string): Observable<string> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.delete<string>(this.adminBase + 'product/' + id, { headers });
@@ -213,7 +214,7 @@ export class AdminService {
 	}
 
 	public checkProductSlugTaken(slug: string): Observable<string> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
 			const params = new HttpParams().append('slug', slug)
@@ -224,7 +225,7 @@ export class AdminService {
 	}
 
 	public getAllCoupons(page?: number, size?: number): Observable<Coupon[]> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			let params = new HttpParams();
@@ -244,7 +245,7 @@ export class AdminService {
 	}
 
 	public getCoupon(id: string): Observable<Coupon> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.get<Coupon>(this.adminBase + 'coupon/' + id, { headers }).pipe(map(coupon => {
@@ -258,7 +259,7 @@ export class AdminService {
 	}
 
 	public getCouponCount(): Observable<number> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.get<number>(this.adminBase + 'coupons/count', { headers });
@@ -268,7 +269,7 @@ export class AdminService {
 	}
 
 	public submitCoupon(coupon: Coupon): Observable<Coupon> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.post<Coupon>(this.adminBase + 'coupons', coupon, { headers });
@@ -278,7 +279,7 @@ export class AdminService {
 	}
 
 	public editCoupon(coupon: Coupon): Observable<string> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.put<string>(this.adminBase + 'coupon/' + coupon.id, coupon, { headers });
@@ -288,7 +289,7 @@ export class AdminService {
 	}
 
 	public deleteCoupon(id: string): Observable<string> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.delete<string>(this.adminBase + 'coupon/' + id, { headers });
@@ -298,7 +299,7 @@ export class AdminService {
 	}
 
 	public checkCouponSlugTaken(slug: string): Observable<string> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
 			const params = new HttpParams().append('slug', slug)
@@ -309,7 +310,7 @@ export class AdminService {
 	}
 
 	public getAllOrders(page?: number, size?: number): Observable<Order[]> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			let params = new HttpParams();
@@ -323,7 +324,7 @@ export class AdminService {
 	}
 
 	public getOrder(id: string): Observable<Order> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.get<Order>(this.adminBase + 'orders/' + id, { headers });
@@ -333,7 +334,7 @@ export class AdminService {
 	}
 
 	public getOrderCount(): Observable<number> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.get<number>(this.adminBase + 'orders/count', { headers });
@@ -343,7 +344,7 @@ export class AdminService {
 	}
 
 	public deleteOrder(id: string): Observable<string> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.delete<string>(this.adminBase + 'order/' + id, { headers });
@@ -353,7 +354,7 @@ export class AdminService {
 	}
 
 	public getAllShippingZones(page?: number, size?: number): Observable<ShippingZone[]> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			let params = new HttpParams();
@@ -367,7 +368,7 @@ export class AdminService {
 	}
 
 	public getShippingZone(id: string): Observable<ShippingZone> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.get<ShippingZone>(this.adminBase + 'usShippingZone/' + id, { headers });
@@ -377,7 +378,7 @@ export class AdminService {
 	}
 
 	public getShippingZoneCount(): Observable<number> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.get<number>(this.adminBase + 'usShippingZones/count', { headers });
@@ -387,7 +388,7 @@ export class AdminService {
 	}
 
 	public submitShippingZone(shippingZone: ShippingZone): Observable<ShippingZone> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.post<ShippingZone>(this.adminBase + 'usShippingZones', shippingZone, { headers });
@@ -397,7 +398,7 @@ export class AdminService {
 	}
 
 	public editShippingZone(shippingZone: ShippingZone): Observable<string> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.put<string>(this.adminBase + 'usShippingZone/' + shippingZone.id, shippingZone, { headers });
@@ -407,7 +408,7 @@ export class AdminService {
 	}
 
 	public deleteShippingZone(id: string): Observable<string> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.delete<string>(this.adminBase + 'usShippingZone/' + id, { headers });

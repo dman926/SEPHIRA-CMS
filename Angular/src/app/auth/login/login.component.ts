@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { CartService } from 'src/app/payment/cart/cart.service';
 import { AuthService } from '../auth.service';
 import { OtpDialogComponent } from './otp-dialog/otp-dialog.component';
 
@@ -16,7 +17,7 @@ export class LoginComponent {
 	isVisible: boolean;
 	loggingIn: boolean;
 
-	constructor(private auth: AuthService, private dialog: MatDialog) {
+	constructor(private auth: AuthService, private cartService: CartService, private dialog: MatDialog) {
 		this.isVisible = false;
 		this.loggingIn = false;
 		this.loginForm = new FormGroup({
@@ -34,6 +35,9 @@ export class LoginComponent {
 				this.auth.setTokens(true, loginRes.accessToken, loginRes.refreshToken);
 				this.auth.getUser().toPromise().then(user => {
 					this.auth.setUser(user);
+					if (user && user.cart) {
+						this.cartService.setCart(user.cart);
+					}
 				}).catch(err => this.loggingIn = false);
 			}).catch(err => {
 				console.log(err.error.message);
@@ -43,7 +47,7 @@ export class LoginComponent {
 						data: {email, password}
 					});
 				} else {
-					this.loggingIn = false
+					this.loggingIn = false;
 				}
 			});
 		}

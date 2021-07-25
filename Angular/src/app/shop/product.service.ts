@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
+import { CookieService } from 'ngx-cookie';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
@@ -14,7 +15,7 @@ export class ProductService {
 
 	private readonly productBase = environment.apiServer + 'product/'
 
-	constructor(private http: HttpClient, private sanitizer: DomSanitizer) { }
+	constructor(private http: HttpClient, private sanitizer: DomSanitizer, private cookie: CookieService) { }
 
 	public getAllProducts(page?: number, size?: number): Observable<Product[]> {
 		let params = new HttpParams();
@@ -54,7 +55,7 @@ export class ProductService {
 	}
 
 	public submitReview(review: Review): Observable<Review> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.post<Review>(this.productBase + 'product/' + review.product + '/reviews', review, { headers });
@@ -64,7 +65,7 @@ export class ProductService {
 	}
 
 	public reviewAllowed(id: string): Observable<boolean> {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.get<boolean>(this.productBase + 'product/' + id + '/reviewAllowed', { headers });
