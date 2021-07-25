@@ -1,7 +1,9 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { CookieService } from 'ngx-cookie';
 import { Subscription } from 'rxjs';
+import { PlatformService } from 'src/app/core/services/platform.service';
 import { WebsocketService } from 'src/app/core/services/websocket.service';
 import { Order } from 'src/app/models/order';
 import { environment } from 'src/environments/environment';
@@ -18,7 +20,7 @@ export class CheckoutRedirectComponent implements OnInit, OnDestroy {
 	private orderID: string | null;
 	private subs: Subscription[];
 
-	constructor(private route: ActivatedRoute, private http: HttpClient, private ws: WebsocketService) {
+	constructor(private route: ActivatedRoute, private http: HttpClient, private ws: WebsocketService, private platformService: PlatformService, private cookie: CookieService) {
 		this.orderID = null;
 		this.order = null;
 		this.subs = [];
@@ -27,11 +29,13 @@ export class CheckoutRedirectComponent implements OnInit, OnDestroy {
 	ngOnInit(): void {
 		this.orderID = this.route.snapshot.queryParamMap.get('id');
 		this.getData();
-		this.subs.push(this.ws.listen('order ' + this.orderID).subscribe(res => {
-			if (this.order) {
-				this.order.orderStatus = res as string;
-			}
-		}));
+		if (this.platformService.isBrowser()) {
+			this.subs.push(this.ws.listen('order ' + this.orderID).subscribe(res => {
+				if (this.order) {
+					this.order.orderStatus = res as string;
+				}
+			}));
+		}
 	}
 
 	ngOnDestroy(): void {
@@ -39,7 +43,7 @@ export class CheckoutRedirectComponent implements OnInit, OnDestroy {
 	}
 
 	getData(): void {
-		const accessToken = localStorage.getItem('accessToken');
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
 			this.http.get<Order>(environment.apiServer + 'order/order/' + this.orderID, { headers }).toPromise().then(res => {

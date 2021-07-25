@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgxQrcodeElementTypes, NgxQrcodeErrorCorrectionLevels } from '@techiediaries/ngx-qrcode';
+import { CookieService } from 'ngx-cookie';
 import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/auth.service';
 import { User } from 'src/app/models/user';
@@ -26,7 +27,7 @@ export class SettingsComponent implements OnInit {
 
 	private subs: Subscription[];
 
-	constructor(private auth: AuthService, private router: Router) {
+	constructor(private auth: AuthService, private router: Router, private cookie: CookieService) {
 		this.qrVal = null;
 
 		this.twoFForm = new FormGroup({
@@ -72,6 +73,7 @@ export class SettingsComponent implements OnInit {
 	deleteUser(): void {
 		this.auth.deleteUser().toPromise().then(res => {
 			localStorage.clear();
+			this.cookie.removeAll();
 			this.auth.setUser(null);
 			this.router.navigate(['/']);
 		});

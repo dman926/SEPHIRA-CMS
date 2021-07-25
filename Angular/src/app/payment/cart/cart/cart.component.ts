@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { PlatformService } from 'src/app/core/services/platform.service';
 import { CartItem } from 'src/app/models/cart-item';
 import { Product } from 'src/app/models/product';
 import { CartService } from '../cart.service';
@@ -25,7 +26,7 @@ export class CartComponent implements OnInit, OnDestroy {
 	private firstPass: boolean;
 	private subs: Subscription[];
 
-	constructor(private cartService: CartService, private http: HttpClient) {
+	constructor(private cartService: CartService, private platformService: PlatformService) {
 		this.appearance = '';
 		this.products = [];
 		this.cartSize = 0;
@@ -34,27 +35,29 @@ export class CartComponent implements OnInit, OnDestroy {
 	}
 
 	ngOnInit(): void {
-		this.subs.push(this.cartService.cart$.subscribe(cart => {
-			this.cartSize = 0;
-			if (cart) {
-				for (let i = 0; i < cart.length; i++) {
-					this.cartSize += cart[i].qty;
-				}
-				if (this.firstPass) {
-					this.firstPass = false;
-					this.cartService.getCart().toPromise().then(products => {
-						if (products) {
-							this.products = products;
-							localStorage.setItem('cart', JSON.stringify(products));
-						}
-					}).catch(err => localStorage.setItem('cart', '[]'));
+		if (this.platformService.isBrowser()) {
+			this.subs.push(this.cartService.cart$.subscribe(cart => {
+				this.cartSize = 0;
+				if (cart) {
+					for (let i = 0; i < cart.length; i++) {
+						this.cartSize += cart[i].qty;
+					}
+					if (this.firstPass) {
+						this.firstPass = false;
+						this.cartService.getCart().toPromise().then(products => {
+							if (products) {
+								this.products = products;
+								localStorage.setItem('cart', JSON.stringify(products));
+							}
+						}).catch(err => localStorage.setItem('cart', '[]'));
+					} else {
+						this.products = cart;
+					}
 				} else {
-					this.products = cart;
+					this.products = [];
 				}
-			} else {
-				this.products = [];
-			}
-		}));
+			}));	
+		}		
 	}
 
 	ngOnDestroy(): void {
