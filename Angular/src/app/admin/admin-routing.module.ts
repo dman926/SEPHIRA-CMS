@@ -30,6 +30,10 @@ const routes: Routes = [
 	{
 		path: 'shipping-zones',
 		loadChildren: () => import('./shipping-zones/shipping-zones.module').then(m => m.ShippingZonesModule)
+	},
+	{
+		path: 'menu-items',
+		loadChildren: () => import('./menu-items/menu-items.module').then(m => m.MenuItemsModule)
 	}
 ];
 

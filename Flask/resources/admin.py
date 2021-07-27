@@ -9,7 +9,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from mongoengine.errors import DoesNotExist, FieldDoesNotExist, ValidationError, InvalidQueryError
 from resources.errors import UnauthorizedError, InternalServerError, ResourceNotFoundError, SchemaValidationError
 
-from database.models import User, Page, Product, Order, Coupon, UsShippingZone
+from database.models import User, Page, Product, Order, Coupon, UsShippingZone, MenuItem
 
 from services.logging_service import writeWarningToLog
 
@@ -635,6 +635,66 @@ class AdminProductCountApi(Resource):
 			return UnauthorizedError
 		except Exception as e:
 			writeWarningToLog('Unhandled exception in resources.admin.AdminProductCountApi get', e)
+			raise InternalServerError
+
+class AdminMenuItemsApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin', 'Menu Item'],
+		'description': 'Get all Menu Items',
+		'responses': {
+			'200': {
+				'description': 'An array of Menu Item'
+			}
+		}
+	})
+	@jwt_required()
+	def get(self):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			menuItems = MenuItem.objects()
+			return jsonify(list(map(lambda p: p.serialize(), menuItems)))
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminMenuItemsApi get', e)
+			raise InternalServerError
+	@swagger.doc({
+		'tags': ['Admin', 'Product'],
+		'description': 'Save Menu Items structure',
+		'parameters': [
+			{
+				'name': '',
+				'description': 'An array of menu items',
+				'in': 'body',
+				'type': 'object',
+				'schema': None,
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'Menu Items saved',
+			}
+		}
+	})
+	@jwt_required()
+	def post(self):
+		try:
+			user = User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			MenuItem.objects().delete() # remove all old menu items
+			for item in request.get_json():
+				MenuItem(**item).save()
+			return 'ok'
+		except (FieldDoesNotExist, ValidationError):
+			raise SchemaValidationError
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminProductsApi post', e)
 			raise InternalServerError
 
 class AdminProductSlugAvailableApi(Resource):

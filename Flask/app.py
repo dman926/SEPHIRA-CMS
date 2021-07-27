@@ -54,8 +54,8 @@ else:
 	app.config['MONGODB_SETTINGS'] = {
 		'host': 'mongodb://localhost/flask-api-test'
 	}
-	resources = {r"/*": {"origins": "http://localhost:4200"}}
-	socketResources = "http://localhost:4200"
+	resources = {r"/*": {"origins": "*"}}
+	socketResources = "*"
 	base = '/api/'
 	paypal_client = PayPalHttpClient(SandboxEnvironment(client_id=paypal_client_id, client_secret=paypal_secret))
 

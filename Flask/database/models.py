@@ -18,7 +18,7 @@ class Post(db.Document):
 	excerpt = db.StringField()
 	status = db.StringField(choices=['publish', 'draft', 'private', 'deactivated'], default='draft')
 	categories = db.ListField(db.StringField())
-	
+
 	categoriesPrefixNgrams = db.ListField(db.StringField())
 	titleNgrams = db.StringField()
 	titlePrefixNgrams = db.StringField()
@@ -62,6 +62,33 @@ class Post(db.Document):
 
 class Page(Post):
 	pass
+
+class MenuItemChild(db.EmbeddedDocument):
+	text = db.StringField(required=True)
+	link = db.StringField(required=True)
+	children = db.EmbeddedDocumentListField('MenuItemChild')
+
+	def serialize(self):
+		return {
+			'text': self.text,
+			'link': self.link,
+			'children': list(map(lambda mi: mi.serialize(), self.children))
+		}
+
+
+class MenuItem(db.Document):
+	text = db.StringField(required=True)
+	link = db.StringField(required=True)
+	order = db.IntField()
+	children = db.EmbeddedDocumentListField('MenuItemChild')
+
+	def serialize(self):
+		return {
+			'text': self.text,
+			'link': self.link,
+			'order': self.order,
+			'children': list(map(lambda mi: mi.serialize(), self.children))
+		}
 
 class CartItem(db.EmbeddedDocument):
 	product = db.ReferenceField('Product')

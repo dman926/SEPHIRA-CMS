@@ -5,6 +5,7 @@ API Endpoints
 from .auth import SignupApi, LoginApi, ForgotPassword, ResetPassword, TokenRefresh, CheckPassword, UserApi, TwoFactorApi
 from .file import UploaderApi, MediaApi, SingleMediaApi
 
+from .menuItem import MenuItemsApi
 from .page import PagesApi, PageApi
 from .product import ProductsApi, ProductApi, ProductCountApi, ProductReviewsApi, ProductReviewsCountApi, ProductReviewAllowedApi
 
@@ -17,7 +18,7 @@ from .stripe import StripeCheckoutApi, StripeApi
 from .paypal import PayPalCreateTransactionApi, PayPalCaptureTransactionApi, PayPalApi
 from .coinbase import CoinbaseCheckoutApi, CoinbaseApi
 
-from .admin import AdminApi, AdminUsersApi, AdminUserApi, AdminUsersCountApi, AdminPagesApi, AdminPageApi, AdminPagesCountApi, AdminPageSlugApi, AdminProductsApi, AdminProductApi, AdminProductCountApi, AdminProductSlugAvailableApi, AdminCouponsApi, AdminCouponApi, AdminCouponCountApi, AdminCouponSlugAvailableApi, AdminOrdersApi, AdminOrderApi, AdminOrderCountApi,AdminUsShippingZonesApi, AdminUsShippingZoneApi, AdminUsShippingZoneCountApi
+from .admin import AdminApi, AdminUsersApi, AdminUserApi, AdminUsersCountApi, AdminPagesApi, AdminPageApi, AdminPagesCountApi, AdminPageSlugApi, AdminProductsApi, AdminProductApi, AdminProductCountApi, AdminProductSlugAvailableApi, AdminCouponsApi, AdminCouponApi, AdminCouponCountApi, AdminCouponSlugAvailableApi, AdminOrdersApi, AdminOrderApi, AdminOrderCountApi,AdminUsShippingZonesApi, AdminUsShippingZoneApi, AdminUsShippingZoneCountApi, AdminMenuItemsApi
 
 import resources.sockets
 
@@ -35,6 +36,7 @@ def initialize_routes(api, base):
 	api.add_resource(MediaApi, base + 'file/media')
 	api.add_resource(SingleMediaApi, base + 'file/media/<filename>')
 
+	api.add_resource(MenuItemsApi, base + 'menuItems')
 	api.add_resource(PagesApi, base + 'page/pages')
 	api.add_resource(PageApi, base + 'page/page')
 	api.add_resource(ProductsApi, base + 'product/products')
@@ -81,3 +83,4 @@ def initialize_routes(api, base):
 	api.add_resource(AdminUsShippingZonesApi, base + 'admin/usShippingZones')
 	api.add_resource(AdminUsShippingZoneApi, base + 'admin/usShippingZone/<id>')
 	api.add_resource(AdminUsShippingZoneCountApi, base + 'admin/usShippingZones/count')
+	api.add_resource(AdminMenuItemsApi, base + 'admin/menuItems')

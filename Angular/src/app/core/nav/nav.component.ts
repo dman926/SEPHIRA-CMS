@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
@@ -11,6 +11,8 @@ import { environment } from 'src/environments/environment';
 import { io } from 'socket.io-client';
 import { CookieService } from 'ngx-cookie';
 import { CartService } from 'src/app/payment/cart/cart.service';
+import { HttpClient } from '@angular/common/http';
+import { MenuItem } from 'src/app/models/menu-item';
 
 interface LinkPair {
 	link: string;
@@ -22,7 +24,7 @@ interface LinkPair {
 	templateUrl: './nav.component.html',
 	styleUrls: ['./nav.component.scss']
 })
-export class NavComponent {
+export class NavComponent implements OnInit {
 
 	@ViewChild('drawer') public sidenav: MatSidenav | undefined;
 
@@ -36,10 +38,12 @@ export class NavComponent {
 
 	user: User | null;
 
+	menuItems: MenuItem[];
+
 	private swipeCoord: number[];
 	private swipeTime: number;
 
-	constructor(private breakpointObserver: BreakpointObserver, private auth: AuthService, private cartService: CartService, private router: Router, private ws: WebsocketService, private cookie: CookieService) {
+	constructor(private breakpointObserver: BreakpointObserver, private auth: AuthService, private cartService: CartService, private router: Router, private ws: WebsocketService, private cookie: CookieService, private http: HttpClient) {
 		this.user = null;
 		this.auth.user$.subscribe(user => {
 			this.user = user;
@@ -50,8 +54,15 @@ export class NavComponent {
 				text: 'Shop'
 			}
 		];
+		this.menuItems = [];
 		this.swipeCoord = [0, 0];
 		this.swipeTime = 0;
+	}
+
+	ngOnInit(): void {
+		this.http.get<MenuItem[]>(environment.apiServer + 'menuItems').toPromise().then(items => {
+			this.menuItems = items;
+		})
 	}
 
 	isSignedIn(): boolean {

@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Coupon } from '../models/coupon';
+import { MenuItem } from '../models/menu-item';
 import { Order } from '../models/order';
 import { Page } from '../models/page';
 import { Product } from '../models/product';
@@ -414,6 +415,26 @@ export class AdminService {
 			return this.http.delete<string>(this.adminBase + 'usShippingZone/' + id, { headers });
 		} else {
 			return new Observable<string>();
+		}
+	}
+
+	public getMenuItems(): Observable<MenuItem[]> {
+		const accessToken = this.cookie.get('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.get<MenuItem[]>(this.adminBase + 'menuItems', { headers });
+		} else {
+			return new Observable<MenuItem[]>();
+		}
+	}
+
+	public saveMenuItems(menuItems: MenuItem[]): Observable<MenuItem[]> {
+		const accessToken = this.cookie.get('accessToken');
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.post<MenuItem[]>(this.adminBase + 'menuItems', menuItems, { headers });
+		} else {
+			return new Observable<MenuItem[]>();
 		}
 	}
 
