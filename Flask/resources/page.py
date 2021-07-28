@@ -76,3 +76,49 @@ class PageApi(Resource):
 		except Exception as e:
 			writeWarningToLog('Unhandled exception in resources.page.PageApi get', e)
 			raise InternalServerError
+
+class PageSearchApi(Resource):
+	@swagger.doc({
+		'tags': ['Page', 'Search'],
+		'description': 'Search the pages and return according to pagination criteria',
+		'parameters': [
+			{
+				'name': 'page',
+				'description': 'The index page',
+				'in': 'query',
+				'type': 'int',
+				'required': False
+			},
+			{
+				'name': 'size',
+				'description': 'The page size',
+				'in': 'query',
+				'type': 'int',
+				'required': False
+			},
+			{
+				'name': 's',
+				'description': 'The search term',
+				'in': 'query',
+				'type': 'string',
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'Array of Page',
+			}
+		}
+	})
+	def get(self):
+		try:
+			pageObjects = Page.objects()
+			page = int(request.args.get('page', 0))
+			size = int(request.args.get('size', pageObjects.count()))
+			pages = pageObjects.search_text(request.args['s']).order_by('$text_score')[page * size : page * size + size]
+			return jsonify(list(map(lambda p: p.serialize(), pages)))
+		except DoesNotExist:
+			raise ResourceNotFoundError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.page.PageSearchApi get', e)
+			raise InternalServerError

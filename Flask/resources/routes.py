@@ -6,7 +6,7 @@ from .auth import SignupApi, LoginApi, ForgotPassword, ResetPassword, TokenRefre
 from .file import UploaderApi, MediaApi, SingleMediaApi
 
 from .menuItem import MenuItemsApi
-from .page import PagesApi, PageApi
+from .page import PagesApi, PageApi, PageSearchApi
 from .product import ProductsApi, ProductApi, ProductCountApi, ProductReviewsApi, ProductReviewsCountApi, ProductReviewAllowedApi
 
 from .order import OrdersApi, OrderApi
@@ -39,6 +39,7 @@ def initialize_routes(api, base):
 	api.add_resource(MenuItemsApi, base + 'menuItems')
 	api.add_resource(PagesApi, base + 'page/pages')
 	api.add_resource(PageApi, base + 'page/page')
+	api.add_resource(PageSearchApi, base + 'page/search')
 	api.add_resource(ProductsApi, base + 'product/products')
 	api.add_resource(ProductApi, base + 'product/product')
 	api.add_resource(ProductCountApi, base + 'product/products/count')

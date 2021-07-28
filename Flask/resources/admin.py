@@ -266,6 +266,7 @@ class AdminPagesApi(Resource):
 			if not user.admin:
 				raise UnauthorizedError
 			page = Page(**request.get_json(), author=user)
+			page.generateNgrams()
 			page.save()
 			return jsonify(page.serialize())
 		except UnauthorizedError:

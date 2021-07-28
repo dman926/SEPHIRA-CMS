@@ -24,6 +24,9 @@
 				<ng-container *ngTemplateOutlet="nodeTemplateRef; context: { list: menuItems }">
 				</ng-container>
 			</ul>
+			<div id="search">
+				<app-search [searchBar]="true"></app-search>
+			</div>
 			<span class="spacer"></span>
 			<div id="sidenav-bottom">
 				<button mat-icon-button (click)="logout()" *ngIf="isSignedIn()">

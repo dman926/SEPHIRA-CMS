@@ -23,6 +23,7 @@ import { WebsocketService } from './services/websocket.service';
 import { RecaptchaV3Module, RECAPTCHA_V3_SITE_KEY } from 'ng-recaptcha';
 import { MatCardModule } from '@angular/material/card';
 import { CartModule } from '../payment/cart/cart.module';
+import { SearchModule } from '../search/search.module';
 
 
 
@@ -40,6 +41,7 @@ import { CartModule } from '../payment/cart/cart.module';
 
 		AuthModule,
 		CartModule,
+		SearchModule,
 
 		MatToolbarModule,
 		MatButtonModule,

@@ -30,12 +30,15 @@ export class PageComponent implements OnInit, OnDestroy {
 		}
 		if (this.platformService.isBrowser()) {
 			this.page = this.state.get(makeStateKey('page'), undefined);
-			if (this.page && this.page.content) {
+			if (!this.page || this.page.slug !== this.router.url) {
+				this.fetchPage();
+			} else if (this.page && this.page.content) {
 				this.page.content = this.sanitizer.bypassSecurityTrustHtml(this.page.content as string);
+				this.loaded = true;
 			}
-			this.loaded = true;
 			this.subs.push(this.router.events.subscribe(ev => {
 				if (ev instanceof NavigationEnd) {
+					console.log('fire');
 					this.fetchPage();
 				}
 			}));
