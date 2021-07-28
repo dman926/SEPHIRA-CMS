@@ -16,7 +16,7 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 ## Build
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+Run `build:ssr:production` to build the project. The build artifacts will be stored in the `dist/` directory. Upload the entirety of the `dist/` folder to the production server as the angular universal server is looking for it.
 
 ## Running unit tests
 
