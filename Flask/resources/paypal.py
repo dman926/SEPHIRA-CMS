@@ -41,12 +41,16 @@ class PayPalCreateTransactionApi(Resource):
 			}
 			total = calculate_discount_price(order.products, order.coupons)
 			discount = calculate_order_amount(order.products) - total
-			amount = total - discount
-			amount += amount * order.taxRate
+			base_amount = total - discount
+			tax = base_amount * order.taxRate
+			amount = base_amount + tax
+			shipping = 0
 			if order.shippingType == 'dollar':
 				amount += order.shippingRate
+				shipping = order.shippingRate
 			elif order.shippingType == 'percent':
 				amount += amount * order.shippingRate
+				shipping = amount * order.shippingRate
 			requestBody = {
 				"intent": "CAPTURE",
 				"application_context": {
@@ -65,19 +69,19 @@ class PayPalCreateTransactionApi(Resource):
 #						"soft_descriptor": "",
 						"amount": {
 							"currency_code": "USD",
-							"value": '{:.2f}'.format(round(total, 2)),
+							"value": '{:.2f}'.format(round(amount, 2)),
 							"breakdown": {
 								"item_total": {
 									"currency_code": "USD",
-									"value": '{:.2f}'.format(round(amount, 2))
+									"value": '{:.2f}'.format(round(total, 2))
 								},
 								"shipping": {
 									"currency_code": "USD",
-									"value": '{:.2f}'.format(round(0, 2)) # TODO
+									"value": '{:.2f}'.format(round(shipping, 2))
 								},
 								"tax_total": {
 									"currency_code": "USD",
-									"value": '{:.2f}'.format(round(0, 2)) # TODO
+									"value": '{:.2f}'.format(round(tax, 2))
 								},
 								"discount": {
 									"currency_code": "USD",
@@ -99,7 +103,7 @@ class PayPalCreateTransactionApi(Resource):
 					},
 					"tax": {
 						"currency_code": "USD",
-						"value": 0 # TODO
+						"value": item.product.price * order.taxRate
 					},
 					"quantity": str(item.qty),
 					"description": item.product.excerpt,
