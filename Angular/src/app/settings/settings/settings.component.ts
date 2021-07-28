@@ -5,6 +5,7 @@ import { NgxQrcodeElementTypes, NgxQrcodeErrorCorrectionLevels } from '@techiedi
 import { CookieService } from 'ngx-cookie';
 import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/auth.service';
+import { PlatformService } from 'src/app/core/services/platform.service';
 import { User } from 'src/app/models/user';
 
 @Component({
@@ -27,7 +28,7 @@ export class SettingsComponent implements OnInit {
 
 	private subs: Subscription[];
 
-	constructor(private auth: AuthService, private router: Router, private cookie: CookieService) {
+	constructor(private auth: AuthService, private router: Router, private cookie: CookieService, private platformService: PlatformService) {
 		this.qrVal = null;
 
 		this.twoFForm = new FormGroup({
@@ -45,14 +46,16 @@ export class SettingsComponent implements OnInit {
 	}
 
 	ngOnInit(): void {
-		this.subs.push(this.auth.user$.subscribe(user => {
-			if (user) {
-				this.settingsForm.patchValue({
-					enableTF: user.twoFactorEnabled ? true : false
-				});	
-			}
-		}));
-		this.auth.getOtpQr().toPromise().then(res => this.qrVal = res);
+		if (this.platformService.isBrowser()) {
+			this.subs.push(this.auth.user$.subscribe(user => {
+				if (user) {
+					this.settingsForm.patchValue({
+						enableTF: user.twoFactorEnabled ? true : false
+					});	
+				}
+			}));
+			this.auth.getOtpQr().toPromise().then(res => this.qrVal = res);
+		}
 	}
 
 	saveSettings(): void {

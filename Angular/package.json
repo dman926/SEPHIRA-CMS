@@ -32,6 +32,7 @@
 		"@techiediaries/ngx-qrcode": "^9.1.0",
 		"@types/stripe-v3": "^3.1.25",
 		"bufferutil": "^4.0.3",
+		"cors": "^2.8.5",
 		"express": "^4.15.2",
 		"ng-recaptcha": "^7.0.2",
 		"ngx-cookie": "^5.0.2",

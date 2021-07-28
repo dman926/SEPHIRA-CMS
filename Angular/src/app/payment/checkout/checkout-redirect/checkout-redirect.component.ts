@@ -28,8 +28,8 @@ export class CheckoutRedirectComponent implements OnInit, OnDestroy {
 
 	ngOnInit(): void {
 		this.orderID = this.route.snapshot.queryParamMap.get('id');
-		this.getData();
 		if (this.platformService.isBrowser()) {
+			this.getData();
 			this.subs.push(this.ws.listen('order ' + this.orderID).subscribe(res => {
 				if (this.order) {
 					this.order.orderStatus = res as string;

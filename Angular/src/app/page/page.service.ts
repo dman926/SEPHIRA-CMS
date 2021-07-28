@@ -18,7 +18,6 @@ export class PageService {
 	public getPage(slug: string): Observable<Page> {
 		const params = new HttpParams().append('slug', slug);
 		return this.http.get<Page>(this.postBase + 'page', { params }).pipe(map(page => {
-			page.content = this.sanitizer.bypassSecurityTrustHtml(page.content as string);
 			page.created = new Date(page.created!);
 			page.modified = new Date(page.modified!);
 			return page;

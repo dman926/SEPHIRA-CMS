@@ -70,7 +70,7 @@ api = Api(app, title='Flask API', api_version='1.0', api_spec_url='/api/spec')
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 socketio = SocketIO(app, cors_allowed_origins=socketResources)
-limiter = Limiter(app, key_func=get_remote_address, default_limits=["2500 per day", "250 per hour"])
+limiter = Limiter(app, key_func=get_remote_address, default_limits=["25000 per day", "2500 per hour"])
 scheduler = APScheduler()
 
 scheduler.init_app(app)

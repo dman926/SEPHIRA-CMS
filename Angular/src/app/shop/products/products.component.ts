@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { PlatformService } from 'src/app/core/services/platform.service';
 import { Product } from 'src/app/models/product';
 import { CartService } from 'src/app/payment/cart/cart.service';
 import { ProductService } from '../product.service';
@@ -22,7 +23,7 @@ export class ProductsComponent implements OnInit {
 	productPageEvent: PageEvent;
 	productCount: number;
 
-	constructor(private productService: ProductService, public cartService: CartService) {
+	constructor(private productService: ProductService, public cartService: CartService, private platformService: PlatformService) {
 		this.loaded = false;
 		this.products = [];
 		this.productPageEvent = {
@@ -35,10 +36,12 @@ export class ProductsComponent implements OnInit {
 	}
 
 	ngOnInit(): void {
-		this.productService.getProductCount().toPromise().then(count => {
-			this.productCount = count;
-		});
-		this.fetchProducts();
+		if (this.platformService.isBrowser()) {
+			this.productService.getProductCount().toPromise().then(count => {
+				this.productCount = count;
+			});
+			this.fetchProducts();
+		}
 	}
 
 	get shownProducts(): Product[] {

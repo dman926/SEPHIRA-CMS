@@ -1,8 +1,9 @@
 import { OnDestroy } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
+import { DomSanitizer, makeStateKey, TransferState } from '@angular/platform-browser';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { PlatformService } from 'src/app/core/services/platform.service';
 import { Page } from 'src/app/models/page';
 import { PageService } from '../page.service';
 
@@ -18,18 +19,28 @@ export class PageComponent implements OnInit, OnDestroy {
 
 	private subs: Subscription[];
 
-	constructor(private pageService: PageService, private router: Router) {
+	constructor(private pageService: PageService, private router: Router, private platformService: PlatformService, private state: TransferState, private sanitizer: DomSanitizer) {
 		this.loaded = false;
 		this.subs = [];
 	}
 
 	ngOnInit(): void {
-		this.fetchPage();
-		this.subs.push(this.router.events.subscribe(ev => {
-			if (ev instanceof NavigationEnd) {
-				this.fetchPage();
+		if (this.platformService.isServer()) {
+			this.fetchPage();
+		}
+		if (this.platformService.isBrowser()) {
+			console.log('fire');
+			this.page = this.state.get(makeStateKey('page'), undefined);
+			if (this.page && this.page.content) {
+				this.page.content = this.sanitizer.bypassSecurityTrustHtml(this.page.content as string);
 			}
-		}));
+			this.loaded = true;
+			this.subs.push(this.router.events.subscribe(ev => {
+				if (ev instanceof NavigationEnd) {
+					this.fetchPage();
+				}
+			}));
+		}
 	}
 
 	ngOnDestroy(): void {
@@ -40,6 +51,11 @@ export class PageComponent implements OnInit, OnDestroy {
 		this.loaded = false;
 		this.pageService.getPage(this.router.url).toPromise().then(page => {
 			this.page = page;
+			if (this.platformService.isServer()) {
+				this.state.set<Page>(makeStateKey('page'), page);
+			} else if (this.page && this.page.content) {
+				this.page.content = this.sanitizer.bypassSecurityTrustHtml(this.page.content as string);
+			}
 			this.loaded = true;
 		}).catch(err => {
 			if (err.status === 404) {

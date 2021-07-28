@@ -24,7 +24,9 @@ export class ProductService {
 		}
 		return this.http.get<Product[]>(this.productBase + 'products', { params }).pipe(map(products => {
 			return products.map(product => {
-				product.content = this.sanitizer.bypassSecurityTrustHtml(product.content as string);
+				if (product.content) {
+					product.content = this.sanitizer.bypassSecurityTrustHtml(product.content as string);
+				}
 				product.created = new Date(product.created!);
 				product.modified = new Date(product.modified!);
 				return product;
@@ -35,7 +37,7 @@ export class ProductService {
 	public getProduct(slug: string): Observable<Product> {
 		const params = new HttpParams().append('slug', slug);
 		return this.http.get<Product>(this.productBase + 'product', { params }).pipe(map(product => {
-			product.content = this.sanitizer.bypassSecurityTrustHtml(product.content as string);
+			// Can't put the DOM Sanitization here due to SSR bug not transfering SafeHTML correctly
 			product.created = new Date(product.created!);
 			product.modified = new Date(product.modified!);
 			return product;

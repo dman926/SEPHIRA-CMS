@@ -1,4 +1,4 @@
-import { SafeStyle } from "@angular/platform-browser";
+import { SafeHtml } from "@angular/platform-browser";
 
 export interface Post {
 	id?: string
@@ -9,7 +9,7 @@ export interface Post {
 	},
 	title?: string;
 	slug?: string;
-	content?: string | SafeStyle;
+	content?: string | SafeHtml;
 	excerpt?: string;
 	status?: string;
 	categories?: string[];

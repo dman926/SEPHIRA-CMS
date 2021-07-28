@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { ServerModule } from '@angular/platform-server';
+import { ServerModule, ServerTransferStateModule } from '@angular/platform-server';
 
 import { AppModule } from './app.module';
 import { AppComponent } from './app.component';
@@ -9,6 +9,7 @@ import { CookieBackendModule } from 'ngx-cookie-backend';
   imports: [
     AppModule,
     ServerModule,
+	ServerTransferStateModule,
 	CookieBackendModule.forRoot()
   ],
   bootstrap: [AppComponent],
