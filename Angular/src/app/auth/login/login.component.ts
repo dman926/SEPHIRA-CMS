@@ -17,6 +17,8 @@ export class LoginComponent {
 	isVisible: boolean;
 	loggingIn: boolean;
 
+	emailAlreadyExists: boolean;
+
 	constructor(private auth: AuthService, private cartService: CartService, private dialog: MatDialog) {
 		this.isVisible = false;
 		this.loggingIn = false;
@@ -24,13 +26,14 @@ export class LoginComponent {
 			email: new FormControl('', [Validators.required, Validators.email]),
 			password: new FormControl('', [Validators.required])
 		});
+		this.emailAlreadyExists = false;
 	}
 
 	login(): void {
 		if (this.loginForm.valid) {
 			this.loggingIn = true;
-			const email = this.loginForm.get('email')?.value;
-			const password = this.loginForm.get('password')?.value;
+			const email = this.loginForm.get('email')!.value;
+			const password = this.loginForm.get('password')!.value;
 			this.auth.login(email, password).toPromise().then(loginRes => {
 				this.auth.setTokens(true, loginRes.accessToken, loginRes.refreshToken);
 				this.auth.getUser().toPromise().then(user => {
@@ -40,9 +43,8 @@ export class LoginComponent {
 					}
 				}).catch(err => this.loggingIn = false);
 			}).catch(err => {
-				console.log(err.error.message);
 				if (err.error.message === 'Missing OTP Error') {
-					const dialogRef = this.dialog.open(OtpDialogComponent, {
+					this.dialog.open(OtpDialogComponent, {
 						width: '250px',
 						data: {email, password}
 					});
@@ -56,8 +58,8 @@ export class LoginComponent {
 	register(): void {
 		if (this.loginForm.valid) {
 			this.loggingIn = true;
-			const email = this.loginForm.get('email')?.value;
-			const password = this.loginForm.get('password')?.value;
+			const email = this.loginForm.get('email')!.value;
+			const password = this.loginForm.get('password')!.value;
 			this.auth.signup(email, password).toPromise().then(signupRes => {
 				this.auth.login(email, password).toPromise().then(loginRes => {
 					this.auth.setTokens(true, loginRes.accessToken, loginRes.refreshToken);
@@ -65,6 +67,12 @@ export class LoginComponent {
 						this.auth.setUser(user);
 					}).catch(err => this.loggingIn = false);
 				}).catch(err => this.loggingIn = false);	
+			}).catch(err => {
+				if (err.error.message === 'Email Already Exists Error') {
+					this.emailAlreadyExists = true;
+					setTimeout(() => this.emailAlreadyExists = false, 3000);
+				}
+				this.loggingIn = false;
 			});
 		}
 	}

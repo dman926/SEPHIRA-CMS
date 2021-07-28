@@ -29,7 +29,6 @@ export class PageComponent implements OnInit, OnDestroy {
 			this.fetchPage();
 		}
 		if (this.platformService.isBrowser()) {
-			console.log('fire');
 			this.page = this.state.get(makeStateKey('page'), undefined);
 			if (this.page && this.page.content) {
 				this.page.content = this.sanitizer.bypassSecurityTrustHtml(this.page.content as string);

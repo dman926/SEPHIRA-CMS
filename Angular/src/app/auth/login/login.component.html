@@ -2,6 +2,7 @@
     <mat-form-field appearance="fill">
         <mat-label>Email</mat-label>
         <input matInput type="email" formControlName="email" required />
+		<p *ngIf="emailAlreadyExists">Email Already Exists</p>
     </mat-form-field>
     <mat-form-field appearance="fill">
         <mat-label>Password</mat-label>

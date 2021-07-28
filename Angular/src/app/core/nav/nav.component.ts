@@ -79,8 +79,8 @@ export class NavComponent implements OnInit {
 
 	logout(): void {
 		this.auth.setUser(null);
-		localStorage.clear();
-		this.cookie.removeAll();
+		this.cookie.remove('accessToken');
+		this.cookie.remove('refreshToken');
 		this.cartService.clearCart(); // Remove this line if you want the cart to persist after log out
 		this.ws.killSocket();
 		const accessToken = this.cookie.get('accessToken');

@@ -1,14 +1,16 @@
 import { Injectable } from '@angular/core';
+import { makeStateKey, TransferState } from '@angular/platform-browser';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { Observable } from 'rxjs';
 import { PlatformService } from '../core/services/platform.service';
+import { User } from '../models/user';
 
 @Injectable({
 	providedIn: 'root'
 })
 export class AdminGuard implements CanActivate {
 
-	constructor(private platformService: PlatformService) { }
+	constructor(private platformService: PlatformService, private state: TransferState) { }
 
 	canActivate(
 		route: ActivatedRouteSnapshot,
@@ -16,9 +18,9 @@ export class AdminGuard implements CanActivate {
 			if (this.platformService.isServer()) {
 				return true;
 			}
-			const cachedUser = localStorage.getItem('user');
+			const cachedUser = this.state.get<User | null>(makeStateKey('user'), null);
 			if (cachedUser) {
-				return JSON.parse(cachedUser).admin;
+				return cachedUser.admin ? cachedUser.admin : false;
 			}
 			return false;
 	}

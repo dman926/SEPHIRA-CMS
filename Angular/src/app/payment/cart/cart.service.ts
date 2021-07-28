@@ -1,11 +1,13 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { makeStateKey, TransferState } from '@angular/platform-browser';
 import { CookieService } from 'ngx-cookie';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { AuthService } from 'src/app/auth/auth.service';
 import { PlatformService } from 'src/app/core/services/platform.service';
 import { CartItem } from 'src/app/models/cart-item';
 import { Product } from 'src/app/models/product';
+import { User } from 'src/app/models/user';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -17,7 +19,7 @@ export class CartService {
 
 	private cartSubject: BehaviorSubject<CartItem[]>;
 
-	constructor(private http: HttpClient, private auth: AuthService, private platformService: PlatformService, private cookie: CookieService) {
+	constructor(private http: HttpClient, private auth: AuthService, private platformService: PlatformService, private cookie: CookieService, private state: TransferState) {
 		this.cartSubject = new BehaviorSubject<CartItem[]>(this.getLocalCart());
 		this.cart$ = this.cartSubject.asObservable();
 	}
@@ -103,11 +105,11 @@ export class CartService {
 
 	public getLocalCart(): CartItem[] {
 		if (this.platformService.isBrowser()) {
-			const user = localStorage.getItem('user');
+			const user = this.state.get<User | null>(makeStateKey('user'), null);
 			const prevCart = localStorage.getItem('cart');
 			let cart;
 			if (user) {
-				cart = JSON.parse(user).cart;
+				cart = user.cart;
 			} else if (prevCart) {
 				cart = JSON.parse(prevCart);
 			} else {

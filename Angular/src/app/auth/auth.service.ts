@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
+import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { io } from 'socket.io-client';
@@ -35,33 +36,34 @@ export class AuthService {
 
 	private readonly authBase = environment.apiServer + 'auth/';
 
-	constructor(private http: HttpClient, private ws: WebsocketService, private platformService: PlatformService, private cookie: CookieService, private state: TransferState) {
+	constructor(private http: HttpClient, private ws: WebsocketService, private router: Router, private platformService: PlatformService, private cookie: CookieService, private state: TransferState) {
 		this.userSubject = new BehaviorSubject<User | null>(null);
 		this.user$ = this.userSubject.asObservable();
-		if (this.platformService.isBrowser()) {
-			const cachedUser = localStorage.getItem('user');
-			if (cachedUser) {
-				this.setUser(JSON.parse(cachedUser));
-			}
-		}
-		this.refresh().toPromise().then(tokens => {
-			this.setTokens(false, tokens.accessToken, tokens.refreshToken);
-			if (this.platformService.isServer()) {
+		if (this.platformService.isServer()) {
+			this.refresh().toPromise().then(tokens => {
+				this.setTokens(false, tokens.accessToken);
 				this.getUser().toPromise().then(res => {
 					this.setUser(res);
 				}).catch(err => {
+					console.error('Error fetching user (token expiration error). Deleting old tokens.');
 					this.setUser(null);
 					this.cookie.remove('accessToken');
 					this.cookie.remove('refreshToken');
-					console.error('Error fetching user (token expiration error): ' + err);
 				});
-			}
-			if (this.platformService.isBrowser()) {
-				this.setUser(this.state.get(makeStateKey('user'), null));
-				setInterval(() =>
-					this.getUser().toPromise().then(user => this.setUser(user)), 1000 * 60 * 5); // Get the current user again every 5 minutes
-			}
-		});
+			}).catch(err => {
+				// Logout and redirect to homepage
+				this.setUser(null);
+				this.cookie.remove('accessToken');
+				this.cookie.remove('refreshToken');
+				this.ws.killSocket();
+				this.ws.setSocket(io(environment.socketServer));
+				this.router.navigate(['/']);
+			});
+		} else {
+			this.setUser(this.state.get(makeStateKey('user'), null));
+			setInterval(() =>
+				this.getUser().toPromise().then(user => this.setUser(user)), 1000 * 60 * 5); // Get the current user again every 5 minutes
+		}
 	}
 
 	public login(email: string, password: string, otp?: string): Observable<TokenPair> {
@@ -152,13 +154,6 @@ export class AuthService {
 	public setUser(user: User | null): void {
 		this.userSubject.next(user);
 		this.state.set<User | null>(makeStateKey('user'), user);
-		if (this.platformService.isBrowser()) {
-			if (user) {
-				localStorage.setItem('user', JSON.stringify(user));
-			} else {
-				localStorage.removeItem('user');
-			}
-		}
 	}
 
 	public getOtpQr(): Observable<string> {
