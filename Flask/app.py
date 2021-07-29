@@ -38,7 +38,7 @@ if PRODUCTION:
 	app.config['MAIL_PASSWORD'] = ""
 	app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), '..', 'angular', 'assets', 'uploads')
 	app.config['MONGODB_SETTINGS'] = {
-		'host': 'mongodb://localhost/flask-api'
+		'host': 'mongodb://localhost/sephira'
 	}
 	resources = {r"/*": {"origins": "https://api.website.com"}}
 	socketResources = "api.website.com"
@@ -52,7 +52,7 @@ else:
 	app.config['MAIL_PASSWORD'] = ""
 	app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), '..', 'Angular', 'src', 'assets', 'uploads')
 	app.config['MONGODB_SETTINGS'] = {
-		'host': 'mongodb://localhost/flask-api-test'
+		'host': 'mongodb://localhost/sephira-test'
 	}
 	resources = {r"/*": {"origins": "*"}}
 	socketResources = "*"

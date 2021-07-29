@@ -6,7 +6,7 @@
 	"version": 1,
 	"newProjectRoot": "projects",
 	"projects": {
-		"flask-api": {
+		"sephira": {
 			"projectType": "application",
 			"schematics": {
 				"@schematics/angular:component": {
@@ -23,7 +23,7 @@
 				"build": {
 					"builder": "@angular-devkit/build-angular:browser",
 					"options": {
-						"outputPath": "dist/flask-api/browser",
+						"outputPath": "dist/sephira/browser",
 						"index": "src/index.html",
 						"main": "src/main.ts",
 						"polyfills": "src/polyfills.ts",
@@ -101,18 +101,18 @@
 				"serve": {
 					"builder": "@angular-devkit/build-angular:dev-server",
 					"options": {
-						"browserTarget": "flask-api:build"
+						"browserTarget": "sephira:build"
 					},
 					"configurations": {
 						"production": {
-							"browserTarget": "flask-api:build:production"
+							"browserTarget": "sephira:build:production"
 						}
 					}
 				},
 				"extract-i18n": {
 					"builder": "@angular-devkit/build-angular:extract-i18n",
 					"options": {
-						"browserTarget": "flask-api:build"
+						"browserTarget": "sephira:build"
 					}
 				},
 				"test": {
@@ -146,18 +146,18 @@
 					"builder": "@angular-devkit/build-angular:protractor",
 					"options": {
 						"protractorConfig": "e2e/protractor.conf.js",
-						"devServerTarget": "flask-api:serve"
+						"devServerTarget": "sephira:serve"
 					},
 					"configurations": {
 						"production": {
-							"devServerTarget": "flask-api:serve:production"
+							"devServerTarget": "sephira:serve:production"
 						}
 					}
 				},
 				"server": {
 					"builder": "@angular-devkit/build-angular:server",
 					"options": {
-						"outputPath": "dist/flask-api/server",
+						"outputPath": "dist/sephira/server",
 						"main": "server.ts",
 						"tsConfig": "tsconfig.server.json",
 						"optimization": false,
@@ -167,12 +167,10 @@
 					"configurations": {
 						"production": {
 							"outputHashing": "media",
-							"fileReplacements": [
-								{
-									"replace": "src/environments/environment.ts",
-									"with": "src/environments/environment.prod.ts"
-								}
-							],
+							"fileReplacements": [{
+								"replace": "src/environments/environment.ts",
+								"with": "src/environments/environment.prod.ts"
+							}],
 							"optimization": true,
 							"sourceMap": false,
 							"extractLicenses": true
@@ -190,12 +188,12 @@
 					"builder": "@nguniversal/builders:ssr-dev-server",
 					"configurations": {
 						"development": {
-							"browserTarget": "flask-api:build:development",
-							"serverTarget": "flask-api:server:development"
+							"browserTarget": "sephira:build:development",
+							"serverTarget": "sephira:server:development"
 						},
 						"production": {
-							"browserTarget": "flask-api:build:production",
-							"serverTarget": "flask-api:server:production"
+							"browserTarget": "sephira:build:production",
+							"serverTarget": "sephira:server:production"
 						}
 					},
 					"defaultConfiguration": "development"
@@ -209,12 +207,12 @@
 					},
 					"configurations": {
 						"production": {
-							"browserTarget": "flask-api:build:production",
-							"serverTarget": "flask-api:server:production"
+							"browserTarget": "sephira:build:production",
+							"serverTarget": "sephira:server:production"
 						},
 						"development": {
-							"browserTarget": "flask-api:build:development",
-							"serverTarget": "flask-api:server:development"
+							"browserTarget": "sephira:build:development",
+							"serverTarget": "sephira:server:development"
 						}
 					},
 					"defaultConfiguration": "production"
@@ -222,5 +220,5 @@
 			}
 		}
 	},
-	"defaultProject": "flask-api"
+	"defaultProject": "sephira"
 }

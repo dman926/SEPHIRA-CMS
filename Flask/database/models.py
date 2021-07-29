@@ -138,8 +138,7 @@ class User(db.Document):
 		return check_password_hash(self.password, password + self.salt)
 
 	def get_totp_uri(self):
-		return 'otpauth://totp/Flask-API:{0}?secret={1}&issuer=Flask-API' \
-			.format(self.email, self.otpSecret)
+		return 'otpauth://totp/SEPHIRA:{0}?secret={1}&issuer=SEPHIRA'.format(self.email, self.otpSecret) # TODO: replace SEPHIRA with your app name
 
 	def verify_totp(self, token):
 		return onetimepass.valid_totp(token, self.otpSecret)

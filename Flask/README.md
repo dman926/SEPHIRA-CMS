@@ -1,5 +1,3 @@
-# Flask-API
-
 (Preferably) In a virtual python environment:
 
 `pip install wheel`

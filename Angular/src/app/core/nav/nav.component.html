@@ -1,7 +1,7 @@
 <mat-sidenav-container class="sidenav-container">
 	<mat-sidenav #drawer class="sidenav" fixedInViewport [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'" [mode]="(isHandset$ | async) ? 'over' : 'side'" [opened]="(isHandset$ | async) === false">
 		<div id="sidenav-wrapper">
-			<mat-toolbar><a routerLink="/">Flask API</a></mat-toolbar>
+			<mat-toolbar><a routerLink="/">SEPHIRA</a></mat-toolbar>
 			<div id="login-forms" *ngIf="!isSignedIn()">
 				<app-login></app-login>
 			</div>
