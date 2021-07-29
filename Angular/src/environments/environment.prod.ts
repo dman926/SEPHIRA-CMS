@@ -4,5 +4,6 @@ export const environment = {
 	socketServer: '',
 	recaptchaSiteKey: '',
 	stripePublicKey: '',
-	paypalClientID: ''
+	paypalClientID: '',
+	gtmId: ''
 };

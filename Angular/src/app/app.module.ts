@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CoreModule } from './core/core.module';
 import { CookieModule } from 'ngx-cookie';
+import { environment } from 'src/environments/environment';
 
 @NgModule({
 	declarations: [
@@ -20,7 +21,9 @@ import { CookieModule } from 'ngx-cookie';
 
 		CoreModule
 	],
-	providers: [],
+	providers: [
+		{ provide: 'googleTagManagerId', useValue: environment.gtmId }
+	],
 	bootstrap: [AppComponent]
 })
 export class AppModule { }

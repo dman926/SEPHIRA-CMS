@@ -5,7 +5,7 @@ import { map, shareReplay } from 'rxjs/operators';
 import { MatSidenav } from '@angular/material/sidenav';
 import { AuthService } from 'src/app/auth/auth.service';
 import { User } from 'src/app/models/user';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { WebsocketService } from '../services/websocket.service';
 import { environment } from 'src/environments/environment';
 import { io } from 'socket.io-client';
@@ -15,6 +15,7 @@ import { HttpClient } from '@angular/common/http';
 import { MenuItem } from 'src/app/models/menu-item';
 import { PlatformService } from '../services/platform.service';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
+import { GoogleTagManagerService } from 'angular-google-tag-manager';
 
 interface LinkPair {
 	link: string;
@@ -45,7 +46,7 @@ export class NavComponent implements OnInit {
 	private swipeCoord: number[];
 	private swipeTime: number;
 
-	constructor(private breakpointObserver: BreakpointObserver, private auth: AuthService, private cartService: CartService, private router: Router, private ws: WebsocketService, private cookie: CookieService, private http: HttpClient, private platformService: PlatformService, private state: TransferState) {
+	constructor(private breakpointObserver: BreakpointObserver, private auth: AuthService, private cartService: CartService, private router: Router, private ws: WebsocketService, private cookie: CookieService, private http: HttpClient, private platformService: PlatformService, private state: TransferState, private gtmService: GoogleTagManagerService) {
 		this.user = null;
 		this.auth.user$.subscribe(user => {
 			this.user = user;
@@ -70,6 +71,15 @@ export class NavComponent implements OnInit {
 			});
 		} else {
 			this.menuItems = this.state.get<MenuItem[]>(menuKey, []);
+
+			this.router.events.subscribe(ev => {
+				if (ev instanceof NavigationEnd) {
+					this.gtmService.pushTag({
+						event: 'page',
+						pageName: ev.url
+					});
+				}
+			});
 		}
 	}
 

@@ -31,6 +31,7 @@
 		"@nguniversal/express-engine": "^12.1.0",
 		"@techiediaries/ngx-qrcode": "^9.1.0",
 		"@types/stripe-v3": "^3.1.25",
+		"angular-google-tag-manager": "^1.4.2",
 		"bufferutil": "^4.0.3",
 		"cors": "^2.8.5",
 		"express": "^4.15.2",
