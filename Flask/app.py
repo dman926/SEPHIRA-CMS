@@ -32,7 +32,7 @@ paypal_client = None
 app = Flask(__name__)
 if PRODUCTION:
 	app.config['JWT_SECRET_KEY'] = 'even-more-secret' # CHANGE THIS
-	app.config['MAIL_SERVER']: "localhost"
+	app.config['MAIL_SERVER'] = "localhost"
 	app.config['MAIL_PORT'] = "1025"
 	app.config['MAIL_USERNAME'] = "support@flaskapi.com"
 	app.config['MAIL_PASSWORD'] = ""
