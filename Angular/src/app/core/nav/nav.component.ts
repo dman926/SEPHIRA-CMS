@@ -16,6 +16,7 @@ import { MenuItem } from 'src/app/models/menu-item';
 import { PlatformService } from '../services/platform.service';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
 import { GoogleTagManagerService } from 'angular-google-tag-manager';
+import { SeoService } from '../services/seo.service';
 
 interface LinkPair {
 	link: string;
@@ -46,7 +47,7 @@ export class NavComponent implements OnInit {
 	private swipeCoord: number[];
 	private swipeTime: number;
 
-	constructor(private breakpointObserver: BreakpointObserver, private auth: AuthService, private cartService: CartService, private router: Router, private ws: WebsocketService, private cookie: CookieService, private http: HttpClient, private platformService: PlatformService, private state: TransferState, private gtmService: GoogleTagManagerService) {
+	constructor(private breakpointObserver: BreakpointObserver, private auth: AuthService, private cartService: CartService, private router: Router, private ws: WebsocketService, private cookie: CookieService, private http: HttpClient, private platformService: PlatformService, private state: TransferState, private gtmService: GoogleTagManagerService, private seo: SeoService) {
 		this.user = null;
 		this.auth.user$.subscribe(user => {
 			this.user = user;
@@ -74,6 +75,7 @@ export class NavComponent implements OnInit {
 
 			this.router.events.subscribe(ev => {
 				if (ev instanceof NavigationEnd) {
+					this.seo.setCanonicalUrl();
 					this.gtmService.pushTag({
 						event: 'page',
 						pageName: ev.url

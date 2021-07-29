@@ -5,5 +5,6 @@ export const environment = {
 	recaptchaSiteKey: '',
 	stripePublicKey: '',
 	paypalClientID: '',
-	gtmId: ''
+	gtmId: '',
+	defaultTitle: ''
 };
