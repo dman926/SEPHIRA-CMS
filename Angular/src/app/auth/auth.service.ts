@@ -49,16 +49,12 @@ export class AuthService {
 					this.setUser(null);
 					this.cookie.remove('accessToken');
 					this.cookie.remove('refreshToken');
-					this.ws.killSocket();
-					this.ws.setSocket(io(environment.socketServer));
 				});
 			}).catch(err => {
 				// Logout and redirect to homepage
 				this.setUser(null);
 				this.cookie.remove('accessToken');
 				this.cookie.remove('refreshToken');
-				this.ws.killSocket();
-				this.ws.setSocket(io(environment.socketServer));
 				this.router.navigate(['/']);
 			});
 		} else {

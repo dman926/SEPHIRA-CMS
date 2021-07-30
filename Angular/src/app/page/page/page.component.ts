@@ -4,7 +4,9 @@ import { DomSanitizer, makeStateKey, TransferState } from '@angular/platform-bro
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { PlatformService } from 'src/app/core/services/platform.service';
+import { SeoService } from 'src/app/core/services/seo.service';
 import { Page } from 'src/app/models/page';
+import { environment } from 'src/environments/environment';
 import { PageService } from '../page.service';
 
 @Component({
@@ -19,7 +21,7 @@ export class PageComponent implements OnInit, OnDestroy {
 
 	private subs: Subscription[];
 
-	constructor(private pageService: PageService, private router: Router, private platformService: PlatformService, private state: TransferState, private sanitizer: DomSanitizer) {
+	constructor(private pageService: PageService, private router: Router, private platformService: PlatformService, private state: TransferState, private sanitizer: DomSanitizer, private seo: SeoService) {
 		this.loaded = false;
 		this.subs = [];
 	}
@@ -27,8 +29,7 @@ export class PageComponent implements OnInit, OnDestroy {
 	ngOnInit(): void {
 		if (this.platformService.isServer()) {
 			this.fetchPage();
-		}
-		if (this.platformService.isBrowser()) {
+		} else {
 			this.page = this.state.get(makeStateKey('page'), undefined);
 			if (!this.page || this.page.slug !== this.router.url) {
 				this.fetchPage();
@@ -38,7 +39,6 @@ export class PageComponent implements OnInit, OnDestroy {
 			}
 			this.subs.push(this.router.events.subscribe(ev => {
 				if (ev instanceof NavigationEnd) {
-					console.log('fire');
 					this.fetchPage();
 				}
 			}));
@@ -53,6 +53,8 @@ export class PageComponent implements OnInit, OnDestroy {
 		this.loaded = false;
 		this.pageService.getPage(this.router.url).toPromise().then(page => {
 			this.page = page;
+			this.seo.setTitle(this.page.title ? this.page.title : environment.defaultTitle);
+			this.seo.updateTag('description', this.page.excerpt ? this.page.excerpt : '');
 			if (this.platformService.isServer()) {
 				this.state.set<Page>(makeStateKey('page'), page);
 			} else if (this.page && this.page.content) {
