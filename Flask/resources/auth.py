@@ -40,7 +40,7 @@ class SignupApi(Resource):
 		try:
 			body = request.get_json()
 			user =  User(**body)
-			if len(User.objects) == 0:
+			if User.objects.count() == 0:
 				user.admin = True
 			user.hash_password()
 			user.save()
