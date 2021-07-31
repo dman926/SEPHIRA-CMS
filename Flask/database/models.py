@@ -2,7 +2,7 @@
 Models to serialize between MongoDB and Python
 '''
 
-from .db import db
+from mongoengine import Document, EmbeddedDocument, EmbeddedDocumentListField, ReferenceField, StringField, ListField, IntField, DateTimeField, BooleanField, EmailField, DecimalField, FloatField, DictField, CASCADE
 from flask_bcrypt import generate_password_hash, check_password_hash
 import onetimepass
 
@@ -10,21 +10,21 @@ from services.util_service import make_ngrams
 
 import base64, os, random, string, datetime
 
-class Post(db.Document):
-	author = db.ReferenceField('User')
-	title = db.StringField()
-	slug = db.StringField(unique_with='_cls')
-	content = db.StringField()
-	excerpt = db.StringField()
-	status = db.StringField(choices=['publish', 'draft', 'private', 'deactivated'], default='draft')
-	categories = db.ListField(db.StringField())
+class Post(Document):
+	author = ReferenceField('User')
+	title = StringField()
+	slug = StringField(unique_with='_cls')
+	content = StringField()
+	excerpt = StringField()
+	status = StringField(choices=['publish', 'draft', 'private', 'deactivated'], default='draft')
+	categories = ListField(StringField())
 
-	categoriesPrefixNgrams = db.ListField(db.StringField())
-	titleNgrams = db.StringField()
-	titlePrefixNgrams = db.StringField()
+	categoriesPrefixNgrams = ListField(StringField())
+	titleNgrams = StringField()
+	titlePrefixNgrams = StringField()
 
-	created = db.DateTimeField(default=datetime.datetime.now())
-	modified = db.DateTimeField(default=datetime.datetime.now())
+	created = DateTimeField(default=datetime.datetime.now())
+	modified = DateTimeField(default=datetime.datetime.now())
 
 	meta = {
 		'allow_inheritance': True,
@@ -63,10 +63,10 @@ class Post(db.Document):
 class Page(Post):
 	pass
 
-class MenuItemChild(db.EmbeddedDocument):
-	text = db.StringField(required=True)
-	link = db.StringField(required=True)
-	children = db.EmbeddedDocumentListField('MenuItemChild')
+class MenuItemChild(EmbeddedDocument):
+	text = StringField(required=True)
+	link = StringField(required=True)
+	children = EmbeddedDocumentListField('MenuItemChild')
 
 	def serialize(self):
 		return {
@@ -76,11 +76,11 @@ class MenuItemChild(db.EmbeddedDocument):
 		}
 
 
-class MenuItem(db.Document):
-	text = db.StringField(required=True)
-	link = db.StringField(required=True)
-	order = db.IntField()
-	children = db.EmbeddedDocumentListField('MenuItemChild')
+class MenuItem(Document):
+	text = StringField(required=True)
+	link = StringField(required=True)
+	order = IntField()
+	children = EmbeddedDocumentListField('MenuItemChild')
 
 	def serialize(self):
 		return {
@@ -90,12 +90,12 @@ class MenuItem(db.Document):
 			'children': list(map(lambda mi: mi.serialize(), self.children))
 		}
 
-class CartItem(db.EmbeddedDocument):
-	product = db.ReferenceField('Product')
-	qty = db.IntField()
+class CartItem(EmbeddedDocument):
+	product = ReferenceField('Product')
+	qty = IntField()
 
 	# For orders
-	price = db.DecimalField(precision=2)
+	price = DecimalField(precision=2)
 
 	def serialize(self, order=False):
 		if order:
@@ -113,18 +113,18 @@ class CartItem(db.EmbeddedDocument):
 				'qty': self.qty
 			}
 
-class User(db.Document):
-	email = db.EmailField(required=True, unique=True)
-	password = db.StringField(required=True, min_length=6)
-	salt = db.StringField()
-	otpSecret = db.StringField()
-	twoFactorEnabled = db.BooleanField()
-	admin = db.BooleanField()
-	firstName = db.StringField()
-	lastName = db.StringField()
+class User(Document):
+	email = EmailField(required=True, unique=True)
+	password = StringField(required=True, min_length=6)
+	salt = StringField()
+	otpSecret = StringField()
+	twoFactorEnabled = BooleanField()
+	admin = BooleanField()
+	firstName = StringField()
+	lastName = StringField()
 
-	cart = db.EmbeddedDocumentListField('CartItem')
-	stripeCustomerID = db.StringField()
+	cart = EmbeddedDocumentListField('CartItem')
+	stripeCustomerID = StringField()
 
 	def hash_password(self):
 		chars = string.ascii_letters + string.punctuation
@@ -156,14 +156,14 @@ class User(db.Document):
 		}
 
 class Product(Post):
-	sku = db.StringField()
-	img = db.ListField(db.StringField())
-	price = db.DecimalField(precision=2)
-	digital = db.BooleanField(default=False)
-	taxable = db.DictField()
+	sku = StringField()
+	img = ListField(StringField())
+	price = DecimalField(precision=2)
+	digital = BooleanField(default=False)
+	taxable = DictField()
 
-	totalReviews = db.IntField(default=0)
-	avgReviewScore = db.FloatField(default=0)
+	totalReviews = IntField(default=0)
+	avgReviewScore = FloatField(default=0)
 
 	def addReview(self, score):
 		self.avgReviewScore = ((self.avgReviewScore * self.totalReviews) + int(score)) / (self.totalReviews + 1)
@@ -194,19 +194,19 @@ class Product(Post):
 			'avgReviewScore': round(self.avgReviewScore, 1) # Round to 1 decimal place
 		}
 
-class Order(db.Document):
-	orderer = db.ReferenceField('User')
-	orderStatus = db.StringField() # can be 'not placed', 'pending', 'paid', 'shipped', 'completed', 'failed'
-	products = db.EmbeddedDocumentListField('CartItem')
-	coupons = db.ListField(db.ReferenceField('Coupon'))
-	taxRate = db.FloatField()
-	shippingType = db.StringField(choices=['dollar', 'percent'])
-	shippingRate = db.FloatField()
-	addresses = db.DictField()
-	paymentIntentID = db.StringField()
-	paypalCaptureID = db.StringField()
-	createdAt = db.DateTimeField(default=datetime.datetime.now)
-	modified = db.DateTimeField(default=datetime.datetime.now)
+class Order(Document):
+	orderer = ReferenceField('User')
+	orderStatus = StringField() # can be 'not placed', 'pending', 'paid', 'shipped', 'completed', 'failed'
+	products = EmbeddedDocumentListField('CartItem')
+	coupons = ListField(ReferenceField('Coupon'))
+	taxRate = FloatField()
+	shippingType = StringField(choices=['dollar', 'percent'])
+	shippingRate = FloatField()
+	addresses = DictField()
+	paymentIntentID = StringField()
+	paypalCaptureID = StringField()
+	createdAt = DateTimeField(default=datetime.datetime.now)
+	modified = DateTimeField(default=datetime.datetime.now)
 
 	meta = {
 		'indexes': [
@@ -234,11 +234,11 @@ class Order(db.Document):
 			'modified': str(self.modified)
 		}
 
-class Review(db.Document):
-	reviewer = db.ReferenceField('User', unique_with='product', required=True) # 1 review per person per product
-	product = db.ReferenceField('Product', required=True)
-	score = db.DecimalField(precision=1, min_value=0, max_value=5, required=True)
-	review = db.StringField()
+class Review(Document):
+	reviewer = ReferenceField('User', unique_with='product', required=True) # 1 review per person per product
+	product = ReferenceField('Product', required=True)
+	score = DecimalField(precision=1, min_value=0, max_value=5, required=True)
+	review = StringField()
 
 	def serialize(self):
 		return {
@@ -252,13 +252,13 @@ class Review(db.Document):
 		}
 
 class Coupon(Post):
-	code = db.StringField(unique=True)
-	discountType = db.StringField() # Can be 'percent' or 'dollar'
-	discount = db.FloatField()
-	storeWide = db.BooleanField(default=False)
-	applicableProducts = db.ListField(db.ReferenceField('Product'))
-	uses = db.IntField(default=0)
-	maxUses = db.IntField(default=-1)
+	code = StringField(unique=True)
+	discountType = StringField() # Can be 'percent' or 'dollar'
+	discount = FloatField()
+	storeWide = BooleanField(default=False)
+	applicableProducts = ListField(ReferenceField('Product'))
+	uses = IntField(default=0)
+	maxUses = IntField(default=-1)
 
 	def serialize(self):
 		return {
@@ -286,16 +286,16 @@ class Coupon(Post):
 			'created': str(self.created)
 		}
 
-class UsTaxJurisdiction(db.Document):
-	zip = db.StringField(primary_key=True)
-	state = db.StringField()
-	taxRegion = db.StringField()
-	stateRate = db.FloatField()
-	estimatedCombinedRate = db.FloatField()
-	estimatedCountyRate = db.FloatField()
-	estimatedCityRate = db.FloatField()
-	estimatedSpecialRate = db.FloatField()
-	riskLevel = db.IntField()
+class UsTaxJurisdiction(Document):
+	zip = StringField(primary_key=True)
+	state = StringField()
+	taxRegion = StringField()
+	stateRate = FloatField()
+	estimatedCombinedRate = FloatField()
+	estimatedCountyRate = FloatField()
+	estimatedCityRate = FloatField()
+	estimatedSpecialRate = FloatField()
+	riskLevel = IntField()
 
 	meta = {
 		'indexes': [
@@ -316,11 +316,11 @@ class UsTaxJurisdiction(db.Document):
 			'riskLevel': self.riskLevel
 		}
 
-class ShippingRate(db.EmbeddedDocument):
-	rate = db.FloatField()
-	type = db.StringField(choices=['dollar', 'percent'])
-	minCutoff = db.FloatField()
-	maxCutoff = db.FloatField()
+class ShippingRate(EmbeddedDocument):
+	rate = FloatField()
+	type = StringField(choices=['dollar', 'percent'])
+	minCutoff = FloatField()
+	maxCutoff = FloatField()
 
 	def serialize(self):
 		return {
@@ -330,16 +330,16 @@ class ShippingRate(db.EmbeddedDocument):
 			'maxCutoff': self.maxCutoff
 		}
 
-class UsShippingZone(db.Document):
-	applicableStates = db.ListField(db.StringField(unique=True, choices=[
+class UsShippingZone(Document):
+	applicableStates = ListField(StringField(unique=True, choices=[
 		"AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA", 
 		"HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", 
 		"MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", 
 		"NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", 
 		"SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
 	]))
-	rates = db.EmbeddedDocumentListField('ShippingRate')
-	default = db.BooleanField(unique=True)
+	rates = EmbeddedDocumentListField('ShippingRate')
+	default = BooleanField(unique=True)
 
 	def serialize(self):
 		mappedRates = list(map(lambda r: r.serialize(), self.rates))
@@ -350,4 +350,4 @@ class UsShippingZone(db.Document):
 			'default': self.default
 		}
 
-User.register_delete_rule(Post, 'author', db.CASCADE)
+User.register_delete_rule(Post, 'author', CASCADE)
