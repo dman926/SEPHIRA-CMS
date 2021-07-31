@@ -8,6 +8,11 @@ import { PlatformService } from 'src/app/core/services/platform.service';
 import { Page } from 'src/app/models/page';
 import { environment } from 'src/environments/environment';
 
+interface AllPages {
+	total: number;
+	pages: Page[];
+}
+
 @Component({
 	selector: 'app-search',
 	templateUrl: './search.component.html',
@@ -16,6 +21,7 @@ import { environment } from 'src/environments/environment';
 export class SearchComponent implements OnInit, OnDestroy {
 
 	@Input() searchBar: boolean;
+	@Input() samePage: boolean;
 
 	pages: Page[];
 	searchForm: FormGroup;
@@ -24,6 +30,7 @@ export class SearchComponent implements OnInit, OnDestroy {
 
 	constructor(private http: HttpClient, private route: ActivatedRoute, private router: Router, private platformService: PlatformService) {
 		this.searchBar = false;
+		this.samePage = false;
 		this.pages = [];
 		this.searchForm = new FormGroup({
 			search: new FormControl('', [Validators.required])
@@ -34,15 +41,16 @@ export class SearchComponent implements OnInit, OnDestroy {
 		if (this.platformService.isBrowser()) {
 			if (!this.searchBar) {
 				this.querySub = this.route.queryParams.subscribe(params => {
-					console.log(params);
-					const httpParams = new HttpParams().append('s', params.s);
-					this.http.get<Page[]>(environment.apiServer + 'page/search', { params: httpParams }).pipe(map(pages => pages.map(page => {
-						page.created = new Date(page.created!);
-						page.modified = new Date(page.modified!);
-						return page;
-					}))).toPromise().then(searchRes => {
-						this.pages = searchRes;
-						console.log(this.pages);
+					const httpParams = new HttpParams().append('search', params.s);
+					this.http.get<AllPages>(environment.apiServer + 'page/pages', { params: httpParams }).pipe(map(res => {
+						res.pages = res.pages.map(page => {
+							page.created = new Date(page.created!);
+							page.modified = new Date(page.modified!);
+							return page;
+						});
+						return res;
+					})).toPromise().then(searchRes => {
+						this.pages = searchRes.pages;
 					})
 				});
 			}
@@ -54,7 +62,20 @@ export class SearchComponent implements OnInit, OnDestroy {
 	}
 
 	search(): void {
-		this.router.navigate(['/search'], { queryParams: {s: this.searchForm.get('search')!.value} });
+		const search = this.searchForm.get('search')!.value;
+		if (this.samePage) {
+			let urlWithoutParams = this.router.parseUrl(this.router.url).root.children['primary']?.segments.map((it: any) => it.path).join('/');
+			if (!urlWithoutParams) {
+				urlWithoutParams = '/';
+			}
+			if (search) {
+				this.router.navigate([urlWithoutParams], { queryParams: { s: search } });
+			} else {
+				this.router.navigate([urlWithoutParams]);
+			}
+		} else {
+			this.router.navigate(['/search'], { queryParams: {s: search} });
+		}
 	}
 
 }

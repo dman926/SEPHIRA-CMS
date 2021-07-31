@@ -85,7 +85,6 @@ export class MediaBrowserComponent implements OnInit {
 	deleteFile(index: number) {
 		const filename = this.files[index].path.substr(this.files[index].path.lastIndexOf('/') + 1);
 		this.fileService.deleteFile(filename).toPromise().then(res => {
-			console.log(res);
 			this.getFiles();
 		});
 	}

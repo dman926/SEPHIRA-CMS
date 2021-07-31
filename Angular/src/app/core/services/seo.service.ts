@@ -30,7 +30,6 @@ export class SeoService {
 
 	updateTag(name: string, content: string): void {
 		const tag: HTMLMetaElement | null = this.meta.getTag('name="' + name + '"');
-		console.log(tag);
 		const tagDef = { name, content }
 		if (tag) {
 			this.meta.updateTag(tagDef, 'name="' + name + '"');

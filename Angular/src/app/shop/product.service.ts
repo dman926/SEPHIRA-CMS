@@ -8,6 +8,11 @@ import { environment } from 'src/environments/environment';
 import { Product } from '../models/product';
 import { Review } from '../models/review';
 
+interface AllProducts {
+	total: number;
+	products: Product[];
+}
+
 @Injectable({
 	providedIn: 'root'
 })
@@ -17,13 +22,16 @@ export class ProductService {
 
 	constructor(private http: HttpClient, private sanitizer: DomSanitizer, private cookie: CookieService) { }
 
-	public getAllProducts(page?: number, size?: number): Observable<Product[]> {
+	public getAllProducts(page?: number, size?: number, search?: string): Observable<AllProducts> {
 		let params = new HttpParams();
 		if (page && size) {
 			params = params.append('page', page.toString()).append('size', size.toString())
 		}
-		return this.http.get<Product[]>(this.productBase + 'products', { params }).pipe(map(products => {
-			return products.map(product => {
+		if (search) {
+			params = params.append('search', search);
+		}
+		return this.http.get<AllProducts>(this.productBase + 'products', { params }).pipe(map(res => {
+			res.products = res.products.map(product => {
 				if (product.content) {
 					product.content = this.sanitizer.bypassSecurityTrustHtml(product.content as string);
 				}
@@ -31,6 +39,7 @@ export class ProductService {
 				product.modified = new Date(product.modified!);
 				return product;
 			});
+			return res;
 		}));
 	}
 

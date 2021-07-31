@@ -16,7 +16,25 @@ from services.logging_service import writeWarningToLog
 class OrdersApi(Resource):
 	@swagger.doc({
 		'tags': ['Order'],
-		'description': 'Get all orders of this user',
+		'description': 'Get all orders of this user according to pagination criteria',
+		'parameters': [
+			{
+				'name': 'page',
+				'description': 'The page index',
+				'in': 'query',
+				'type': 'int',
+				'schema': None,
+				'required': False
+			},
+			{
+				'name': 'size',
+				'description': 'The page size',
+				'in': 'query',
+				'type': 'int',
+				'schema': None,
+				'required': False
+			}
+		],
 		'responses': {
 			'200': {
 				'description': 'Array of Orders',
@@ -27,10 +45,11 @@ class OrdersApi(Resource):
 	def get(self):
 		try:
 			orders = Order.objects(orderer=get_jwt_identity())
-			mappedOrders = list(map(lambda o: o.serialize(), orders))
-			return jsonify(mappedOrders)
-		except DoesNotExist:
-			return jsonify([])
+			total = orders.count()
+			page = int(request.args.get('page', 0))
+			size = int(request.args.get('size', total))
+			orders = orders[page * size : page * size + size]			
+			return jsonify({ 'total': total, 'orders': list(map(lambda o: o.serialize(), orders)) })
 		except Exception as e:
 			writeWarningToLog('Unhandled exception in resources.order.OrdersApi get', e)
 			raise InternalServerError

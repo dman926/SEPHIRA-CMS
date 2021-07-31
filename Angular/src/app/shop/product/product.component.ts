@@ -64,7 +64,6 @@ export class ProductComponent implements OnInit {
 				if (this.product.content && typeof this.product.content === 'string') {
 					this.product.content = this.sanitizer.bypassSecurityTrustHtml(this.product.content as string);
 				}
-				console.log(this.product);
 				this.productService.reviewAllowed(this.product.id!).toPromise().then(allowed => {
 					this.reviewAllowed = allowed;
 				});
@@ -77,7 +76,6 @@ export class ProductComponent implements OnInit {
 						product.content = this.sanitizer.bypassSecurityTrustHtml(product.content as string);
 					}
 					this.product = product;
-					console.log(this.product);
 					this.loaded = true;
 				}).catch(err => this.loaded = true);
 			}

@@ -13,6 +13,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { StarRatingModule } from '../star-rating/star-rating.module';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { SearchModule } from '../search/search.module';
 
 
 @NgModule({
@@ -33,7 +34,8 @@ import { MatInputModule } from '@angular/material/input';
 	MatFormFieldModule,
 	MatInputModule,
 
-	StarRatingModule
+	StarRatingModule,
+	SearchModule
   ]
 })
 export class ShopModule { }

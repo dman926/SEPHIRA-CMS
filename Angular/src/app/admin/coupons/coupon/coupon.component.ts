@@ -185,7 +185,6 @@ export class CouponComponent implements OnInit, OnDestroy {
 		} else if (!event.checked) {
 			this.applicableProducts.splice(index, 1);
 		}
-		console.log(this.applicableProducts);
 	}
 
 	get slug(): FormControl {

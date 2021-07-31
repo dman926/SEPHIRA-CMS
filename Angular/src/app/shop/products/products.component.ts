@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { PlatformService } from 'src/app/core/services/platform.service';
 import { Product } from 'src/app/models/product';
 import { CartService } from 'src/app/payment/cart/cart.service';
@@ -16,14 +18,16 @@ interface PageEvent {
 	templateUrl: './products.component.html',
 	styleUrls: ['./products.component.scss']
 })
-export class ProductsComponent implements OnInit {
+export class ProductsComponent implements OnInit, OnDestroy {
 
 	loaded: boolean;
 	products: Product[];
 	productPageEvent: PageEvent;
 	productCount: number;
+	private searchTerm: string | undefined;
+	private subs: Subscription[];
 
-	constructor(private productService: ProductService, public cartService: CartService, private platformService: PlatformService) {
+	constructor(private productService: ProductService, public cartService: CartService, private platformService: PlatformService, private route: ActivatedRoute) {
 		this.loaded = false;
 		this.products = [];
 		this.productPageEvent = {
@@ -33,15 +37,21 @@ export class ProductsComponent implements OnInit {
 			previousPageIndex: 0
 		};
 		this.productCount = 0;
+		this.subs = [];
 	}
 
 	ngOnInit(): void {
 		if (this.platformService.isBrowser()) {
-			this.productService.getProductCount().toPromise().then(count => {
-				this.productCount = count;
-			});
-			this.fetchProducts();
+			this.subs.push(this.route.queryParams.subscribe(params => {
+				this.searchTerm = params.s;
+				this.resetProducts();
+				this.fetchProducts();
+			}));
 		}
+	}
+
+	ngOnDestroy(): void {
+		this.subs.forEach(sub => sub.unsubscribe());
 	}
 
 	get shownProducts(): Product[] {
@@ -55,10 +65,22 @@ export class ProductsComponent implements OnInit {
 			this.productPageEvent = event;
 		}
 		this.loaded = false;
-		this.productService.getAllProducts(this.productPageEvent.pageIndex, this.productPageEvent.pageSize).toPromise().then(products => {
-			this.products = this.products.concat(products);
+		this.productService.getAllProducts(this.productPageEvent.pageIndex, this.productPageEvent.pageSize, this.searchTerm).toPromise().then(res => {
+			this.productCount = res.total;
+			this.products = this.products.concat(res.products);
 			this.loaded = true;
 		}).catch(err => this.loaded = true);
+	}
+
+	private resetProducts(): void {
+		this.products = [];
+		this.productCount = 0;
+		this.productPageEvent = {
+			length: 0,
+			pageIndex: 0,
+			pageSize: 10,
+			previousPageIndex: 0
+		};
 	}
 
 }

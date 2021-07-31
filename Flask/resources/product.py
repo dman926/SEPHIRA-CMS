@@ -33,20 +33,34 @@ class ProductsApi(Resource):
 				'type': 'int',
 				'schema': None,
 				'required': False
+			},
+			{
+				'name': 'search',
+				'description': 'The search term',
+				'in': 'query',
+				'type': 'string',
+				'schema': None,
+				'required': False
 			}
 		],
 		'responses': {
 			'200': {
-				'description': 'An array of Page'
+				'description': 'An array of Product'
 			}
 		}
 	})
 	def get(self):
 		try:
+			search = request.args.get('search')
+			products = Product.objects()
+			print(search)
+			if search:
+				products = products.search_text(search).order_by('$text_score')
+			total = products.count()
 			page = int(request.args.get('page', 0))
-			size = int(request.args.get('size', Product.objects.count()))
-			products = Product.objects[page * size : page * size + size]
-			return jsonify(list(map(lambda p: p.serialize(), products)))
+			size = int(request.args.get('size', total))
+			products = products[page * size : page * size + size]
+			return jsonify({ 'total': total, 'products': list(map(lambda p: p.serialize(), products)) })
 		except UnauthorizedError:
 			raise UnauthorizedError
 		except Exception as e:

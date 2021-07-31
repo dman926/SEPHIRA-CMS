@@ -41,7 +41,6 @@ export class MenuItemsComponent implements OnInit {
 			children: [],
 			order: this.menuItems.length
 		});
-		console.log(this.menuItems);
 	}
 
 	removeTopLevel(): void {
@@ -54,7 +53,6 @@ export class MenuItemsComponent implements OnInit {
 			link: '/',
 			children: []
 		});
-		console.log(this.menuItems);
 	}
 
 	removeNode(node: MenuItem): void {
