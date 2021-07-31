@@ -40,7 +40,7 @@ class SignupApi(Resource):
 		try:
 			body = request.get_json()
 			user =  User(**body)
-			if len(User.objects) == 0:
+			if User.objects.count() == 0:
 				user.admin = True
 			user.hash_password()
 			user.save()
@@ -91,8 +91,8 @@ class LoginApi(Resource):
 	def post(self):
 		try:
 			body = request.get_json()
-			user = User.objects.get(email=body.get('email'))
-			authorized = user.check_password(body.get('password'))
+			user = User.objects.get(email=body['email'])
+			authorized = user.check_password(body['password'])
 			if not authorized:
 				raise UnauthorizedError
 			if user.twoFactorEnabled:
@@ -103,9 +103,9 @@ class LoginApi(Resource):
 						raise UnauthorizedError
 				else:
 					raise MissingOtpError
-			access_token = create_access_token(identity=str(user.id), expires_delta=datetime.timedelta(days=1))
-			refresh_token = create_refresh_token(identity=str(user.id), expires_delta=datetime.timedelta(days=30))
-			return {'accessToken': access_token, 'refreshToken': refresh_token}, 200
+			accessToken = create_access_token(identity=str(user.id), expires_delta=datetime.timedelta(days=1))
+			refreshToken = create_refresh_token(identity=str(user.id), expires_delta=datetime.timedelta(days=30))
+			return {'accessToken': accessToken, 'refreshToken': refreshToken}, 200
 		except (UnauthorizedError, DoesNotExist):
 			time.sleep(2)
 			raise UnauthorizedError
