@@ -41,7 +41,7 @@ export class AuthService {
 		this.user$ = this.userSubject.asObservable();
 		if (this.platformService.isServer()) {
 			this.refresh().toPromise().then(tokens => {
-				this.setTokens(false, tokens.accessToken);
+				this.setTokens(false, tokens.accessToken, tokens.refreshToken);
 				this.getUser().toPromise().then(res => {
 					this.setUser(res);
 				}).catch(err => {
@@ -104,9 +104,9 @@ export class AuthService {
 	}
 
 	public setTokens(refreshSocket: boolean, accessToken: string, refreshToken?: string): void {
-		this.cookie.put('accessToken', accessToken, { expires: new Date(Date.now() + (1000 * 60 * 60 * 24 * 1)) }); // expires in 1 day
+		this.cookie.put('accessToken', accessToken, { sameSite: 'strict', expires: new Date(Date.now() + (1000 * 60 * 60 * 24 * 1)) }); // expires in 1 day
 		if (refreshToken) {
-			this.cookie.put('refreshToken', refreshToken, { expires: new Date(Date.now() + (1000 * 60 * 60 * 24 * 30)) }); // expires in 30 days
+			this.cookie.put('refreshToken', refreshToken, { sameSite: 'strict', expires: new Date(Date.now() + (1000 * 60 * 60 * 24 * 30)) }); // expires in 30 days
 		}
 		if (refreshSocket) {
 			this.ws.killSocket();

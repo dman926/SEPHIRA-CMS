@@ -50,6 +50,8 @@ export class ProductComponent implements OnInit, OnDestroy {
 			status: new FormControl(''),
 			sku: new FormControl(''),
 			price: new FormControl('', [Validators.required]),
+			hasStock: new FormControl(''),
+			stock: new FormControl(''),
 			categories: new FormArray([])
 		});
 		this.imgBrowserOpen = false;
@@ -59,6 +61,15 @@ export class ProductComponent implements OnInit, OnDestroy {
 	}
 
 	ngOnInit(): void {
+		this.subs.push(this.productGroup.get('hasStock')!.valueChanges.subscribe(change => {
+			console.log(change);
+			const stockControl = this.productGroup.get('stock')! as FormControl;
+			if (change) {
+				stockControl.setValidators([Validators.required])
+			} else {
+				stockControl.setValidators([]);
+			}	
+		}));
 		this.subs.push(this.route.params.subscribe(params => {
 			this.adminService.getProduct(params.id).toPromise().then(product => {
 				this.product = product;
@@ -70,6 +81,8 @@ export class ProductComponent implements OnInit, OnDestroy {
 					status: product.status,
 					sku: product.sku,
 					price: product.price,
+					hasStock: product.hasStock,
+					stock: product.stock,
 					categories: product.categories!.map(cat => new FormControl(cat, [Validators.required]))
 				});
 				if (product.img) {
@@ -94,6 +107,8 @@ export class ProductComponent implements OnInit, OnDestroy {
 				status: this.productGroup.get('status')!.value,
 				sku: this.productGroup.get('sku')!.value,
 				price: this.productGroup.get('price')!.value,
+				hasStock: this.productGroup.get('hasStock')!.value,
+				stock: this.productGroup.get('stock')!.value,
 				categories: this.productGroup.get('categories')!.value,
 				img: this.images
 			};
@@ -139,8 +154,12 @@ export class ProductComponent implements OnInit, OnDestroy {
 		return this.productGroup.get('slug')! as FormControl;
 	}
 
-	get categoriesArray() {
+	get categoriesArray(): FormArray {
 		return this.productGroup.get('categories')! as FormArray;
+	}
+
+	get hasStock(): boolean {
+		return this.productGroup.get('hasStock')!.value;
 	}
 
 	private slugValidator(): AsyncValidatorFn {

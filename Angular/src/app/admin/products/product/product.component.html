@@ -26,6 +26,11 @@
         <span matPrefix>$</span>
         <input matInput formControlName="price" />
     </mat-form-field>
+	<mat-checkbox formControlName="hasStock" color="primary">Has Stock</mat-checkbox>
+	<mat-form-field *ngIf="hasStock" appearance="fill">
+        <mat-label>Stock</mat-label>
+        <input matInput type="number" formControlName="stock" />
+    </mat-form-field>
     <mat-form-field appearance="fill">
         <mat-label>Status</mat-label>
         <mat-select formControlName="status">

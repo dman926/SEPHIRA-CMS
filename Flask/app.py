@@ -36,7 +36,7 @@ if PRODUCTION:
 	app.config['MAIL_PORT'] = "1025"
 	app.config['MAIL_USERNAME'] = "support@flaskapi.com"
 	app.config['MAIL_PASSWORD'] = ""
-	app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), '..', 'angular', 'assets', 'uploads')
+	app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), '..', 'angular', 'assets', 'uploads') # TODO: Fix this. Is wrong after SSR update
 	app.config['MONGODB_SETTINGS'] = 'mongodb://localhost/sephira'
 	resources = {r"/*": {"origins": "https://api.website.com"}}
 	socketResources = "api.website.com"

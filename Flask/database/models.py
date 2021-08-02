@@ -162,6 +162,9 @@ class Product(Post):
 	digital = BooleanField(default=False)
 	taxable = DictField()
 
+	hasStock = BooleanField(default=False)
+	stock = IntField()
+
 	totalReviews = IntField(default=0)
 	avgReviewScore = FloatField(default=0)
 
@@ -190,6 +193,8 @@ class Product(Post):
 			'price': float(self.price) if self.price else None,
 			"digital": self.digital,
 			"taxable": self.taxable,
+			'hasStock': self.hasStock,
+			'stock': self.stock,
 			'totalReviews': self.totalReviews,
 			'avgReviewScore': round(self.avgReviewScore, 1) # Round to 1 decimal place
 		}

@@ -15,7 +15,7 @@
 			</div>
 			<div>
 				<h2>{{ product.title }}</h2>
-				<p>{{ product.price | currency }}</p>
+				<p>{{ product.price | currency }} <span *ngIf="product.hasStock">| {{ product.stock }} in stock</span></p>
 				<button mat-raised-button color="primary" (click)="cartService.addToCart(product)">Add to cart</button>
 			</div>
 		</div>

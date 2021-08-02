@@ -76,6 +76,8 @@ export class ProductComponent implements OnInit {
 						product.content = this.sanitizer.bypassSecurityTrustHtml(product.content as string);
 					}
 					this.product = product;
+					this.productService.getReviewCount(this.product.id!).toPromise().then(count => this.reviewCount = count);
+					this.fetchReviews();
 					this.loaded = true;
 				}).catch(err => this.loaded = true);
 			}

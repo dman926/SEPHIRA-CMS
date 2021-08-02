@@ -14,6 +14,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MediaBrowserModule } from 'src/app/media-browser/media-browser.module';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 
 @NgModule({
@@ -35,6 +36,7 @@ import { MatSelectModule } from '@angular/material/select';
 		MatFormFieldModule,
 		MatIconModule,
 		MatSelectModule,
+		MatCheckboxModule,
 
 		AngularEditorModule
 	]

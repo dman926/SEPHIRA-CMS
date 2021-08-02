@@ -31,9 +31,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 		MatButtonModule,
 		MatDialogModule
 	],
-	providers: [
-		AuthService
-	],
+	providers: [],
 	exports: [
 		LoginComponent
 	]

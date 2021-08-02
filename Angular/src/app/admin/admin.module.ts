@@ -5,7 +5,6 @@ import { AdminRoutingModule } from './admin-routing.module';
 import { HomeComponent } from './home/home.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { AdminService } from './admin.service';
 import { HttpClientModule } from '@angular/common/http';
 
 
@@ -22,6 +21,6 @@ import { HttpClientModule } from '@angular/common/http';
 		MatButtonModule,
 		MatProgressSpinnerModule
 	],
-	providers: [AdminService]
+	providers: []
 })
 export class AdminModule { }
