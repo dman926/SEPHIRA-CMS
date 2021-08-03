@@ -170,7 +170,7 @@ class OrderApi(Resource):
 			body = request.get_json()
 			order = Order.objects.get(id=id, orderer=get_jwt_identity())
 			if (body.get('addresses')):
-				taxJurisdiction = UsTaxJurisdiction.objects.get(zip=str(int(body['addresses']['shipping']['zip'])))
+				taxJurisdiction = UsTaxJurisdiction.objects.get(zip=body['addresses']['shipping']['zip'])
 				shippingZone = None
 				try:
 					shippingZone = UsShippingZone.objects.get(applicableStates=body['addresses']['shipping']['region'])
@@ -192,7 +192,7 @@ class OrderApi(Resource):
 							match = candidate
 						elif match.matchCutoff - match.minCutoff > candidate.maxCutoff - candidate.minCutoff:
 							match = candidate
-				order.update(addresses=body['addresses'], taxRate=taxJurisdiction.estimatedCombinedRate, shippingType=match.type, shippnigRate=match.rate)
+				order.update(addresses=body['addresses'], taxRate=taxJurisdiction.estimatedCombinedRate, shippingType=match.type, shippingRate=match.rate)
 			if (body.get('coupons')):
 				coupons = list(map(lambda c: Coupon.objects.get(id=c['id']), body['coupons']))
 				order.update(coupons=coupons)

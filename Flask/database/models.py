@@ -294,7 +294,7 @@ class Coupon(Post):
 class UsTaxJurisdiction(Document):
 	zip = StringField(primary_key=True)
 	state = StringField()
-	taxRegion = StringField()
+	taxRegionName = StringField()
 	stateRate = FloatField()
 	estimatedCombinedRate = FloatField()
 	estimatedCountyRate = FloatField()
@@ -312,7 +312,7 @@ class UsTaxJurisdiction(Document):
 		return {
 			'zip': self.zip,
 			'state': self.state,
-			'taxRegion': self.taxRegion,
+			'taxRegionName': self.taxRegionName,
 			'stateRate': self.stateRate,
 			'estimatedCombinedRate': self.estimatedCombinedRate,
 			'estimatedCountyRate': self.estimatedCountyRate,

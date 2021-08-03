@@ -40,7 +40,7 @@ def remove_stock(items):
 		for item in items:
 			if item.product.hasStock:
 				item.product.stock -= item.qty
-				item.save()
+				item.product.save()
 		return True
 	else:
 		return False
@@ -49,4 +49,4 @@ def add_stock(items):
 	for item in items:
 		if item.product.hasStock:
 			item.product.stock += item.qty
-			item.save()
+			item.product.save()
