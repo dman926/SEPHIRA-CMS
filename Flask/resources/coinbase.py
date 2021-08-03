@@ -11,8 +11,10 @@ from coinbase_commerce.webhook import Webhook
 
 from database.models import Order
 
+from resources.errors import OutOfStockError
+
 from app import socketio
-from services.price_service import calculate_discount_price
+from services.price_service import calculate_discount_price, remove_stock, add_stock
 
 import json
 
@@ -78,6 +80,7 @@ class CoinbaseApi(Resource):
 			order = Order(id=event.data.metadata.order)
 			order.orderStatus = 'placed'
 			order.save()
+			remove_stock(order.products)
 		elif event.type == 'charge:confirmed':
 			order = Order(id=event.data.metadata.order)
 			order.orderStatus = 'paid'
@@ -86,6 +89,7 @@ class CoinbaseApi(Resource):
 			order = Order(id=event.data.metadata.order)
 			order.orderStatus = 'failed'
 			order.save()
+			add_stock(order.products)
 		else:
 			return 'ok', 200
 

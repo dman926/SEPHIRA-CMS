@@ -44,6 +44,10 @@ class MissingOtpError(Exception):
 	message = 'Missing OTP Error'
 	code = '401'
 
+class OutOfStockError(Exception):
+	message = 'Out Of Stock Error'
+	code = '409'
+
 @app.errorhandler(InternalServerError)
 def handle_(error):
 	return {'message': error.message}, error.code
@@ -78,4 +82,8 @@ def handle_(error):
 
 @app.errorhandler(MissingOtpError)
 def handle_MissingOtpError(error):
+	return {'message': error.message}, error.code
+
+@app.errorhandler(OutOfStockError)
+def handle_OutOfStockError(error):
 	return {'message': error.message}, error.code

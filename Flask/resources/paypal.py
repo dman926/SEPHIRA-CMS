@@ -7,7 +7,7 @@ from flask_restful_swagger_2 import Resource, swagger
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from mongoengine.errors import DoesNotExist
-from resources.errors import UnauthorizedError, InternalServerError
+from resources.errors import UnauthorizedError, InternalServerError, OutOfStockError
 
 from database.models import Order
 
@@ -15,7 +15,7 @@ from app import paypal_client
 from paypalcheckoutsdk.orders import OrdersCreateRequest, OrdersCaptureRequest, OrdersGetRequest
 
 from services.logging_service import writeWarningToLog
-from services.price_service import calculate_order_amount, calculate_discount_price
+from services.price_service import calculate_order_amount, calculate_discount_price, check_stock, remove_stock, add_stock
 
 class PayPalCreateTransactionApi(Resource):
 	@jwt_required(optional=True)
@@ -128,6 +128,8 @@ class PayPalCaptureTransactionApi(Resource):
 		response = paypal_client.execute(OrdersCaptureRequest(orderID))
 		orderResponse = paypal_client.execute(OrdersGetRequest(orderID))
 		order = Order.objects.get(id=orderResponse.result.purchase_units[0].custom_id)
+		if not remove_stock(order.products):
+			raise OutOfStockError
 		order.paypalCaptureID = response.result.purchase_units[0].payments.captures[0].id
 		order.orderStatus = 'placed'
 		order.save()
@@ -146,6 +148,8 @@ class PayPalApi(Resource):
 	def post(self):
 		payload = request.get_json()
 		
+		if payload['event_type'] == 'CHECKOUT.ORDER.COMPLETED':
+
 		# TODO
 
 		return 'ok', 200
