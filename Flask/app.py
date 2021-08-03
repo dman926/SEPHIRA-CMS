@@ -38,8 +38,8 @@ if PRODUCTION:
 	app.config['MAIL_PASSWORD'] = ""
 	app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), '..', 'angular', 'assets', 'uploads') # TODO: Fix this. Is wrong after SSR update
 	app.config['MONGODB_SETTINGS'] = 'mongodb://localhost/sephira'
-	resources = {r"/*": {"origins": "https://api.website.com"}}
-	socketResources = "api.website.com"
+	resources = {r"/*": {"origins": "https://www.website.com"}}
+	socketResources = "www.website.com"
 	base = '/'
 	paypal_client = PayPalHttpClient(LiveEnvironment(client_id=paypal_client_id, client_secret=paypal_secret))
 else:
