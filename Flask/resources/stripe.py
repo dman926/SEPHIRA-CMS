@@ -7,16 +7,14 @@ from flask_restful_swagger_2 import Resource, swagger
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from mongoengine.errors import DoesNotExist
-from resources.errors import InternalServerError, UnauthorizedError
+from resources.errors import InternalServerError, UnauthorizedError, OutOfStockError
 
 from database.models import Order, User
 
 from app import socketio
-from services.price_service import calculate_discount_price
+from services.price_service import calculate_discount_price, check_stock, remove_stock, add_stock
 from services.logging_service import writeWarningToLog
 
-import json
-import os
 
 import stripe
 
@@ -26,6 +24,10 @@ class StripeCheckoutApi(Resource):
 		try:
 			body = request.get_json()
 			order = Order.objects.get(id=body['orderID'], orderer=get_jwt_identity())
+
+			if not remove_stock(order.products):
+				raise OutOfStockError
+
 			paymentMethodID = body['paymentMethodID']
 			shipping = order.addresses['shipping']
 			shipping = {
@@ -84,9 +86,12 @@ class StripeCheckoutApi(Resource):
 			order.paymentIntentID = intent['id']
 			order.orderStatus = 'placed'
 			order.save()
+
 			return str(order.id)
 		except DoesNotExist:
 			raise UnauthorizedError
+		except OutOfStockError:
+			raise OutOfStockError
 		except Exception as e:
 			writeWarningToLog('Unhandled exception in resources.stripe.CheckoutPaymentApi post', str(e))
 			raise InternalServerError
@@ -123,6 +128,7 @@ class StripeApi(Resource):
 			order = Order(id=payment_intent['metadata']['Order object'])
 			order.orderStatus = 'failed'
 			order.save()
+			add_stock(order.products)
 			socketio.emit('order ' + str(order.pk), order.orderStatus, namespace='/')
 		elif event.type == 'invoice.paid':
 			# TODO: create order with details

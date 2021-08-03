@@ -34,7 +34,7 @@ class UsTaxJurisdictionApi(Resource):
 	})
 	def get(self):
 		try:
-			taxJurisdiction = UsTaxJurisdiction.objects.get(zip=str(int(request.args['zip']))) # strip leading 0s if present
+			taxJurisdiction = UsTaxJurisdiction.objects.get(zip=request.args['zip'])
 			return jsonify(taxJurisdiction.serialize())
 		except DoesNotExist:
 			raise ResourceNotFoundError

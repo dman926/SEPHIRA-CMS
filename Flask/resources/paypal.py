@@ -7,7 +7,7 @@ from flask_restful_swagger_2 import Resource, swagger
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from mongoengine.errors import DoesNotExist
-from resources.errors import UnauthorizedError, InternalServerError
+from resources.errors import UnauthorizedError, InternalServerError, OutOfStockError
 
 from database.models import Order
 
@@ -15,7 +15,7 @@ from app import paypal_client
 from paypalcheckoutsdk.orders import OrdersCreateRequest, OrdersCaptureRequest, OrdersGetRequest
 
 from services.logging_service import writeWarningToLog
-from services.price_service import calculate_order_amount, calculate_discount_price
+from services.price_service import calculate_order_amount, calculate_discount_price, check_stock, remove_stock, add_stock
 
 class PayPalCreateTransactionApi(Resource):
 	@jwt_required(optional=True)
@@ -44,13 +44,13 @@ class PayPalCreateTransactionApi(Resource):
 			base_amount = total - discount
 			tax = base_amount * order.taxRate
 			amount = base_amount + tax
-			shipping = 0
+			shippingAmt = 0
 			if order.shippingType == 'dollar':
 				amount += order.shippingRate
-				shipping = order.shippingRate
+				shippingAmt = order.shippingRate
 			elif order.shippingType == 'percent':
 				amount += amount * order.shippingRate
-				shipping = amount * order.shippingRate
+				shippingAmt = amount * order.shippingRate
 			requestBody = {
 				"intent": "CAPTURE",
 				"application_context": {
@@ -77,7 +77,7 @@ class PayPalCreateTransactionApi(Resource):
 								},
 								"shipping": {
 									"currency_code": "USD",
-									"value": '{:.2f}'.format(round(shipping, 2))
+									"value": '{:.2f}'.format(round(shippingAmt, 2))
 								},
 								"tax_total": {
 									"currency_code": "USD",
@@ -99,11 +99,11 @@ class PayPalCreateTransactionApi(Resource):
 					"name": item.product.title,
 					"unit_amount": {
 						"currency_code": "USD",
-						"value": str(item.product.price)
+						"value": '{:.2f}'.format(float(item.product.price))
 					},
 					"tax": {
 						"currency_code": "USD",
-						"value": item.product.price * order.taxRate
+						"value": '{:.2f}'.format(float(item.product.price) * order.taxRate)
 					},
 					"quantity": str(item.qty),
 					"description": item.product.excerpt,
@@ -118,16 +118,19 @@ class PayPalCreateTransactionApi(Resource):
 		except DoesNotExist:
 			raise UnauthorizedError
 		except Exception as e:
-			writeWarningToLog('Unhandled exception in resources.stripe.CheckoutPaymentApi post', str(e))
+			writeWarningToLog('Unhandled exception in resources.paypal.PayPalCreateTransactionApi post', str(e))
 			raise InternalServerError
 
 class PayPalCaptureTransactionApi(Resource):
 	@jwt_required(optional=True)
 	def post(self):
 		orderID = request.get_json()['orderID']
-		response = paypal_client.execute(OrdersCaptureRequest(orderID))
 		orderResponse = paypal_client.execute(OrdersGetRequest(orderID))
+		print(orderResponse)
 		order = Order.objects.get(id=orderResponse.result.purchase_units[0].custom_id)
+		if not remove_stock(order.products):
+			raise OutOfStockError
+		response = paypal_client.execute(OrdersCaptureRequest(orderID))
 		order.paypalCaptureID = response.result.purchase_units[0].payments.captures[0].id
 		order.orderStatus = 'placed'
 		order.save()
@@ -146,6 +149,8 @@ class PayPalApi(Resource):
 	def post(self):
 		payload = request.get_json()
 		
+		if payload['event_type'] == 'CHECKOUT.ORDER.COMPLETED':
+			pass
 		# TODO
 
 		return 'ok', 200

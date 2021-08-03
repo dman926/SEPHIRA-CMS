@@ -28,3 +28,25 @@ def calculate_discount_price(items, coupons):
 			elif coupon.discountType == 'percent':
 				total -= total * (coupon.discount / 100.0)
 	return total
+
+def check_stock(items):
+	for item in items:
+		if item.product.hasStock and item.product.stock < item.qty:
+			return False
+	return True
+
+def remove_stock(items):
+	if check_stock(items):
+		for item in items:
+			if item.product.hasStock:
+				item.product.stock -= item.qty
+				item.product.save()
+		return True
+	else:
+		return False
+
+def add_stock(items):
+	for item in items:
+		if item.product.hasStock:
+			item.product.stock += item.qty
+			item.product.save()
