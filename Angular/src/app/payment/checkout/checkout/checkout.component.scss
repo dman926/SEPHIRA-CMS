@@ -3,6 +3,9 @@ section#checkout-wrapper {
 	grid-template-columns: repeat(2, 1fr);
 	gap: 1em;
 	mat-vertical-stepper {
+		::ng-deep mat-step-header {
+			pointer-events: none;
+		}
 		img {
 			width: 2em;
 		}
