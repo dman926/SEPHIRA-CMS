@@ -97,7 +97,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 			country: new FormControl({ value: 'US', disabled: true }, [Validators.required]),
 			street1: new FormControl('', [Validators.required]),
 			street2: new FormControl(''),
-			stateProvidenceRegion: new FormControl('', [Validators.required]),
+			stateProvidenceRegion: new FormControl('', [Validators.required, this.stateCodeValidator()]),
 			city: new FormControl('', [Validators.required]),
 			zip: new FormControl('', [Validators.required, Validators.pattern('[0-9]{5}')]),
 			phoneNumber: new FormControl('', [Validators.required])
@@ -109,7 +109,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 			country: new FormControl({ value: 'US', disabled: true }, [Validators.required]),
 			street1: new FormControl('', [Validators.required]),
 			street2: new FormControl(''),
-			stateProvidenceRegion: new FormControl('', [Validators.required]),
+			stateProvidenceRegion: new FormControl('', [Validators.required, this.stateCodeValidator()]),
 			city: new FormControl('', [Validators.required]),
 			zip: new FormControl('', [Validators.required, Validators.pattern('[0-9]{5}')]),
 			phoneNumber: new FormControl('', [Validators.required])
@@ -435,6 +435,19 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 			}
 		};
 		return addresses;
+	}
+
+	private stateCodeValidator(): ValidatorFn {
+		return (control: AbstractControl): ValidationErrors | null => {
+			const states = [
+				"AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA", 
+				"HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", 
+				"MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", 
+				"NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", 
+				"SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
+			];
+			return states.indexOf(control.value) === -1 ? { invalidState: true } : null;
+		}
 	}
 
 	private _filter(value: string): CountryPair[] {
