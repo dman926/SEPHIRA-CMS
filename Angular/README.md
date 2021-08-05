@@ -12,7 +12,7 @@ Run `npm run dev:ssr` for an express server that supports server-side rendering.
 
 ## Build
 
-Run `build:ssr:production` to build the project. The build artifacts will be stored in the `dist/` directory. Upload the entirety of the `dist/` folder to the production server as the angular universal server is looking for it.
+Run `npm run build:ssr:production` to build the project. The build artifacts will be stored in the `dist/` directory. Upload the entirety of the `dist/` folder to the production server as the angular universal server is looking for it.
 
 ## Production server
 
