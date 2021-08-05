@@ -101,6 +101,12 @@ export class CartService {
 	public clearCart(): void {
 		localStorage.setItem('cart', '[]');
 		this.cartSubject.next([]);
+		if (accessToken) {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			this.http.put<string>(environment.apiServer + 'cart/cart', [], { headers }).toPromise().then(res => {
+				this.auth.getUser().toPromise().then(user => this.auth.setUser(user));
+			});
+		}
 	}
 
 	public getLocalCart(): CartItem[] {
