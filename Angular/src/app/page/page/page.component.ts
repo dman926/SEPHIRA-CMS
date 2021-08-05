@@ -34,7 +34,9 @@ export class PageComponent implements OnInit, OnDestroy {
 			if (!this.page || this.page.slug !== this.router.url) {
 				this.fetchPage();
 			} else if (this.page && this.page.content) {
-				this.page.content = this.sanitizer.bypassSecurityTrustHtml(this.page.content as string);
+				if (typeof this.page.content === 'string') {
+					this.page.content = this.sanitizer.bypassSecurityTrustHtml(this.page.content as string);
+				}
 				this.loaded = true;
 			}
 			this.subs.push(this.router.events.subscribe(ev => {

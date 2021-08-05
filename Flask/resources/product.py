@@ -52,8 +52,7 @@ class ProductsApi(Resource):
 	def get(self):
 		try:
 			search = request.args.get('search')
-			products = Product.objects()
-			print(search)
+			products = Product.objects
 			if search:
 				products = products.search_text(search).order_by('$text_score')
 			total = products.count()

@@ -62,7 +62,6 @@ export class ProductComponent implements OnInit, OnDestroy {
 
 	ngOnInit(): void {
 		this.subs.push(this.productGroup.get('hasStock')!.valueChanges.subscribe(change => {
-			console.log(change);
 			const stockControl = this.productGroup.get('stock')! as FormControl;
 			if (change) {
 				stockControl.setValidators([Validators.required])

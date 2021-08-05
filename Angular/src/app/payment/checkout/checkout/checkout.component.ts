@@ -198,7 +198,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
 					let headers = new HttpHeaders();
 					const accessToken = this.cookie.get('accessToken');
-					if (accessToken) {
+					if (accessToken && accessToken !== 'undefined') {
 						headers = headers.append('Authorization', 'Bearer ' + accessToken);
 					}
 					this.http.post<string>(environment.apiServer + 'order/orders', { products: this.products }, { headers }).toPromise().then(orderID => {
@@ -268,7 +268,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 	renderPaypalCoinbase(): void {
 		let headers = new HttpHeaders();
 		const accessToken = this.cookie.get('accessToken');
-		if (accessToken) {
+		if (accessToken && accessToken !== 'undefined') {
 			headers = headers.append('Authorization', 'Bearer ' + accessToken);
 		}
 		document.getElementById('paypal-button-container')!.innerHTML = '';
@@ -298,7 +298,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 	private submitPaymentMethod(paymentMethodID: any): Observable<any> {
 		const accessToken = this.cookie.get('accessToken');
 		let headers = new HttpHeaders();
-		if (accessToken) {
+		if (accessToken && accessToken !== 'undefined') {
 			headers = headers.append('Authorization', 'Bearer ' + accessToken);
 		}
 		const email = this.billingForm.get('email')!.value;

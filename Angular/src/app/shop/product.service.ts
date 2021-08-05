@@ -67,7 +67,7 @@ export class ProductService {
 
 	public submitReview(review: Review): Observable<Review> {
 		const accessToken = this.cookie.get('accessToken');
-		if (accessToken) {
+		if (accessToken && accessToken !== 'undefined') {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.post<Review>(this.productBase + 'product/' + review.product + '/reviews', review, { headers });
 		} else {
@@ -77,7 +77,7 @@ export class ProductService {
 
 	public reviewAllowed(id: string): Observable<boolean> {
 		const accessToken = this.cookie.get('accessToken');
-		if (accessToken) {
+		if (accessToken && accessToken !== 'undefined') {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.get<boolean>(this.productBase + 'product/' + id + '/reviewAllowed', { headers });
 		} else {

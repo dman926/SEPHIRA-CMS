@@ -109,7 +109,7 @@ class CartItem(EmbeddedDocument):
 			return {
 				'id': str(self.product.id),
 				'name': self.product.title,
-				'price': float(self.product.price),
+				'price': float(self.product.price) if self.product.price else 0,
 				'qty': self.qty
 			}
 

@@ -86,7 +86,8 @@ export class NavComponent implements OnInit {
 	}
 
 	isSignedIn(): boolean {
-		return this.cookie.hasKey('accessToken');
+		const accessToken = this.cookie.get('accessToken');
+		return accessToken !== undefined && accessToken !== 'undefined';
 	}
 
 	logout(): void {

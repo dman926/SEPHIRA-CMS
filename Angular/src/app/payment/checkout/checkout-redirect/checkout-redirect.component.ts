@@ -44,7 +44,7 @@ export class CheckoutRedirectComponent implements OnInit, OnDestroy {
 
 	getData(): void {
 		const accessToken = this.cookie.get('accessToken');
-		if (accessToken) {
+		if (accessToken && accessToken !== 'undefined') {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
 			this.http.get<Order>(environment.apiServer + 'order/order/' + this.orderID, { headers }).toPromise().then(res => {
 				this.order = res;

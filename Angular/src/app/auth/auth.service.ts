@@ -52,6 +52,7 @@ export class AuthService {
 				});
 			}).catch(err => {
 				// Logout and redirect to homepage
+				console.error('Error refreshing tokens')
 				this.setUser(null);
 				this.cookie.remove('accessToken');
 				this.cookie.remove('refreshToken');
@@ -59,6 +60,12 @@ export class AuthService {
 			});
 		} else {
 			this.setUser(this.state.get(makeStateKey('user'), null));
+			if (this.cookie.get('accessToken') === 'undefined') {
+				this.cookie.remove('accessToken');
+			}
+			if (this.cookie.get('refreshToken') === 'undefined') {
+				this.cookie.remove('refreshToken');
+			}
 			setInterval(() =>
 				this.getUser().toPromise().then(user => this.setUser(user)), 1000 * 60 * 5); // Get the current user again every 5 minutes
 		}
@@ -85,7 +92,7 @@ export class AuthService {
 
 	public refresh(): Observable<TokenPair> {
 		const refresh = this.cookie.get('refreshToken');
-		if (refresh) {
+		if (refresh && refresh !== 'undefined') {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + refresh);
 			return this.http.get<TokenPair>(this.authBase + 'refresh', { headers });
 		} else {
@@ -95,7 +102,7 @@ export class AuthService {
 
 	public checkPassword(password: string): any {
 		const accessToken = this.cookie.get('accessToken');
-		if (accessToken) {
+		if (accessToken && accessToken !== 'undefined') {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
 			return this.http.post<any>(this.authBase + 'checkPassword', { password }, { headers });
 		} else {
@@ -121,7 +128,7 @@ export class AuthService {
 
 	public getUser(): Observable<User> {
 		const accessToken = this.cookie.get('accessToken');
-		if (accessToken) {
+		if (accessToken && accessToken !== 'undefined') {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
 			return this.http.get<User>(this.authBase + 'user', { headers });
 		} else {
@@ -131,7 +138,7 @@ export class AuthService {
 
 	public updateUser(user: User): Observable<string> {
 		const accessToken = this.cookie.get('accessToken');
-		if (accessToken) {
+		if (accessToken && accessToken !== 'undefined') {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
 			return this.http.put<string>(this.authBase + 'user', user, { headers });
 		} else {
@@ -141,7 +148,7 @@ export class AuthService {
 
 	public deleteUser(): Observable<string> {
 		const accessToken = this.cookie.get('accessToken');
-		if (accessToken) {
+		if (accessToken && accessToken !== 'undefined') {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
 			return this.http.delete<string>(this.authBase + 'user', { headers });
 		} else {
@@ -156,7 +163,7 @@ export class AuthService {
 
 	public getOtpQr(): Observable<string> {
 		const accessToken = this.cookie.get('accessToken');
-		if (accessToken) {
+		if (accessToken && accessToken !== 'undefined') {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
 			return this.http.get<string>(this.authBase + '2fa', { headers });
 		} else {
@@ -166,7 +173,7 @@ export class AuthService {
 
 	public CheckOtp(otp: string): Observable<string> {
 		const accessToken = this.cookie.get('accessToken');
-		if (accessToken) {
+		if (accessToken && accessToken !== 'undefined') {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
 			return this.http.post<string>(this.authBase + '2fa', { otp }, { headers });
 		} else {

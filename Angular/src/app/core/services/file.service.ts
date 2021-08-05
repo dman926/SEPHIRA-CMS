@@ -16,7 +16,7 @@ export class FileService {
 
 	public upload(file: File, isThumbnail?: boolean): Observable<HttpEvent<string>> {
 		const accessToken = this.cookie.get('accessToken');
-		if (accessToken) {
+		if (accessToken && accessToken !== 'undefined') {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			const body = new FormData();
 			body.append('file', file);
@@ -29,7 +29,7 @@ export class FileService {
 
 	public getMedia(): Observable<Media[]> {
 		const accessToken = this.cookie.get('accessToken');
-		if (accessToken) {
+		if (accessToken && accessToken !== 'undefined') {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.get<Media[]>(this.fileBase + 'media', { headers });
 		} else {
@@ -39,7 +39,7 @@ export class FileService {
 
 	public deleteFile(filename: string): Observable<string> {
 		const accessToken = this.cookie.get('accessToken');
-		if (accessToken) {
+		if (accessToken && accessToken !== 'undefined') {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.delete<string>(this.fileBase + 'media/' + filename, { headers });
 		} else {

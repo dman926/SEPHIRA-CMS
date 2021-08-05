@@ -42,17 +42,7 @@ export class CartComponent implements OnInit, OnDestroy {
 					for (let i = 0; i < cart.length; i++) {
 						this.cartSize += cart[i].qty;
 					}
-					if (this.firstPass) {
-						this.firstPass = false;
-						this.cartService.getCart().toPromise().then(products => {
-							if (products) {
-								this.products = products;
-								localStorage.setItem('cart', JSON.stringify(products));
-							}
-						}).catch(err => localStorage.setItem('cart', '[]'));
-					} else {
-						this.products = cart;
-					}
+					this.products = cart;
 				} else {
 					this.products = [];
 				}

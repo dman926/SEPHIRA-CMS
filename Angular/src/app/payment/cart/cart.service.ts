@@ -31,8 +31,8 @@ export class CartService {
 
 	public getCart(): Observable<CartItem[]> {
 		const accessToken = this.cookie.get('accessToken');
-		if (accessToken) {
-			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken).append('Accept', 'application/json');
+		if (accessToken && accessToken !== 'undefined') {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			return this.http.get<CartItem[]>(environment.apiServer + 'cart/cart', { headers });
 		} else {
 			const cart = this.getLocalCart();
@@ -60,7 +60,7 @@ export class CartService {
 		this.cartSubject.next(cart);
 
 		const accessToken = this.cookie.get('accessToken');
-		if (accessToken) {
+		if (accessToken && accessToken !== 'undefined') {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			this.http.put<string>(environment.apiServer + 'cart/cart', cart, { headers }).toPromise().then(res => {
 				this.auth.getUser().toPromise().then(user => this.auth.setUser(user));
@@ -88,7 +88,7 @@ export class CartService {
 			this.cartSubject.next(cart);
 
 			const accessToken = this.cookie.get('accessToken');
-			if (accessToken) {
+			if (accessToken && accessToken !== 'undefined') {
 				const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 				this.http.put<string>(environment.apiServer + 'cart/cart', cart, { headers }).toPromise().then(res => {
 					this.auth.getUser().toPromise().then(user => this.auth.setUser(user));
@@ -102,7 +102,7 @@ export class CartService {
 		localStorage.setItem('cart', '[]');
 		this.cartSubject.next([]);
 		const accessToken = this.cookie.get('accessToken');
-		if (accessToken) {
+		if (accessToken && accessToken !== 'undefined') {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			this.http.put<string>(environment.apiServer + 'cart/cart', [], { headers }).toPromise().then(res => {
 				this.auth.getUser().toPromise().then(user => this.auth.setUser(user));
