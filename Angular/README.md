@@ -16,4 +16,4 @@ Run `npm run build:ssr:production` to build the project. The build artifacts wil
 
 ## Production server
 
-Install the `pm2` node package and use the included `pm2.service` file to run it on startup. Refer to the included NGINX configs for proxy_pass information
+Install the `pm2` node package and refer to the included NGINX configs for proxy_pass information
