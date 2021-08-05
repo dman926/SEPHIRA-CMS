@@ -101,6 +101,7 @@ export class CartService {
 	public clearCart(): void {
 		localStorage.setItem('cart', '[]');
 		this.cartSubject.next([]);
+		const accessToken = this.cookie.get('accessToken');
 		if (accessToken) {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			this.http.put<string>(environment.apiServer + 'cart/cart', [], { headers }).toPromise().then(res => {

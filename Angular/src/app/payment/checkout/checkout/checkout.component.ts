@@ -4,7 +4,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { CartService } from '../../cart/cart.service';
 import { CartItem } from 'src/app/models/cart-item';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { debounceTime, map, startWith } from 'rxjs/operators';
 import { Observable, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
@@ -369,6 +369,9 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 				}
 			}
 		});
+		if (total < 0.5) {
+			total = 0.5
+		}
 		return total;
 	}
 
