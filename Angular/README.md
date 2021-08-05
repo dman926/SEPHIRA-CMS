@@ -16,4 +16,6 @@ Run `npm run build:ssr:production` to build the project. The build artifacts wil
 
 ## Production server
 
-Install the `pm2` node package and refer to the included NGINX configs for proxy_pass information
+Install the `pm2` node package and refer to the included NGINX configs for proxy_pass information.
+
+Use `pm2 start /dist/sephira/server/main.js --name ssr.angular`, `pm2 startup`, then `pm2 save` as root in the angular root folder to get the node server to start at startup
