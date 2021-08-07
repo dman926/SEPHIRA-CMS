@@ -74,6 +74,9 @@ export class CouponsComponent implements OnInit {
 	fetchCoupons(event?: PageEvent): void {
 		if (event) {
 			this.couponPageEvent = event;
+			if (event.pageIndex * event.pageSize < this.coupons.length) {
+				return;
+			}
 		}
 		this.loaded = false;
 		this.admin.getAllCoupons(this.couponPageEvent.pageIndex, this.couponPageEvent.pageSize).toPromise().then(coupons => {

@@ -51,6 +51,9 @@ export class ShippingZonesComponent implements OnInit {
 	fetchShippingZones(event?: PageEvent): void {
 		if (event) {
 			this.shippingZonePageEvent = event;
+			if (event.pageIndex * event.pageSize < this.shippingZones.length) {
+				return;
+			}
 		}
 		this.loaded = false;
 		this.admin.getAllShippingZones(this.shippingZonePageEvent.pageIndex, this.shippingZonePageEvent.pageSize).toPromise().then(zones => {

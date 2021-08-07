@@ -74,6 +74,9 @@ export class ProductsComponent implements OnInit {
 	fetchProducts(event?: PageEvent): void {
 		if (event) {
 			this.productPageEvent = event;
+			if (event.pageIndex * event.pageSize < this.products.length) {
+				return;
+			}
 		}
 		this.loaded = false;
 		this.admin.getAllProducts(this.productPageEvent.pageIndex, this.productPageEvent.pageSize).toPromise().then(products => {

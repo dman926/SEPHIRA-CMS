@@ -50,6 +50,9 @@ export class UsersComponent implements OnInit {
 	fetchUsers(event?: PageEvent): void {
 		if (event) {
 			this.userPageEvent = event;
+			if (event.pageIndex * event.pageSize < this.users.length) {
+				return;
+			}
 		}
 		this.loaded = false;
 		this.admin.getAllUsers(this.userPageEvent.pageIndex, this.userPageEvent.pageSize).toPromise().then(users => {

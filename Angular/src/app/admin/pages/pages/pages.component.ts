@@ -75,6 +75,9 @@ export class PagesComponent implements OnInit {
 	fetchPages(event?: PageEvent): void {
 		if (event) {
 			this.pagePageEvent = event;
+			if (event.pageIndex * event.pageSize < this.pages.length) {
+				return;
+			}
 		}
 		this.loaded = false;
 		this.admin.getAllPages(this.pagePageEvent.pageIndex, this.pagePageEvent.pageSize).toPromise().then(pages => {

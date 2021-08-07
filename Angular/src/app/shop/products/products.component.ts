@@ -63,6 +63,9 @@ export class ProductsComponent implements OnInit, OnDestroy {
 	fetchProducts(event?: PageEvent): void {
 		if (event) {
 			this.productPageEvent = event;
+			if (event.pageIndex * event.pageSize < this.products.length) {
+				return;
+			}
 		}
 		this.loaded = false;
 		this.productService.getAllProducts(this.productPageEvent.pageIndex, this.productPageEvent.pageSize, this.searchTerm).toPromise().then(res => {

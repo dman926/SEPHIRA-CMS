@@ -50,6 +50,9 @@ export class OrdersComponent implements OnInit {
 	fetchOrders(event?: PageEvent): void {
 		if (event) {
 			this.orderPageEvent = event;
+			if (event.pageIndex * event.pageSize < this.orders.length) {
+				return;
+			}
 		}
 		this.loaded = false;
 		this.admin.getAllOrders(this.orderPageEvent.pageIndex, this.orderPageEvent.pageSize).toPromise().then(orders => {
