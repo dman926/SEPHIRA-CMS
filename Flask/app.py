@@ -63,7 +63,7 @@ app.config['SCHEDULER_API_ENABLED'] = True
 mail = Mail(app)
 
 cors = CORS(app, resources=resources)
-api = Api(app, title='Flask API', api_version='1.0', api_spec_url='/api/spec')
+api = Api(app, title='SEPHIRA API', api_version='1.0', api_spec_url='/api/spec')
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 socketio = SocketIO(app, cors_allowed_origins=socketResources)
