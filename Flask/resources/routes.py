@@ -7,7 +7,7 @@ from .file import UploaderApi, MediaApi, SingleMediaApi
 
 from .menuItem import MenuItemsApi
 from .page import PagesApi, PageApi
-from .product import ProductsApi, ProductApi, ProductCountApi, ProductReviewsApi, ProductReviewsCountApi, ProductReviewAllowedApi
+from .product import ProductsApi, ProductApi, ProductReviewsApi, ProductReviewsCountApi, ProductReviewAllowedApi
 
 from .order import OrdersApi, OrderApi
 from .cart import CartApi, CouponCheckApi
@@ -41,7 +41,6 @@ def initialize_routes(api, base):
 	api.add_resource(PageApi, base + 'page/page')
 	api.add_resource(ProductsApi, base + 'product/products')
 	api.add_resource(ProductApi, base + 'product/product')
-	api.add_resource(ProductCountApi, base + 'product/products/count')
 	api.add_resource(ProductReviewsApi, base + 'product/product/<id>/reviews')
 	api.add_resource(ProductReviewsCountApi, base + 'product/product/<id>/reviews/count')
 	api.add_resource(ProductReviewAllowedApi, base + 'product/product/<id>/reviewAllowed')

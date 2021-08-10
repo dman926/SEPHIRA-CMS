@@ -53,10 +53,6 @@ export class ProductService {
 		}));
 	}
 
-	public getProductCount(): Observable<number> {
-		return this.http.get<number>(this.productBase + 'products/count');
-	}
-
 	public getReviews(id: string, page?: number, size?: number): Observable<Review[]> {
 		let params = new HttpParams();
 		if (page && size) {

@@ -52,7 +52,7 @@ class ProductsApi(Resource):
 	def get(self):
 		try:
 			search = request.args.get('search')
-			products = Product.objects
+			products = Product.objects(status='publish')
 			if search:
 				products = products.search_text(search).order_by('$text_score')
 			total = products.count()
@@ -87,31 +87,12 @@ class ProductApi(Resource):
 	})
 	def get(self):
 		try:
-			product = Product.objects.get(slug=request.args.get('slug'))
+			product = Product.objects.get(status='publish', slug=request.args.get('slug'))
 			return jsonify(product.serialize())
 		except DoesNotExist:
 			raise ResourceNotFoundError
 		except Exception as e:
 			writeWarningToLog('Unhandled exception in resources.product.ProductApi get', e)
-			raise InternalServerError
-
-class ProductCountApi(Resource):
-	@swagger.doc({
-		'tags': ['Product', 'Counter'],
-		'description': 'Get the number of products',
-		'responses': {
-			'200': {
-				'description': 'The number of products',
-			}
-		}
-	})
-	def get(self):
-		try:
-			return Product.objects.count()
-		except UnauthorizedError:
-			return UnauthorizedError
-		except Exception as e:
-			writeWarningToLog('Unhandled exception in resources.product.ProductCountApi get', e)
 			raise InternalServerError
 
 class ProductReviewsApi(Resource):

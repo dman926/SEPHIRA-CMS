@@ -41,7 +41,8 @@
 						"allowedCommonJsDependencies": [
 							"socket.io-client",
 							"swagger-ui-dist",
-							"qrcode"
+							"qrcode",
+							"path"
 						],
 						"vendorChunk": true,
 						"extractLicenses": false,
