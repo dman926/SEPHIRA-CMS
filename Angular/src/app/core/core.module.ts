@@ -20,7 +20,6 @@ import { MatInputModule } from '@angular/material/input';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SwaggerComponent } from './swagger/swagger.component';
 import { WebsocketService } from './services/websocket.service';
-import { RecaptchaV3Module, RECAPTCHA_V3_SITE_KEY } from 'ng-recaptcha';
 import { MatCardModule } from '@angular/material/card';
 import { CartModule } from '../payment/cart/cart.module';
 import { SearchModule } from '../search/search.module';
@@ -37,8 +36,6 @@ import { SearchModule } from '../search/search.module';
 		ReactiveFormsModule,
 		HttpClientModule,
 
-		RecaptchaV3Module,
-
 		AuthModule,
 		CartModule,
 		SearchModule,
@@ -51,15 +48,6 @@ import { SearchModule } from '../search/search.module';
 		MatFormFieldModule,
 		MatInputModule,
 		MatCardModule
-	],
-	providers: [
-		{
-			provide: RECAPTCHA_V3_SITE_KEY,
-			useValue: '6LfH28kaAAAAADGa7FNCdPCcrJoZCDm8qdVVsK9j'
-		},
-
-		FileService,
-		WebsocketService
 	],
 	exports: [
 		NavComponent
