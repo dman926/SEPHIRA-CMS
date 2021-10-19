@@ -3,7 +3,6 @@ import { CookieService } from 'ngx-cookie';
 import { Observable } from 'rxjs';
 
 import { io, Socket } from 'socket.io-client';
-import { DefaultEventsMap } from 'socket.io-client/build/typed-events';
 import { environment } from 'src/environments/environment';
 import { PlatformService } from './platform.service';
 
@@ -12,7 +11,7 @@ import { PlatformService } from './platform.service';
 })
 export class WebsocketService {
 
-	socket: Socket<DefaultEventsMap, DefaultEventsMap> | null;
+	socket: Socket<any> | null;
 
 	constructor(private platformService: PlatformService, private cookie: CookieService) {
 		this.socket = null;
@@ -26,7 +25,7 @@ export class WebsocketService {
 		}
 	}
 
-	setSocket(socket: Socket<DefaultEventsMap, DefaultEventsMap>) {
+	setSocket(socket: Socket<any, any>) {
 		this.socket = socket;
 	}
 
