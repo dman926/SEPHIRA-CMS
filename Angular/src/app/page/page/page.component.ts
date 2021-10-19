@@ -1,4 +1,4 @@
-import { OnDestroy } from '@angular/core';
+import { HostListener, OnDestroy } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, makeStateKey, TransferState } from '@angular/platform-browser';
 import { NavigationEnd, Router } from '@angular/router';
@@ -68,6 +68,19 @@ export class PageComponent implements OnInit, OnDestroy {
 				this.loaded = true;
 			}
 		});
+	}
+
+	// Provide routerLink functionality for dynamically created a tags
+	@HostListener('document:click', ['$event'])
+	public handleClick(event: Event): void {
+		if (event.target instanceof HTMLAnchorElement) {
+			const el = event.target as HTMLAnchorElement;
+			const route = el?.getAttribute('routerLink');
+			if (route) {
+				event.preventDefault();
+				this.router.navigate([route])
+			}
+		}
 	}
 
 }
