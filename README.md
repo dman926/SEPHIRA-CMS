@@ -8,8 +8,12 @@ An Angular 12 front end with a complete Flask RESTful API complete with server-s
 
 ## How to get the project running
 
+See [sephira.org](https://sephira.org/)
+
 See the Angular and Flask folders for clear instructions on how to get each runnning.
 
 Please feel free to add and improve this project.
 
-External dependencies: MongoDB
+## External dependencies
+
+MongoDB
