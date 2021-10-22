@@ -11,6 +11,7 @@ from resources.errors import UnauthorizedError, InternalServerError, ResourceNot
 
 import database.models as models
 
+from services.util_service import all_subclasses
 from services.logging_service import writeWarningToLog
 
 import datetime
@@ -223,11 +224,10 @@ class AdminPostTypesApi(Resource):
 			user = models.User.objects.get(id=get_jwt_identity())
 			if not user.admin:
 				raise UnauthorizedError
-			return jsonify(list(map(lambda s: s.__module__[9:] + '.' + s.__name__, models.Post.__subclasses__())))
+			return jsonify(list(map(lambda s: s.__module__[9:] + '.' + s.__name__, all_subclasses(models.Post))))
 		except Exception as e:
 			writeWarningToLog('Unhandled exception in resources.admin.AdminPostTypesApi get', e)
 			raise InternalServerError
-	
 
 class AdminPostsApi(Resource):
 	@swagger.doc({
@@ -490,7 +490,7 @@ class AdminPostApi(Resource):
 			{
 				'name': 'post',
 				'description': 'The post type',
-				'in': 'body',
+				'in': 'query',
 				'type': 'string',
 				'schema': None,
 				'required': True
@@ -543,7 +543,7 @@ class AdminPostSlugAvailableApi(Resource):
 			{
 				'name': 'post',
 				'description': 'The post type',
-				'in': 'body',
+				'in': 'query',
 				'type': 'string',
 				'schema': None,
 				'required': True
@@ -551,7 +551,7 @@ class AdminPostSlugAvailableApi(Resource):
 			{
 				'name': 'slug',
 				'description': 'The post slug',
-				'in': 'body',
+				'in': 'query',
 				'schema': None,
 				'type': 'string',
 				'required': True

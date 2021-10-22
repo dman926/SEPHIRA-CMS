@@ -356,3 +356,5 @@ class UsShippingZone(Document):
 		}
 
 User.register_delete_rule(Post, 'author', CASCADE)
+
+# Import any aditional model files here

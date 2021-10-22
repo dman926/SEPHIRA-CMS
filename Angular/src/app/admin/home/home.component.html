@@ -1,5 +1,7 @@
-<p>Admin Section</p>
+<h2>Admin Section</h2>
 <hr />
+
+<h3>Singleton types</h3>
 
 <button mat-raised-button color="primary" routerLink="/admin/users">Users</button>
 <button mat-raised-button color="primary" routerLink="/admin/orders">Orders</button>
@@ -7,5 +9,7 @@
 <button mat-raised-button color="primary" routerLink="/admin/menu-items">Menu</button>
 
 <hr />
+
+<h3>Post types</h3>
 
 <button mat-raised-button color="primary" *ngFor="let type of types" [routerLink]="'/admin/' + type">{{ type }}</button>

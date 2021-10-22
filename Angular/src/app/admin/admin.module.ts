@@ -6,13 +6,11 @@ import { HomeComponent } from './home/home.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { HttpClientModule } from '@angular/common/http';
-import { PostsComponent } from './posts/posts.component';
 
 
 @NgModule({
 	declarations: [
-		HomeComponent,
-  PostsComponent
+		HomeComponent
 	],
 	imports: [
 		CommonModule,

@@ -6,6 +6,8 @@ from .auth import SignupApi, LoginApi, ForgotPassword, ResetPassword, TokenRefre
 from .file import UploaderApi, MediaApi, SingleMediaApi
 
 from .menuItem import MenuItemsApi
+
+from .post import PostsApi, PostApi, PostSlugApi
 from .page import PagesApi, PageApi
 from .product import ProductsApi, ProductApi, ProductReviewsApi, ProductReviewsCountApi, ProductReviewAllowedApi
 
@@ -37,10 +39,10 @@ def initialize_routes(api, base):
 	api.add_resource(SingleMediaApi, base + 'file/media/<filename>')
 
 	api.add_resource(MenuItemsApi, base + 'menuItems')
-	api.add_resource(PagesApi, base + 'page/pages')
-	api.add_resource(PageApi, base + 'page/page')
-	api.add_resource(ProductsApi, base + 'product/products')
-	api.add_resource(ProductApi, base + 'product/product')
+
+	api.add_resource(PostsApi, base + 'post/posts')
+	api.add_resource(PostApi, base + 'post/post/id')
+	api.add_resource(PostSlugApi, base + 'post/post/slug')
 	api.add_resource(ProductReviewsApi, base + 'product/product/<id>/reviews')
 	api.add_resource(ProductReviewsCountApi, base + 'product/product/<id>/reviews/count')
 	api.add_resource(ProductReviewAllowedApi, base + 'product/product/<id>/reviewAllowed')
