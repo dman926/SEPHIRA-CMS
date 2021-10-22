@@ -48,6 +48,10 @@ class OutOfStockError(Exception):
 	message = 'Out Of Stock Error'
 	code = '409'
 
+class InvalidPostTypeError(Exception):
+	message = 'Invalid Post Type Error'
+	code = '422'
+
 @app.errorhandler(InternalServerError)
 def handle_(error):
 	return {'message': error.message}, error.code
@@ -86,4 +90,8 @@ def handle_MissingOtpError(error):
 
 @app.errorhandler(OutOfStockError)
 def handle_OutOfStockError(error):
+	return {'message': error.message}, error.code
+
+app.errorhandler(InvalidPostTypeError)
+def handle_InvalidPostTypeError(error):
 	return {'message': error.message}, error.code

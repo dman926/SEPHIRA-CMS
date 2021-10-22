@@ -55,6 +55,16 @@ export class AdminService {
 		}
 	}
 
+	public getPostTypes(): Observable<string[]> {
+		const accessToken = this.cookie.get('accessToken');
+		if (accessToken && accessToken !== 'undefined') {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.get<string[]>(this.adminBase + 'posts/types', { headers });
+		} else {
+			return new Observable<string[]>();
+		}
+	}
+
 	public getAllPages(page?: number, size?: number): Observable<Page[]> {
 		const accessToken = this.cookie.get('accessToken');
 		if (accessToken && accessToken !== 'undefined') {
