@@ -2,7 +2,7 @@
 
 ![SEPHIRA Logo](./SEPHIRA_logo.svg?raw=true)
 
-### Try to refrain from using the main branch for you sites in the meantime. Use the `post-type-revamp` branch with some modifications or just wait a little longer for the v1.1.0 release as there are major DB changes.
+### Try to refrain from using the main branch for your sites in the meantime. Use the `post-type-revamp` branch with some modifications or just wait a little longer for the v1.1.0 release as there are major DB changes.
 
 ## Self Executing, Processing, and Handling of Information from Real-world Applications
 
