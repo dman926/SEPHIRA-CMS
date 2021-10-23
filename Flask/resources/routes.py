@@ -8,8 +8,7 @@ from .file import UploaderApi, MediaApi, SingleMediaApi
 from .menuItem import MenuItemsApi
 
 from .post import PostsApi, PostApi, PostSlugApi
-from .page import PagesApi, PageApi
-from .product import ProductsApi, ProductApi, ProductReviewsApi, ProductReviewsCountApi, ProductReviewAllowedApi
+from .product import ProductReviewsApi, ProductReviewsCountApi, ProductReviewAllowedApi
 
 from .order import OrdersApi, OrderApi
 from .cart import CartApi, CouponCheckApi

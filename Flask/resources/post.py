@@ -22,7 +22,7 @@ class PostsApi(Resource):
 				'description': 'The post type',
 				'in': 'query',
 				'type': 'string',
-				'required': False
+				'required': True
 			},
 			{
 				'name': 'page',
@@ -68,7 +68,7 @@ class PostsApi(Resource):
 				posts = posts.search_text(search).order_by('$text_score')
 			page = int(request.args.get('page', 0))
 			size = int(request.args.get('size', posts.count()))
-			return jsonify({ 'total': posts.count(), 'pages': list(map(lambda p: p.serialize(), posts[page * size : page * size + size])) })
+			return jsonify({ 'total': posts.count(), 'posts': list(map(lambda p: p.serialize(), posts[page * size : page * size + size])) })
 		except SchemaValidationError:
 			raise SchemaValidationError
 		except InvalidPostTypeError:
@@ -90,7 +90,7 @@ class PostApi(Resource):
 				'required': False
 			},
 			{
-				'name': 'ID',
+				'name': 'id',
 				'description': 'The post ID',
 				'in': 'query',
 				'type': 'string',

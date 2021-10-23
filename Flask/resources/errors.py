@@ -53,35 +53,35 @@ class InvalidPostTypeError(Exception):
 	code = '422'
 
 @app.errorhandler(InternalServerError)
-def handle_(error):
+def handle_InternalServerError(error):
 	return {'message': error.message}, error.code
 
 @app.errorhandler(SchemaValidationError)
-def handle_(error):
+def handle_SchemaValidationError(error):
 	return {'message': error.message}, error.code
 
 @app.errorhandler(EmailAlreadyExistsError)
-def handle_(error):
+def handle_EmailAlreadyExistsError(error):
 	return {'message': error.message}, error.code
 
 @app.errorhandler(UnauthorizedError)
-def handle_(error):
+def handle_UnauthorizedError(error):
 	return {'message': error.message}, error.code
 
 @app.errorhandler(EmailDoesnotExistsError)
-def handle_(error):
+def handle_EmailDoesnotExistsError(error):
 	return {'message': error.message}, error.code
 
 @app.errorhandler(BadTokenError)
-def handle_(error):
+def handle_BadTokenError(error):
 	return {'message': error.message}, error.code
 
 @app.errorhandler(FileNotFoundError)
-def handle_(error):
+def handle_FileNotFoundError(error):
 	return {'message': error.message}, error.code
 
 @app.errorhandler(ResourceNotFoundError)
-def handle_(error):
+def handle_ResourceNotFoundError(error):
 	return {'message': error.message}, error.code
 
 @app.errorhandler(MissingOtpError)
@@ -92,6 +92,6 @@ def handle_MissingOtpError(error):
 def handle_OutOfStockError(error):
 	return {'message': error.message}, error.code
 
-app.errorhandler(InvalidPostTypeError)
+@app.errorhandler(InvalidPostTypeError)
 def handle_InvalidPostTypeError(error):
 	return {'message': error.message}, error.code

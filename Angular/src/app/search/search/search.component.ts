@@ -1,17 +1,10 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { PlatformService } from 'src/app/core/services/platform.service';
+import { PostService } from 'src/app/core/services/post.service';
 import { Page } from 'src/app/models/page';
-import { environment } from 'src/environments/environment';
-
-interface AllPages {
-	total: number;
-	pages: Page[];
-}
 
 @Component({
 	selector: 'app-search',
@@ -28,7 +21,7 @@ export class SearchComponent implements OnInit, OnDestroy {
 
 	private querySub: Subscription | undefined;
 
-	constructor(private http: HttpClient, private route: ActivatedRoute, private router: Router, private platformService: PlatformService) {
+	constructor(private postService: PostService, private route: ActivatedRoute, private router: Router, private platformService: PlatformService) {
 		this.searchBar = false;
 		this.samePage = false;
 		this.pages = [];
@@ -41,16 +34,8 @@ export class SearchComponent implements OnInit, OnDestroy {
 		if (this.platformService.isBrowser()) {
 			if (!this.searchBar) {
 				this.querySub = this.route.queryParams.subscribe(params => {
-					const httpParams = new HttpParams().append('search', params.s);
-					this.http.get<AllPages>(environment.apiServer + 'page/pages', { params: httpParams }).pipe(map(res => {
-						res.pages = res.pages.map(page => {
-							page.created = new Date(page.created!);
-							page.modified = new Date(page.modified!);
-							return page;
-						});
-						return res;
-					})).toPromise().then(searchRes => {
-						this.pages = searchRes.pages;
+					this.postService.getPosts('models.Page', undefined, undefined, params.s).toPromise().then(searchRes => {
+						this.pages = searchRes.posts;
 					})
 				});
 			}
