@@ -8,7 +8,7 @@ An Angular 12 front end with a complete Flask RESTful API complete with server-s
 
 ## How to get the project running
 
-See [sephira.org](https://sephira.org/)
+See [sephira.org](https://sephira.org/) (I have plans to redo it a little once the new post type system is done)
 
 See the Angular and Flask folders for clear instructions on how to get each runnning.
 
