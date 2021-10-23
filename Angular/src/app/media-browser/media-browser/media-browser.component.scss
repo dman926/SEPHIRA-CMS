@@ -1,9 +1,40 @@
-section#media-browser-wrapper {
-    img {
-        width: 12em;
-        height: 12em;
-        object-fit: cover;
-    }
+mat-card#media-browser-wrapper {
+	mat-card-header mat-card-subtitle {
+		align-items: center;
+		justify-content: center;
+		mat-checkbox {
+			margin-right: 1em;
+		}
+	}
+	mat-card-content {
+		div#media-filters {
+			display: flex;
+			justify-content: center;
+		}
+		div#browser {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 1em;
+			div {
+				position: relative;
+				width: 12em;
+				height: 12em;
+				img {
+					width: 12em;
+					height: 12em;
+					object-fit: cover;
+				}
+				button {
+					position: absolute;
+					top: 0.5em;
+					right: 0;
+					z-index: 999;
+					background-color: white;
+					border-radius: 50%;
+				}	
+			}
+        }
+	}
     .round-button {
         border-radius: 50%;
         min-width: unset;
@@ -13,22 +44,5 @@ section#media-browser-wrapper {
     }
     .hidden {
         display: none;
-    }
-    div#browser {
-        display: flex;
-        gap: 1em;
-        div {
-            position: relative;
-            width: 12em;
-            height: 12em;
-            button {
-                position: absolute;
-                top: 0.5em;
-                right: 0;
-                z-index: 999;
-                background-color: white;
-                border-radius: 50%;
-            }
-        }
     }
 }

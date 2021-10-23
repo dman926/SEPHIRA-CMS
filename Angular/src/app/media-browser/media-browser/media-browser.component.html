@@ -1,15 +1,34 @@
-<div id="loader-spinner" *ngIf="gettingInformation">
-    <mat-spinner></mat-spinner>
-</div>
-<section id="media-browser-wrapper">
-    <div id="uploader">
-        <input type=file class="hidden" (change)="onFileUploaderSelected($event)" #fileUpload />
-        <button mat-raised-button class="round-button" type="button" color="primary" (click)="fileUpload.click()"><mat-icon>attach_file</mat-icon></button>
-    </div>
-    <div id="browser">
-        <div *ngFor="let image of files; index as i" [hidden]="!(ratio === '*' || ratio === image.ratio)">
-            <img [src]="image.path" (click)="selectFile(i)" [style]="'border: 4px solid ' + ((multipleSelect ? arraySelected.indexOf(i) !== -1 : i == selected) ? '#673ab7' : 'transparent') + ';'" />
-            <button mat-icon-button (click)="deleteFile(i)"><mat-icon>clear</mat-icon></button>
-        </div>
-    </div>
-</section>
+<mat-card id="media-browser-wrapper">
+    <mat-card-header id="uploader" [formGroup]="formGroup">
+		<mat-card-title><ng-content></ng-content></mat-card-title>
+        <mat-card-subtitle>
+			<input type=file class="hidden" (change)="onFileUploaderSelected($event)" #fileUpload />
+			<mat-checkbox color="primary" formControlName="isThumbnail">Is Thumbnail</mat-checkbox>
+			<button mat-raised-button class="round-button" type="button" color="primary" (click)="fileUpload.click()"><mat-icon>attach_file</mat-icon></button>
+		</mat-card-subtitle>
+    </mat-card-header>
+	<mat-card-content>
+		<div id="media-filters" [formGroup]="formGroup">
+			<mat-form-field appearance="fill">
+				<mat-label>Ratio</mat-label>
+				<mat-select formControlName="ratio">
+					<mat-option value="*">*</mat-option>
+					<mat-option value="1">1/1</mat-option>
+					<mat-option value="16/9">16/9</mat-option>
+				</mat-select>
+			</mat-form-field>
+		</div>
+		<mat-paginator [length]="filteredFiles.length" [pageSize]="filePageEvent.pageSize" (page)="fetchFiles($event)"></mat-paginator>
+		<ng-template #loaderSpinner>
+			<div id="loader-spinner"> 
+				<mat-spinner></mat-spinner>
+			</div>
+		</ng-template>
+		<div id="browser" *ngIf="loaded;else loaderSpinner">
+			<div *ngFor="let image of shownFiles;">
+				<img [src]="image.path" (click)="selectFile(image.path)" [style]="'border: 4px solid ' + (isSelected(image.path) ? '#673ab7' : 'transparent') + ';'" />
+	            <button mat-icon-button (click)="deleteFile(image)"><mat-icon>clear</mat-icon></button>
+			</div>
+		</div>
+	</mat-card-content>
+</mat-card>

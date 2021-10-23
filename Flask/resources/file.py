@@ -121,9 +121,27 @@ class MediaApi(Resource):
 	@swagger.doc({
 		'tags': ['File IO'],
 		'description': 'Get all media urls belonging to user',
+		'parameters': [
+			{
+				'name': 'page',
+				'description': 'The page index',
+				'in': 'query',
+				'type': 'int',
+				'schema': None,
+				'required': False
+			},
+			{
+				'name': 'size',
+				'description': 'The page size',
+				'in': 'query',
+				'type': 'int',
+				'schema': None,
+				'required': False
+			}
+		],
 		'responses': {
 			'200': {
-				'description': 'An array of file locations',
+				'description': 'A count of the total amount of media and an array of file locations',
 			}
 		}
 	})
@@ -139,9 +157,12 @@ class MediaApi(Resource):
 						'path': '/assets/uploads/' + get_jwt_identity() + '/' + file,
 						'ratio': str(Fraction(image.size[0], image.size[1]))
 					}
-				mappedFilenames = map(mapFilenames, filenames)
-				return jsonify(list(mappedFilenames))
-			return ''
+				filenameCount = len(filenames)
+				page = int(request.args.get('page', 0))
+				size = int(request.args.get('size', filenameCount))
+				mappedFilenames = list(map(mapFilenames, filenames[page * size : page * size + size]))
+				return jsonify({ 'count': len(mappedFilenames), 'files': mappedFilenames})
+			return jsonify({ 'count': 0, 'files': [] })
 		except Exception as e:
 			writeWarningToLog('Unhandled exception in resources.file.MediaApi get: ' + str(e))
 			raise InternalServerError

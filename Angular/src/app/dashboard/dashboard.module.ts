@@ -11,8 +11,6 @@ import { LayoutModule } from '@angular/cdk/layout';
 import { DashboardRoutingModule } from './dashboard-routing.module';
 import { DashboardComponent } from './dashboard/dashboard.component';
 
-import { MediaBrowserModule } from '../media-browser/media-browser.module';
-
 @NgModule({
 	declarations: [DashboardComponent],
 	imports: [
@@ -24,9 +22,7 @@ import { MediaBrowserModule } from '../media-browser/media-browser.module';
 		MatMenuModule,
 		MatIconModule,
 		MatButtonModule,
-		LayoutModule,
-
-		MediaBrowserModule
+		LayoutModule
 	],
 })
 export class DashboardModule { }

@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { PlatformService } from 'src/app/core/services/platform.service';
+import { PostService } from 'src/app/core/services/post.service';
 import { Product } from 'src/app/models/product';
 import { CartService } from 'src/app/payment/cart/cart.service';
 import { ProductService } from '../product.service';
@@ -27,7 +28,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
 	private searchTerm: string | undefined;
 	private subs: Subscription[];
 
-	constructor(private productService: ProductService, public cartService: CartService, private platformService: PlatformService, private route: ActivatedRoute) {
+	constructor(private postService: PostService, private productService: ProductService, public cartService: CartService, private platformService: PlatformService, private route: ActivatedRoute) {
 		this.loaded = false;
 		this.products = [];
 		this.productPageEvent = {
@@ -68,9 +69,9 @@ export class ProductsComponent implements OnInit, OnDestroy {
 			}
 		}
 		this.loaded = false;
-		this.productService.getAllProducts(this.productPageEvent.pageIndex, this.productPageEvent.pageSize, this.searchTerm).toPromise().then(res => {
+		this.postService.getPosts('models.Product', this.productPageEvent.pageIndex, this.productPageEvent.pageSize, this.searchTerm).toPromise().then(res => {
 			this.productCount = res.total;
-			this.products = this.products.concat(res.products);
+			this.products = this.products.concat(res.posts);
 			this.loaded = true;
 		}).catch(err => this.loaded = true);
 	}

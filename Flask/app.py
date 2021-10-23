@@ -37,7 +37,7 @@ if PRODUCTION:
 	app.config['MAIL_USERNAME'] = "support@flaskapi.com"
 	app.config['MAIL_PASSWORD'] = ""
 	app.config['PROPAGATE_EXCEPTIONS'] = True
-	app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), '..', 'angular', 'assets', 'uploads') # TODO: Fix this. Is wrong after SSR update
+	app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), '..', 'ANGULARFOLDERNAME', 'dist', 'sephira', 'browser', 'assets') # Change ANGULARFOLDERNAME to the name of the folder it is hosted in
 	app.config['MONGODB_SETTINGS'] = 'mongodb://localhost/sephira'
 	resources = {r"/*": {"origins": "https://www.website.com"}}
 	socketResources = "www.website.com"

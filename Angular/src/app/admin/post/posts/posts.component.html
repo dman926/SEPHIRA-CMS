@@ -1,0 +1,60 @@
+<form [formGroup]="newPostGroup" (ngSubmit)="newPost()">
+    <mat-form-field appearance="fill">
+        <mat-label>Title</mat-label>
+        <input matInput formControlName="title" autocomplete="off" required />
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+        <mat-label>Slug</mat-label>
+        <input matInput formControlName="slug" autocomplete="off" required />
+        <mat-error *ngIf="slug.hasError('slugTaken') && slug.dirty">
+            Slug not available
+        </mat-error>
+		<mat-error *ngIf="slug.hasError('pattern')">
+			Must be in the form of a URL slug
+		</mat-error>
+        <mat-error *ngIf="slug.pending && slug.dirty">
+            Checking availability...
+        </mat-error>
+    </mat-form-field>
+    <button mat-raised-button color="primary" [disabled]="newPostGroup.invalid || creating">Create {{ postType }}</button>
+</form>
+
+<button mat-raised-button color="primary" type="button" routerLink="../">Back</button>
+
+<mat-paginator [length]="postPageEvent.length" [pageSize]="postPageEvent.pageSize" (page)="fetchPosts($event)"></mat-paginator>
+<ng-template #loaderSpinner>
+	<div id="loader-spinner"> 
+		<mat-spinner></mat-spinner>
+	</div>
+</ng-template>
+<div *ngIf="loaded;else loaderSpinner">
+	<table mat-table [dataSource]="shownPosts">
+		<ng-container matColumnDef="title">
+			<th mat-header-cell *matHeaderCellDef>Title</th>
+			<td mat-cell *matCellDef="let el">{{ el.title }}</td>
+		</ng-container>
+
+		<ng-container matColumnDef="slug">
+			<th mat-header-cell *matHeaderCellDef>Slug</th>
+			<td mat-cell *matCellDef="let el">{{ el.slug }}</td>
+		</ng-container>
+
+		<ng-container matColumnDef="author">
+			<th mat-header-cell *matHeaderCellDef>Title</th>
+			<td mat-cell *matCellDef="let el">{{ el.author.firstName + ' ' + el.author.lastName }}</td>
+		</ng-container>
+
+		<ng-container matColumnDef="modified">
+			<th mat-header-cell *matHeaderCellDef>Title</th>
+			<td mat-cell *matCellDef="let el">{{ el.modified | date }}</td>
+		</ng-container>
+
+		<ng-container matColumnDef="edit">
+			<th mat-header-cell *matHeaderCellDef>Edit</th>
+			<td mat-cell *matCellDef="let el"><button mat-raised-button color="primary" [routerLink]="['/admin', postType, el.id]">Edit</button></td>
+		</ng-container>
+
+		<tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+		<tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+	</table>
+</div>

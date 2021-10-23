@@ -7,6 +7,7 @@ import { ProductService } from '../product.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { PlatformService } from 'src/app/core/services/platform.service';
 import { DomSanitizer, makeStateKey, TransferState } from '@angular/platform-browser';
+import { PostService } from 'src/app/core/services/post.service';
 
 interface PageEvent {
 	length: number;
@@ -32,7 +33,7 @@ export class ProductComponent implements OnInit {
 	reviewPageEvent: PageEvent;
 	reviewCount: number;
 
-	constructor(private productService: ProductService, private router: Router, public cartService: CartService, private platformService: PlatformService, private state: TransferState, private sanitizer: DomSanitizer) {
+	constructor(private postService: PostService, private productService: ProductService, private router: Router, public cartService: CartService, private platformService: PlatformService, private state: TransferState, private sanitizer: DomSanitizer) {
 		this.loaded = false;
 		this.selectedImg = 0;
 		this.reviews = [];
@@ -53,7 +54,7 @@ export class ProductComponent implements OnInit {
 	ngOnInit(): void {
 		const productKey = makeStateKey<Product>('product');
 		if (this.platformService.isServer()) {
-			this.productService.getProduct(this.router.url.substr(5)).toPromise().then(product => {
+			this.postService.getPostFromSlug('models.Product', this.router.url.substr(5)).toPromise().then(product => {
 				this.product = product;
 				this.state.set(productKey, product);
 			}).catch(err => this.loaded = true);
@@ -71,7 +72,7 @@ export class ProductComponent implements OnInit {
 				this.fetchReviews();
 				this.loaded = true;
 			} else {
-				this.productService.getProduct(this.router.url.substr(5)).toPromise().then(product => {
+				this.postService.getPostFromSlug('models.Product', this.router.url.substr(5)).toPromise().then(product => {
 					if (product.content) {
 						product.content = this.sanitizer.bypassSecurityTrustHtml(product.content as string);
 					}

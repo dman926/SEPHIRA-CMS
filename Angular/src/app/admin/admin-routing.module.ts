@@ -12,18 +12,6 @@ const routes: Routes = [
 		loadChildren: () => import('./users/users.module').then(m => m.UsersModule)
 	},
 	{
-		path: 'pages',
-		loadChildren: () => import('./pages/pages.module').then(m => m.PagesModule)
-	},
-	{
-		path: 'products',
-		loadChildren: () => import('./products/products.module').then(m => m.ProductsModule)
-	},
-	{
-		path: 'coupons',
-		loadChildren: () => import('./coupons/coupons.module').then(m => m.CouponsModule)
-	},
-	{
 		path: 'orders',
 		loadChildren: () => import('./orders/orders.module').then(m => m.OrdersModule)
 	},
@@ -34,6 +22,10 @@ const routes: Routes = [
 	{
 		path: 'menu-items',
 		loadChildren: () => import('./menu-items/menu-items.module').then(m => m.MenuItemsModule)
+	},
+	{
+		path: ':postType',
+		loadChildren: () => import('./post/post.module').then(m => m.PostModule)
 	}
 ];
 
