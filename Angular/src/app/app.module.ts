@@ -8,6 +8,7 @@ import { CoreModule } from './core/core.module';
 import { CookieModule } from 'ngx-cookie';
 import { environment } from 'src/environments/environment';
 import { RECAPTCHA_V3_SITE_KEY, RecaptchaV3Module } from "ng-recaptcha";
+import { ServiceWorkerModule } from '@angular/service-worker';
 
 @NgModule({
 	declarations: [
@@ -21,7 +22,13 @@ import { RECAPTCHA_V3_SITE_KEY, RecaptchaV3Module } from "ng-recaptcha";
 		CookieModule.forRoot(),
 
 		RecaptchaV3Module,
-		CoreModule
+		CoreModule,
+  ServiceWorkerModule.register('ngsw-worker.js', {
+    enabled: environment.production,
+    // Register the ServiceWorker as soon as the app is stable
+    // or after 30 seconds (whichever comes first).
+    registrationStrategy: 'registerWhenStable:30000'
+  })
 	],
 	providers: [
 		{ provide: RECAPTCHA_V3_SITE_KEY, useValue: environment.recaptchaSiteKey },
