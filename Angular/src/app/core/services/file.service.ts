@@ -1,9 +1,14 @@
-import { HttpClient, HttpEvent, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { CookieService } from 'ngx-cookie';
 import { Observable } from 'rxjs';
 import { Media } from 'src/app/models/media';
 import { environment } from 'src/environments/environment';
+
+interface AllMedia {
+	count: number;
+	files: Media[];
+}
 
 @Injectable({
 	providedIn: 'root'
@@ -27,13 +32,17 @@ export class FileService {
 		}
 	}
 
-	public getMedia(): Observable<Media[]> {
+	public getMedia(page?: number, size?: number): Observable<AllMedia> {
 		const accessToken = this.cookie.get('accessToken');
 		if (accessToken && accessToken !== 'undefined') {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
-			return this.http.get<Media[]>(this.fileBase + 'media', { headers });
+			let params = new HttpParams();
+			if (page && size) {
+				params = params.append('page', page).append('size', size);
+			}
+			return this.http.get<AllMedia>(this.fileBase + 'media', { headers, params });
 		} else {
-			return new Observable<Media[]>();
+			return new Observable<AllMedia>();
 		}
 	}
 

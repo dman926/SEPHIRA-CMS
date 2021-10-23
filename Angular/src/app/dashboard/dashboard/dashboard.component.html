@@ -1,5 +1,3 @@
 <div class="grid-container">
     <h1 class="mat-h1">Dashboard</h1>
-    <button mat-raised-button color="primary" (click)="selectingMedia = !selectingMedia">{{ selectingMedia ? 'Close' : 'Open' }} Media Browser</button>
-    <app-media-browser *ngIf="selectingMedia" (selectedImage)="onSelectedImage($event)"></app-media-browser>
 </div>
