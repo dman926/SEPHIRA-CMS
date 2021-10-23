@@ -229,6 +229,51 @@ class AdminPostTypesApi(Resource):
 			writeWarningToLog('Unhandled exception in resources.admin.AdminPostTypesApi get', e)
 			raise InternalServerError
 
+class AdminPostSchemaApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin', 'Post'],
+		'description': 'Get the schema of a post type',
+		'parameters': [
+			{
+				'name': 'post',
+				'description': 'The post type',
+				'in': 'query',
+				'type': 'string',
+				'schema': None,
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'The schema of the post type'
+			}
+		}
+	})
+	@jwt_required()
+	def get(self):
+		try:
+			user = models.User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			postType = request.args.get('post', None)
+			if not postType:
+				raise SchemaValidationError
+			try:
+				postType = eval(postType)
+				if not is_post(postType):
+					raise InvalidPostTypeError
+			except Exception:
+				raise InvalidPostTypeError
+			return jsonify(postType.schema())
+		except SchemaValidationError:
+			raise SchemaValidationError
+		except InvalidPostTypeError:
+			raise InvalidPostTypeError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminPostSchemaApi get', e)
+			raise InternalServerError
+
+
 class AdminPostsApi(Resource):
 	@swagger.doc({
 		'tags': ['Admin', 'Post'],
@@ -284,6 +329,8 @@ class AdminPostsApi(Resource):
 				raise SchemaValidationError
 			try:
 				postType = eval(postType)
+				if not is_post(postType):
+					raise InvalidPostTypeError
 			except Exception:
 				raise InvalidPostTypeError
 			search = request.args.get('search', None)

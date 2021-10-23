@@ -23,10 +23,10 @@ def all_subclasses(cls):
 
 def is_post(cls):
 	'''
-	Check if the given class is a post type
+	Check if the given class is a post type (exluding Post as it is abstract)
 	'''
 	from database.models import Post
-	for post_type in [Post] + all_subclasses(Post):
+	for post_type in all_subclasses(Post):
 		if cls == post_type:
 			return True
 	return False

@@ -36,7 +36,7 @@ export class PostsComponent implements OnInit, OnDestroy {
 		};
 		this.newPostGroup = new FormGroup({
 			title: new FormControl('', [Validators.required]),
-			slug: new FormControl('', [Validators.required, Validators.pattern('^[a-z0-9]+(?:-[a-z0-9]+)*$')], [this.slugValidator()])
+			slug: new FormControl('', [Validators.required, Validators.pattern('^([/]?)+([a-z0-9]?)+(?:-[a-z0-9]+)*$')], [this.slugValidator()])
 		});
 	}
 

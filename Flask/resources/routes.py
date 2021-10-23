@@ -20,7 +20,7 @@ from .stripe import StripeCheckoutApi, StripeApi
 from .paypal import PayPalCreateTransactionApi, PayPalCaptureTransactionApi, PayPalApi
 from .coinbase import CoinbaseCheckoutApi, CoinbaseApi
 
-from .admin import AdminApi, AdminUsersApi, AdminUserApi, AdminUsersCountApi, AdminPostTypesApi, AdminPostsApi, AdminPostApi, AdminPostSlugAvailableApi, AdminOrdersApi, AdminOrderApi, AdminOrderCountApi,AdminUsShippingZonesApi, AdminUsShippingZoneApi, AdminUsShippingZoneCountApi, AdminMenuItemsApi
+from .admin import AdminApi, AdminUsersApi, AdminUserApi, AdminUsersCountApi, AdminPostTypesApi, AdminPostSchemaApi, AdminPostsApi, AdminPostApi, AdminPostSlugAvailableApi, AdminOrdersApi, AdminOrderApi, AdminOrderCountApi,AdminUsShippingZonesApi, AdminUsShippingZoneApi, AdminUsShippingZoneCountApi, AdminMenuItemsApi
 
 import resources.sockets
 
@@ -67,6 +67,7 @@ def initialize_routes(api, base):
 	api.add_resource(AdminUserApi, base + 'admin/user/<id>')
 	api.add_resource(AdminUsersCountApi, base + 'admin/users/count')
 	api.add_resource(AdminPostTypesApi, base + 'admin/posts/types')
+	api.add_resource(AdminPostSchemaApi, base + 'admin/posts/schema')
 	api.add_resource(AdminPostsApi, base + 'admin/posts')
 	api.add_resource(AdminPostApi, base + 'admin/post/<id>')
 	api.add_resource(AdminPostSlugAvailableApi, base + 'admin/posts/slugTaken')

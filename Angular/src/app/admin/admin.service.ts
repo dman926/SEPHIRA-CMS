@@ -68,6 +68,17 @@ export class AdminService {
 		}
 	}
 
+	public getPostSchema(postType: string): Observable<object> {
+		const accessToken = this.cookie.get('accessToken');
+		if (accessToken && accessToken !== 'undefined') {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			const params = new HttpParams().append('post', postType);
+			return this.http.get<object>(this.adminBase + 'posts/schema', { headers, params });
+		} else {
+			return new Observable<object>();
+		}
+	}
+
 	public getAllPosts(postType: string, page?: number, size?: number, search?: string): Observable<AllPosts> {
 		const accessToken = this.cookie.get('accessToken');
 		if (accessToken && accessToken !== 'undefined') {
