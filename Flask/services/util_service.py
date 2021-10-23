@@ -19,4 +19,14 @@ def all_subclasses(cls):
 	'''
 	Recursively gets all subclasses of the given class
 	'''
-	return set(cls.__subclasses__()).union([s for c in cls.__subclasses__() for s in all_subclasses(c)])
+	return list(set(cls.__subclasses__()).union([s for c in cls.__subclasses__() for s in all_subclasses(c)]))
+
+def is_post(cls):
+	'''
+	Check if the given class is a post type
+	'''
+	from database.models import Post
+	for post_type in [Post] + all_subclasses(Post):
+		if cls == post_type:
+			return True
+	return False

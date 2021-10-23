@@ -11,7 +11,7 @@ from resources.errors import UnauthorizedError, InternalServerError, ResourceNot
 
 import database.models as models
 
-from services.util_service import all_subclasses
+from services.util_service import all_subclasses, is_post
 from services.logging_service import writeWarningToLog
 
 import datetime
@@ -29,7 +29,7 @@ class AdminApi(Resource):
 	@jwt_required()
 	def get(self):
 		try:
-			user = models.models.User.objects.get(id=get_jwt_identity())
+			user = models.User.objects.get(id=get_jwt_identity())
 			return user.admin
 		except UnauthorizedError:
 			raise UnauthorizedError
@@ -68,7 +68,7 @@ class AdminUsersApi(Resource):
 	@jwt_required()
 	def get(self):
 		try:
-			user = models.models.User.objects.get(id=get_jwt_identity())
+			user = models.User.objects.get(id=get_jwt_identity())
 			if not user.admin:
 				raise UnauthorizedError
 			page = int(request.args.get('page', 0))
@@ -336,21 +336,25 @@ class AdminPostsApi(Resource):
 			user = models.User.objects.get(id=get_jwt_identity())
 			if not user.admin:
 				raise UnauthorizedError
-			postType = request.args.get('post', None)
-			obj = request.args.get('obj', None)
+			body = request.get_json()
+			postType = body.get('post', None)
+			obj = body.get('obj', None)
 			if not postType or not obj:
 				raise SchemaValidationError
 			try:
 				postType = eval(postType)
+				if not is_post(postType):
+					raise InvalidPostTypeError
 			except Exception:
 				raise InvalidPostTypeError
 			obj = postType(**obj)
+			obj.author = user
 
 			postTypeName = postType.__name__
 			
 			# Do any aditional logic here.
 			# Just check with a simple `if postTypeName == POSTTYPENAME:` to see the class name coming in. Do not rely on request.args.get('post', None)
-			
+
 			obj.save()
 			return jsonify(obj.serialize())
 		except (FieldDoesNotExist, ValidationError, SchemaValidationError):
