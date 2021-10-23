@@ -16,6 +16,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { AngularEditorModule } from '@kolkov/angular-editor';
 import { MatIconModule } from '@angular/material/icon';
+import { PostSelectModule } from '../post-select/post-select.module';
 
 @NgModule({
 	declarations: [
@@ -40,7 +41,8 @@ import { MatIconModule } from '@angular/material/icon';
 
 		AngularEditorModule,
 
-		MediaBrowserModule
+		MediaBrowserModule,
+		PostSelectModule
 	]
 })
 export class PostModule { }

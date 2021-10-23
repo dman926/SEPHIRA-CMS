@@ -468,7 +468,7 @@ class Coupon(Post):
 				'name': 'applicableProducts',
 				'niceName': 'Applicable Products',
 				'controlType': 'post-select',
-				'type': 'model.Product',
+				'type': 'models.Product',
 				'multiple': True
 			},
 			{

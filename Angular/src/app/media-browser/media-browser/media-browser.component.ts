@@ -1,7 +1,8 @@
 import { HttpEventType } from '@angular/common/http';
-import { Component, OnInit, Output, ViewChild, ElementRef, Input } from '@angular/core';
+import { Component, OnInit, Output, ViewChild, ElementRef, Input, OnDestroy } from '@angular/core';
 import { FormArray, FormControl, FormGroup, FormGroupDirective, Validators } from '@angular/forms';
 import { PageEvent } from '@angular/material/paginator';
+import { Subscription } from 'rxjs';
 import { FileService } from 'src/app/core/services/file.service';
 import { Media } from 'src/app/models/media';
 
@@ -10,7 +11,7 @@ import { Media } from 'src/app/models/media';
 	templateUrl: './media-browser.component.html',
 	styleUrls: ['./media-browser.component.scss']
 })
-export class MediaBrowserComponent implements OnInit {
+export class MediaBrowserComponent implements OnInit, OnDestroy {
 
 	@Input() formArrayName: string | null;
 	@Input() allowMultiple: boolean;
@@ -18,6 +19,7 @@ export class MediaBrowserComponent implements OnInit {
 	@ViewChild('fileUpload') fileUpload: ElementRef | undefined;
 
 	files: Media[];
+	filteredFiles: Media[];
 	filePageEvent: PageEvent;
 	loaded: boolean;
 
@@ -27,10 +29,13 @@ export class MediaBrowserComponent implements OnInit {
 	formArray: FormArray | undefined;
 	formGroup: FormGroup;
 
+	private ratioChangeSub: Subscription | undefined;
+
 	constructor(private fileService: FileService, private rootFormGroup: FormGroupDirective) {
 		this.formArrayName = null;
 		this.allowMultiple = false;
 		this.files = [];
+		this.filteredFiles = [];
 		this.filePageEvent = {
 			pageIndex: 0,
 			pageSize: 10,
@@ -48,16 +53,23 @@ export class MediaBrowserComponent implements OnInit {
 	ngOnInit(): void {
 		if (this.formArrayName) {
 			this.formArray = this.rootFormGroup.control.get(this.formArrayName) as FormArray;
+			this.formGroup.get('ratio')!.valueChanges.subscribe(val => {
+				this.filterFiles(val);
+			});
 			this.fetchFiles();
 		} else {
 			throw new Error('`formArrayName` is a required input');
 		}
 	}
 
+	ngOnDestroy(): void {
+		this.ratioChangeSub?.unsubscribe();
+	}
+
 	get shownFiles(): Media[] {
 		const index = this.filePageEvent.pageIndex;
 		const size = this.filePageEvent.pageSize;
-		return this.files.slice(index * size, index * size + size);
+		return this.filteredFiles.slice(index * size, index * size + size);
 	}
 
 	fetchFiles(event?: PageEvent): void {
@@ -71,6 +83,7 @@ export class MediaBrowserComponent implements OnInit {
 		this.fileService.getMedia(this.filePageEvent.pageIndex, this.filePageEvent.pageSize).toPromise().then(files => {
 			this.filePageEvent.length = files.count;
 			this.files = this.files.concat(files.files);
+			this.filterFiles(this.ratio);
 			this.loaded = true;
 		}).catch(err => this.loaded = true);
 	}
@@ -80,7 +93,8 @@ export class MediaBrowserComponent implements OnInit {
 		if (file) {
 			this.uploadPercent = 0;
 			this.uploading = true;
-			this.fileService.upload(file, this.formGroup.get('isThumbnail')!.value).subscribe(res => {
+			const isThumbnail = this.formGroup.get('isThumbnail')!.value;
+			this.fileService.upload(file, isThumbnail).subscribe(res => {
 				if (res.type === HttpEventType.Response) {
 					// Done uploading
 					if (this.fileUpload) {
@@ -88,7 +102,7 @@ export class MediaBrowserComponent implements OnInit {
 					}
 					this.uploading = false;
 					if (res) {
-						// res.body contains the resulting url
+						this.files.unshift({ ratio: isThumbnail ? '1' : '16/9', path: '/' + res.body! });
 					}
 				} else if (res.type === HttpEventType.UploadProgress) {
 					// Update progress
@@ -124,10 +138,11 @@ export class MediaBrowserComponent implements OnInit {
 		}
 	}
 
-	deleteFile(index: number) {
-		const filename = this.files[index].path.substr(this.files[index].path.lastIndexOf('/') + 1);
+	deleteFile(media: Media) {
+		const filename = media.path.substr(media.path.lastIndexOf('/') + 1);
 		this.fileService.deleteFile(filename).toPromise().then(res => {
-			// TODO: remove file from this.files
+			this.files.splice(this.files.indexOf(media), 1);
+			this.filterFiles(this.ratio);
 		});
 	}
 
@@ -142,6 +157,20 @@ export class MediaBrowserComponent implements OnInit {
 
 	get ratio(): string {
 		return this.formGroup.get('ratio')!.value;
+	}
+
+	private filterFiles(ratio: string): void {
+		const out: Media[] = [];
+		this.files.forEach(file => {
+			if (ratio === '*') {
+				out.push(file);
+			} else {
+				if (file.ratio === ratio) {
+					out.push(file);
+				}
+			}
+		});
+		this.filteredFiles = out;
 	}
 
 }

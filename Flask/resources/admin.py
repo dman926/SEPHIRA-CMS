@@ -347,6 +347,8 @@ class AdminPostsApi(Resource):
 			raise UnauthorizedError
 		except SchemaValidationError:
 			raise SchemaValidationError
+		except InvalidPostTypeError:
+			raise InvalidPostTypeError
 		except Exception as e:
 			writeWarningToLog('Unhandled exception in resources.admin.AdminPostsApi get', e)
 			raise InternalServerError

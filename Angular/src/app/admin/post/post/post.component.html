@@ -43,11 +43,11 @@
 		</div>
 
 		<div *ngSwitchCase="'media-browser'" class="spaceout">
-			<app-media-browser [formArrayName]="schema.name" [allowMultiple]="schema.multiple ? schema.multiple : false"></app-media-browser>
+			<app-media-browser [formArrayName]="schema.name" [allowMultiple]="schema.multiple ? schema.multiple : false">{{ schema.niceName }}</app-media-browser>
 		</div>
 
 		<div *ngSwitchCase="'post-select'" class="spaceout">
-			<p>POST SELECT NOT IMPLEMENTED YET</p>
+			<app-post-select [type]="schema.type" [formArrayName]="schema.name" [allowMultiple]="schema.multiple ? schema.multiple : false">{{ schema.niceName }}</app-post-select>
 		</div>
 
 		<p *ngSwitchDefault>Schema Error: {{ schema.name }} has an invalid controlType {{ schema.controlType }}</p>

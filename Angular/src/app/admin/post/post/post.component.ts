@@ -143,6 +143,9 @@ export class PostComponent implements OnInit, OnDestroy {
 			case 'FormArray':
 				absControl = new FormArray(postVal.map((val: any) => this.parseAbsControl(schema.array!, val)), validators, asyncValidators);
 				break;
+			case 'post-select':
+				absControl = new FormArray(postVal.map((val: any) => new FormControl(val)), validators, asyncValidators);
+				break;
 			default:
 				absControl = new FormControl(postVal, validators, asyncValidators);
 		}
