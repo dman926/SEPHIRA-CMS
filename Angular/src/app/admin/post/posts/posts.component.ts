@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, AsyncValidatorFn, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { debounceTime, map, take } from 'rxjs/operators';
 import { PlatformService } from 'src/app/core/services/platform.service';
 import { Post } from 'src/app/models/post';
@@ -21,6 +21,7 @@ export class PostsComponent implements OnInit, OnDestroy {
 	postType: string | undefined;
 
 	newPostGroup: FormGroup;
+	creating: boolean;
 
 	readonly displayedColumns = ['title', 'slug', 'author', 'modified', 'edit'];
 
@@ -38,13 +39,17 @@ export class PostsComponent implements OnInit, OnDestroy {
 			title: new FormControl('', [Validators.required]),
 			slug: new FormControl('', [Validators.required, Validators.pattern('^([/]?)+([a-z0-9]?)+(?:-[a-z0-9]+)*$')], [this.slugValidator()])
 		});
+		this.creating = false;
 	}
 
 	ngOnInit(): void {
 		if (this.platform.isBrowser()) {
 			this.parentParamsSub = this.route.parent!.params.subscribe(params => {
 				this.postType = params.postType;
-				this.fetchPosts();				
+				this.fetchPosts();
+				this.newPostGroup.get('slug')!.valueChanges.subscribe(val => {
+					console.log(this.newPostGroup.get('slug')!.errors);
+				})
 			});
 		}
 	}
@@ -62,7 +67,9 @@ export class PostsComponent implements OnInit, OnDestroy {
 			if (post.slug!.substr(0, 1) !== '/') {
 				post.slug = '/' + post.slug;
 			}
+			this.creating = true;
 			this.admin.submitPost(this.postType!, post).toPromise().then(post => {
+				this.creating = false;
 				this.posts.unshift(post);
 			})
 		}
@@ -95,11 +102,15 @@ export class PostsComponent implements OnInit, OnDestroy {
 
 	private slugValidator(): AsyncValidatorFn {
 		return (control: AbstractControl): Observable<ValidationErrors | null> => {
-			return this.admin.checkPostSlugTaken(this.postType!, control.value).pipe(
-				debounceTime(500),
-				take(1),
-				map(res => !res ? { slugTaken: true } : null)
-			);
+			if (control.hasError('pattern')) {
+				return of(null);
+			} else {
+				return this.admin.checkPostSlugTaken(this.postType!, control.value).pipe(
+					debounceTime(500),
+					take(1),
+					map(res => !res ? { slugTaken: true } : null)
+				);	
+			}
 		};
 	}
 

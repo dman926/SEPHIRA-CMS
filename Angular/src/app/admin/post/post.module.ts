@@ -11,6 +11,11 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
+import { MediaBrowserModule } from 'src/app/media-browser/media-browser.module';
+import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { AngularEditorModule } from '@kolkov/angular-editor';
+import { MatIconModule } from '@angular/material/icon';
 
 @NgModule({
 	declarations: [
@@ -28,7 +33,14 @@ import { MatTableModule } from '@angular/material/table';
 		MatButtonModule,
 		MatFormFieldModule,
 		MatInputModule,
-		MatTableModule
+		MatTableModule,
+		MatSelectModule,
+		MatCheckboxModule,
+		MatIconModule,
+
+		AngularEditorModule,
+
+		MediaBrowserModule
 	]
 })
 export class PostModule { }

@@ -432,6 +432,14 @@ class AdminPostApi(Resource):
 				'type': 'string',
 				'schema': None,
 				'required': True
+			},
+			{
+				'name': 'withSchema',
+				'description': 'If the class schema should be included',
+				'in': 'query',
+				'type': 'bool',
+				'schema': None,
+				'required': False
 			}
 		],
 		'responses': {
@@ -454,7 +462,10 @@ class AdminPostApi(Resource):
 			except Exception:
 				raise InvalidPostTypeError
 			obj = postType.objects.get(id=id)
-			return jsonify(obj.serialize())
+			out = {'obj': obj.serialize()}
+			if bool(request.args.get('withSchema', False)):
+				out['schema'] = postType.schema()
+			return jsonify(out)
 		except UnauthorizedError:
 			raise UnauthorizedError
 		except SchemaValidationError:

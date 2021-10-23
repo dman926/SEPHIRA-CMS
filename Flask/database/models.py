@@ -8,7 +8,7 @@ import onetimepass
 
 from services.util_service import make_ngrams
 
-import base64, os, random, string, datetime
+import base64, os, random, string, datetime, re
 
 #############
 # BUILT INS #
@@ -236,7 +236,7 @@ class Post(Document):
 	'''
 	author = ReferenceField('User')
 	title = StringField()
-	slug = StringField(unique=True)
+	slug = StringField(unique=True, regex=re.compile('^([/]?)+([a-z0-9]?)+(?:-[a-z0-9]+)*$'))
 	content = StringField()
 	excerpt = StringField()
 	status = StringField(choices=['publish', 'draft', 'private', 'deactivated'], default='draft')
@@ -273,22 +273,37 @@ class Post(Document):
 		'''
 		Return the schema used for editing
 		'''
-		return {
-			'title': {
-				'required': True,
+		return [
+			{
+				'name': 'title',
+				'niceName': 'Title',
 				'controlType': 'input',
+				'validators': {
+					'required': True
+				}
 			},
-			'slug': {
-				'required': True,
+			{
+				'name': 'slug',
+				'niceName': 'Slug',
 				'controlType': 'input',
+				'validators': {
+					'required': True,
+					'pattern': '^([/]?)+([a-z0-9]?)+(?:-[a-z0-9]+)*$'
+				}
 			},
-			'content': {
+			{
+				'name': 'content',
+				'niceName': 'Content',
 				'controlType': 'wysiwyg'
 			},
-			'excerpt': {
+			{
+				'name': 'excerpt',
+				'niceName': 'Excerpt',
 				'controlType': 'textarea'
 			},
-			'status': {
+			{
+				'name': 'status',
+				'niceName': 'Status',
 				'controlType': 'select',
 				'options': [
 					{ 'key': 'Publish', 'value': 'publish' },
@@ -296,14 +311,20 @@ class Post(Document):
 					{ 'key': 'Deactivated', 'value': 'deactivated' }
 				]
 			},
-			'categories': {
+			{
+				'name': 'categories',
+				'niceName': 'Categories',
 				'controlType': 'FormArray',
 				'array': {
-					'required': True,
-					'controlType': 'input'
+					'name': 'category',
+					'niceName': 'Category',
+					'controlType': 'input',
+					'validators': {
+						'required': True
+					}
 				}
 			}
-		}
+		]
 
 	def serialize(self):
 		'''
@@ -334,7 +355,7 @@ class Product(Post):
 	img = ListField(StringField())
 	price = DecimalField(precision=2)
 	digital = BooleanField(default=False)
-	taxable = DictField()
+	taxable = BooleanField(default=True)
 
 	hasStock = BooleanField(default=False)
 	stock = IntField()
@@ -348,34 +369,49 @@ class Product(Post):
 
 	@classmethod
 	def schema(cls):
-		return {
-			**super().schema(),
-			'sku': {
+		return super().schema() + [
+			{
+				'name': 'sku',
+				'niceName': 'SKU',
 				'controlType': 'input'
 			},
-			'img': {
+			{
+				'name': 'img',
+				'niceName': 'Images',
 				'controlType': 'media-browser',
 				'multiple': True
 			},
-			'price': {
+			{
+				'name': 'price',
+				'niceName': 'Price',
 				'controlType': 'input',
 				'type': 'number'
 			},
-			'digital': {
+			{
+				'name': 'digital',
+				'niceName': 'Digital',
 				'controlType': 'checkbox'
 			},
-			'taxable': {
+			{
+				'name': 'taxable',
+				'niceName': 'Taxable',
 				'controlType': 'checkbox'
 			},
-			'hasStock': {
+			{
+				'name': 'hasStock',
+				'niceName': 'Has Stock',
 				'controlType': 'checkbox'
 			},
-			'stock': {
-				'required': True,
+			{
+				'name': 'stock',
+				'niceName': 'Stock',
 				'controlType': 'input',
 				'type': 'number',
+				'validators': {
+					'required': True
+				}
 			}
-		}
+		]
 
 	def serialize(self):
 		return {
@@ -402,35 +438,46 @@ class Coupon(Post):
 
 	@classmethod
 	def schema(cls):
-		return {
-			**super().schema(),
-			'code': {
+		return super().schema() + [
+			{
+				'name': 'code',
+				'niceName': 'Code',
 				'controlType': 'input'
 			},
-			'discountType': {
+			{
+				'name': 'discountType',
+				'niceName': 'Discount Type',
 				'controlType': 'select',
 				'options': [
 					{ 'key': 'Percent', 'value': 'percent' },
 					{ 'key': 'Dollar', 'value': 'dollar' }
 				]
 			},
-			'discount': {
+			{
+				'name': 'discount',
+				'niceName': 'Discount',
 				'controlType': 'input',
 				'type': 'number'
 			},
-			'storeWide': {
+			{
+				'name': 'storeWide',
+				'niceName': 'Store wide',
 				'controlType': 'checkbox'
 			},
-			'applicableProducts': {
+			{
+				'name': 'applicableProducts',
+				'niceName': 'Applicable Products',
 				'controlType': 'post-select',
 				'type': 'model.Product',
 				'multiple': True
 			},
-			'maxUses': {
+			{
+				'name': 'maxUses',
+				'niceName': 'Max Uses',
 				'controlType': 'input',
 				'type': 'number'
 			}
-		}
+		]
 
 	def serialize(self):
 		return {
@@ -441,8 +488,7 @@ class Coupon(Post):
 			'storeWide': self.storeWide,
 			'applicableProducts': list(map(lambda p: str(p.id), self.applicableProducts)),
 			'uses': self.uses,
-			'maxUses': self.maxUses,
-			'created': str(self.created)
+			'maxUses': self.maxUses
 		}
 
 User.register_delete_rule(Post, 'author', CASCADE)

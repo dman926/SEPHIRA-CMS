@@ -7,12 +7,18 @@ import { environment } from 'src/environments/environment';
 import { MenuItem } from '../models/menu-item';
 import { Order } from '../models/order';
 import { Post } from '../models/post';
+import { PostSchema } from '../models/post-schema';
 import { ShippingZone } from '../models/shipping-zone';
 import { User } from '../models/user';
 
 interface AllPosts {
 	count: number;
 	posts: Post[];
+}
+
+interface SchemaPost {
+	obj: Post;
+	schema?: PostSchema[];
 }
 
 @Injectable({
@@ -103,18 +109,21 @@ export class AdminService {
 		}
 	}
 
-	public getPost(postType: string, id: string): Observable<Post> {
+	public getPost(postType: string, id: string, withSchema?: boolean): Observable<SchemaPost> {
 		const accessToken = this.cookie.get('accessToken');
 		if (accessToken && accessToken !== 'undefined') {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
-			const params = new HttpParams().append('post', postType);
-			return this.http.get<Post>(this.adminBase + 'post/' + id, { headers, params }).pipe(map(post => {
-				post.created = new Date(post.created!);
-				post.modified = new Date(post.modified!);
+			let params = new HttpParams().append('post', postType);
+			if (withSchema) {
+				params = params.append('withSchema', true);
+			}
+			return this.http.get<SchemaPost>(this.adminBase + 'post/' + id, { headers, params }).pipe(map(post => {
+				post.obj.created = new Date(post.obj.created!);
+				post.obj.modified = new Date(post.obj.modified!);
 				return post;
 			}));
 		} else {
-			return new Observable<Post>();
+			return new Observable<SchemaPost>();
 		}
 	}
 
@@ -144,7 +153,7 @@ export class AdminService {
 		if (accessToken && accessToken !== 'undefined') {
 			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
 			const params = new HttpParams().append('post', postType);
-			return this.http.delete<string>(this.adminBase + 'page/' + id, { headers, params });
+			return this.http.delete<string>(this.adminBase + 'post/' + id, { headers, params });
 		} else {
 			return new Observable<string>();
 		}

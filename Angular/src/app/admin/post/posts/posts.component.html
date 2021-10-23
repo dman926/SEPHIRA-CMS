@@ -9,12 +9,17 @@
         <mat-error *ngIf="slug.hasError('slugTaken') && slug.dirty">
             Slug not available
         </mat-error>
+		<mat-error *ngIf="slug.hasError('pattern')">
+			Must be in the form of a URL slug
+		</mat-error>
         <mat-error *ngIf="slug.pending && slug.dirty">
             Checking availability...
         </mat-error>
     </mat-form-field>
-    <button mat-raised-button color="primary">Create {{ postType }}</button>
+    <button mat-raised-button color="primary" [disabled]="newPostGroup.invalid || creating">Create {{ postType }}</button>
 </form>
+
+<button mat-raised-button color="primary" type="button" routerLink="../">Back</button>
 
 <mat-paginator [length]="postPageEvent.length" [pageSize]="postPageEvent.pageSize" (page)="fetchPosts($event)"></mat-paginator>
 <ng-template #loaderSpinner>
