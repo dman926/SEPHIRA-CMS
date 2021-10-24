@@ -19,7 +19,7 @@ from .stripe import StripeCheckoutApi, StripeApi
 from .paypal import PayPalCreateTransactionApi, PayPalCaptureTransactionApi, PayPalApi
 from .coinbase import CoinbaseCheckoutApi, CoinbaseApi
 
-from .admin import AdminApi, AdminUsersApi, AdminUserApi, AdminUsersCountApi, AdminPostTypesApi, AdminPostSchemaApi, AdminPostsApi, AdminPostApi, AdminPostSlugAvailableApi, AdminOrdersApi, AdminOrderApi, AdminOrderCountApi,AdminUsShippingZonesApi, AdminUsShippingZoneApi, AdminUsShippingZoneCountApi, AdminMenuItemsApi
+from .admin import AdminApi, AdminUsersApi, AdminUserApi, AdminUsersCountApi, AdminPostTypesApi, AdminPostSchemaApi, AdminPostsApi, AdminPostApi, AdminPostSlugAvailableApi, AdminOrdersApi, AdminOrderApi, AdminOrderCountApi,AdminUsShippingZonesApi, AdminUsShippingZoneApi, AdminUsShippingZoneCountApi, AdminMenuItemsApi, AdminBackendEditorFilesApi, AdminBackendEditorFileApi, AdminServerRestartApi
 
 import resources.sockets
 
@@ -77,3 +77,6 @@ def initialize_routes(api, base):
 	api.add_resource(AdminUsShippingZoneApi, base + 'admin/usShippingZone/<id>')
 	api.add_resource(AdminUsShippingZoneCountApi, base + 'admin/usShippingZones/count')
 	api.add_resource(AdminMenuItemsApi, base + 'admin/menuItems')
+	api.add_resource(AdminBackendEditorFilesApi, base + 'admin/backend-editor/files')
+	api.add_resource(AdminBackendEditorFileApi, base + 'admin/backend-editor/file')
+	api.add_resource(AdminServerRestartApi, base + 'admin/server/restart')

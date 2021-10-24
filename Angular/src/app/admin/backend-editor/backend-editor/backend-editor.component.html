@@ -1,0 +1,26 @@
+<section id="wrapper">
+	<section id="editor">
+		<ng-template #loaderSpinner>
+			<div id="loader-spinner">
+				<mat-spinner></mat-spinner>
+			</div>
+		</ng-template>
+		<form *ngIf="!loadingFile;else loaderSpinner" [formGroup]="formGroup" (ngSubmit)="saveFile()">
+			<ng-container *ngIf="currentFile">
+				<mat-form-field appearance="fill">
+					<mat-label>{{ getFileName(currentFile.path) }}</mat-label>
+					<textarea matInput formControlName="content" rows="20"></textarea>
+				</mat-form-field>
+				<button mat-raised-button color="primary" [disabled]="savingFile">Save</button>
+				<p *ngIf="savedFile">Saved</p>
+			</ng-container>
+		</form>
+		<div *ngIf="dirty">
+			<p>Click the button below to restart the server and apply your changes</p>
+			<button mat-raised-button color="warn" (click)="restartServer()">Restart Server</button>	
+		</div>
+	</section>
+	<section id="files">
+		<button mat-flat-button *ngFor="let file of workingFiles" (click)="file.isDir ? openDir(file) : openFile(file)"><mat-icon>{{ file.isDir ? 'folder' : 'description' }}</mat-icon> {{ getFileName(file.path) }}</button>
+	</section>
+</section>

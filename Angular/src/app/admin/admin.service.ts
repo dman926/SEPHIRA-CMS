@@ -10,6 +10,7 @@ import { Post } from '../models/post';
 import { PostSchema } from '../models/post-schema';
 import { ShippingZone } from '../models/shipping-zone';
 import { User } from '../models/user';
+import { File } from './models/file';
 
 interface AllPosts {
 	count: number;
@@ -296,6 +297,47 @@ export class AdminService {
 			return this.http.post<MenuItem[]>(this.adminBase + 'menuItems', menuItems, { headers });
 		} else {
 			return new Observable<MenuItem[]>();
+		}
+	}
+
+	public getBackendFiles(): Observable<File[]> {
+		const accessToken = this.cookie.get('accessToken');
+		if (accessToken && accessToken !== 'undefined') {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.get<File[]>(this.adminBase + 'backend-editor/files', { headers });
+		} else {
+			return new Observable<File[]>();
+		}
+	}
+
+	public getBackendFile(path: string): Observable<string> {
+		const accessToken = this.cookie.get('accessToken');
+		if (accessToken && accessToken !== 'undefined') {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			const params = new HttpParams().append('path', path);
+			return this.http.get<string>(this.adminBase + 'backend-editor/file', { headers, params });
+		} else {
+			return new Observable<string>();
+		}
+	}
+
+	public saveBackendFile(path: string, content: string): Observable<string> {
+		const accessToken = this.cookie.get('accessToken');
+		if (accessToken && accessToken !== 'undefined') {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.put<string>(this.adminBase + 'backend-editor/file', { path, content }, { headers });
+		} else {
+			return new Observable<string>();
+		}
+	}
+
+	public restartServer(): Observable<string> {
+		const accessToken = this.cookie.get('accessToken');
+		if (accessToken && accessToken !== 'undefined') {
+			const headers = new HttpHeaders().append('Authorization', 'Bearer ' + accessToken);
+			return this.http.post<string>(this.adminBase + 'server/restart', {}, { headers });
+		} else {
+			return new Observable<string>();
 		}
 	}
 
