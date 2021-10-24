@@ -8,6 +8,10 @@ const routes: Routes = [
 		component: HomeComponent
 	},
 	{
+		path: 'backend-editor',
+		loadChildren: () => import('./backend-editor/backend-editor.module').then(m => m.BackendEditorModule)
+	},
+	{
 		path: 'users',
 		loadChildren: () => import('./users/users.module').then(m => m.UsersModule)
 	},

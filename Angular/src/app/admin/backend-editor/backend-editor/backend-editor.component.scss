@@ -1,0 +1,24 @@
+@import "src/styles.scss";
+
+section#wrapper {
+	display: grid;
+	grid-template-columns: 1fr;
+	min-height: 100vh;
+	section#editor {
+		width: 100%;
+		min-height: 90vh;
+		form, mat-form-field {
+			width: 100%;
+		}
+	}
+	section#files {
+		display: flex;
+		flex-direction: column;
+	}
+}
+
+@include brkpnt-lg {
+	section#wrapper {
+		grid-template-columns: 3fr 1fr;
+	}
+}

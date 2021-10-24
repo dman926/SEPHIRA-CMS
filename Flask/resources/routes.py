@@ -19,61 +19,103 @@ from .stripe import StripeCheckoutApi, StripeApi
 from .paypal import PayPalCreateTransactionApi, PayPalCaptureTransactionApi, PayPalApi
 from .coinbase import CoinbaseCheckoutApi, CoinbaseApi
 
-from .admin import AdminApi, AdminUsersApi, AdminUserApi, AdminUsersCountApi, AdminPostTypesApi, AdminPostSchemaApi, AdminPostsApi, AdminPostApi, AdminPostSlugAvailableApi, AdminOrdersApi, AdminOrderApi, AdminOrderCountApi,AdminUsShippingZonesApi, AdminUsShippingZoneApi, AdminUsShippingZoneCountApi, AdminMenuItemsApi
+from .admin import AdminApi, AdminUsersApi, AdminUserApi, AdminUsersCountApi, AdminPostTypesApi, AdminPostSchemaApi, AdminPostsApi, AdminPostApi, AdminPostSlugAvailableApi, AdminOrdersApi, AdminOrderApi, AdminOrderCountApi,AdminUsShippingZonesApi, AdminUsShippingZoneApi, AdminUsShippingZoneCountApi, AdminMenuItemsApi, AdminBackendEditorFilesApi, AdminBackendEditorFileApi, AdminServerReloadApi
 
-import resources.sockets
+#import resources.sockets
 
-def initialize_routes(api, base):
-	api.add_resource(SignupApi, base + 'auth/signup')
-	api.add_resource(LoginApi, base + 'auth/login')
-	api.add_resource(ForgotPassword, base + 'auth/forgot')
-	api.add_resource(ResetPassword, base + 'auth/reset')
-	api.add_resource(TokenRefresh, base + 'auth/refresh')
-	api.add_resource(CheckPassword, base + 'auth/checkPassword')
-	api.add_resource(UserApi, base + 'auth/user')
-	api.add_resource(TwoFactorApi, base + 'auth/2fa')
+from .sockets import MainSpace
 
-	api.add_resource(UploaderApi, base + 'file/uploader')
-	api.add_resource(MediaApi, base + 'file/media')
-	api.add_resource(SingleMediaApi, base + 'file/media/<filename>')
+routes = [
+	########
+	# AUTH #
+	########
+	{ 'module': SignupApi, 'path': 'auth/signup' },
+	{ 'module': LoginApi, 'path': 'auth/login' },
+	{ 'module': ForgotPassword, 'path': 'auth/forgot' },
+	{ 'module': ResetPassword, 'path': 'auth/reset' },
+	{ 'module': TokenRefresh, 'path': 'auth/refresh' },
+	{ 'module': CheckPassword, 'path': 'auth/checkPassword' },
+	{ 'module': UserApi, 'path': 'auth/user' },
+	{ 'module': TwoFactorApi, 'path': 'auth/2fa' },
 
-	api.add_resource(MenuItemsApi, base + 'menuItems')
+	###########
+	# FILE IO #
+	###########
+	{ 'module': UploaderApi, 'path': 'file/uploader' },
+	{ 'module': MediaApi, 'path': 'file/media' },
+	{ 'module': SingleMediaApi, 'path': 'file/media/<filename>' },
 
-	api.add_resource(PostsApi, base + 'post/posts')
-	api.add_resource(PostApi, base + 'post/post/id')
-	api.add_resource(PostSlugApi, base + 'post/post/slug')
-	api.add_resource(ProductReviewsApi, base + 'product/product/<id>/reviews')
-	api.add_resource(ProductReviewsCountApi, base + 'product/product/<id>/reviews/count')
-	api.add_resource(ProductReviewAllowedApi, base + 'product/product/<id>/reviewAllowed')
+	##############
+	# MENU ITEMS #
+	##############
+	{ 'module': MenuItemsApi, 'path': 'menuItems' },
 
-	api.add_resource(OrdersApi, base + 'order/orders')
-	api.add_resource(OrderApi, base + 'order/order/<id>')
-	api.add_resource(CartApi, base + 'cart/cart')
-	api.add_resource(CouponCheckApi, base + 'cart/couponCheck')
-	api.add_resource(UsTaxJurisdictionApi, base + 'tax/us')
-	api.add_resource(UsShippingZoneApi, base + 'shipping/us')
+	##############
+	# POST TYPES #
+	##############
+	{ 'module': PostsApi, 'path': 'post/posts' },
+	{ 'module': PostApi, 'path': 'post/post/id' },
+	{ 'module': PostSlugApi, 'path': 'post/post/slug' },
+	{ 'module': ProductReviewsApi, 'path': 'product/product/<id>/reviews' },
+	{ 'module': ProductReviewsCountApi, 'path': 'product/product/<id>/reviews/count' },
+	{ 'module': ProductReviewAllowedApi, 'path': 'product/product/<id>/reviewAllowed' },
 
-	api.add_resource(StripeCheckoutApi, base + 'payment/stripe/checkout')
-	api.add_resource(StripeApi, base + 'payment/stripe/webhook')
-	api.add_resource(PayPalCreateTransactionApi, base + 'payment/paypal/checkout')
-	api.add_resource(PayPalCaptureTransactionApi, base + 'payment/paypal/capture')
-	api.add_resource(PayPalApi, base + 'payment/paypal/webhook')
-	api.add_resource(CoinbaseCheckoutApi, base + 'payment/coinbase/checkout')
-	api.add_resource(CoinbaseApi, base + 'payment/coinbase/webhook')
+	#############
+	# BUILT INS #
+	#############
+	{ 'module': OrdersApi, 'path': 'order/orders' },
+	{ 'module': OrderApi, 'path': 'order/order/<id>' },
+	{ 'module': CartApi, 'path': 'cart/cart' },
+	{ 'module': CouponCheckApi, 'path': 'cart/couponCheck' },
+	{ 'module': UsTaxJurisdictionApi, 'path': 'tax/us' },
+	{ 'module': UsShippingZoneApi, 'path': 'shipping/us' },
 
-	api.add_resource(AdminApi, base + 'admin/admin')
-	api.add_resource(AdminUsersApi, base + 'admin/users')
-	api.add_resource(AdminUserApi, base + 'admin/user/<id>')
-	api.add_resource(AdminUsersCountApi, base + 'admin/users/count')
-	api.add_resource(AdminPostTypesApi, base + 'admin/posts/types')
-	api.add_resource(AdminPostSchemaApi, base + 'admin/posts/schema')
-	api.add_resource(AdminPostsApi, base + 'admin/posts')
-	api.add_resource(AdminPostApi, base + 'admin/post/<id>')
-	api.add_resource(AdminPostSlugAvailableApi, base + 'admin/posts/slugTaken')
-	api.add_resource(AdminOrdersApi, base + 'admin/orders')
-	api.add_resource(AdminOrderApi, base + 'admin/order/<id>')
-	api.add_resource(AdminOrderCountApi, base + 'admin/orders/count')
-	api.add_resource(AdminUsShippingZonesApi, base + 'admin/usShippingZones')
-	api.add_resource(AdminUsShippingZoneApi, base + 'admin/usShippingZone/<id>')
-	api.add_resource(AdminUsShippingZoneCountApi, base + 'admin/usShippingZones/count')
-	api.add_resource(AdminMenuItemsApi, base + 'admin/menuItems')
+	###########
+	# PAYMENT #
+	###########
+	{ 'module': StripeCheckoutApi, 'path': 'payment/stripe/checkout' },
+	{ 'module': StripeApi, 'path': 'payment/stripe/webhook' },
+	{ 'module': PayPalCreateTransactionApi, 'path': 'payment/paypal/checkout' },
+	{ 'module': PayPalCaptureTransactionApi, 'path': 'payment/paypal/capture' },
+	{ 'module': PayPalApi, 'path': 'payment/paypal/webhook' },
+	{ 'module': CoinbaseCheckoutApi, 'path': 'payment/coinbase/checkout' },
+	{ 'module': CoinbaseApi, 'path': 'payment/coinbase/webhook' },
+
+	#########
+	# ADMIN #
+	#########
+	{ 'module': AdminApi, 'path': 'admin/admin' },
+	{ 'module': AdminUsersApi, 'path': 'admin/users' },
+	{ 'module': AdminUserApi, 'path': 'admin/user/<id>' },
+	{ 'module': AdminUsersCountApi, 'path': 'admin/users/count' },
+	{ 'module': AdminPostTypesApi, 'path': 'admin/posts/types' },
+	{ 'module': AdminPostSchemaApi, 'path': 'admin/posts/schema' },
+	{ 'module': AdminPostsApi, 'path': 'admin/posts' },
+	{ 'module': AdminPostApi, 'path': 'admin/post/<id>' },
+	{ 'module': AdminPostSlugAvailableApi, 'path': 'admin/posts/slugTaken' },
+	{ 'module': AdminOrdersApi, 'path': 'admin/orders' },
+	{ 'module': AdminOrderApi, 'path': 'admin/order/<id>' },
+	{ 'module': AdminOrderCountApi, 'path': 'admin/orders.count' },
+	{ 'module': AdminUsShippingZonesApi, 'path': 'admin/usShippingZones' },
+	{ 'module': AdminUsShippingZoneApi, 'path': 'admin/usShippingZone/<id>' },
+	{ 'module': AdminUsShippingZoneCountApi, 'path': 'admin/usShippingZones/count' },
+	{ 'module': AdminMenuItemsApi, 'path': 'admin/menuItems' },
+	{ 'module': AdminBackendEditorFilesApi, 'path': 'admin/backend-editor/files' },
+	{ 'module': AdminBackendEditorFileApi, 'path': 'admin/backend-editor/file' },
+	{ 'module': AdminServerReloadApi, 'path': 'admin/server/restart' },
+]
+
+namespaces = [
+	MainSpace()
+]
+
+def initialize_routes(api, base):	
+	for route in routes:
+		try:
+			api.add_resource(route['module'], base + route['path'])
+		except ValueError:
+			pass
+
+def initialize_namespaces(socketio):
+	for namespace in namespaces:
+		socketio.on_namespace(namespace)

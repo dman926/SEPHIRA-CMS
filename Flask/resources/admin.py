@@ -14,7 +14,7 @@ import database.models as models
 from services.util_service import all_subclasses, is_post
 from services.logging_service import writeWarningToLog
 
-import datetime
+import datetime, os
 
 class AdminApi(Resource):
 	@swagger.doc({
@@ -1064,7 +1064,160 @@ class AdminUsShippingZoneCountApi(Resource):
 				raise UnauthorizedError
 			return models.UsShippingZone.objects.count()
 		except UnauthorizedError:
-			return UnauthorizedError
+			raise UnauthorizedError
 		except Exception as e:
 			writeWarningToLog('Unhandled exception in resources.admin.AdminUsShippingZoneCountApi get', e)
+			raise InternalServerError
+
+class AdminBackendEditorFilesApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin', 'Backend Editor'],
+		'description': 'Get the file structure of the backend',
+		'responses': {
+			'200': {
+				'description': 'An array of files and directories',
+			}
+		}
+	})
+	@jwt_required()
+	def get(self):
+		def getFileTree(dir):
+			files = []
+			cwd = os.getcwd()
+			with os.scandir(dir) as it:
+				for entry in it:
+					file = {
+						'path': entry.path[len(cwd):] # Strip cwd from the path
+					}
+					if entry.is_dir():
+						if entry.name == '__pycache__' or entry.name == 'venv':
+							continue # Ignore pycache and venv folders
+						file['isDir'] = True
+						file['children'] = getFileTree(entry.path)
+					files.append(file)
+			return files
+
+
+		try:
+			user = models.User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			return jsonify(getFileTree(os.getcwd()))
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminBackendEditorFilesApi get', e)
+			raise InternalServerError
+
+class AdminBackendEditorFileApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin', 'Backend Editor'],
+		'description': 'Get the contents of the requested file',
+		'parameters': [
+			{
+				'name': 'path',
+				'description': 'The file path',
+				'in': 'query',
+				'type': 'string',
+				'schema': None,
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'The contents of the requested file',
+			}
+		}
+	})
+	@jwt_required()
+	def get(self):
+		try:
+			user = models.User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			path = request.args.get('path', None)
+			if not path:
+				raise SchemaValidationError
+			f = open(os.path.join(os.getcwd(), path[1:]), 'r')
+			lines = ''.join(f.readlines())
+			f.close()
+			return lines
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except SchemaValidationError:
+			raise SchemaValidationError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminBackendEditorFileApi get', e)
+			raise InternalServerError
+	@swagger.doc({
+		'tags': ['Admin', 'Backend Editor'],
+		'description': 'Overwrite the contents of the file',
+		'parameters': [
+			{
+				'name': 'path',
+				'description': 'The file path',
+				'in': 'body',
+				'type': 'string',
+				'schema': None,
+				'required': True
+			},
+			{
+				'name': 'content',
+				'description': 'The new content',
+				'in': 'body',
+				'type': 'string',
+				'schema': None,
+				'required': True
+			}
+		],
+		'responses': {
+			'200': {
+				'description': 'Successful of file overwrite',
+			}
+		}
+	})
+	@jwt_required()
+	def put(self):
+		try:
+			user = models.User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+			body = request.get_json()
+			path = body.get('path', None)
+			if not path:
+				raise SchemaValidationError
+			f = open(os.path.join(os.getcwd(), path[1:]), 'w')
+			f.write(body.get('content'))
+			f.close()
+			return 'ok'
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except SchemaValidationError:
+			raise SchemaValidationError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminBackendEditorFileApi put', e)
+			raise InternalServerError
+
+class AdminServerRestartApi(Resource):
+	@swagger.doc({
+		'tags': ['Admin', 'Server Management'],
+		'description': 'Add a request to restart the server',
+		'responses': {
+			'200': {
+				'description': 'Successfuly added request to restart the server',
+			}
+		}
+	})
+	@jwt_required()
+	def post(self):
+		try:
+			user = models.User.objects.get(id=get_jwt_identity())
+			if not user.admin:
+				raise UnauthorizedError
+
+			return 'ok'
+		except UnauthorizedError:
+			raise UnauthorizedError
+		except Exception as e:
+			writeWarningToLog('Unhandled exception in resources.admin.AdminServerRestartApi post', e)
 			raise InternalServerError

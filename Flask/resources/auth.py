@@ -237,8 +237,8 @@ class ForgotPassword(Resource):
 			expires = datetime.timedelta(hours=24)
 			reset_token = create_access_token(str(user.id), expires_delta=expires)
 
-			return send_email('[Flask Api] Reset Your Password',
-							  sender='support@movie-bag.com',
+			return send_email('[SEPHIRA] Reset Your Password',
+							  sender='support@sephira.org',
 							  recipients=[user.email],
 							  text_body=render_template('email/reset_password.txt',
 														url=url + reset_token),

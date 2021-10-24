@@ -4,14 +4,14 @@
 root /path/to/flask
 
 location /socket.io/ {
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection "upgrade";
-    include uwsgi_params;
+	proxy_http_version 1.1;
+	proxy_set_header Upgrade $http_upgrade;
+	proxy_set_header Connection "upgrade";
+	include uwsgi_params;
 	uwsgi_pass unix:/path/to/site/app.sock;
 }
 location / {
-    include uwsgi_params;
+	include uwsgi_params;
 	uwsgi_pass unix:/path/to/site/app.sock;
 }
 

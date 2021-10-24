@@ -1,17 +1,13 @@
 '''
-Socket routes
-
-This file probably shouldn't be used. See https://flask-socketio.readthedocs.io/en/latest/getting_started.html#class-based-namespaces for a better implementation
+Sockets
 '''
 
-from flask_socketio import emit
-from app import socketio
+from flask_socketio import emit, Namespace
 
-@socketio.on('connect')
-def test_connect():
-	print('Client Connected')
-	emit('connection', {'data': 'Connected'})
+class MainSpace(Namespace):
+	def on_connect(self):
+		print('Client Connected')
+		emit('connection', {'data': 'Connected'})
 
-@socketio.on('disconnect')
-def test_disconnect():
-    print('Client disconnected')
+	def on_disconnect(self):
+	    print('Client disconnected')

@@ -14,12 +14,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 
 import { AuthModule } from '../auth/auth.module';
-import { FileService } from './services/file.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SwaggerComponent } from './swagger/swagger.component';
-import { WebsocketService } from './services/websocket.service';
 import { MatCardModule } from '@angular/material/card';
 import { CartModule } from '../payment/cart/cart.module';
 import { SearchModule } from '../search/search.module';
