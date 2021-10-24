@@ -7,11 +7,7 @@ section#wrapper {
 	section#editor {
 		width: 100%;
 		min-height: 90vh;
-		form {
-			width: 100%;
-			height: 100%;
-		}
-		mat-form-field {
+		form, mat-form-field {
 			width: 100%;
 		}
 	}

@@ -9,7 +9,7 @@
 			<ng-container *ngIf="currentFile">
 				<mat-form-field appearance="fill">
 					<mat-label>{{ getFileName(currentFile.path) }}</mat-label>
-					<textarea matInput formControlName="content" rows="20"></textarea>
+					<textarea matInput formControlName="content" rows="20" (keydown)="handleKeydown($event)"></textarea>
 				</mat-form-field>
 				<button mat-raised-button color="primary" [disabled]="savingFile">Save</button>
 				<p *ngIf="savedFile">Saved</p>

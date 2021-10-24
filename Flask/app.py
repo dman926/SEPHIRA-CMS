@@ -74,8 +74,10 @@ scheduler.init_app(app)
 
 initialize_db(app)
 
-from resources.routes import initialize_routes
+from resources.routes import initialize_routes, initialize_namespaces
 
 initialize_routes(api, base)
+
+initialize_namespaces(socketio)
 
 initialize_tasks(scheduler)

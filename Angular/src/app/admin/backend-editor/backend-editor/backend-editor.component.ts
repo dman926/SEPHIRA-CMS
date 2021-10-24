@@ -81,6 +81,18 @@ export class BackendEditorComponent implements OnInit {
 		}
 	}
 
+	handleKeydown(event: KeyboardEvent): void {
+		if (event.key == 'Tab') {
+			event.preventDefault();
+			event.stopPropagation();
+			const target = (event.target! as any);
+			const start = target.selectionStart!;
+			const end = target.selectionEnd;
+			target.value = target.value.substring(0, start) + '\t' + target.value.substring(end);
+			target.selectionStart = target.selectionEnd = start + 1;
+		}
+	}
+
 	private generateWorkingFiles(): void {
 		if (this.currentDir) {
 			const files: File[] = [{
