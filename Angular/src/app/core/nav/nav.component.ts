@@ -17,6 +17,7 @@ import { PlatformService } from '../services/platform.service';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
 import { GoogleTagManagerService } from 'angular-google-tag-manager';
 import { SeoService } from '../services/seo.service';
+import { webSocket } from 'rxjs/webSocket';
 
 interface LinkPair {
 	link: string;
@@ -71,6 +72,8 @@ export class NavComponent implements OnInit {
 				this.state.set<MenuItem[]>(menuKey, items);
 			});
 		} else {
+			this.ws.socket?.subscribe(); // Dummy subscribe to get the control socket connection open
+
 			this.menuItems = this.state.get<MenuItem[]>(menuKey, []);
 
 			this.router.events.subscribe(ev => {
@@ -99,13 +102,9 @@ export class NavComponent implements OnInit {
 		const accessToken = this.cookie.get('accessToken');
 		let socket;
 		if (accessToken) {
-			socket = io(environment.socketServer, {
-				extraHeaders: {
-					Authorization: 'Bearer ' + accessToken
-				}
-			});
+			socket = webSocket(environment.socketServer);
 		} else {
-			socket = io(environment.socketServer);
+			socket = webSocket(environment.socketServer);
 		}
 		this.ws.setSocket(socket);
 		this.router.navigate(['/']);

@@ -4,6 +4,7 @@ import { makeStateKey, TransferState } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { webSocket } from 'rxjs/webSocket';
 import { io } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
 import { PlatformService } from '../core/services/platform.service';
@@ -117,11 +118,7 @@ export class AuthService {
 		}
 		if (refreshSocket) {
 			this.ws.killSocket();
-			const socket = io(environment.socketServer, {
-				extraHeaders: {
-					Authorization: 'Bearer ' + accessToken
-				}
-			});
+			const socket = webSocket(environment.socketServer);
 			this.ws.setSocket(socket);
 		}
 	}

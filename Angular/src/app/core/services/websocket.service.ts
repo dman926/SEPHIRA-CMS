@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CookieService } from 'ngx-cookie';
-import { Observable } from 'rxjs';
+import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 
-import { io, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
 import { PlatformService } from './platform.service';
 
@@ -11,41 +10,28 @@ import { PlatformService } from './platform.service';
 })
 export class WebsocketService {
 
-	socket: Socket<any> | null;
+	socket: WebSocketSubject<any> | null;
 
 	constructor(private platformService: PlatformService, private cookie: CookieService) {
 		this.socket = null;
 		if (this.platformService.isBrowser()) {
-			const socket = io(environment.socketServer, {
-				extraHeaders: {
-					Authorization: 'Bearer ' + this.cookie.get('accessToken')
-				}
-			});
-			this.setSocket(socket);
+			this.socket = webSocket(environment.socketServer);
 		}
 	}
 
-	setSocket(socket: Socket<any, any>) {
+	setSocket(socket: WebSocketSubject<any> | null) {
 		this.socket = socket;
 	}
 
 	killSocket() {
 		if (this.socket) {
-			this.socket.close();
+			this.socket.complete();
 			this.socket = null;
 		}
 	}
 
-	listen(eventName: string) {
-		return new Observable(subscriber => {
-			this.socket?.on(eventName, (data: any) => {
-				subscriber.next(data);
-			});
-		});
-	}
-
-	emit(eventName: string, data: any): boolean {
-		this.socket?.emit(eventName, data);
+	emit(data: any): boolean {
+		this.socket?.next(data);
 		return !!this.socket;
 	}
 }
