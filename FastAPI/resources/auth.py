@@ -135,13 +135,15 @@ async def getUser(identity: str = Depends(get_jwt_identity)):
 @router.put('/user')
 async def updateUser(user: UserModel, identity: str = Depends(get_jwt_identity)):
 	try:
-		user = User.objects.get(id=identity)
-		user.update(**user)
+		foundUser = User.objects.get(id=identity)
+		if user.admin:
+			raise UnauthorizedError # Cannot set themselves as admin
+		foundUser.update(**user)
 		if user.password:
 			user.hash_password()
 			user.save()
 		return 'ok'
-	except DoesNotExist:
+	except (UnauthorizedError, DoesNotExist):
 		raise UnauthorizedError()
 	except Exception as e:
 		raise e
