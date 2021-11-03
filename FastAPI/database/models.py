@@ -38,6 +38,20 @@ class UserModel(BaseModel):
 	lastName: Optional[str]
 	cart: List[CartItemModel]
 
+class OrderModel(BaseModel):
+	orderStatus: str
+
+class ShippingRateModel(BaseModel):
+	rate: float
+	type: str
+	minCutoff: Optional[float]
+	maxCutoff: Optional[float]
+
+class UsShippingZoneModel(BaseModel):
+	applicableState: list[str]
+	rate: list[ShippingRateModel]
+	default: Optional[bool]
+
 ###########
 # HELPERS #
 ###########
@@ -141,7 +155,7 @@ class User(Document):
 
 class Order(Document):
 	orderer = ReferenceField('User')
-	orderStatus = StringField() # can be 'not placed', 'pending', 'paid', 'shipped', 'completed', 'failed'
+	orderStatus = StringField(choices=['not placed', 'pending', 'paid', 'shipped', 'completed', 'failed'])
 	products = EmbeddedDocumentListField('CartItem')
 	coupons = ListField(ReferenceField('Coupon'))
 	taxRate = FloatField()

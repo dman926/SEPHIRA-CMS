@@ -1,7 +1,10 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from config import CORS_SETTINGS
+from config import CORS_SETTINGS, UVICORN_SETTINGS
+import logging
 
+logging.basicConfig(filename="log.log", level=logging.INFO, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
+logger = logging.getLogger(__name__)
 app = FastAPI()
 
 app.add_middleware(
@@ -13,31 +16,24 @@ app.add_middleware(
 
 @app.on_event('startup')
 async def startup():
+	logger.info('-- STARTING UP --')
 	print('-- STARTING UP --')
 	from database.db import initialize_db
 	initialize_db()
 	from resources.routes import initialize_routes
 	initialize_routes(app)
+	print('-- STARTED UP --')
+	logger.info('-- STARTED UP --')
 
 @app.on_event('shutdown')
 async def shutdown():
+	logger.info('-- SHUTTING DOWN --')
 	print('-- SHUTTING DOWN --')
 	from database.db import close_db
 	close_db()
+	print('-- SHUT DOWN --')
+	logger.info('-- SHUT DOWN --')
 
-@app.websocket('/')
-async def controlSocket(websocket: WebSocket):
-	await websocket.accept()
-	print('Client connected')
-	try:
-		while True:
-			# This socket does not expect incoming data
-			await websocket.receive_text()
-	except WebSocketDisconnect:
-		print('Client disconnected')
-
-'''
-@app.get('/socket.io/')
-async def test():
-	print('test')
-'''
+if __name__== '__main__':
+	import uvicorn
+	uvicorn.run('main:app', reload=UVICORN_SETTINGS.USE_RELOADER, log_level=UVICORN_SETTINGS.LOG_LEVEL)

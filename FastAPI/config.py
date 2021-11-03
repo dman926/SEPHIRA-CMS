@@ -33,7 +33,12 @@ class CORSSettings:
 
 
 class APISettings:
-	ROUTE_BASE: str = '/api/'
+	ROUTE_BASE: str = '/api/' # There must be a leading and trailing '/'
+
+
+class UvicornSettings:
+	USE_RELOADER: bool = True # You should most definitely set this to 'False' in production as it takes a lot of resources to use
+	LOG_LEVEL: str = 'info' # It is recommended to use 'warning' in production to reduce log clutter
 
 #########################
 # SETTING INSTANTIATION #
@@ -45,3 +50,4 @@ OAUTH2_SETTINGS = OAuth2Settings()
 UPLOAD_SETTINGS = UploadSettings()
 CORS_SETTINGS = CORSSettings()
 API_SETTINGS = APISettings()
+UVICORN_SETTINGS = UvicornSettings()

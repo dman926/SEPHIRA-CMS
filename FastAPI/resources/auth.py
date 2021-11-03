@@ -14,7 +14,7 @@ from time import sleep
 
 router = APIRouter(
 	prefix=API_SETTINGS.ROUTE_BASE + 'auth',
-	tags=['auth']
+	tags=['Auth']
 )
 
 ###########
