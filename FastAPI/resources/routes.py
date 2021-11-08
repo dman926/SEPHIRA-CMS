@@ -1,40 +1,50 @@
 from fastapi import FastAPI
 
-from .admin import router as adminRouter
-from .auth import router as authRouter
-from .cart import router as cartRouter
-from .coinbase import router as coinbaseRouter
-from .file import router as fileRouter
-from .menuItem import router as menuItemRouter
-from .order import router as orderRouter
-from .paypal import router as paypalRouter
-from .post import router as postRouter
-from .product import router as productRouter
-from .shipping import router as shippingRouter
-from .stripe import router as stripeRouter
-from .tax import router as taxRouter
+from config import CoinbaseCommerceSettings, PayPalSettings, StripeSettings
 
-from .sockets import router as socketRouter
+from .admin import router as admin_router
+from .auth import router as auth_router
+from .cart import router as cart_router
+from .file import router as file_router
+from .menu_item import router as menu_item_router
+from .order import router as order_router
+from .post import router as post_router
+from .product import router as product_router
+from .shipping import router as shipping_router
+from .tax import router as tax_router
+
+from .sockets import router as socket_router
+
+if CoinbaseCommerceSettings.ENABLE:
+	from .coinbase import router as coinbase_router
+if PayPalSettings.ENABLE:
+	from .paypal import router as paypal_router
+if StripeSettings.ENABLE:
+	from .stripe import router as stripe_router
 
 routers = [
 	# REST
-	adminRouter,
-	authRouter,
-	cartRouter,
-	coinbaseRouter,
-	fileRouter,
-	menuItemRouter,
-	orderRouter,
-	paypalRouter,
-	postRouter,
-	productRouter,
-	shippingRouter,
-	stripeRouter,
-	taxRouter,
+	admin_router,
+	auth_router,
+	cart_router,
+	file_router,
+	menu_item_router,
+	order_router,
+	post_router,
+	product_router,
+	shipping_router,
+	tax_router,
 
 	# SOCKETS
-	socketRouter
+	socket_router
 ]
+
+if CoinbaseCommerceSettings.ENABLE:
+	routers.append(coinbase_router)
+if PayPalSettings.ENABLE:
+	routers.append(paypal_router)
+if StripeSettings.ENABLE:
+	routers.append(stripe_router)
 
 def initialize_routes(app: FastAPI):
 	for router in routers:

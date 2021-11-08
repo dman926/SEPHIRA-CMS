@@ -2,10 +2,10 @@
 Models to serialize between MongoDB and Python
 '''
 
-from typing import List, Optional
+from typing import Optional
 from mongoengine import Document, EmbeddedDocument, EmbeddedDocumentListField, ReferenceField, StringField, ListField, IntField, DateTimeField, BooleanField, EmailField, DecimalField, FloatField, DictField, CASCADE
 from passlib.context import CryptContext
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 import onetimepass
 
 from services.util_service import make_ngrams
@@ -13,50 +13,55 @@ from services.util_service import make_ngrams
 import base64, os, random, string, datetime, re
 
 ###########
+# HELPERS #
+###########
+
+_bcrypt = CryptContext(schemes=['bcrypt'])
+
+###########
 # SCHEMAS #
 ###########
 
 class ProductModel(BaseModel):
-	sku: Optional[str]
-	img: List[str]
-	price: Optional[float]
-	digital: Optional[bool]
-	taxable: Optional[bool]
-	hasStock: Optional[bool]
-	stock: Optional[int]
+	sku: Optional[str] = None
+	img: Optional[list[str]] = []
+	price: Optional[float] = None
+	digital: Optional[bool] = None
+	taxable: Optional[bool] = None
+	hasStock: Optional[bool] = None
+	stock: Optional[int] = None
+
+class CartItemIDModel(BaseModel):
+	id: str
+	qty: int
 
 class CartItemModel(BaseModel):
 	product: ProductModel
 	qty: int
 
 class UserModel(BaseModel):
-	email: Optional[str]
-	password: Optional[str]
-	twoFactorEnabled: Optional[str]
-	admin: Optional[bool]
-	firstName: Optional[str]
-	lastName: Optional[str]
-	cart: List[CartItemModel]
+	email: Optional[EmailStr] = None
+	password: Optional[str] = None
+	twoFactorEnabled: Optional[str] = None
+	admin: Optional[bool] = None
+	firstName: Optional[str] = None
+	lastName: Optional[str] = None
+	cart: Optional[list[CartItemModel]] = None
 
 class OrderModel(BaseModel):
-	orderStatus: str
+	addresses: Optional[dict] = None
+	coupons: Optional[list[str]] = None
 
 class ShippingRateModel(BaseModel):
 	rate: float
 	type: str
-	minCutoff: Optional[float]
-	maxCutoff: Optional[float]
+	minCutoff: Optional[float] = None
+	maxCutoff: Optional[float] = None
 
 class UsShippingZoneModel(BaseModel):
-	applicableState: list[str]
-	rate: list[ShippingRateModel]
-	default: Optional[bool]
-
-###########
-# HELPERS #
-###########
-
-_bcrypt = CryptContext(schemes=['bcrypt'])
+	applicableState: list[str] = []
+	rate: list[ShippingRateModel] = []
+	default: Optional[bool] = None
 
 #############
 # BUILT INS #
@@ -133,7 +138,7 @@ class User(Document):
 			self.otpSecret = base64.b32encode(os.urandom(10)).decode('utf8')
 
 	def check_password(self, password):
-		return _bcrypt.verify(self.password, password + self.salt)
+		return _bcrypt.verify(password + self.salt, self.password)
 
 	def get_totp_uri(self):
 		return 'otpauth://totp/SEPHIRA:{0}?secret={1}&issuer=SEPHIRA'.format(self.email, self.otpSecret) # TODO: replace SEPHIRA with your app name

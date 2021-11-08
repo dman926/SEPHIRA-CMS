@@ -1,19 +1,21 @@
-from fastapi import APIRouter
-from config import API_SETTINGS
+from fastapi import APIRouter, Request
+from config import APISettings
 
 from fastapi import Depends, Form
-from pydantic import BaseModel
-from typing import Optional
+from pydantic import BaseModel, EmailStr
+from typing import List, Optional
 from mongoengine.errors import NotUniqueError, DoesNotExist
 
-from modules.JWT import Token, create_access_token, create_refresh_token, decode_token, get_jwt_identity
+from modules.JWT import Token, create_access_token, create_refresh_token, get_jwt_identity, get_raw_token
 from database.models import User, UserModel
 from resources.errors import UserAlreadyExistsError, UnauthorizedError, MissingOtpError
+from services.mail_service import send_email_async
 
+from datetime import timedelta
 from time import sleep
 
 router = APIRouter(
-	prefix=API_SETTINGS.ROUTE_BASE + 'auth',
+	prefix=APISettings.ROUTE_BASE + 'auth',
 	tags=['Auth']
 )
 
@@ -22,17 +24,25 @@ router = APIRouter(
 ###########
 
 class EmailPasswordForm(BaseModel):
-	def __init__(self, email: str = Form(...), password: str = Form(...), otp: Optional[str] = Form(None)):
-		self.email = email
-		self.password = password
-		self.otp = otp
+	email: EmailStr
+	password: str
+	otp: Optional[str] = None
+
+class PasswordForm(BaseModel):
+	password: str
+
+class OtpForm(BaseModel):
+	otp: str
+
+class EmailForm(BaseModel):
+	email: str
 
 ##########
 # ROUTES #
 ##########
 
 @router.post('/signup')
-async def signup(form_data: EmailPasswordForm = Depends()):
+async def signup(form_data: EmailPasswordForm):
 	try:
 		user = User(email = form_data.email, password = form_data.password)
 		if User.objects.count() == 0:
@@ -41,12 +51,12 @@ async def signup(form_data: EmailPasswordForm = Depends()):
 		user.save()
 		return {'id': str(user.id)}
 	except NotUniqueError:
-		raise UserAlreadyExistsError()
+		raise UserAlreadyExistsError().http_exception
 	except Exception as e:
 		raise e
 
 @router.post('/login')
-async def login(form_data: EmailPasswordForm = Depends()):
+async def login(form_data: EmailPasswordForm):
 	try:
 		user = User.objects.get(email=form_data.email)
 		if not user.check_password(form_data.password):
@@ -63,14 +73,14 @@ async def login(form_data: EmailPasswordForm = Depends()):
 		}
 	except (UnauthorizedError, DoesNotExist):
 		sleep(2)
-		raise UnauthorizedError(detail='Incorrect email, password, or otp')
+		raise UnauthorizedError(detail='Incorrect email, password, or otp').http_exception
 	except MissingOtpError:
-		raise MissingOtpError()
+		raise MissingOtpError().http_exception
 	except Exception as e:
 		raise e
 
 @router.get('/refresh')
-async def tokenRefresh(token: Token = Depends(decode_token)):
+async def token_refresh(token: Token = Depends(get_raw_token)):
 	try:
 		if not token['refresh']:
 			raise UnauthorizedError
@@ -81,59 +91,95 @@ async def tokenRefresh(token: Token = Depends(decode_token)):
 			'refreshToken': create_refresh_token(identity=identity)
 		}
 	except UnauthorizedError:
-		raise UnauthorizedError(detail='Invalid token. Not a refresh token')
+		raise UnauthorizedError(detail='Invalid token. Not a refresh token').http_exception
 	except DoesNotExist:
-		raise UnauthorizedError(detail='Invalid token')
+		raise UnauthorizedError(detail='Invalid token').http_exception
 	except Exception as e:
 		raise e
 
 @router.get('/check-password')
-async def checkPassword(password: str, identity: str = Depends(get_jwt_identity)):
+async def check_password(password_body: PasswordForm, identity: str = Depends(get_jwt_identity)):
 	try:
 		user = User.objects.get(id=identity)
-		authorized = user.check_password(password)
+		authorized = user.check_password(password_body.password)
 		if not authorized:
 			raise UnauthorizedError
 		return 'ok'
 	except (UnauthorizedError, DoesNotExist):
-		raise UnauthorizedError()
+		raise UnauthorizedError().http_exception
 	except Exception as e:
 		raise e
 
 @router.get('/2fa')
-async def getOtpCode(identity: str = Depends(get_jwt_identity)):
+async def get_otp_code(identity: str = Depends(get_jwt_identity)):
 	try:
 		user = User.objects.get(id=identity)
 		return user.get_totp_uri()
 	except DoesNotExist:
-		raise UnauthorizedError()
+		raise UnauthorizedError().http_exception
 	except Exception as e:
 		raise e
 
 @router.post('/2fa')
-async def verifyOtpCode(otp: str, identity: str = Depends(get_jwt_identity)):
+async def verify_otp_code(otp_body: OtpForm, identity: str = Depends(get_jwt_identity)):
 	try:
 		user = User.objects.get(id=identity)
-		if user.verify_totp(otp):
+		if user.verify_totp(otp_body.otp):
 			return 'ok'
 		raise UnauthorizedError
 	except (UnauthorizedError, DoesNotExist):
-		raise UnauthorizedError()
+		raise UnauthorizedError().http_exception
+	except Exception as e:
+		raise e
+
+@router.post('/forgot')
+async def forgot_password(email_body: EmailForm, request: Request):
+	try:
+		user = User.objects.get(email=email_body.email)
+		reset_token = create_access_token(str(user.id), expires_delta=timedelta(days=1))
+		send_email_async(
+			'[SEPHIRA] Reset Your Password',
+			[email_body.email],
+			'reset_password.html',
+			{
+				'url': request.client.host + '/reset/?t=' + reset_token,
+			}
+		)
+		return 'ok'
+	except DoesNotExist:
+		sleep(2)
+		return 'ok'
+	except Exception as e:
+		raise e
+
+@router.post('/reset')
+async def reset_password(password_body: PasswordForm, identity: str = Depends(get_jwt_identity)):
+	try:
+		user = User.objects.get(id=identity)
+		user.modify(password=password_body.password)
+		user.hash_password()
+		user.save()
+		send_email_async(
+			'[SEPHIRA] Password Has Been Reset',
+			[user.email],
+			'password_reset.html'
+		)
+		return 'ok'
 	except Exception as e:
 		raise e
 
 @router.get('/user')
-async def getUser(identity: str = Depends(get_jwt_identity)):
+async def get_user(identity: str = Depends(get_jwt_identity)):
 	try:
 		user = User.objects.get(id=identity)
 		return user.serialize()
 	except DoesNotExist:
-		raise UnauthorizedError()
+		raise UnauthorizedError().http_exception
 	except Exception as e:
 		raise e
 
 @router.put('/user')
-async def updateUser(user: UserModel, identity: str = Depends(get_jwt_identity)):
+async def update_user(user: UserModel, identity: str = Depends(get_jwt_identity)):
 	try:
 		foundUser = User.objects.get(id=identity)
 		if user.admin:
@@ -144,16 +190,16 @@ async def updateUser(user: UserModel, identity: str = Depends(get_jwt_identity))
 			user.save()
 		return 'ok'
 	except (UnauthorizedError, DoesNotExist):
-		raise UnauthorizedError()
+		raise UnauthorizedError().http_exception
 	except Exception as e:
 		raise e
 
 @router.delete('/user')
-async def deleteUser(identity: str = Depends(get_jwt_identity)):
+async def delete_user(identity: str = Depends(get_jwt_identity)):
 	try:
 		User.objects.get(id=identity).delete()
 		return 'ok'
 	except DoesNotExist:
-		raise UnauthorizedError()
+		raise UnauthorizedError().http_exception
 	except Exception as e:
 		raise e

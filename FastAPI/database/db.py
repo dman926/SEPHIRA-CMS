@@ -3,11 +3,11 @@ MongoEngine connector
 '''
 
 from mongoengine import connect, disconnect
-from config import MONGO_SETTINGS
+from config import MongoSettings
 from .models import UsTaxJurisdiction
 
 def initialize_db():
-	connect(host=MONGO_SETTINGS.CONNECT_URI)
+	connect(host=MongoSettings.CONNECT_URI)
 
 	if UsTaxJurisdiction.objects.count() == 0:
 		from json import load

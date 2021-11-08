@@ -5,7 +5,7 @@ router = APIRouter(
 )
 
 @router.websocket('/')
-async def controlSocket(websocket: WebSocket):
+async def control_socket(websocket: WebSocket):
 	await websocket.accept()
 	print('Client connected')
 	try:

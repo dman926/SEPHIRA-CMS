@@ -1,6 +1,9 @@
-from pydantic import AnyHttpUrl
+from pydantic import AnyHttpUrl, EmailStr
 from datetime import timedelta
 from os import path
+
+# This is just for development purposes. Feel free to put the raw values in this file if people seeing them is not an issue (ie. private code base)
+from secret import COINBASE_API_KEY, COINBASE_SHARED_SECRET, PAYPAL_ID, PAYPAL_SECRET, STRIPE_SK
 
 
 class MongoSettings:
@@ -8,10 +11,13 @@ class MongoSettings:
 
 
 class MailSettings:
-	MAIL_SERVER: str
-	MAIL_PORT: int
-	MAIL_USERNAME: str
-	MAIL_PASSWORD: str
+	MAIL_SERVER: str = ''
+	MAIL_PORT: int = 0
+	MAIL_TLS: bool = False
+	MAIL_SSL: bool = False
+	MAIL_USERNAME: str = ''
+	MAIL_PASSWORD: str = ''
+	MAIL_FROM: EmailStr = 'sephira@sephira.org'
 
 
 class OAuth2Settings:
@@ -24,6 +30,9 @@ class OAuth2Settings:
 
 class UploadSettings:
 	UPLOAD_FOLDER: str = path.join(path.dirname(__file__), '..', 'Angular', 'src', 'assets', 'uploads')
+	ALLOWED_EXTENSIONS: set[str] = {'png', 'jpg', 'jpeg', 'gif'}
+	IMAGE_EXTENSIONS: set[str] = {'png', 'jpg', 'jpeg', 'gif'} # Should be a subset of ALLOWED_EXTENSIONS
+	IMAGE_COMPRESSION_AMOUNT: int = 75 # Shouldn't be below 65
 
 
 class CORSSettings:
@@ -40,14 +49,23 @@ class UvicornSettings:
 	USE_RELOADER: bool = True # You should most definitely set this to 'False' in production as it takes a lot of resources to use
 	LOG_LEVEL: str = 'info' # It is recommended to use 'warning' in production to reduce log clutter
 
-#########################
-# SETTING INSTANTIATION #
-#########################
 
-MONGO_SETTINGS = MongoSettings()
-MAIL_SETTINGS = MailSettings()
-OAUTH2_SETTINGS = OAuth2Settings()
-UPLOAD_SETTINGS = UploadSettings()
-CORS_SETTINGS = CORSSettings()
-API_SETTINGS = APISettings()
-UVICORN_SETTINGS = UvicornSettings()
+class CoinbaseCommerceSettings:
+	ENABLE: bool = True
+	API_KEY: str = COINBASE_API_KEY
+	SHARED_SECRET: str = COINBASE_SHARED_SECRET
+	CHARGE_NAME: str = 'Test Charge'
+	CHARGE_DESCRIPTION: str = 'Test Description'
+
+
+class PayPalSettings:
+	ENABLE: bool = True
+	CLIENT_ID: str = PAYPAL_ID
+	CLIENT_SECRET: str = PAYPAL_SECRET
+	USE_SANDBOX: bool = True
+	BRAND_NAME: str = 'Test Brand'
+
+
+class StripeSettings:
+	ENABLE: bool = True
+	SECRET_KEY: str = STRIPE_SK

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from config import CORS_SETTINGS, UVICORN_SETTINGS
+from config import CORSSettings, UvicornSettings
 import logging
 
 logging.basicConfig(filename="log.log", level=logging.INFO, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
@@ -9,7 +9,7 @@ app = FastAPI()
 
 app.add_middleware(
 	CORSMiddleware,
-	allow_origins=CORS_SETTINGS.ALLOW_ORIGINS,
+	allow_origins=CORSSettings.ALLOW_ORIGINS,
 	allow_methods=['*'],
 	allow_headers=['*']
 )
@@ -36,4 +36,4 @@ async def shutdown():
 
 if __name__== '__main__':
 	import uvicorn
-	uvicorn.run('main:app', reload=UVICORN_SETTINGS.USE_RELOADER, log_level=UVICORN_SETTINGS.LOG_LEVEL)
+	uvicorn.run('main:app', reload=UvicornSettings.USE_RELOADER, log_level=UvicornSettings.LOG_LEVEL)

@@ -1,7 +1,7 @@
 from typing import Optional
-from fastapi import APIRouter
-from fastapi.params import Depends
-from config import API_SETTINGS
+from fastapi import APIRouter, Depends, Body
+from pydantic.main import BaseModel
+from config import APISettings
 
 from mongoengine.errors import DoesNotExist, FieldDoesNotExist, ValidationError
 from modules.JWT import get_jwt_identity
@@ -13,7 +13,7 @@ from services.util_service import all_subclasses, is_post
 from datetime import datetime
 
 router = APIRouter(
-	prefix=API_SETTINGS.ROUTE_BASE + 'admin',
+	prefix=APISettings.ROUTE_BASE + 'admin',
 	tags=['Admin']
 )
 
@@ -21,8 +21,7 @@ router = APIRouter(
 # HELPERS #
 ###########
 
-
-def getAdminUser(identity: str) -> models.User:
+def get_admin_user(identity: str) -> models.User:
 	'''Get the user with given identity if they are admin, otherwise raise an appropriate error'''
 	user = models.User.objects.get(id=identity)
 	if user.admin:
@@ -33,16 +32,18 @@ def getAdminUser(identity: str) -> models.User:
 # SCHEMAS #
 ###########
 
-
+class PostForm(BaseModel):
+	post: str
+	obj: dict
 
 ##########
 # ROUTES #
 ##########
 
 @router.get('/admin')
-async def getIsAdmin(identity: str = Depends(get_jwt_identity)):
+async def get_is_admin(identity: str = Depends(get_jwt_identity)):
 	try:
-		user = getAdminUser(identity)
+		user = get_admin_user(identity)
 		return user.admin
 	except (DoesNotExist, UnauthorizedError):
 		raise UnauthorizedError(detail='User is not admin')
@@ -50,9 +51,9 @@ async def getIsAdmin(identity: str = Depends(get_jwt_identity)):
 		raise e
 
 @router.get('/users')
-async def getUsers(page: Optional[int] = None, size: Optional[int] = None, identity: str = Depends(get_jwt_identity)):
+async def get_users(page: Optional[int] = None, size: Optional[int] = None, identity: str = Depends(get_jwt_identity)):
 	try:
-		user = getAdminUser(identity)
+		user = get_admin_user(identity)
 		users = models.User.objects
 		if page == None:
 			page = 0
@@ -68,9 +69,9 @@ async def getUsers(page: Optional[int] = None, size: Optional[int] = None, ident
 		raise e
 
 @router.get('/user/{id}')
-async def getUser(id: str, identity: str = Depends(get_jwt_identity)):
+async def get_user(id: str, identity: str = Depends(get_jwt_identity)):
 	try:
-		getAdminUser(identity)
+		get_admin_user(identity)
 	except (DoesNotExist, UnauthorizedError):
 		raise UnauthorizedError('User is not admin')
 	except Exception as e:
@@ -84,9 +85,9 @@ async def getUser(id: str, identity: str = Depends(get_jwt_identity)):
 		raise e
 
 @router.put('/user/{id}')
-async def getAdminUser(id: str, user: models.UserModel, identity: str = Depends(get_jwt_identity)):
+async def update_user(id: str, user: models.UserModel, identity: str = Depends(get_jwt_identity)):
 	try:
-		getAdminUser(identity)
+		get_admin_user(identity)
 	except (DoesNotExist, UnauthorizedError):
 		raise UnauthorizedError('User is not admin')
 	except Exception as e:
@@ -100,9 +101,9 @@ async def getAdminUser(id: str, user: models.UserModel, identity: str = Depends(
 		raise e
 
 @router.delete('/user/{id}')
-async def getAdminUser(id: str, identity: str = Depends(get_jwt_identity)):
+async def delete_user(id: str, identity: str = Depends(get_jwt_identity)):
 	try:
-		getAdminUser(identity)
+		get_admin_user(identity)
 	except (DoesNotExist, UnauthorizedError):
 		raise UnauthorizedError('User is not admin')
 	except Exception as e:
@@ -116,9 +117,9 @@ async def getAdminUser(id: str, identity: str = Depends(get_jwt_identity)):
 		raise e
 
 @router.get('/posts/types')
-async def getAdminUser(identity: str = Depends(get_jwt_identity)):
+async def get_post_types(identity: str = Depends(get_jwt_identity)):
 	try:
-		getAdminUser(identity)
+		get_admin_user(identity)
 		return list(map(lambda s: s.__module__[9:] + '.' + s.__name__, all_subclasses(models.Post)))
 	except (DoesNotExist, UnauthorizedError):
 		raise UnauthorizedError('User is not admin')
@@ -126,9 +127,9 @@ async def getAdminUser(identity: str = Depends(get_jwt_identity)):
 		raise e
 
 @router.get('/posts/schema')
-async def getAdmin(post: str, identity: str = Depends(get_jwt_identity)):
+async def get_post_schema(post: str, identity: str = Depends(get_jwt_identity)):
 	try:
-		getAdminUser(identity)
+		get_admin_user(identity)
 		try:
 			postType = eval(post)
 			if not is_post(postType):
@@ -144,9 +145,9 @@ async def getAdmin(post: str, identity: str = Depends(get_jwt_identity)):
 		raise e
 
 @router.get('/posts')
-async def getPosts(post: str, page: Optional[int] = None, size: Optional[int] = None, search: Optional[str] = None, identity: str = Depends(get_jwt_identity)):
+async def get_posts(post: str, page: Optional[int] = None, size: Optional[int] = None, search: Optional[str] = None, identity: str = Depends(get_jwt_identity)):
 	try:
-		getAdminUser(identity)
+		get_admin_user(identity)
 		try:
 			postType = eval(post)
 			if not is_post(postType):
@@ -170,16 +171,16 @@ async def getPosts(post: str, page: Optional[int] = None, size: Optional[int] = 
 		raise e
 
 @router.post('/posts')
-async def addPost(post: str, obj: dict, identity: str = Depends(get_jwt_identity)):
+async def add_post(post_body: PostForm, identity: str = Depends(get_jwt_identity)):
 	try:
-		user = getAdminUser(identity)
+		user = get_admin_user(identity)
 		try:
-			postType = eval(post)
+			postType = eval(post_body.post)
 			if not is_post(postType):
 				raise InvalidPostTypeError
 		except Exception:
 			raise InvalidPostTypeError
-		obj = postType(**obj)
+		obj = postType(**post_body.obj)
 		obj.author = user
 
 		postTypeName = postType.__name__
@@ -199,9 +200,9 @@ async def addPost(post: str, obj: dict, identity: str = Depends(get_jwt_identity
 		raise e
 
 @router.get('/post/{id}')
-async def getPost(post: str, id: str, withSchema: Optional[bool] = False, identity: str = Depends(get_jwt_identity)):
+async def get_post(post: str, id: str, withSchema: Optional[bool] = False, identity: str = Depends(get_jwt_identity)):
 	try:
-		getAdminUser(identity)
+		get_admin_user(identity)
 	except (DoesNotExist, UnauthorizedError):
 		raise UnauthorizedError('User is not admin')
 	try:
@@ -224,14 +225,14 @@ async def getPost(post: str, id: str, withSchema: Optional[bool] = False, identi
 		raise e
 
 @router.put('/post/{id}')
-async def updatePost(post: str, id: str, obj: dict, identity: str = Depends(get_jwt_identity)):
+async def update_post(id: str, post_body: PostForm, identity: str = Depends(get_jwt_identity)):
 	try:
-		getAdminUser(identity)
+		get_admin_user(identity)
 	except (DoesNotExist, UnauthorizedError):
 		raise UnauthorizedError('User is not admin')
 	try:
 		try:
-			postType = eval(post)
+			postType = eval(post_body.post)
 			if not is_post(postType):
 				raise InvalidPostTypeError
 		except Exception:
@@ -240,14 +241,14 @@ async def updatePost(post: str, id: str, obj: dict, identity: str = Depends(get_
 		
 		postTypeName = postType.__name__
 		if postTypeName == 'Coupon':
-			if obj['applicableProducts']:
-					obj['applicableProducts'] = list(map(lambda p: models.Product.objects.get(id=p), obj['applicableProducts']))
+			if post_body.obj['applicableProducts']:
+					post_body.obj['applicableProducts'] = list(map(lambda p: models.Product.objects.get(id=p), post_body.obj['applicableProducts']))
 
-		toUpdate.update(**obj)
-		obj.reload()
-		obj.modified = datetime.now
-		obj.generateNgrams()
-		obj.save()
+		toUpdate.update(**post_body.obj)
+		toUpdate.reload()
+		toUpdate.modified = datetime.now
+		toUpdate.generateNgrams()
+		toUpdate.save()
 		return 'ok'
 	except DoesNotExist:
 		raise NotFoundError()
@@ -259,9 +260,9 @@ async def updatePost(post: str, id: str, obj: dict, identity: str = Depends(get_
 		raise e
 
 @router.delete('/post/{id}')
-async def deletePost(post: str, id: str, identity: str = Depends(get_jwt_identity)):
+async def delete_post(post: str, id: str, identity: str = Depends(get_jwt_identity)):
 	try:
-		getAdminUser(identity)
+		get_admin_user(identity)
 		try:
 			postType = eval(post)
 			if not is_post(postType):
@@ -278,9 +279,9 @@ async def deletePost(post: str, id: str, identity: str = Depends(get_jwt_identit
 		raise e
 
 @router.get('/posts/slugTaken')
-async def isPostSlugTaken(post: str, slug: str, identity: str = Depends(get_jwt_identity)):
+async def is_post_slug_taken(post: str, slug: str, identity: str = Depends(get_jwt_identity)):
 	try:
-		getAdminUser(identity)
+		get_admin_user(identity)
 	except (DoesNotExist, UnauthorizedError):
 		raise UnauthorizedError('User is not admin')
 	try:
@@ -300,9 +301,9 @@ async def isPostSlugTaken(post: str, slug: str, identity: str = Depends(get_jwt_
 		raise e
 
 @router.get('/orders')
-async def getOrders(page: Optional[int] = None, size: Optional[int] = None, identity: str = Depends(get_jwt_identity)):
+async def get_orders(page: Optional[int] = None, size: Optional[int] = None, identity: str = Depends(get_jwt_identity)):
 	try:
-		getAdminUser(identity)
+		get_admin_user(identity)
 		orders = models.Order.objects
 		if page == None:
 			page = 0
@@ -316,9 +317,9 @@ async def getOrders(page: Optional[int] = None, size: Optional[int] = None, iden
 		raise e
 
 @router.get('/order/{id}')
-async def getOrder(id: str, identity: str = Depends(get_jwt_identity)):
+async def get_order(id: str, identity: str = Depends(get_jwt_identity)):
 	try:
-		getAdminUser(identity)
+		get_admin_user(identity)
 	except (DoesNotExist, UnauthorizedError):
 		raise UnauthorizedError('User is not admin')
 	try:
@@ -330,9 +331,9 @@ async def getOrder(id: str, identity: str = Depends(get_jwt_identity)):
 		raise e
 
 @router.put('/order/{id}')
-async def editOrder(id: str, order: models.OrderModel, identity: str = Depends(get_jwt_identity)):
+async def edit_order(id: str, order: models.OrderModel, identity: str = Depends(get_jwt_identity)):
 	try:
-		getAdminUser(identity)
+		get_admin_user(identity)
 	except (DoesNotExist, UnauthorizedError):
 		raise UnauthorizedError('User is not admin')
 	try:
@@ -348,9 +349,9 @@ async def editOrder(id: str, order: models.OrderModel, identity: str = Depends(g
 		raise e
 
 @router.delete('/order/{id}')
-async def deleteOrder(id: str, identity: str = Depends(get_jwt_identity)):
+async def delete_order(id: str, identity: str = Depends(get_jwt_identity)):
 	try:
-		getAdminUser(identity)
+		get_admin_user(identity)
 	except (DoesNotExist, UnauthorizedError):
 		raise UnauthorizedError('User is not admin')
 	try:
@@ -362,9 +363,9 @@ async def deleteOrder(id: str, identity: str = Depends(get_jwt_identity)):
 		raise e
 
 @router.get('/usShippingZones')
-async def getUsShippingZones(page: Optional[int] = None, size: Optional[int] = None, identity: str = Depends(get_jwt_identity)):
+async def get_us_shipping_zones(page: Optional[int] = None, size: Optional[int] = None, identity: str = Depends(get_jwt_identity)):
 	try:
-		getAdminUser(identity)
+		get_admin_user(identity)
 		zones = models.UsShippingZone.objects
 		if page == None:
 			page = 0
@@ -378,9 +379,9 @@ async def getUsShippingZones(page: Optional[int] = None, size: Optional[int] = N
 		raise e
 
 @router.post('/usShippingZones')
-async def addUsShippingZone(shippingZone: models.UsShippingZoneModel, identity: str = Depends(get_jwt_identity)):
+async def add_us_shipping_zone(shippingZone: models.UsShippingZoneModel, identity: str = Depends(get_jwt_identity)):
 	try:
-		getAdminUser(identity)
+		get_admin_user(identity)
 		zone = models.UsShippingZone(**shippingZone)
 		try:
 			models.UsShippingZone.objects.get(default=True)
@@ -396,9 +397,9 @@ async def addUsShippingZone(shippingZone: models.UsShippingZoneModel, identity: 
 		raise e
 
 @router.get('/usShippingZone/{id}')
-async def getOrder(id: str, identity: str = Depends(get_jwt_identity)):
+async def get_us_shipping_zone(id: str, identity: str = Depends(get_jwt_identity)):
 	try:
-		getAdminUser(identity)
+		get_admin_user(identity)
 	except (DoesNotExist, UnauthorizedError):
 		raise UnauthorizedError('User is not admin')
 	try:
@@ -410,9 +411,9 @@ async def getOrder(id: str, identity: str = Depends(get_jwt_identity)):
 		raise e
 
 @router.put('/usShippingZone/{id}')
-async def editOrder(id: str, shippingZone: models.UsShippingZoneModel, identity: str = Depends(get_jwt_identity)):
+async def update_us_shipping_zone(id: str, shippingZone: models.UsShippingZoneModel, identity: str = Depends(get_jwt_identity)):
 	try:
-		getAdminUser(identity)
+		get_admin_user(identity)
 	except (DoesNotExist, UnauthorizedError):
 		raise UnauthorizedError('User is not admin')
 	try:
@@ -425,9 +426,9 @@ async def editOrder(id: str, shippingZone: models.UsShippingZoneModel, identity:
 		raise e
 
 @router.delete('/usShippingZone/{id}')
-async def deleteUsShippingZone(id: str, identity: str = Depends(get_jwt_identity)):
+async def delete_us_shipping_zone(id: str, identity: str = Depends(get_jwt_identity)):
 	try:
-		getAdminUser(identity)
+		get_admin_user(identity)
 	except (DoesNotExist, UnauthorizedError):
 		raise UnauthorizedError('User is not admin')
 	try:
