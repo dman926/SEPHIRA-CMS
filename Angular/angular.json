@@ -1,227 +1,179 @@
 {
-	"$schema": "./node_modules/@angular/cli/lib/config/schema.json",
-	"cli": {
-		"analytics": "0eb33176-6490-4cf1-9d06-a8e445e71c3c"
-	},
-	"version": 1,
-	"newProjectRoot": "projects",
-	"projects": {
-		"sephira": {
-			"projectType": "application",
-			"schematics": {
-				"@schematics/angular:component": {
-					"style": "scss"
-				},
-				"@schematics/angular:application": {
-					"strict": true
-				}
-			},
-			"root": "",
-			"sourceRoot": "src",
-			"prefix": "app",
-			"architect": {
-				"build": {
-					"builder": "@angular-devkit/build-angular:browser",
-					"options": {
-						"outputPath": "dist/sephira/browser",
-						"index": "src/index.html",
-						"main": "src/main.ts",
-						"polyfills": "src/polyfills.ts",
-						"tsConfig": "tsconfig.app.json",
-						"assets": [
-							"src/favicon.ico",
-							"src/assets",
-							"src/manifest.webmanifest"
-						],
-						"styles": [
-							"./node_modules/swagger-ui-dist/swagger-ui.css",
-							"./node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css",
-							"src/styles.scss"
-						],
-						"scripts": [],
-						"allowedCommonJsDependencies": [
-							"qrcode",
-							"path"
-						],
-						"vendorChunk": true,
-						"extractLicenses": false,
-						"buildOptimizer": false,
-						"sourceMap": true,
-						"optimization": false,
-						"namedChunks": true,
-						"serviceWorker": true,
-						"ngswConfigPath": "ngsw-config.json"
-					},
-					"configurations": {
-						"production": {
-							"fileReplacements": [{
-								"replace": "src/environments/environment.ts",
-								"with": "src/environments/environment.prod.ts"
-							}],
-							"optimization": true,
-							"outputHashing": "all",
-							"sourceMap": false,
-							"namedChunks": false,
-							"extractLicenses": true,
-							"vendorChunk": false,
-							"buildOptimizer": true,
-							"budgets": [{
-									"type": "initial",
-									"maximumWarning": "3mb",
-									"maximumError": "5mb"
-								},
-								{
-									"type": "anyComponentStyle",
-									"maximumWarning": "10kb",
-									"maximumError": "15kb"
-								}
-							]
-						},
-						"development": {
-							"optimization": true,
-							"outputHashing": "all",
-							"sourceMap": false,
-							"namedChunks": false,
-							"extractLicenses": true,
-							"vendorChunk": false,
-							"buildOptimizer": true,
-							"budgets": [{
-									"type": "initial",
-									"maximumWarning": "2.5mb",
-									"maximumError": "3mb"
-								},
-								{
-									"type": "anyComponentStyle",
-									"maximumWarning": "10kb",
-									"maximumError": "15kb"
-								}
-							]
-						}
-					},
-					"defaultConfiguration": ""
-				},
-				"serve": {
-					"builder": "@angular-devkit/build-angular:dev-server",
-					"options": {
-						"browserTarget": "sephira:build"
-					},
-					"configurations": {
-						"production": {
-							"browserTarget": "sephira:build:production"
-						}
-					}
-				},
-				"extract-i18n": {
-					"builder": "@angular-devkit/build-angular:extract-i18n",
-					"options": {
-						"browserTarget": "sephira:build"
-					}
-				},
-				"test": {
-					"builder": "@angular-devkit/build-angular:karma",
-					"options": {
-						"main": "src/test.ts",
-						"polyfills": "src/polyfills.ts",
-						"tsConfig": "tsconfig.spec.json",
-						"karmaConfig": "karma.conf.js",
-						"assets": [
-							"src/favicon.ico",
-							"src/assets",
-							"src/manifest.webmanifest"
-						],
-						"styles": [
-							"./node_modules/@angular/material/prebuilt-themes/purple-green.css",
-							"src/styles.scss"
-						],
-						"scripts": []
-					}
-				},
-				"lint": {
-					"builder": "@angular-eslint/builder:lint",
-					"options": {
-						"lintFilePatterns": [
-							"src/**/*.ts",
-							"src/**/*.html"
-						]
-					}
-				},
-				"e2e": {
-					"builder": "@angular-devkit/build-angular:protractor",
-					"options": {
-						"protractorConfig": "e2e/protractor.conf.js",
-						"devServerTarget": "sephira:serve"
-					},
-					"configurations": {
-						"production": {
-							"devServerTarget": "sephira:serve:production"
-						}
-					}
-				},
-				"server": {
-					"builder": "@angular-devkit/build-angular:server",
-					"options": {
-						"outputPath": "dist/sephira/server",
-						"main": "server.ts",
-						"tsConfig": "tsconfig.server.json",
-						"optimization": false,
-						"sourceMap": true,
-						"extractLicenses": false
-					},
-					"configurations": {
-						"production": {
-							"outputHashing": "media",
-							"fileReplacements": [{
-								"replace": "src/environments/environment.ts",
-								"with": "src/environments/environment.prod.ts"
-							}],
-							"optimization": true,
-							"sourceMap": false,
-							"extractLicenses": true
-						},
-						"development": {
-							"outputHashing": "media",
-							"optimization": true,
-							"sourceMap": false,
-							"extractLicenses": true
-						}
-					},
-					"defaultConfiguration": "production"
-				},
-				"serve-ssr": {
-					"builder": "@nguniversal/builders:ssr-dev-server",
-					"configurations": {
-						"development": {
-							"browserTarget": "sephira:build:development",
-							"serverTarget": "sephira:server:development"
-						},
-						"production": {
-							"browserTarget": "sephira:build:production",
-							"serverTarget": "sephira:server:production"
-						}
-					},
-					"defaultConfiguration": "development"
-				},
-				"prerender": {
-					"builder": "@nguniversal/builders:prerender",
-					"options": {
-						"routes": [
-							"/"
-						]
-					},
-					"configurations": {
-						"production": {
-							"browserTarget": "sephira:build:production",
-							"serverTarget": "sephira:server:production"
-						},
-						"development": {
-							"browserTarget": "sephira:build:development",
-							"serverTarget": "sephira:server:development"
-						}
-					},
-					"defaultConfiguration": "production"
-				}
-			}
-		}
-	},
-	"defaultProject": "sephira"
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "cli": {
+    "analytics": "c1216cdf-9f9e-441b-ab92-01639d2020d3"
+  },
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "sephira": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        },
+        "@schematics/angular:application": {
+          "strict": true
+        }
+      },
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/sephira/browser",
+            "index": "src/index.html",
+            "main": "src/main.ts",
+            "polyfills": "src/polyfills.ts",
+            "tsConfig": "tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "src/favicon.ico",
+              "src/assets",
+              "src/manifest.webmanifest"
+            ],
+            "styles": [
+              "./node_modules/@angular/material/prebuilt-themes/purple-green.css",
+              "src/styles.scss"
+            ],
+            "scripts": [],
+            "serviceWorker": true,
+            "ngswConfigPath": "ngsw-config.json"
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kb",
+                  "maximumError": "1mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "2kb",
+                  "maximumError": "4kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "configurations": {
+            "production": {
+              "browserTarget": "sephira:build:production"
+            },
+            "development": {
+              "browserTarget": "sephira:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "sephira:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "src/test.ts",
+            "polyfills": "src/polyfills.ts",
+            "tsConfig": "tsconfig.spec.json",
+            "karmaConfig": "karma.conf.js",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "src/favicon.ico",
+              "src/assets",
+              "src/manifest.webmanifest"
+            ],
+            "styles": [
+              "./node_modules/@angular/material/prebuilt-themes/purple-green.css",
+              "src/styles.scss"
+            ],
+            "scripts": []
+          }
+        },
+        "server": {
+          "builder": "@angular-devkit/build-angular:server",
+          "options": {
+            "outputPath": "dist/sephira/server",
+            "main": "server.ts",
+            "tsConfig": "tsconfig.server.json",
+            "inlineStyleLanguage": "scss"
+          },
+          "configurations": {
+            "production": {
+              "outputHashing": "media",
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ]
+            },
+            "development": {
+              "optimization": false,
+              "sourceMap": true,
+              "extractLicenses": false
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve-ssr": {
+          "builder": "@nguniversal/builders:ssr-dev-server",
+          "configurations": {
+            "development": {
+              "browserTarget": "sephira:build:development",
+              "serverTarget": "sephira:server:development"
+            },
+            "production": {
+              "browserTarget": "sephira:build:production",
+              "serverTarget": "sephira:server:production"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "prerender": {
+          "builder": "@nguniversal/builders:prerender",
+          "options": {
+            "routes": [
+              "/"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "sephira:build:production",
+              "serverTarget": "sephira:server:production"
+            },
+            "development": {
+              "browserTarget": "sephira:build:development",
+              "serverTarget": "sephira:server:development"
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
+    }
+  },
+  "defaultProject": "sephira"
 }

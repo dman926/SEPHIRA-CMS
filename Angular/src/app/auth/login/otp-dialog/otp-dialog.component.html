@@ -1,7 +1,0 @@
-<form [formGroup]="otpForm" (ngSubmit)="submitOtp()">
-    <mat-form-field appearance="fill">
-        <mat-label>Two Factor Code</mat-label>
-        <input matInput formControlName="otp" required />
-    </mat-form-field>
-    <button mat-raised-button color="primary" [disabled]="otpForm.invalid">Login</button>
-</form>
