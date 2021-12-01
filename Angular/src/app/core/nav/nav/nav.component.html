@@ -1,0 +1,27 @@
+
+<section id="top-bar-wrapper" *ngIf="menuStyle === 'top';else sidenav">
+	<mat-toolbar>
+		<p>top bar works!</p>
+	</mat-toolbar>
+	<main class="mat-app-background">
+		<ng-content></ng-content>
+	</main>
+</section>
+
+<ng-template #sidenav>
+	<mat-sidenav-container class="sidenav-container" (touchstart)="swipe($event, 'start')" (touchend)="swipe($event, 'end')">
+		<mat-sidenav #drawer class="sidenav" fixedInViewport [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'" [mode]="(isHandset$ | async) ? 'over' : 'side'" [opened]="(isHandset$ | async) === false">
+			<p>sidenav content</p>
+		</mat-sidenav>
+		<mat-sidenav-content>
+			<div id="sidenav-button" *ngIf="isHandset$ | async">
+				<button type="button" aria-label="Toggle sidenav" mat-icon-button (click)="drawer.toggle()">
+					<mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+				</button>
+			</div>
+			<main>
+				<ng-content></ng-content>
+			</main>
+		</mat-sidenav-content>
+	</mat-sidenav-container>
+</ng-template>

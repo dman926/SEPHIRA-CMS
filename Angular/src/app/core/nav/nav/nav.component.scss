@@ -1,0 +1,41 @@
+section#top-bar-wrapper {
+	background: inherit;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	main {
+		flex-grow: 1;
+	}
+}
+
+.sidenav-container {
+	height: 100%;
+	.sidenav {
+		width: 200px;
+		height: 100%;
+	}
+	.sidenav .mat-toolbar {
+		background: inherit;
+	}
+	.mat-toolbar.mat-primary {
+		position: sticky;
+		top: 0;
+		z-index: 1;
+	}
+	div#sidenav-button {
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: 999;
+	}
+	div#sidenav-wrapper {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+		div#sidenav-bottom {
+			border-top-left-radius: 0.5em;
+			border-top-right-radius: 0.5em;
+			background-color: rgba(0, 0, 0, 0.1);
+		}
+	}
+}

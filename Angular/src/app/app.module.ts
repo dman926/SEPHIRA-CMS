@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
+import { NavModule } from './core/nav/nav.module';
 
 @NgModule({
 	declarations: [AppComponent],
@@ -19,6 +20,8 @@ import { environment } from '../environments/environment';
 			// or after 30 seconds (whichever comes first).
 			registrationStrategy: 'registerWhenStable:30000',
 		}),
+
+		NavModule
 	],
 	providers: [],
 	bootstrap: [AppComponent],
