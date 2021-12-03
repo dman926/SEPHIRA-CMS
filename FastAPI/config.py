@@ -42,7 +42,7 @@ class CORSSettings:
 
 
 class APISettings:
-	ROUTE_BASE: str = '/api/' # There must be a leading and trailing '/'
+	ROUTE_BASE: str = '/' # There must be a leading and trailing '/'
 
 
 class UvicornSettings:
