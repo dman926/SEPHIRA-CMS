@@ -52,8 +52,7 @@ export class NavComponent implements OnInit {
 		private menuItemService: MenuItemService,
 		private platform: PlatformService,
 		private state: TransferState,
-		private router: Router,
-		private auth: AuthService
+		private router: Router
 	) {
 		this.isAdmin =
 			this.router.url.substr(1, environment.adminPath.length) ===

@@ -23,9 +23,18 @@ interface Id {
 })
 export class AuthService {
 
+	/**
+	 * Observable that stores the user
+	 */
 	public user$: Observable<User | null>;
 
+	/**
+	 * A simple observable that will toggle `true` then `false` when the user is force logged out due to invalid tokens to allow components to notify the user why they were logged out and redirected
+	 */
+	public forceLogout$: Observable<boolean>;
+
 	private userSubject: BehaviorSubject<User | null>;
+	private forceLogoutSubject: BehaviorSubject<boolean>;
 
 	private readonly authBase = environment.apiServer + 'auth/';
 	private readonly userStateKey = makeStateKey<User | null>('user');
@@ -33,6 +42,10 @@ export class AuthService {
 	constructor(private http: HttpClient, private core: CoreService, private platform: PlatformService, private cookie: CookieService, private state: TransferState, private router: Router) {
 		this.userSubject = new BehaviorSubject<User | null>(null);
 		this.user$ = this.userSubject.asObservable();
+
+		this.forceLogoutSubject = new BehaviorSubject<boolean>(false);
+		this.forceLogout$ = this.forceLogoutSubject.asObservable();
+
 		if (this.platform.isServer) {
 			this.refreshTokensAndUser();
 		} else {
@@ -46,8 +59,10 @@ export class AuthService {
 		this.cookie.removeItem('accessToken');
 		this.cookie.removeItem('refreshToken');
 		if (redirect) {
-			this.router.navigate(['/'], { state: { signedOut: true } });
+			this.router.navigate(['/']);
 		}
+		this.forceLogoutSubject.next(true);
+		this.forceLogoutSubject.next(false);
 	}
 
 	public login(email: string, password: string, otp?: string): Observable<TokenPair> {
