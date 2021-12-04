@@ -13,6 +13,9 @@ section#top-bar-wrapper {
 	.sidenav {
 		width: 200px;
 		height: 100%;
+		h1.title {
+			text-align: center;
+		}
 	}
 	.sidenav .mat-toolbar {
 		background: inherit;
