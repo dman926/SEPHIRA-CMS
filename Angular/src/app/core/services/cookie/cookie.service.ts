@@ -14,13 +14,13 @@ export class CookieService {
 		@Optional() @Inject(RESPONSE) private res: Response<any>
 	) {
 		if (this.req !== null) {
-			this.cookies = this.req.cookies;
+			this.cookies = this._getPairs();
 		} else {
 			this.document = document;
 		}
 	}
 
-	getItem(name: string): string | null {
+	public getItem(name: string): string | null {
 		const cookies: { [key: string]: string | null } = this._getPairs();
 		if (name && typeof cookies[name] !== 'undefined') {
 			return cookies[name];
@@ -28,10 +28,11 @@ export class CookieService {
 		return null;
 	}
 
-	setItem(
+	public setItem(
 		name: string,
 		value: string,
 		expiry?: Date | string,
+		sameSite?: boolean | "lax" | "strict" | "none",
 		path?: string
 	): boolean {
 		if (!name) {
@@ -62,6 +63,7 @@ export class CookieService {
 					this.res.cookie(name, value, {
 						expires: expiry,
 						path,
+						sameSite,
 						encode: String,
 					});
 				}
@@ -73,7 +75,7 @@ export class CookieService {
 		return true;
 	}
 
-	removeItem(name: string, path?: string): boolean {
+	public removeItem(name: string, path?: string): boolean {
 		if (this.req !== null || !name) {
 			return false;
 		}
@@ -94,21 +96,25 @@ export class CookieService {
 		return true;
 	}
 
-	_getPairs(): { [key: string]: string | null } {
+	private _getPairs(): { [key: string]: string | null } {
+		let parsed;
 		if (this.req === null) {
-			const parsed = this.document.cookie.split('; ');
-			const cookies: { [key: string]: string | null } = {};
-			parsed.forEach((element: string) => {
-				if (element) {
-					const pair = element.split('=');
-					cookies[pair[0]] =
-						typeof pair[1] !== 'undefined' ? pair[1] : null;
-				}
-			});
-			return cookies;
+			parsed = this.document.cookie.split('; ');
 		} else {
-			return this.cookies;
+			if (!this.req.headers.cookie) {
+				return {}; // No cookies available
+			}
+			parsed = this.req.headers.cookie.split('; ');	
 		}
+		const cookies: { [key: string]: string | null } = {};
+		parsed.forEach((element: string) => {
+			if (element) {
+				const pair = element.split('=');
+				cookies[pair[0]] =
+					typeof pair[1] !== 'undefined' ? pair[1] : null;
+			}
+		});
+		return cookies;
 	}
 
 }

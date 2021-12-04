@@ -79,13 +79,13 @@ async def login(form_data: EmailPasswordForm):
 	except Exception as e:
 		raise e
 
-@router.get('/refresh')
+@router.post('/refresh')
 async def token_refresh(token: Token = Depends(get_raw_token)):
 	try:
 		if not token['refresh']:
 			raise UnauthorizedError
 		identity = token['sub']
-		User.objects.get(id=identity)
+		User.objects.get(id=identity) # Verify the user exists
 		return {
 			'accessToken': create_access_token(identity=identity),
 			'refreshToken': create_refresh_token(identity=identity)
@@ -125,7 +125,7 @@ async def verify_otp_code(otp_body: OtpForm, identity: str = Depends(get_jwt_ide
 	try:
 		user = User.objects.get(id=identity)
 		if user.verify_totp(otp_body.otp):
-			return 'ok'
+			return True
 		raise UnauthorizedError
 	except (UnauthorizedError, DoesNotExist):
 		raise UnauthorizedError().http_exception
@@ -188,7 +188,7 @@ async def update_user(user: UserModel, identity: str = Depends(get_jwt_identity)
 		if user.password:
 			user.hash_password()
 			user.save()
-		return 'ok'
+		return True
 	except (UnauthorizedError, DoesNotExist):
 		raise UnauthorizedError().http_exception
 	except Exception as e:
@@ -197,8 +197,9 @@ async def update_user(user: UserModel, identity: str = Depends(get_jwt_identity)
 @router.delete('/user')
 async def delete_user(identity: str = Depends(get_jwt_identity)):
 	try:
+		# TODO: 'archive' the user instead of deleting
 		User.objects.get(id=identity).delete()
-		return 'ok'
+		return True
 	except DoesNotExist:
 		raise UnauthorizedError().http_exception
 	except Exception as e:
