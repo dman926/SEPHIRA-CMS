@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NavComponent } from './nav/nav.component';
+import { NavComponent } from './components/nav/nav.component';
 import { HttpClientModule } from '@angular/common/http';
 
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -10,14 +10,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatListModule } from '@angular/material/list';
 import { RouterModule } from '@angular/router';
-import { RecursiveMenuItemsComponent } from './recursive-menu-items/recursive-menu-items.component';
-import { MenuComponent } from './menu/menu.component';
+import { RecursiveMenuItemsComponent } from './components/recursive-menu-items/recursive-menu-items.component';
+import { MenuComponent } from './components/menu/menu.component';
 
 @NgModule({
 	declarations: [
 		NavComponent,
-  RecursiveMenuItemsComponent,
-  MenuComponent
+		RecursiveMenuItemsComponent,
+		MenuComponent
 	],
 	imports: [
 		CommonModule,

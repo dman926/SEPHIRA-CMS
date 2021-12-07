@@ -3,12 +3,11 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { map, Observable, shareReplay } from 'rxjs';
 import { MatSidenav } from '@angular/material/sidenav';
 import { environment } from 'src/environments/environment';
-import { PlatformService } from '../../services/platform/platform.service';
+import { PlatformService } from '../../../services/platform/platform.service';
 import { MenuItem } from 'src/app/models/menu-item';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
 import { MenuItemService } from '../../services/menu-item/menu-item.service';
 import { NavigationEnd, Router } from '@angular/router';
-import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
 	selector: 'app-nav',

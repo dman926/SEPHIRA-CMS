@@ -9,8 +9,8 @@ const routes: Routes = [
 		canActivate: [AdminGuard]
 	},
 	{
-		path: '',
-		loadChildren: () => import('./core/core.module').then(m => m.CoreModule)
+		path: 'login',
+		loadChildren: () => import('./features/auth/auth.module').then(m => m.AuthModule)
 	}
 ];
 

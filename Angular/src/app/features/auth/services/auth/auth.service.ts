@@ -5,9 +5,9 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, EMPTY, Observable } from 'rxjs';
 import { User } from 'src/app/models/user';
 import { environment } from 'src/environments/environment';
-import { CookieService } from '../cookie/cookie.service';
-import { CoreService } from '../core/core.service';
-import { PlatformService } from '../platform/platform.service';
+import { CookieService } from '../../../../core/services/cookie/cookie.service';
+import { CoreService } from '../../../../core/services/core/core.service';
+import { PlatformService } from '../../../../core/services/platform/platform.service';
 
 interface TokenPair {
 	accessToken: string;
