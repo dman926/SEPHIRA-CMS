@@ -1,12 +1,19 @@
 <section id="top-bar-wrapper" *ngIf="menuStyle === 'top';else sidenav">
 	<mat-toolbar>
-		<h1 class="title">{{ siteTitle }}</h1>
+		<h1 class="title" routerLink="/">{{ siteTitle }}</h1>
 		<span class="spacer"></span>
 		<app-menu [menuItems]="isAdmin ? adminMenuItems : menuItems" [horizontal]="true" [isAdmin]="isAdmin"></app-menu>
-
+		<ng-container *ngIf="auth.isSignedIn">
+			<button mat-icon-button>
+				<mat-icon>settings</mat-icon>
+			</button>
+			<button mat-icon-button (click)="auth.logout()">
+				<mat-icon>logout</mat-icon>
+			</button>
+		</ng-container>
 	</mat-toolbar>
 	<main class="mat-app-background">
-		<ng-content></ng-content>
+		<router-outlet></router-outlet>
 	</main>
 </section>
 
@@ -14,12 +21,16 @@
 	<mat-sidenav-container class="sidenav-container" (touchstart)="swipe($event, 'start')" (touchend)="swipe($event, 'end')">
 		<mat-sidenav #drawer class="sidenav" fixedInViewport [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'" [mode]="(isHandset$ | async) ? 'over' : 'side'" [opened]="(isHandset$ | async) === false">
 			<div id="sidenav-wrapper">
-				<h1 class="title">{{ siteTitle }}</h1>
+				<h1 class="title" routerLink="/">{{ siteTitle }}</h1>
 				<app-menu [menuItems]="isAdmin ? adminMenuItems : menuItems" [isAdmin]="isAdmin"></app-menu>
-				
 				<span class="spacer"></span>
-				<div id="sidenav-bottom">
-					
+				<div id="sidenav-bottom" *ngIf="auth.isSignedIn">
+					<button mat-icon-button (click)="auth.logout()">
+						<mat-icon>logout</mat-icon>
+					</button>
+					<button mat-icon-button>
+						<mat-icon>settings</mat-icon>
+					</button>
 				</div>	
 			</div>
 		</mat-sidenav>
@@ -30,7 +41,7 @@
 				</button>
 			</div>
 			<main>
-				<ng-content></ng-content>
+				<router-outlet></router-outlet>
 			</main>
 		</mat-sidenav-content>
 	</mat-sidenav-container>

@@ -82,7 +82,7 @@ export class AuthService {
 
 	public setUser(user: User | null): void {
 		this.userSubject.next(user);
-		this.state.set<User | null>(this.userStateKey, user);
+		this.state.set(this.userStateKey, user);
 	}
 
 	public refresh(): Observable<TokenPair> {
@@ -131,13 +131,17 @@ export class AuthService {
 		}
 	}
 
-	public CheckOtp(otp: string): Observable<boolean> {
+	public checkOtp(otp: string): Observable<boolean> {
 		const headers = this.core.createAuthHeader();
 		if (headers) {
 			return this.http.post<boolean>(this.authBase + '2fa', otp, { headers });
 		} else {
 			return EMPTY;
 		}
+	}
+
+	get isSignedIn(): boolean {
+		return this.cookie.getItem('accessToken') !== null;
 	}
 
 	private refreshTokensAndUser(): void {

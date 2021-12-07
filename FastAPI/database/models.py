@@ -42,7 +42,7 @@ class CartItemModel(BaseModel):
 class UserModel(BaseModel):
 	email: Optional[EmailStr] = None
 	password: Optional[str] = None
-	twoFactorEnabled: Optional[str] = None
+	twoFactorEnabled: Optional[bool] = None
 	admin: Optional[bool] = None
 	firstName: Optional[str] = None
 	lastName: Optional[str] = None

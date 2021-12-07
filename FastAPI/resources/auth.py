@@ -49,7 +49,7 @@ async def signup(form_data: EmailPasswordForm):
 			user.admin = True
 		user.hash_password()
 		user.save()
-		return {'id': str(user.id)}
+		return { 'id': str(user.id) }
 	except NotUniqueError:
 		raise UserAlreadyExistsError().http_exception
 	except Exception as e:

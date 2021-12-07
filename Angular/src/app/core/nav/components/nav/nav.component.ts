@@ -8,6 +8,7 @@ import { MenuItem } from 'src/app/models/menu-item';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
 import { MenuItemService } from '../../services/menu-item/menu-item.service';
 import { NavigationEnd, Router } from '@angular/router';
+import { AuthService } from 'src/app/features/auth/services/auth/auth.service';
 
 @Component({
 	selector: 'app-nav',
@@ -51,7 +52,8 @@ export class NavComponent implements OnInit {
 		private menuItemService: MenuItemService,
 		private platform: PlatformService,
 		private state: TransferState,
-		private router: Router
+		private router: Router,
+		public auth: AuthService
 	) {
 		this.isAdmin =
 			this.router.url.substr(1, environment.adminPath.length) ===
