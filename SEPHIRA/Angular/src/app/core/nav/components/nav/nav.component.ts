@@ -94,6 +94,11 @@ export class NavComponent implements OnInit {
 	logout(): void {
 		this.auth.logout();
 		this.snackbar.open('Logged Out', 'Close', { duration: 2500 });
+		this.router.navigate(['/login/redirect'], {
+			queryParams: {
+				return: this.router.url
+			}
+		});
 	}
 
 	swipe(e: TouchEvent, when: string): void {
