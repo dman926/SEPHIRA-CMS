@@ -26,6 +26,8 @@ export class NavComponent implements OnInit {
 			shareReplay()
 		);
 
+	isHandset: boolean; // Just for ease of use in the swipe function
+
 	// Making this a dedicated variable because it is more efficient checking
 	// once rather than relying on a get function which may fire multiple times
 	isAdmin: boolean;
@@ -33,7 +35,8 @@ export class NavComponent implements OnInit {
 	menuItems: MenuItem[];
 
 	readonly siteTitle: string = environment.siteTitle;
-	readonly menuStyle: string = environment.menuStyle;
+	readonly desktopMenuStyle: string = environment.desktopMenuStyle;
+	readonly mobileMenuStyle: string = environment.mobileMenuStyle;
 	readonly adminMenuItems: MenuItem[] = [
 		{
 			text: 'Home',
@@ -57,6 +60,11 @@ export class NavComponent implements OnInit {
 		public auth: AuthService,
 		private snackbar: MatSnackBar
 	) {
+		this.isHandset = false;
+		this.isHandset$.subscribe(val => {
+			this.isHandset = val;
+		});
+
 		this.isAdmin =
 			this.router.url.substr(1, environment.adminPath.length) ===
 			environment.adminPath;
@@ -102,7 +110,7 @@ export class NavComponent implements OnInit {
 	}
 
 	swipe(e: TouchEvent, when: string): void {
-		if (!this.sidenav || this.menuStyle !== 'side') {
+		if (!this.sidenav || (this.isHandset ? this.mobileMenuStyle !== 'side' : this.desktopMenuStyle !== 'side')) {
 			return;
 		}
 		const coord: [number, number] = [

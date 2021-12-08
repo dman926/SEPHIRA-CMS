@@ -1,4 +1,4 @@
-<section id="top-bar-wrapper" *ngIf="menuStyle === 'top';else sidenav">
+<section id="top-bar-wrapper" *ngIf="isHandset ? mobileMenuStyle === 'top' : desktopMenuStyle === 'top';else sidenav">
 	<mat-toolbar>
 		<h1 class="title" routerLink="/">{{ siteTitle }}</h1>
 		<span class="spacer"></span>
