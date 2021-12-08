@@ -1,11 +1,12 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SephiraErrorStateMatcher } from 'src/app/core/classes/Error State Matcher/sephira-error-state-matcher';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
 import { AuthService } from '../../services/auth/auth.service';
-import { OtpDialogComponent } from '../otp-dialog/otp-dialog.component';
+import { OtpDialogComponent } from '../../components/otp-dialog/otp-dialog.component';
 
 @Component({
 	selector: 'app-auth',
@@ -22,7 +23,7 @@ export class AuthComponent implements OnInit {
 	isVisible: boolean;
 	loggingIn: boolean;
 
-	errorMatcher = new SephiraErrorStateMatcher();
+	errorMatcher: SephiraErrorStateMatcher;
 
 	private returnUrl: string;
 
@@ -31,7 +32,8 @@ export class AuthComponent implements OnInit {
 		private dialog: MatDialog,
 		private platform: PlatformService,
 		private route: ActivatedRoute,
-		private router: Router) {
+		private router: Router,
+		private snackbar: MatSnackBar) {
 		this.hideLogin = false;
 		this.hideRegister = false;
 
@@ -41,6 +43,7 @@ export class AuthComponent implements OnInit {
 		});
 		this.isVisible = false;
 		this.loggingIn = false;
+		this.errorMatcher = new SephiraErrorStateMatcher();
 		this.returnUrl = '';
 	}
 
@@ -62,6 +65,7 @@ export class AuthComponent implements OnInit {
 					this.auth.setTokens(loginRes.accessToken, loginRes.refreshToken);
 					this.auth.getUser().subscribe(user => {
 						this.auth.setUser(user);
+						this.showSnackBar();
 						this.router.navigateByUrl(this.returnUrl);
 					});
 				},
@@ -69,9 +73,12 @@ export class AuthComponent implements OnInit {
 					if (err.status === 401 && err.error.detail === 'Missing otp') {
 						const diag = this.dialog.open(OtpDialogComponent, {
 							width: '250px',
-							data: { email, password }
+							data: { email, password, returnUrl: this.returnUrl }
 						});
-						diag.afterClosed().subscribe(() => {
+						diag.afterClosed().subscribe(val => {
+							if (val) {
+								this.showSnackBar();
+							}
 							this.loggingIn = false;
 						})
 					} else {
@@ -94,6 +101,7 @@ export class AuthComponent implements OnInit {
 							this.auth.setTokens(loginRes.accessToken, loginRes.refreshToken);
 							this.auth.getUser().subscribe(user => {
 								this.auth.setUser(user);
+								this.showSnackBar();
 								this.router.navigateByUrl(this.returnUrl);
 							});
 						},
@@ -110,6 +118,10 @@ export class AuthComponent implements OnInit {
 				}
 			});
 		}
+	}
+
+	private showSnackBar(): void {
+		this.snackbar.open('Logged In', 'Close', { duration: 2500 });
 	}
 
 	get emailFormControl(): FormControl {

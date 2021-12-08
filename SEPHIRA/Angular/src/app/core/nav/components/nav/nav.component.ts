@@ -9,6 +9,7 @@ import { makeStateKey, TransferState } from '@angular/platform-browser';
 import { MenuItemService } from '../../services/menu-item/menu-item.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { AuthService } from 'src/app/features/auth/services/auth/auth.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
 	selector: 'app-nav',
@@ -53,7 +54,8 @@ export class NavComponent implements OnInit {
 		private platform: PlatformService,
 		private state: TransferState,
 		private router: Router,
-		public auth: AuthService
+		public auth: AuthService,
+		private snackbar: MatSnackBar
 	) {
 		this.isAdmin =
 			this.router.url.substr(1, environment.adminPath.length) ===
@@ -87,6 +89,11 @@ export class NavComponent implements OnInit {
 				}
 			});
 		}
+	}
+
+	logout(): void {
+		this.auth.logout();
+		this.snackbar.open('Logged Out', 'Close', { duration: 2500 });
 	}
 
 	swipe(e: TouchEvent, when: string): void {

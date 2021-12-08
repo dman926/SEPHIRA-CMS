@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { AuthService } from './features/auth/services/auth/auth.service';
 
 @Component({
 	selector: 'app-root',
@@ -9,7 +8,6 @@ import { AuthService } from './features/auth/services/auth/auth.service';
 export class AppComponent {
 	title = 'SEPHIRA';
 
-	// Load necessary services here that might not be loaded otherwise
-	constructor(private auth: AuthService) { }
+	constructor() { }
 
 }

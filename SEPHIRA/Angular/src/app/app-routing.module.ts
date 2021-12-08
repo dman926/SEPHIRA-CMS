@@ -14,6 +14,11 @@ const routes: Routes = [
 		path: 'login',
 		loadChildren: () => import('./features/auth/auth.module').then(m => m.AuthModule),
 		canActivate: [SignedOutGuard]
+	},
+	{
+		path: 'settings',
+		loadChildren: () => import('./features/settings/settings.module').then(m => m.SettingsModule),
+		canActivate: [SignedInGuard]
 	}
 ];
 

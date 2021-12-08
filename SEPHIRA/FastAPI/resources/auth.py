@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request
 from config import APISettings
 
-from fastapi import Depends, Form
+from fastapi import Depends
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 from mongoengine.errors import NotUniqueError, DoesNotExist
@@ -80,9 +80,9 @@ async def login(form_data: EmailPasswordForm):
 		raise e
 
 @router.post('/refresh')
-async def token_refresh(token: Token = Depends(get_raw_token)):
+async def token_refresh2(token: str = Depends(get_raw_token)):
 	try:
-		if not token['refresh']:
+		if 'refresh' not in token or not token['refresh']:
 			raise UnauthorizedError
 		identity = token['sub']
 		User.objects.get(id=identity) # Verify the user exists
@@ -90,6 +90,7 @@ async def token_refresh(token: Token = Depends(get_raw_token)):
 			'accessToken': create_access_token(identity=identity),
 			'refreshToken': create_refresh_token(identity=identity)
 		}
+		return True
 	except UnauthorizedError:
 		raise UnauthorizedError(detail='Invalid token. Not a refresh token').http_exception
 	except DoesNotExist:

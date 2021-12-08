@@ -22,7 +22,7 @@ class UnauthorizedError(Exception):
 		print(self.detail)
 		self.http_exception = HTTPException(status_code=self.status_code, detail=self.detail)
 
-	status_code = 400
+	status_code = 401
 
 
 class MissingOtpError(Exception):

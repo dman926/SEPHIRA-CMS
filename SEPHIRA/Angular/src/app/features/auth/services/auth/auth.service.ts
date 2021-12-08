@@ -45,12 +45,14 @@ export class AuthService {
 
 		this.forceLogoutSubject = new BehaviorSubject<boolean>(false);
 		this.forceLogout$ = this.forceLogoutSubject.asObservable();
-
+		
 		if (this.platform.isServer) {
 			this.refreshTokensAndUser();
 		} else {
 			this.setUser(this.state.get(this.userStateKey, null));
-			setInterval(this.refreshTokensAndUser, 1000 * 60 * 5); // Refresh the tokens and user every 5 minutes
+			setInterval(() => {
+				this.refreshTokensAndUser();
+			}, 1000 * 60 * 5); // Refresh the tokens and user every 5 minutes
 		}
 	}
 
@@ -89,7 +91,7 @@ export class AuthService {
 		const refresh = this.cookie.getItem('refreshToken');
 		if (refresh) {
 			const headers = new HttpHeaders().append('Authorization', `Bearer ${refresh}`);
-			return this.http.post<TokenPair>(this.authBase + 'refresh', { headers });
+			return this.http.post<TokenPair>(this.authBase + 'refresh', {}, { headers });
 		} else {
 			return EMPTY;
 		}

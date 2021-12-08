@@ -4,10 +4,10 @@
 		<span class="spacer"></span>
 		<app-menu [menuItems]="isAdmin ? adminMenuItems : menuItems" [horizontal]="true" [isAdmin]="isAdmin"></app-menu>
 		<ng-container *ngIf="auth.isSignedIn;else notSignedIn">
-			<button mat-icon-button>
+			<button mat-icon-button routerLink="/settings">
 				<mat-icon>settings</mat-icon>
 			</button>
-			<button mat-icon-button (click)="auth.logout()">
+			<button mat-icon-button (click)="logout()">
 				<mat-icon>logout</mat-icon>
 			</button>
 		</ng-container>
@@ -26,10 +26,10 @@
 				<span class="spacer"></span>
 				<div id="sidenav-bottom">
 					<ng-container *ngIf="auth.isSignedIn;else notSignedIn">
-						<button mat-icon-button (click)="auth.logout()">
+						<button mat-icon-button (click)="logout()">
 							<mat-icon>logout</mat-icon>
 						</button>
-						<button mat-icon-button>
+						<button mat-icon-button routerLink="/settings">
 							<mat-icon>settings</mat-icon>
 						</button>	
 					</ng-container>
