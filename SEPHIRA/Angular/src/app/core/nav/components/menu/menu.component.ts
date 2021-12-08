@@ -13,8 +13,6 @@ export class MenuComponent {
 	@Input() horizontal: boolean;
 	@Input() isAdmin: boolean;
 
-	readonly adminPath: string = environment.adminPath;
-
 	constructor() {
 		this.menuItems = [];
 		this.horizontal = false;

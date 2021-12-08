@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AdminGuard } from './admin/admin.guard';
+import { AdminGuard } from './admin/guards/admin.guard';
 import { SignedInGuard } from './features/auth/guards/signed-in.guard';
 import { SignedOutGuard } from './features/auth/guards/signed-out.guard';
 

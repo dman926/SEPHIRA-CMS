@@ -10,6 +10,7 @@ import { MenuItemService } from '../../services/menu-item/menu-item.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { AuthService } from 'src/app/features/auth/services/auth/auth.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { User } from 'src/app/models/user';
 
 @Component({
 	selector: 'app-nav',
@@ -33,14 +34,16 @@ export class NavComponent implements OnInit {
 	isAdmin: boolean;
 
 	menuItems: MenuItem[];
+	user: User | null;
 
 	readonly siteTitle: string = environment.siteTitle;
 	readonly desktopMenuStyle: string = environment.desktopMenuStyle;
 	readonly mobileMenuStyle: string = environment.mobileMenuStyle;
+	readonly adminPath: string = environment.adminPath;
 	readonly adminMenuItems: MenuItem[] = [
 		{
 			text: 'Home',
-			link: environment.adminPath,
+			link: this.adminPath,
 		},
 		{
 			text: 'View Site',
@@ -66,9 +69,10 @@ export class NavComponent implements OnInit {
 		});
 
 		this.isAdmin =
-			this.router.url.substr(1, environment.adminPath.length) ===
-			environment.adminPath;
+			this.router.url.substr(1, this.adminPath.length) ===
+			this.adminPath;
 		this.menuItems = [];
+		this.user = null;
 
 		this.swipeCoord = [0, 0];
 		this.swipeTime = 0;
@@ -84,6 +88,8 @@ export class NavComponent implements OnInit {
 		} else {
 			this.menuItems = this.state.get<MenuItem[]>(menuItemsKey, []);
 
+			this.auth.user$.subscribe(user => this.user = user);
+
 			this.router.events.subscribe((ev) => {
 				if (ev instanceof NavigationEnd) {
 					// Page change
@@ -92,8 +98,8 @@ export class NavComponent implements OnInit {
 					this.isAdmin =
 						this.router.url.substr(
 							1,
-							environment.adminPath.length
-						) === environment.adminPath;
+							this.adminPath.length
+						) === this.adminPath;
 				}
 			});
 		}

@@ -10,6 +10,9 @@
 			<button mat-icon-button (click)="logout()">
 				<mat-icon>logout</mat-icon>
 			</button>
+			<button mat-icon-button [routerLink]="['/' + adminPath]" *ngIf="user?.admin && !isAdmin">
+				<mat-icon>admin_panel_settings</mat-icon>
+			</button>
 		</ng-container>
 	</mat-toolbar>
 	<main class="mat-app-background">
@@ -26,12 +29,15 @@
 				<span class="spacer"></span>
 				<div id="sidenav-bottom">
 					<ng-container *ngIf="auth.isSignedIn;else notSignedIn">
+						<button mat-icon-button [routerLink]="['/' + adminPath]" *ngIf="user?.admin && !isAdmin">
+							<mat-icon>admin_panel_settings</mat-icon>
+						</button>
 						<button mat-icon-button (click)="logout()">
 							<mat-icon>logout</mat-icon>
 						</button>
 						<button mat-icon-button routerLink="/settings">
 							<mat-icon>settings</mat-icon>
-						</button>	
+						</button>
 					</ng-container>
 				</div>
 			</div>

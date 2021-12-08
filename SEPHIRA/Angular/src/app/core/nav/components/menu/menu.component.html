@@ -1,6 +1,5 @@
 <!-- TODO: The top level doesn't look the best in the side menu, but functionality is good -->
 <mat-nav-list [class.horizontal]="horizontal">
-	<a mat-list-item *ngIf="isAdmin" [routerLink]="[adminPath]">Admin Area</a>
 	<ng-container *ngFor="let menuItem of menuItems;index as i">
 		<div class="mat-list-item-wrapper">
 			<a mat-list-item [routerLink]="[menuItem.link]">{{ menuItem.text }}</a>
