@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
+import { SephiraErrorStateMatcher } from 'src/app/core/classes/Error State Matcher/sephira-error-state-matcher';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
 import { AuthService } from '../../services/auth/auth.service';
 import { OtpDialogComponent } from '../otp-dialog/otp-dialog.component';
@@ -20,6 +21,8 @@ export class AuthComponent implements OnInit {
 
 	isVisible: boolean;
 	loggingIn: boolean;
+
+	errorMatcher = new SephiraErrorStateMatcher();
 
 	private returnUrl: string;
 
@@ -52,8 +55,8 @@ export class AuthComponent implements OnInit {
 	login(): void {
 		if (this.loginForm.valid) {
 			this.loggingIn = true;
-			const email = this.loginForm.get('email')!.value;
-			const password = this.loginForm.get('password')!.value;
+			const email = this.emailFormControl.value;
+			const password = this.passwordFormControl.value;
 			this.auth.login(email, password).subscribe({
 				next: loginRes => {
 					this.auth.setTokens(loginRes.accessToken, loginRes.refreshToken);
@@ -82,8 +85,8 @@ export class AuthComponent implements OnInit {
 	register(): void {
 		if (this.loginForm.valid) {
 			this.loggingIn = true;
-			const email = this.loginForm.get('email')!.value;
-			const password = this.loginForm.get('password')!.value;
+			const email = this.emailFormControl.value;
+			const password = this.passwordFormControl.value;
 			this.auth.signup(email, password).subscribe({
 				next: signupRes => {
 					this.auth.login(email, password).subscribe({
@@ -107,6 +110,14 @@ export class AuthComponent implements OnInit {
 				}
 			});
 		}
+	}
+
+	get emailFormControl(): FormControl {
+		return this.loginForm.get('email')! as FormControl;
+	}
+
+	get passwordFormControl(): FormControl {
+		return this.loginForm.get('password')! as FormControl;
 	}
 
 }
