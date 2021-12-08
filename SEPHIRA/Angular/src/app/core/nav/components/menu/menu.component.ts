@@ -1,6 +1,5 @@
 import { Component, Input } from '@angular/core';
 import { MenuItem } from 'src/app/models/menu-item';
-import { environment } from 'src/environments/environment';
 
 @Component({
 	selector: 'app-menu',

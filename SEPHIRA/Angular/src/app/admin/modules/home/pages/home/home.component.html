@@ -1,0 +1,12 @@
+<h3>Built Ins</h3>
+
+<button mat-raised-button color="primary" routerLink="users">Users</button>
+<button mat-raised-button color="primary" routerLink="orders">Orders</button>
+<button mat-raised-button color="primary" routerLink="shipping-zones">Shipping Zones</button>
+<button mat-raised-button color="primary" routerLink="menu-items">Menu Items</button>
+
+<hr />
+
+<h3>Post Types</h3>
+
+<button mat-raised-button color="primary" *ngFor="let type of types" [routerLink]="type">{{ type }}</button>
