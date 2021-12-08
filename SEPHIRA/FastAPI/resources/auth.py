@@ -10,9 +10,12 @@ from modules.JWT import Token, create_access_token, create_refresh_token, get_jw
 from database.models import User, UserModel
 from resources.errors import UserAlreadyExistsError, UnauthorizedError, MissingOtpError
 from services.mail_service import send_email_async
+from services.util_service import base_model_to_clean_dict
 
 from datetime import timedelta
 from time import sleep
+import base64
+import os
 
 router = APIRouter(
 	prefix=APISettings.ROUTE_BASE + 'auth',
@@ -115,6 +118,8 @@ async def check_password(password_body: PasswordForm, identity: str = Depends(ge
 async def get_otp_code(identity: str = Depends(get_jwt_identity)):
 	try:
 		user = User.objects.get(id=identity)
+		user.otpSecret = base64.b32encode(os.urandom(10)).decode('utf8')
+		user.save()
 		return user.get_totp_uri()
 	except DoesNotExist:
 		raise UnauthorizedError().http_exception
@@ -185,7 +190,7 @@ async def update_user(user: UserModel, identity: str = Depends(get_jwt_identity)
 		foundUser = User.objects.get(id=identity)
 		if user.admin:
 			raise UnauthorizedError # Cannot set themselves as admin
-		foundUser.update(**user)
+		foundUser.update(**base_model_to_clean_dict(user))
 		if user.password:
 			user.hash_password()
 			user.save()

@@ -11,11 +11,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 import { QrCodeModule } from 'ng-qrcode';
+import { TwoFaDialogComponent } from './components/two-fa-dialog/two-fa-dialog.component';
+import { MatDialogModule } from '@angular/material/dialog';
 
 
 @NgModule({
 	declarations: [
-		SettingsComponent
+		SettingsComponent,
+  TwoFaDialogComponent
 	],
 	imports: [
 		CommonModule,
@@ -26,6 +29,7 @@ import { QrCodeModule } from 'ng-qrcode';
 		MatFormFieldModule,
 		MatInputModule,
 		MatSlideToggleModule,
+		MatDialogModule,
 
 		QrCodeModule
 	]

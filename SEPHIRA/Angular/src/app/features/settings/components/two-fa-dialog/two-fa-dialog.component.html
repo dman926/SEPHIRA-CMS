@@ -1,0 +1,11 @@
+<p>Please scan the QR code with your authenticator app and enter the generated code below to save your settings</p>
+<qr-code [value]="otpQrVal"></qr-code>
+<form [formGroup]="otpCheckFormGroup" (ngSubmit)="checkOtpCode()">
+	<mat-form-field appearance="fill">
+		<mat-label>Generated Code</mat-label>
+		<input matInput formControlName="otpCode" type="tel" required />
+	</mat-form-field>
+	<mat-dialog-actions>
+		<button mat-raised-button color="primary">Check and Save</button>
+	</mat-dialog-actions>
+</form>

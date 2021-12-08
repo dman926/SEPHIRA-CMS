@@ -136,7 +136,7 @@ export class AuthService {
 	public checkOtp(otp: string): Observable<boolean> {
 		const headers = this.core.createAuthHeader();
 		if (headers) {
-			return this.http.post<boolean>(this.authBase + '2fa', otp, { headers });
+			return this.http.post<boolean>(this.authBase + '2fa', { otp }, { headers });
 		} else {
 			return EMPTY;
 		}

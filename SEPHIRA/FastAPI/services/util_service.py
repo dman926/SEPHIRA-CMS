@@ -30,3 +30,9 @@ def is_post(cls):
 		if cls == post_type:
 			return True
 	return False
+
+def base_model_to_clean_dict(model):
+	'''
+	Returns a `cleaned` dictionary (a dictionary with all None values removed) for easily exploding a BaseModel to a dictionary
+	'''
+	return { k: v for k, v, in model.dict().items() if v is not None }

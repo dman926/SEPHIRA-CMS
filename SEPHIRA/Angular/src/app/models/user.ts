@@ -6,5 +6,5 @@ export interface User {
 	admin?: boolean;
 	firstName?: string;
 	lastName?: string;
-	cart: CartItem[];
+	cart?: CartItem[];
 }

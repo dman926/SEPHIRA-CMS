@@ -1,1 +1,12 @@
-<qr-code [value]="otpQrVal">
+<form [formGroup]="settingsFormGroup" (ngSubmit)="saveSettings()">
+	<mat-form-field appearance="fill">
+		<mat-label>First Name</mat-label>
+		<input matInput formControlName="firstName" required />
+	</mat-form-field>
+	<mat-form-field appearance="fill">
+		<mat-label>Last Name</mat-label>
+		<input matInput formControlName="lastName" required />
+	</mat-form-field>
+	<mat-slide-toggle color="primary" formControlName="enableTF">Enable Two Factor Authentication</mat-slide-toggle>
+	<button mat-raised-button color="primary" [disabled]="settingsFormGroup.invalid || saving">Save</button>
+</form>

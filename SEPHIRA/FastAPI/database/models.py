@@ -134,8 +134,6 @@ class User(Document):
 		size = 12
 		self.salt = ''.join(random.choice(chars) for x in range(size))
 		self.password = _bcrypt.hash(self.password + self.salt)
-		if self.otpSecret is None:
-			self.otpSecret = base64.b32encode(os.urandom(10)).decode('utf8')
 
 	def check_password(self, password):
 		return _bcrypt.verify(password + self.salt, self.password)
