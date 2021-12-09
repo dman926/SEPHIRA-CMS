@@ -8,7 +8,7 @@ from modules.JWT import get_jwt_identity
 
 import database.models as models
 from resources.errors import InvalidPostTypeError, NotFoundError, UnauthorizedError, SchemaValidationError
-from services.util_service import all_subclasses, is_post
+from services.util_service import all_subclasses, is_post, base_model_to_clean_dict
 
 from datetime import datetime
 
@@ -35,6 +35,10 @@ def get_admin_user(identity: str) -> models.User:
 class PostForm(BaseModel):
 	post: str
 	obj: dict
+
+
+class MenuItemForm(BaseModel):
+	menuItems: list[models.MenuItemModel]
 
 ##########
 # ROUTES #
@@ -310,7 +314,7 @@ async def get_orders(page: Optional[int] = None, size: Optional[int] = None, ide
 			size = orders.count()
 		elif size == None:
 			raise SchemaValidationError
-		return { 'count': orders.count(), 'users': list(map(lambda o: o.serialize(), orders[page * size : page * size + size])) }
+		return { 'count': orders.count(), 'orders': list(map(lambda o: o.serialize(), orders[page * size : page * size + size])) }
 	except (DoesNotExist, UnauthorizedError):
 		raise UnauthorizedError('User is not admin')
 	except Exception as e:
@@ -372,7 +376,7 @@ async def get_us_shipping_zones(page: Optional[int] = None, size: Optional[int] 
 			size = zones.count()
 		elif size == None:
 			raise SchemaValidationError
-		return { 'count': zones.count(), 'users': list(map(lambda z: z.serialize(), zones[page * size : page * size + size])) }
+		return { 'count': zones.count(), 'shippingZones': list(map(lambda z: z.serialize(), zones[page * size : page * size + size])) }
 	except (DoesNotExist, UnauthorizedError):
 		raise UnauthorizedError('User is not admin')
 	except Exception as e:
@@ -436,5 +440,28 @@ async def delete_us_shipping_zone(id: str, identity: str = Depends(get_jwt_ident
 		return 'ok'
 	except DoesNotExist:
 		raise NotFoundError()
+	except Exception as e:
+		raise e
+
+@router.get('/menuItems')
+async def get_menu_items(identity: str = Depends(get_jwt_identity)):
+	try:
+		get_admin_user(identity)
+		return list(map(lambda m: m.serialize(), models.MenuItem.objects()))
+	except (DoesNotExist, UnauthorizedError):
+		raise UnauthorizedError('User is not admin')
+	except Exception as e:
+		raise e
+
+@router.post('/menuItems')
+async def save_menu_items(menuItems: MenuItemForm, identity: str = Depends(get_jwt_identity)):
+	try:
+		get_admin_user(identity)
+		models.MenuItem.objects().delete() # remove all old menu items
+		for item in menuItems.menuItems:
+			models.MenuItem(**base_model_to_clean_dict(item)).save()
+		return 'ok'
+	except (DoesNotExist, UnauthorizedError):
+		raise UnauthorizedError('User is not admin')
 	except Exception as e:
 		raise e

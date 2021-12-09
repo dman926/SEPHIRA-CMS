@@ -83,7 +83,7 @@ async def login(form_data: EmailPasswordForm):
 		raise e
 
 @router.post('/refresh')
-async def token_refresh2(token: str = Depends(get_raw_token)):
+async def token_refresh2(token: Token = Depends(get_raw_token)):
 	try:
 		if 'refresh' not in token or not token['refresh']:
 			raise UnauthorizedError

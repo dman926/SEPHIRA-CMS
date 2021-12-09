@@ -87,7 +87,7 @@ export class NavComponent implements OnInit {
 			});
 		} else {
 			this.menuItems = this.state.get<MenuItem[]>(menuItemsKey, []);
-
+			console.log(this.menuItems);
 			this.auth.user$.subscribe(user => this.user = user);
 
 			this.router.events.subscribe((ev) => {

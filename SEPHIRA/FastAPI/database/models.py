@@ -2,6 +2,10 @@
 Models to serialize between MongoDB and Python
 '''
 
+# to make the recursive MenuItemModel work
+from __future__ import annotations
+from typing import List
+
 from typing import Optional
 from mongoengine import Document, EmbeddedDocument, EmbeddedDocumentListField, ReferenceField, StringField, ListField, IntField, DateTimeField, BooleanField, EmailField, DecimalField, FloatField, DictField, CASCADE
 from passlib.context import CryptContext
@@ -10,7 +14,7 @@ import onetimepass
 
 from services.util_service import make_ngrams
 
-import base64, os, random, string, datetime, re
+import random, string, datetime, re
 
 ###########
 # HELPERS #
@@ -63,6 +67,13 @@ class UsShippingZoneModel(BaseModel):
 	rate: list[ShippingRateModel] = []
 	default: Optional[bool] = None
 
+class MenuItemModel(BaseModel):
+	text: str
+	link: str
+	children: List['MenuItemModel'] = []
+
+MenuItemModel.update_forward_refs() # Get recursive model prepared
+
 #############
 # BUILT INS #
 #############
@@ -82,14 +93,12 @@ class MenuItemChild(EmbeddedDocument):
 class MenuItem(Document):
 	text = StringField(required=True)
 	link = StringField(required=True)
-	order = IntField()
 	children = EmbeddedDocumentListField('MenuItemChild')
 
 	def serialize(self):
 		return {
 			'text': self.text,
 			'link': self.link,
-			'order': self.order,
 			'children': list(map(lambda mi: mi.serialize(), self.children))
 		}
 
