@@ -54,7 +54,7 @@ starlette==0.16.0
 stripe==2.63.0
 typing_extensions==4.0.1
 urllib3==1.26.7
-uvicorn==0.15.0
+uvicorn==0.16.0
 uvloop==0.16.0
 watchgod==0.7
 websockets==10.1
