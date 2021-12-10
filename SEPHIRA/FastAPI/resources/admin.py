@@ -152,7 +152,6 @@ async def get_post_schema(post: str, identity: str = Depends(get_jwt_identity)):
 async def get_posts(post: str, page: Optional[int] = None, size: Optional[int] = None, search: Optional[str] = None, identity: str = Depends(get_jwt_identity)):
 	try:
 		get_admin_user(identity)
-		print('pass')
 		try:
 			postType = eval(post)
 			if not is_post(postType):

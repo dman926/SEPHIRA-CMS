@@ -76,7 +76,7 @@ export class CookieService {
 	}
 
 	public removeItem(name: string, path?: string): boolean {
-		if (this.req !== null || !name) {
+		if (!name) {
 			return false;
 		}
 		if (!path) {

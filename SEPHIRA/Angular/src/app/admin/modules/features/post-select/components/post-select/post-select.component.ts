@@ -67,7 +67,6 @@ export class PostSelectComponent implements OnInit {
 				this.loaded = true;
 			},
 			error: err => {
-				console.error(err);
 				this.loaded = true
 			}
 		});

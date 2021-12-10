@@ -10,8 +10,8 @@ import { CoreService } from '../../../../core/services/core/core.service';
 import { PlatformService } from '../../../../core/services/platform/platform.service';
 
 interface TokenPair {
-	token: string;
-	refreshToken: string;
+	access_token: string;
+	refresh_token: string;
 }
 
 interface Id {
@@ -147,12 +147,18 @@ export class AuthService {
 	}
 
 	private refreshTokensAndUser(): void {
+		if (this.cookie.getItem('accessToken') === 'undefined' || this.cookie.getItem('refreshToken') === 'undefined') {
+			this.cookie.removeItem('accessToken');
+			this.cookie.removeItem('refreshToken');
+		}
 		this.refresh().subscribe({
 			next: tokens => {
-				this.setTokens(tokens.token, tokens.refreshToken);
+				this.setTokens(tokens.access_token, tokens.refresh_token);
 				this.getUser().subscribe({
 					next: user => this.setUser(user),
-					error: err => this.logout()
+					error: err => {
+						this.logout(true);
+					}
 				});
 			},
 			error: err => this.logout(true)

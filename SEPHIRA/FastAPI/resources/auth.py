@@ -63,6 +63,7 @@ async def signup(form_data: EmailPasswordForm):
 @router.post('/login')
 async def login(form_data: EmailPasswordForm):
 	try:
+		user = None
 		if form_data.client_secret:
 			user = User.objects.get(email=get_jwt_identity(form_data.client_secret))
 		else:
@@ -76,8 +77,8 @@ async def login(form_data: EmailPasswordForm):
 				if not user.verify_totp(otp):
 					raise UnauthorizedError
 		return {
-			'token': create_access_token(identity=str(user.id)),
-			'refreshToken': create_refresh_token(identity=str(user.id))
+			'access_token': create_access_token(identity=str(user.id)),
+			'refresh_token': create_refresh_token(identity=str(user.id))
 		}
 	except (UnauthorizedError, DoesNotExist):
 		sleep(2)
