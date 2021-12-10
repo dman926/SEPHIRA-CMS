@@ -49,7 +49,7 @@ export class CookieService {
 				}
 				expiryStr = '; expires=' + expiry.toUTCString();
 			}
-			this.document.cookie = `${name}=${value}${expiryStr}; path=${path}`;
+			this.document.cookie = `${name}=${value}${expiryStr}; SameSite=${sameSite}; path=${path};`;
 		} else {
 			if (expiry) {
 				if (!(expiry instanceof Date)) {
@@ -69,7 +69,11 @@ export class CookieService {
 				}
 			} else {
 				this.cookies[name] = value;
-				this.res.cookie(name, value, { path, encode: String });
+				this.res.cookie(name, value, {
+					path,
+					sameSite,
+					encode: String,
+				});
 			}
 		}
 		return true;

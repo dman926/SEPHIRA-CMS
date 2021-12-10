@@ -41,18 +41,18 @@ export class PostsComponent implements OnInit {
 	}
 
 	ngOnInit(): void {
-		// this.route.parent!.params.subscribe(params => {
-		// 	this.postType = params['postType'];
-		// 	const postKey = makeStateKey<Post[]>('adminPosts');
-		// 	this.newPostGroup = new FormGroup({
-		// 		title: new FormControl('', [Validators.required]),
-		// 		slug: new FormControl('', [Validators.required, Validators.pattern(this.core.slugRegex)], [this.core.slugValidator(this.postType!)])
-		// 	});
-		// 	if (this.platform.isBrowser) {
-		// 		this.posts = this.state.get(postKey, []);
-		// 	}
-		// 	this.fetchPosts();
-		// });
+		this.route.parent!.params.subscribe(params => {
+			this.postType = params['postType'];
+			const postKey = makeStateKey<Post[]>('adminPosts');
+			this.newPostGroup = new FormGroup({
+				title: new FormControl('', [Validators.required]),
+				slug: new FormControl('', [Validators.required, Validators.pattern(this.core.slugRegex)], [this.core.slugValidator(this.postType!)])
+			});
+			if (this.platform.isBrowser) {
+				this.posts = this.state.get(postKey, []);
+			}
+			this.fetchPosts();
+		});
 	}
 
 	newPost(): void {

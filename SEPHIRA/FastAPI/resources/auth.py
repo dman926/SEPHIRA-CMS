@@ -124,8 +124,8 @@ async def token_refresh2(token: Token = Depends(get_raw_token)):
 		identity = token['sub']
 		User.objects.get(id=identity) # Verify the user exists
 		return {
-			'accessToken': create_access_token(identity=identity),
-			'refreshToken': create_refresh_token(identity=identity)
+			'access_token': create_access_token(identity=identity),
+			'refresh_token': create_refresh_token(identity=identity)
 		}
 		return True
 	except UnauthorizedError:
