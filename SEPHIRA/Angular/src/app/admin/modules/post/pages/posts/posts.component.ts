@@ -88,6 +88,7 @@ export class PostsComponent implements OnInit {
 		this.loaded = false;
 		this.admin.getAllPosts(this.postType!, this.postPageEvent.pageIndex, this.postPageEvent.pageSize).subscribe({
 			next: posts => {
+				console.log(posts);
 				this.postPageEvent.length = posts.count;
 				this.posts = this.posts.concat(posts.posts);
 				this.loaded = true;

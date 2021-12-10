@@ -49,7 +49,7 @@
 
 		<ng-container matColumnDef="edit">
 			<th mat-header-cell *matHeaderCellDef>Edit</th>
-			<td mat-cell *matCellDef="let el"><button mat-raised-button color="primary" [routerLink]="['/admin', postType, el.id]">Edit</button></td>
+			<td mat-cell *matCellDef="let el"><button mat-raised-button color="primary" [routerLink]="[el.id]">Edit</button></td>
 		</ng-container>
 
 		<tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
