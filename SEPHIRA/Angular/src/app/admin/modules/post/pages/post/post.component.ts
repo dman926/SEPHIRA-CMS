@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, AsyncValidatorFn, FormArray, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AngularEditorConfig } from '@kolkov/angular-editor';
 import { AdminService } from 'src/app/admin/servies/admin.service';
 import { CoreService } from 'src/app/core/services/core/core.service';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
@@ -20,21 +21,21 @@ export class PostComponent implements OnInit {
 	saved: boolean;
 	loaded: boolean;
 
-	// readonly editorConfig: AngularEditorConfig = {
-	// 	editable: true,
-	// 	spellcheck: true,
-	// 	height: 'auto',
-	// 	minHeight: '0',
-	// 	maxHeight: 'auto',
-	// 	width: 'auto',
-	// 	minWidth: '0',
-	// 	translate: 'yes',
-	// 	enableToolbar: true,
-	// 	showToolbar: true,
-	// 	placeholder: 'Enter text here...',
-	// 	sanitize: false,
-	// 	toolbarPosition: 'top',
-	// };
+	readonly editorConfig: AngularEditorConfig = {
+		editable: true,
+		spellcheck: true,
+		height: 'auto',
+		minHeight: '0',
+		maxHeight: 'auto',
+		width: 'auto',
+		minWidth: '0',
+		translate: 'yes',
+		enableToolbar: true,
+		showToolbar: true,
+		placeholder: 'Enter text here...',
+		sanitize: false,
+		toolbarPosition: 'top',
+	};
 
 	private id: string | undefined;
 	private postType: string | undefined;
@@ -124,7 +125,7 @@ export class PostComponent implements OnInit {
 		}
 		const asyncValidators: AsyncValidatorFn[] = [];
 		if (schema.name === 'slug') {
-			asyncValidators.push(this.core.slugValidator(this.postType!));
+			asyncValidators.push(this.core.slugValidator(this.postType!, this.id));
 		}
 		switch (schema.controlType) {
 			case 'media-browser':

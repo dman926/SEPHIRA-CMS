@@ -35,7 +35,7 @@ export class CoreService {
 	 * @param postType The post type. ex. `models.Page`
 	 * @returns An observable containing errors if any
 	 */
-	public slugValidator(postType: string): AsyncValidatorFn {
+	public slugValidator(postType: string, postID?: string): AsyncValidatorFn {
 		if (!postType) {
 			// Slug technically OK because it's not associated with a post type
 			return () => EMPTY;
@@ -46,10 +46,16 @@ export class CoreService {
 			} else {
 				// TODO: switch this with a post service instead to make every request in one place
 				const params = new HttpParams().append('post', postType).append('slug', control.value);
-				return this.http.get<boolean>(environment.apiServer + 'post/posts/slugTaken', { params }).pipe(
+				return this.http.get<boolean | string>(environment.apiServer + 'post/posts/slugTaken', { params }).pipe(
 					debounceTime(500),
 					take(1),
-					map(res => !res ? { slugTaken: true } : null)
+					map(res => {
+						if (postID) {
+							return res !== postID ? { slugTaken: true } : null;
+						} else {
+							return res ? { slugTaken: true } : null
+						}
+					})
 				);	
 			}
 		};

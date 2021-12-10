@@ -16,6 +16,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { ReactiveFormsModule } from '@angular/forms';
 import { LoaderSpinnerModule } from 'src/app/features/loader-spinner/loader-spinner.module';
+import { AngularEditorModule } from '@kolkov/angular-editor';
 
 
 @NgModule({
@@ -38,7 +39,9 @@ import { LoaderSpinnerModule } from 'src/app/features/loader-spinner/loader-spin
 		MatIconModule,
 
 		PostSelectModule,
-		LoaderSpinnerModule
+		LoaderSpinnerModule,
+
+		AngularEditorModule
 	]
 })
 export class PostModule { }

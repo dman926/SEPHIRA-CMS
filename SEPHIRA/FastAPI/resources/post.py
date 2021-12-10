@@ -94,8 +94,8 @@ async def is_post_slug_taken(post: str, slug: str):
 				raise InvalidPostTypeError
 		except Exception:
 			raise InvalidPostTypeError
-		postType.objects.get(slug=slug)
-		return False
+		foundPost = postType.objects.get(slug=slug)
+		return str(foundPost.id)
 	except DoesNotExist:
 		return True
 	except InvalidPostTypeError:
