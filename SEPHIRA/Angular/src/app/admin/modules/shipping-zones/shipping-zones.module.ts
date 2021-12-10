@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 
 import { ShippingZonesRoutingModule } from './shipping-zones-routing.module';
 import { ShippingZonesComponent } from './pages/shipping-zones/shipping-zones.component';
+import { ShippingZoneComponent } from './pages/shipping-zone/shipping-zone.component';
 
 
 @NgModule({
   declarations: [
-    ShippingZonesComponent
+    ShippingZonesComponent,
+    ShippingZoneComponent
   ],
   imports: [
     CommonModule,

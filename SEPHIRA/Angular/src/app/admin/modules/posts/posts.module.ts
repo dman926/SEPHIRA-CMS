@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { PostRoutingModule } from './post-routing.module';
+import { PostsRoutingModule } from './posts-routing.module';
 import { PostComponent } from './pages/post/post.component';
 import { PostsComponent } from './pages/posts/posts.component';
 import { PostSelectModule } from '../features/post-select/post-select.module';
@@ -26,7 +26,7 @@ import { AngularEditorModule } from '@kolkov/angular-editor';
 	],
 	imports: [
 		CommonModule,
-		PostRoutingModule,
+		PostsRoutingModule,
 		ReactiveFormsModule,
 
 		MatPaginatorModule,
@@ -44,4 +44,4 @@ import { AngularEditorModule } from '@kolkov/angular-editor';
 		AngularEditorModule
 	]
 })
-export class PostModule { }
+export class PostsModule { }
