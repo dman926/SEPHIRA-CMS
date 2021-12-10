@@ -44,7 +44,8 @@ export class CoreService {
 			if (control.hasError('pattern')) {
 				return EMPTY;
 			} else {
-				// TODO: switch this with a post service instead to make every request in one place
+				// Have to hardcode this to avoid circular dependency.
+				// Would rather be able to use CoreService in PostService than the other way around.
 				const params = new HttpParams().append('post', postType).append('slug', control.value);
 				return this.http.get<boolean | string>(environment.apiServer + 'post/posts/slugTaken', { params }).pipe(
 					debounceTime(500),

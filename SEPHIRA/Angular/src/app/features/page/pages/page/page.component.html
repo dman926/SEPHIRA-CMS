@@ -1,0 +1,11 @@
+<section *ngIf="loaded;else loaderSpinner">
+    <ng-container *ngIf="page;else notFound">
+        <div [innerHtml]="page.content"></div>
+    </ng-container>
+    <ng-template #notFound>
+        <h1>404</h1>
+    </ng-template>
+</section>
+<ng-template #loaderSpinner>
+    <app-loader-spinner></app-loader-spinner>
+</ng-template>

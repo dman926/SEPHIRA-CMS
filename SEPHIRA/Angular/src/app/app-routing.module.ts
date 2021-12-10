@@ -19,6 +19,10 @@ const routes: Routes = [
 		path: 'settings',
 		loadChildren: () => import('./features/settings/settings.module').then(m => m.SettingsModule),
 		canActivate: [SignedInGuard]
+	},
+	{
+		path: '**',
+		loadChildren: () => import('./features/page/page.module').then(m => m.PageModule)
 	}
 ];
 
