@@ -41,13 +41,11 @@ export class MenuItemsComponent implements OnInit {
 	}
 
 	addTopLevel(): void {
-		console.log('fire');
 		this.menuItems.push({
 			text: 'TEXT HERE',
 			link: '/LINK-HERE',
 			children: []
 		});
-		console.log(this.menuItems);
 	}
 
 	removeTopLevel(): void {

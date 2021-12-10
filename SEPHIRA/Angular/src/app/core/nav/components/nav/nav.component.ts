@@ -69,7 +69,7 @@ export class NavComponent implements OnInit {
 		});
 
 		this.isAdmin =
-			this.router.url.substr(1, this.adminPath.length) ===
+			this.router.url.substring(1, this.adminPath.length + 1) ===
 			this.adminPath;
 		this.menuItems = [];
 		this.user = null;
@@ -87,7 +87,6 @@ export class NavComponent implements OnInit {
 			});
 		} else {
 			this.menuItems = this.state.get<MenuItem[]>(menuItemsKey, []);
-			console.log(this.menuItems);
 			this.auth.user$.subscribe(user => this.user = user);
 
 			this.router.events.subscribe((ev) => {
@@ -96,9 +95,9 @@ export class NavComponent implements OnInit {
 
 					// Recheck if in admin area
 					this.isAdmin =
-						this.router.url.substr(
+						this.router.url.substring(
 							1,
-							this.adminPath.length
+							this.adminPath.length + 1
 						) === this.adminPath;
 				}
 			});

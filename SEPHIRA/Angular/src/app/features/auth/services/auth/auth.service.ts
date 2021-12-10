@@ -10,7 +10,7 @@ import { CoreService } from '../../../../core/services/core/core.service';
 import { PlatformService } from '../../../../core/services/platform/platform.service';
 
 interface TokenPair {
-	accessToken: string;
+	token: string;
 	refreshToken: string;
 }
 
@@ -68,7 +68,7 @@ export class AuthService {
 	}
 
 	public login(email: string, password: string, otp?: string): Observable<TokenPair> {
-		return this.http.post<TokenPair>(this.authBase + 'login', { email, password, otp });
+		return this.http.post<TokenPair>(this.authBase + 'login', { username: email, password, client_id: otp });
 	}
 
 	public signup(email: string, password: string): Observable<Id> {
@@ -149,7 +149,7 @@ export class AuthService {
 	private refreshTokensAndUser(): void {
 		this.refresh().subscribe({
 			next: tokens => {
-				this.setTokens(tokens.accessToken, tokens.refreshToken);
+				this.setTokens(tokens.token, tokens.refreshToken);
 				this.getUser().subscribe({
 					next: user => this.setUser(user),
 					error: err => this.logout()

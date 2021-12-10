@@ -4,7 +4,7 @@ import { EMPTY, Observable } from 'rxjs';
 import { CoreService } from 'src/app/core/services/core/core.service';
 import { MenuItem } from 'src/app/models/menu-item';
 import { Order } from 'src/app/models/order';
-import { Post, PostSchema } from 'src/app/models/post';
+import { Post, PostSchema } from 'src/app/models/posts/post';
 import { ShippingZone } from 'src/app/models/shipping-zone';
 import { User } from 'src/app/models/user';
 import { environment } from 'src/environments/environment';
@@ -82,7 +82,7 @@ export class AdminService {
 	public getAllPosts(postType: string, page?: number, size?: number, search?: string): Observable<AllPosts> {
 		const headers = this.core.createAuthHeader();
 		if (headers) {
-			let params = new HttpParams();
+			let params = new HttpParams().append('post', postType);
 			if (page && size) {
 				params = params.append('page', page).append('size', size);
 			}

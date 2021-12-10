@@ -62,7 +62,7 @@ export class AuthComponent implements OnInit {
 			const password = this.passwordFormControl.value;
 			this.auth.login(email, password).subscribe({
 				next: loginRes => {
-					this.auth.setTokens(loginRes.accessToken, loginRes.refreshToken);
+					this.auth.setTokens(loginRes.token, loginRes.refreshToken);
 					this.auth.getUser().subscribe(user => {
 						this.auth.setUser(user);
 						this.showSnackBar();
@@ -84,6 +84,7 @@ export class AuthComponent implements OnInit {
 					} else {
 						this.loggingIn = false;
 					}
+					console.error(err);
 				}
 			});
 		}
@@ -98,7 +99,7 @@ export class AuthComponent implements OnInit {
 				next: signupRes => {
 					this.auth.login(email, password).subscribe({
 						next: loginRes => {
-							this.auth.setTokens(loginRes.accessToken, loginRes.refreshToken);
+							this.auth.setTokens(loginRes.token, loginRes.refreshToken);
 							this.auth.getUser().subscribe(user => {
 								this.auth.setUser(user);
 								this.showSnackBar();

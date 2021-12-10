@@ -25,7 +25,7 @@ class OAuth2Settings:
 	DEFAULT_ACCESS_TOKEN_EXPIRES_MINUTES: timedelta = timedelta(days=1)
 	DEFAULT_REFRESH_TOKEN_EXPIRES_MINUTES: timedelta = timedelta(days=7)
 	ALGORITHM: str = 'HS256' # Don't change this unless you know what you're doing
-	TOKEN_URL: str = 'auth/login' # Don't change this unless you change the login route for some reason
+	TOKEN_URL: str = 'auth/docs-login' # Don't change this unless you change the login route for some reason
 
 
 class UploadSettings:

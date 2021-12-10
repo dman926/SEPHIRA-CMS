@@ -36,7 +36,7 @@ export class OtpDialogComponent {
 			this.loggingIn = true;
 			this.auth.login(this.data.email, this.data.password, this.otpFormControl.value).subscribe({
 				next: loginRes => {
-					this.auth.setTokens(loginRes.accessToken, loginRes.refreshToken);
+					this.auth.setTokens(loginRes.token, loginRes.refreshToken);
 					this.auth.getUser().subscribe(user => {
 						this.auth.setUser(user);
 						this.dialogRef.close(true);

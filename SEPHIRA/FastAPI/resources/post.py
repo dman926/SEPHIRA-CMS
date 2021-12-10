@@ -84,3 +84,21 @@ async def get_post_from_slug(post: str, slug: str):
 		raise InvalidPostTypeError().http_exception
 	except Exception as e:
 		raise e
+
+@router.get('/posts/slugTaken')
+async def is_post_slug_taken(post: str, slug: str):
+	try:
+		try:
+			postType = eval(post)
+			if not is_post(postType):
+				raise InvalidPostTypeError
+		except Exception:
+			raise InvalidPostTypeError
+		postType.objects.get(slug=slug)
+		return False
+	except DoesNotExist:
+		return True
+	except InvalidPostTypeError:
+		raise InvalidPostTypeError()
+	except Exception as e:
+		raise e

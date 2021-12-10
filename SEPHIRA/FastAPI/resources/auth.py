@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Request
+from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from config import APISettings
 
 from fastapi import Depends
 from pydantic import BaseModel, EmailStr
-from typing import List, Optional
+from typing import Optional
 from mongoengine.errors import NotUniqueError, DoesNotExist
 
 from modules.JWT import Token, create_access_token, create_refresh_token, get_jwt_identity, get_raw_token
@@ -27,9 +28,10 @@ router = APIRouter(
 ###########
 
 class EmailPasswordForm(BaseModel):
-	email: EmailStr
+	username: EmailStr
 	password: str
-	otp: Optional[str] = None
+	client_secret: Optional[str] = None
+	client_id: Optional[str] = None
 
 class PasswordForm(BaseModel):
 	password: str
@@ -47,7 +49,7 @@ class EmailForm(BaseModel):
 @router.post('/signup')
 async def signup(form_data: EmailPasswordForm):
 	try:
-		user = User(email = form_data.email, password = form_data.password)
+		user = User(email = form_data.username, password = form_data.password)
 		if User.objects.count() == 0:
 			user.admin = True
 		user.hash_password()
@@ -61,18 +63,49 @@ async def signup(form_data: EmailPasswordForm):
 @router.post('/login')
 async def login(form_data: EmailPasswordForm):
 	try:
-		user = User.objects.get(email=form_data.email)
-		if not user.check_password(form_data.password):
-			raise UnauthorizedError
-		if user.twoFactorEnabled:
-			otp = form_data.otp
-			if not otp:
-				raise MissingOtpError
-			if not user.verify_totp(otp):
+		if form_data.client_secret:
+			user = User.objects.get(email=get_jwt_identity(form_data.client_secret))
+		else:
+			user = User.objects.get(email=form_data.username)
+			if not user.check_password(form_data.password):
 				raise UnauthorizedError
+			if user.twoFactorEnabled:
+				otp = form_data.client_id
+				if not otp:
+					raise MissingOtpError
+				if not user.verify_totp(otp):
+					raise UnauthorizedError
 		return {
-			'accessToken': create_access_token(identity=str(user.id)),
+			'token': create_access_token(identity=str(user.id)),
 			'refreshToken': create_refresh_token(identity=str(user.id))
+		}
+	except (UnauthorizedError, DoesNotExist):
+		sleep(2)
+		raise UnauthorizedError(detail='Incorrect email, password, or otp').http_exception
+	except MissingOtpError:
+		raise MissingOtpError().http_exception
+	except Exception as e:
+		raise e
+
+# needed a separate login for docs due to how it sends the login data
+@router.post('/docs-login')
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+	try:
+		if form_data.client_secret:
+			user = User.objects.get(email=get_jwt_identity(form_data.client_secret))
+		else:
+			user = User.objects.get(email=form_data.username)
+			if not user.check_password(form_data.password):
+				raise UnauthorizedError
+			if user.twoFactorEnabled:
+				otp = form_data.client_id
+				if not otp:
+					raise MissingOtpError
+				if not user.verify_totp(otp):
+					raise UnauthorizedError
+		return {
+			'access_token': create_access_token(identity=str(user.id)),
+			'refresh_token': create_refresh_token(identity=str(user.id))
 		}
 	except (UnauthorizedError, DoesNotExist):
 		sleep(2)

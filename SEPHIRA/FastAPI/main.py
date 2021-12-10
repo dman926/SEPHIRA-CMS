@@ -5,7 +5,7 @@ import logging
 
 logging.basicConfig(filename="log.log", level=logging.INFO, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
 logger = logging.getLogger(__name__)
-app = FastAPI()
+app = FastAPI(debug=True)
 
 app.add_middleware(
 	CORSMiddleware,
