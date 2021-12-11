@@ -17,6 +17,9 @@ export class PageComponent implements OnInit {
 
 	private readonly pageStateKey = makeStateKey<Page>('page');
 
+	// TODO:
+	// For some reason, this component always fires for root if not on a dynamic page
+	// Could have a potential performance improvement, but it's only server-side, so I don't relly care right now
 	constructor(private postService: PostService, private platform: PlatformService, private state: TransferState, private sanitizer: DomSanitizer, private router: Router) {
 		this.loaded = false;
 		this.page = null;
@@ -27,25 +30,34 @@ export class PageComponent implements OnInit {
 			this.fetchPage();
 		} else {
 			this.page = this.state.get(this.pageStateKey, null);
-			if (this.page && this.page.slug !== this.router.url) {
-				this.page.content = this.sanitizer.bypassSecurityTrustHtml(this.page.content as string);
-			}
-			this.loaded = true;
-		}
-		this.router.events.subscribe(ev => {
-			if (ev instanceof NavigationEnd) {
+			if (!this.page || this.page.slug !== this.router.url) {
+				this.fetchPage();
+			} else if (this.page) {
+				if (this.page.content && typeof this.page.content === 'string') {
+					this.page.content = this.sanitizer.bypassSecurityTrustHtml(this.page.content as string);
+				}
+				this.loaded = true;
+			} else {
 				this.fetchPage();
 			}
-		});
+			this.loaded = true;
+			this.router.events.subscribe(ev => {
+				if (ev instanceof NavigationEnd) {
+					this.fetchPage();
+				}
+			});
+		}
 	}
 
 	private fetchPage(): void {
 		this.loaded = false;
 		this.postService.getPostFromSlug('models.Page', this.router.url).subscribe({
 			next: page => {
-				this.page = page;
 				this.state.set(this.pageStateKey, page);
-				if (this.page && this.page.content) {
+				// Do it this way instead of direct assignment because sanitization doesn't work correctly with TransferState.
+				// So make a copy of the object instead.
+				this.page = {...page};
+				if (this.page && this.page.content && typeof this.page.content === 'string') {
 					this.page.content = this.sanitizer.bypassSecurityTrustHtml(this.page.content as string);
 				}
 				this.loaded = true;
