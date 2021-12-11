@@ -1,5 +1,3 @@
 import { Post } from "./post";
 
-export interface Page extends Post {
-	
-}
+export interface Page extends Post { }
