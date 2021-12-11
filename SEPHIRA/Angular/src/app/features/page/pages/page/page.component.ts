@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { DomSanitizer, makeStateKey, TransferState } from '@angular/platform-browser';
 import { NavigationEnd, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
 import { PostService } from 'src/app/core/services/post/post.service';
 import { Page } from 'src/app/models/posts/page';
@@ -10,11 +11,12 @@ import { Page } from 'src/app/models/posts/page';
 	templateUrl: './page.component.html',
 	styleUrls: ['./page.component.scss'],
 })
-export class PageComponent implements OnInit {
+export class PageComponent implements OnInit, OnDestroy {
 
 	loaded: boolean;
 	page: Page | null;
 
+	private routerSub: Subscription | null;
 	private readonly pageStateKey = makeStateKey<Page>('page');
 
 	// TODO:
@@ -23,6 +25,7 @@ export class PageComponent implements OnInit {
 	constructor(private postService: PostService, private platform: PlatformService, private state: TransferState, private sanitizer: DomSanitizer, private router: Router) {
 		this.loaded = false;
 		this.page = null;
+		this.routerSub = null;
 	}
 
 	ngOnInit(): void {
@@ -41,12 +44,16 @@ export class PageComponent implements OnInit {
 				this.fetchPage();
 			}
 			this.loaded = true;
-			this.router.events.subscribe(ev => {
+			this.routerSub = this.router.events.subscribe(ev => {
 				if (ev instanceof NavigationEnd) {
 					this.fetchPage();
 				}
 			});
 		}
+	}
+
+	ngOnDestroy(): void {
+		this.routerSub?.unsubscribe();
 	}
 
 	private fetchPage(): void {
