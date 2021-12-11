@@ -9,7 +9,7 @@ const routes: Routes = [
 		component: ShippingZonesComponent
 	},
 	{
-		path: 'id',
+		path: ':id',
 		component: ShippingZoneComponent
 	}
 ];

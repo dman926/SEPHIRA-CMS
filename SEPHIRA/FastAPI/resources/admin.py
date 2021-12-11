@@ -97,7 +97,7 @@ async def update_user(id: str, user: models.UserModel, identity: str = Depends(g
 	except Exception as e:
 		raise e
 	try:
-		models.User.objects.get(id=id).update(**user)
+		models.User.objects.get(id=id).update(**base_model_to_clean_dict(user))
 		return 'ok'
 	except DoesNotExist:
 		raise NotFoundError(detail='User with id ' + id + ' does not exist')
@@ -184,7 +184,7 @@ async def add_post(post_body: PostForm, identity: str = Depends(get_jwt_identity
 				raise InvalidPostTypeError
 		except Exception:
 			raise InvalidPostTypeError
-		obj = postType(**post_body.obj)
+		obj = postType(**base_model_to_clean_dict(post_body.obj))
 		obj.author = user
 
 		postTypeName = postType.__name__
@@ -248,7 +248,7 @@ async def update_post(id: str, post_body: PostForm, identity: str = Depends(get_
 			if post_body.obj['applicableProducts']:
 					post_body.obj['applicableProducts'] = list(map(lambda p: models.Product.objects.get(id=p), post_body.obj['applicableProducts']))
 
-		toUpdate.update(**post_body.obj)
+		toUpdate.update(**base_model_to_clean_dict(post_body.obj))
 		toUpdate.reload()
 		toUpdate.modified = datetime.now
 		toUpdate.generateNgrams()
@@ -342,7 +342,7 @@ async def edit_order(id: str, order: models.OrderModel, identity: str = Depends(
 		raise UnauthorizedError('User is not admin')
 	try:
 		toUpdate = models.Order.objects.get(id=id)
-		toUpdate.update(**order)
+		toUpdate.update(**base_model_to_clean_dict(order))
 		toUpdate.reload()
 		toUpdate.modified = datetime.now
 		toUpdate.save()
@@ -386,7 +386,7 @@ async def get_us_shipping_zones(page: Optional[int] = None, size: Optional[int] 
 async def add_us_shipping_zone(shippingZone: models.UsShippingZoneModel, identity: str = Depends(get_jwt_identity)):
 	try:
 		get_admin_user(identity)
-		zone = models.UsShippingZone(**shippingZone)
+		zone = models.UsShippingZone(**base_model_to_clean_dict(shippingZone))
 		try:
 			models.UsShippingZone.objects.get(default=True)
 		except DoesNotExist:
@@ -421,8 +421,8 @@ async def update_us_shipping_zone(id: str, shippingZone: models.UsShippingZoneMo
 	except (DoesNotExist, UnauthorizedError):
 		raise UnauthorizedError('User is not admin')
 	try:
-		toUpdate = models.UsShippingZoneModel.objects.get(id=id)
-		toUpdate.update(**shippingZone)
+		toUpdate = models.UsShippingZone.objects.get(id=id)
+		toUpdate.update(**base_model_to_clean_dict(shippingZone))
 		return 'ok'
 	except DoesNotExist:
 		raise NotFoundError()

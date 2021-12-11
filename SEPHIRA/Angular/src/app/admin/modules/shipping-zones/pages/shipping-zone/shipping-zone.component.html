@@ -1,1 +1,47 @@
-<p>shipping-zone works!</p>
+<ng-template #loaderSpinner>
+	<app-loader-spinner></app-loader-spinner>
+</ng-template>
+
+<form *ngIf="loaded;else loaderSpinner" [formGroup]="shippingZoneGroup" (ngSubmit)="editZone()">
+	<div>
+		<p>Applicable States</p>
+		<button mat-icon-button type="button" (click)="addState()"><mat-icon>add</mat-icon></button>
+		<button mat-icon-button type="button" (click)="removeState()"><mat-icon>delete</mat-icon></button>
+		<mat-form-field *ngFor="let stateControl of stateArray.controls;index as i" appearance="fill">
+			<mat-label>State Code {{ i + 1 }}</mat-label>
+			<input matInput [formControl]="$any(stateControl)" maxlength="2" required />
+		</mat-form-field>
+	</div>
+	<div>
+		<p>Rates</p>
+		<button mat-icon-button type="button" (click)="addRate()"><mat-icon>add</mat-icon></button>
+		<button mat-icon-button type="button" (click)="removeRate()"><mat-icon>delete</mat-icon></button>
+		<div *ngFor="let rateGroup of rateArray.controls;index as i" [formGroup]="$any(rateGroup)">
+			<p>Rate {{ i + 1 }}</p>
+			<mat-form-field appearance="fill">
+				<mat-label>Rate</mat-label>
+				<input matInput type="number" formControlName="rate" required />
+			</mat-form-field>
+			<mat-form-field appearance="fill">
+				<mat-label>Type</mat-label>
+				<mat-select formControlName="type" required>
+					<mat-option value="dollar">$</mat-option>
+					<mat-option value="percent">%</mat-option>
+				</mat-select>
+			</mat-form-field>
+			<mat-form-field appearance="fill">
+				<mat-label>Min Cutoff</mat-label>
+				<input matInput type="number" formControlName="minCutoff" />
+				<span matPrefix>$</span>
+			</mat-form-field>
+			<mat-form-field appearance="fill">
+				<mat-label>Max Cutoff</mat-label>
+				<input matInput type="number" formControlName="maxCutoff" />
+				<span matPrefix>$</span>
+			</mat-form-field>
+		</div>
+	</div>
+	<mat-checkbox color="primary" formControlName="default">Default?</mat-checkbox>
+	<button mat-raised-button color="primary" [disabled]="shippingZoneGroup.invalid">Save</button>
+	<p *ngIf="saved">Saved</p>
+</form>

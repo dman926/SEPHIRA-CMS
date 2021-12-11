@@ -63,8 +63,8 @@ class ShippingRateModel(BaseModel):
 	maxCutoff: Optional[float] = None
 
 class UsShippingZoneModel(BaseModel):
-	applicableState: list[str] = []
-	rate: list[ShippingRateModel] = []
+	applicableStates: list[str] = []
+	rates: list[ShippingRateModel] = []
 	default: Optional[bool] = None
 
 class MenuItemModel(BaseModel):

@@ -142,7 +142,7 @@ export class AdminService {
 		}
 	}
 
-	public getAllOrders(postType: string, page?: number, size?: number): Observable<AllOrders> {
+	public getAllOrders(page?: number, size?: number): Observable<AllOrders> {
 		const headers = this.core.createAuthHeader();
 		if (headers) {
 			let params = new HttpParams();
