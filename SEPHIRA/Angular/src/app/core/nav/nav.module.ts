@@ -14,6 +14,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatListModule } from '@angular/material/list';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { ShopModule } from 'src/app/features/shop/shop.module';
 
 
 @NgModule({
@@ -33,7 +34,9 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 		MatButtonModule,
 		MatMenuModule,
 		MatListModule,
-		MatSnackBarModule
+		MatSnackBarModule,
+
+		ShopModule
 	],
 	exports: [
 		NavComponent

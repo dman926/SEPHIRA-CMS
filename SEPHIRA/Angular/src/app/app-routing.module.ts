@@ -21,6 +21,10 @@ const routes: Routes = [
 		canActivate: [SignedInGuard]
 	},
 	{
+		path: 'shop',
+		loadChildren: () => import('./features/shop/shop.module').then(m => m.ShopModule)
+	},
+	{
 		path: '**',
 		loadChildren: () => import('./features/page/page.module').then(m => m.PageModule)
 	}

@@ -26,7 +26,9 @@ export class MenuItemsComponent implements OnInit {
 			});
 		} else {
 			const items = this.state.get(stateKey, null);
-			if (!items) {
+			if (items) {
+				this.menuItems = items;				
+			} else {
 				this.admin.getMenuItems().subscribe(items => {
 					this.menuItems = items;
 				});
