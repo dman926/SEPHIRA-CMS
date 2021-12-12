@@ -3,8 +3,8 @@
 		<h1 class="title" routerLink="/">{{ siteTitle }}</h1>
 		<span class="spacer"></span>
 		<sephira-menu [menuItems]="isAdmin ? adminMenuItems : menuItems" [horizontal]="true" [isAdmin]="isAdmin"></sephira-menu>
+		<sephira-cart *ngIf="!isAdmin && shopEnabled"></sephira-cart>
 		<ng-container *ngIf="auth.isSignedIn;else notSignedIn">
-			<sephira-cart *ngIf="!isAdmin && shopEnabled"></sephira-cart>
 			<button mat-icon-button routerLink="/settings">
 				<mat-icon>settings</mat-icon>
 			</button>
@@ -39,8 +39,8 @@
 						<button mat-icon-button routerLink="/settings">
 							<mat-icon>settings</mat-icon>
 						</button>
-						<sephira-cart *ngIf="!isAdmin && shopEnabled"></sephira-cart>
 					</ng-container>
+					<sephira-cart *ngIf="!isAdmin && shopEnabled"></sephira-cart>
 				</div>
 			</div>
 		</mat-sidenav>

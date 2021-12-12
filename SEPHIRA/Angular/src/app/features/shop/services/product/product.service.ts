@@ -1,9 +1,15 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { CoreService } from 'src/app/core/services/core/core.service';
 import { Review } from 'src/app/models/review';
 import { environment } from 'src/environments/environment';
+
+interface AllReviews {
+	count: number;
+	reviews: Review[];
+	allowed: boolean;
+}
 
 @Injectable({
 	providedIn: 'root',
@@ -14,12 +20,16 @@ export class ProductService {
 
 	constructor(private http: HttpClient, private core: CoreService) { }
 
-	public getReviews(id: string, page?: number, size?: number): Observable<Review[]> {
+	public getReviews(id: string, page?: number, size?: number): Observable<AllReviews> {
+		let headers = this.core.createAuthHeader();
+		if (!headers) {
+			headers = new HttpHeaders();
+		}
 		let params = new HttpParams();
 		if (page && size) {
 			params = params.append('page', page.toString()).append('size', size.toString())
 		}
-		return this.http.get<Review[]>(this.productBase + 'product/' + id + '/reviews', { params });
+		return this.http.get<AllReviews>(this.productBase + 'product/' + id + '/reviews', { headers, params });
 	}
 
 	public submitReview(review: Review): Observable<Review> {
@@ -29,19 +39,6 @@ export class ProductService {
 		} else {
 			return new Observable<Review>();
 		}
-	}
-
-	public reviewAllowed(id: string): Observable<boolean> {
-		const headers = this.core.createAuthHeader();
-		if (headers) {
-			return this.http.get<boolean>(this.productBase + 'product/' + id + '/reviewAllowed', { headers });
-		} else {
-			return new Observable<boolean>();
-		}
-	}
-
-	public getReviewCount(id: string): Observable<number> {
-		return this.http.get<number>(this.productBase + 'product/' + id + '/reviews/count');
 	}
 
 }

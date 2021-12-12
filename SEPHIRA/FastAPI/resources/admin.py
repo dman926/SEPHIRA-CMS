@@ -184,7 +184,7 @@ async def add_post(post_body: PostForm, identity: str = Depends(get_jwt_identity
 				raise InvalidPostTypeError
 		except Exception:
 			raise InvalidPostTypeError
-		obj = postType(**base_model_to_clean_dict(post_body.obj))
+		obj = postType(**post_body.obj)
 		obj.author = user
 
 		postTypeName = postType.__name__

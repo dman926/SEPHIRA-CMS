@@ -5,7 +5,6 @@ import { ActivatedRoute } from '@angular/router';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
 import { PostService } from 'src/app/core/services/post/post.service';
 import { Product } from 'src/app/models/posts/product';
-import { CartService } from '../../services/cart/cart.service';
 
 @Component({
 	selector: 'sephira-shop',
@@ -25,7 +24,7 @@ export class ShopComponent implements OnInit {
 	private readonly productCountStateKey = makeStateKey<number>('productCount');
 	private readonly productStateKey = makeStateKey<Product>('product');
 
-	constructor(private post: PostService, private route: ActivatedRoute, private platform: PlatformService, private state: TransferState, public cart: CartService) {
+	constructor(private post: PostService, private route: ActivatedRoute, private platform: PlatformService, private state: TransferState) {
 		this.products = [];
 		this.productPageEvent = {
 			length: 0,
@@ -49,6 +48,7 @@ export class ShopComponent implements OnInit {
 					const product = this.state.get(this.productStateKey, null);
 					if (product) {
 						this.product = product;
+						this.loaded = true;
 					} else {
 						this.fetchProduct(params['p']);
 					}
@@ -58,8 +58,8 @@ export class ShopComponent implements OnInit {
 				this.isProduct = false;
 				if (params['s']) {
 					this.searchTerm = params['s'];
-					this.resetProducts();
 				}
+				this.resetProducts();
 				if (this.platform.isServer) {
 					this.fetchProducts();
 				} else {
@@ -68,6 +68,7 @@ export class ShopComponent implements OnInit {
 					if (products !== null && productCount !== null) {
 						this.products = products;
 						this.productPageEvent.length = productCount;
+						this.loaded = true;
 					} else {
 						this.fetchProducts();
 					}

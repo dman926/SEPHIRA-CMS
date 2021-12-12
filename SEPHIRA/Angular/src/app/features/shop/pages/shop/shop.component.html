@@ -1,4 +1,6 @@
-<sephira-product-display *ngIf="isProduct;else shop"></sephira-product-display>
+<ng-container *ngIf="isProduct;else shop">
+	<sephira-product-display *ngIf="loaded" [product]="product"></sephira-product-display>
+</ng-container>
 
 <ng-template #shop id="shop">
 	<!-- TODO: <sephira-search></sephira-search> -->
@@ -8,7 +10,7 @@
 	</ng-template>
 	<div *ngIf="loaded;else loaderSpinner" id="products" fxLayoutAlign="stretch">
 	    <div class="product" *ngFor="let product of shownProducts">
-	        <sephira-product-display></sephira-product-display>
+	        <sephira-product-display [product]="product" [card]="true"></sephira-product-display>
 	    </div>
 	</div>
 </ng-template>
