@@ -12,7 +12,7 @@ interface DialogData {
 }
 
 @Component({
-	selector: 'app-otp-dialog',
+	selector: 'sephira-otp-dialog',
 	templateUrl: './otp-dialog.component.html',
 	styleUrls: ['./otp-dialog.component.scss'],
 })

@@ -13,7 +13,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { User } from 'src/app/models/user';
 
 @Component({
-	selector: 'app-nav',
+	selector: 'sephira-nav',
 	templateUrl: './nav.component.html',
 	styleUrls: ['./nav.component.scss'],
 })

@@ -5,7 +5,7 @@ import { PlatformService } from 'src/app/core/services/platform/platform.service
 import { Slide } from 'src/app/models/slide';
 
 @Component({
-	selector: 'app-full-page-slider',
+	selector: 'sephira-full-page-slider',
 	templateUrl: './full-page-slider.component.html',
 	styleUrls: ['./full-page-slider.component.scss'],
 	animations: [

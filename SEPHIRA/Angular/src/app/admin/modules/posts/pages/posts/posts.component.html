@@ -23,7 +23,7 @@
 
 <mat-paginator [length]="postPageEvent.length" [pageSize]="postPageEvent.pageSize" (page)="fetchPosts($event)"></mat-paginator>
 <ng-template #loaderSpinner>
-	<app-loader-spinner></app-loader-spinner>
+	<sephira-loader-spinner></sephira-loader-spinner>
 </ng-template>
 <div *ngIf="loaded;else loaderSpinner">
 	<table mat-table [dataSource]="shownPosts">

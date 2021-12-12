@@ -2,7 +2,7 @@
 	<ng-container *ngFor="let item of items">
 		<ng-container *ngIf="item.children">
 			<button mat-menu-item [routerLink]="item.link" [matMenuTriggerFor]="subMenu.menu!">{{ item.text }}</button>
-			<app-recursive-menu-items #subMenu [items]="item.children"></app-recursive-menu-items>
+			<sephira-recursive-menu-items #subMenu [items]="item.children"></sephira-recursive-menu-items>
 		</ng-container>
 		<ng-container *ngIf="!item.children">
 			<button mat-menu-item [routerLink]="item.link">{{ item.text }}</button>

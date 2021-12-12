@@ -7,7 +7,7 @@ import { User } from 'src/app/models/user';
 import { TwoFaDialogComponent } from '../../components/two-fa-dialog/two-fa-dialog.component';
 
 @Component({
-	selector: 'app-settings',
+	selector: 'sephira-settings',
 	templateUrl: './settings.component.html',
 	styleUrls: ['./settings.component.scss'],
 })

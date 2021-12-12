@@ -12,7 +12,7 @@ interface Rate {
 }
 
 @Component({
-	selector: 'app-shipping-zone',
+	selector: 'sephira-shipping-zone',
 	templateUrl: './shipping-zone.component.html',
 	styleUrls: ['./shipping-zone.component.scss'],
 })

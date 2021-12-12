@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'app-loader-spinner',
+  selector: 'sephira-loader-spinner',
   templateUrl: './loader-spinner.component.html',
   styleUrls: ['./loader-spinner.component.scss']
 })

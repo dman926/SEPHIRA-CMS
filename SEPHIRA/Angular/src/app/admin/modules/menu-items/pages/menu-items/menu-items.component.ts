@@ -5,7 +5,7 @@ import { PlatformService } from 'src/app/core/services/platform/platform.service
 import { MenuItem } from 'src/app/models/menu-item';
 
 @Component({
-	selector: 'app-menu-items',
+	selector: 'sephira-menu-items',
 	templateUrl: './menu-items.component.html',
 	styleUrls: ['./menu-items.component.scss'],
 })

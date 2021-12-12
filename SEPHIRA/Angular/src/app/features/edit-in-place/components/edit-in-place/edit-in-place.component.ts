@@ -4,7 +4,7 @@ import { EditModeDirective } from '../../directives/edit-mode.directive';
 import { ViewModeDirective } from '../../directives/view-mode.directive';
 
 @Component({
-	selector: 'app-edit-in-place',
+	selector: 'sephira-edit-in-place',
 	templateUrl: './edit-in-place.component.html',
 	styleUrls: ['./edit-in-place.component.scss'],
 })

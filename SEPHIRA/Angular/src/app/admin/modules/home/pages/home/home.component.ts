@@ -4,7 +4,7 @@ import { PlatformService } from 'src/app/core/services/platform/platform.service
 import { AdminService } from '../../../../servies/admin.service';
 
 @Component({
-	selector: 'app-home',
+	selector: 'sephira-home',
 	templateUrl: './home.component.html',
 	styleUrls: ['./home.component.scss'],
 })

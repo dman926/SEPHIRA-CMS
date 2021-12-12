@@ -6,7 +6,7 @@ import { AdminService } from 'src/app/admin/servies/admin.service';
 import { Post } from 'src/app/models/posts/post';
 
 @Component({
-	selector: 'app-post-select',
+	selector: 'sephira-post-select',
 	templateUrl: './post-select.component.html',
 	styleUrls: ['./post-select.component.scss'],
 })

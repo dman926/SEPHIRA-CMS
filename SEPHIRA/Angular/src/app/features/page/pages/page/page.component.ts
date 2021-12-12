@@ -7,7 +7,7 @@ import { PostService } from 'src/app/core/services/post/post.service';
 import { Page } from 'src/app/models/posts/page';
 
 @Component({
-	selector: 'app-page',
+	selector: 'sephira-page',
 	templateUrl: './page.component.html',
 	styleUrls: ['./page.component.scss'],
 })

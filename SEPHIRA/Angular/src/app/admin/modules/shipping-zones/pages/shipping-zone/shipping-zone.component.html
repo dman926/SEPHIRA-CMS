@@ -1,5 +1,5 @@
 <ng-template #loaderSpinner>
-	<app-loader-spinner></app-loader-spinner>
+	<sephira-loader-spinner></sephira-loader-spinner>
 </ng-template>
 
 <form *ngIf="loaded;else loaderSpinner" [formGroup]="shippingZoneGroup" (ngSubmit)="editZone()">

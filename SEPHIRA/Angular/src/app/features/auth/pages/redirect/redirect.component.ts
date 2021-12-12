@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
 
 @Component({
-	selector: 'app-redirect',
+	selector: 'sephira-redirect',
 	templateUrl: './redirect.component.html',
 	styleUrls: ['./redirect.component.scss'],
 })

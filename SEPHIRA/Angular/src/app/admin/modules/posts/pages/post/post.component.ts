@@ -8,7 +8,7 @@ import { PlatformService } from 'src/app/core/services/platform/platform.service
 import { Post, PostSchema } from 'src/app/models/posts/post';
 
 @Component({
-	selector: 'app-post',
+	selector: 'sephira-post',
 	templateUrl: './post.component.html',
 	styleUrls: ['./post.component.scss'],
 })

@@ -4,7 +4,7 @@ import { AdminService } from 'src/app/admin/servies/admin.service';
 import { Order } from 'src/app/models/order';
 
 @Component({
-	selector: 'app-orders',
+	selector: 'sephira-orders',
 	templateUrl: './orders.component.html',
 	styleUrls: ['./orders.component.scss'],
 })

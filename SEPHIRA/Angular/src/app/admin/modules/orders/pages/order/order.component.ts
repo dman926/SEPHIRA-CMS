@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-	selector: 'app-order',
+	selector: 'sephira-order',
 	templateUrl: './order.component.html',
 	styleUrls: ['./order.component.scss'],
 })

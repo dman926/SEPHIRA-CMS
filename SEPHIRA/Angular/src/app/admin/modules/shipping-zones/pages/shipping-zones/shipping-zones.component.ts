@@ -5,7 +5,7 @@ import { AdminService } from 'src/app/admin/servies/admin.service';
 import { ShippingZone } from 'src/app/models/shipping-zone';
 
 @Component({
-	selector: 'app-shipping-zones',
+	selector: 'sephira-shipping-zones',
 	templateUrl: './shipping-zones.component.html',
 	styleUrls: ['./shipping-zones.component.scss'],
 })

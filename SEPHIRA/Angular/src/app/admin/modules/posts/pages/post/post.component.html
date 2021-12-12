@@ -1,5 +1,5 @@
 <ng-template #loaderSpinner>
-	<app-loader-spinner></app-loader-spinner>
+	<sephira-loader-spinner></sephira-loader-spinner>
 </ng-template>
 <form *ngIf="postFormGroup && loaded;else loaderSpinner" [formGroup]="postFormGroup" (ngSubmit)="editPost()">
 	<ng-container *ngFor="let schema of schemas" [ngSwitch]="schema.controlType">
@@ -41,11 +41,11 @@
 		</div>
 
 		<div *ngSwitchCase="'media-browser'" class="spaceout">
-			<!-- TODO: <app-media-browser [formArrayName]="schema.name" [allowMultiple]="schema.multiple ? schema.multiple : false">{{ schema.niceName }}</app-media-browser> -->
+			<!-- TODO: <sephira-media-browser [formArrayName]="schema.name" [allowMultiple]="schema.multiple ? schema.multiple : false">{{ schema.niceName }}</sephira-media-browser> -->
 		</div>
 
 		<div *ngSwitchCase="'post-select'" class="spaceout">
-			<app-post-select [type]="schema.type" [formArrayName]="schema.name" [allowMultiple]="schema.multiple ? schema.multiple : false">{{ schema.niceName }}</app-post-select>
+			<sephira-post-select [type]="schema.type" [formArrayName]="schema.name" [allowMultiple]="schema.multiple ? schema.multiple : false">{{ schema.niceName }}</sephira-post-select>
 		</div>
 
 		<p *ngSwitchDefault>Schema Error: {{ schema.name }} has an invalid controlType {{ schema.controlType }}</p>

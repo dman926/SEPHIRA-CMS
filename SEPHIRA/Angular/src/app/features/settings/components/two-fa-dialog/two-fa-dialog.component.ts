@@ -4,7 +4,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { AuthService } from 'src/app/features/auth/services/auth/auth.service';
 
 @Component({
-	selector: 'app-two-fa-dialog',
+	selector: 'sephira-two-fa-dialog',
 	templateUrl: './two-fa-dialog.component.html',
 	styleUrls: ['./two-fa-dialog.component.scss'],
 })

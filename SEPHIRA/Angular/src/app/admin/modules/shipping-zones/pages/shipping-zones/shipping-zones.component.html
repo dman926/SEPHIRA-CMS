@@ -1,7 +1,7 @@
 <button mat-raised-button color="primary" (click)="addNewShippingZone()">New Shipping Zone</button>
 <mat-paginator [length]="shippingZonePageEvent.length" [pageSize]="shippingZonePageEvent.pageSize" (page)="fetchShippingZones($event)"></mat-paginator>
 <ng-template #loaderSpinner>
-	<app-loader-spinner></app-loader-spinner>
+	<sephira-loader-spinner></sephira-loader-spinner>
 </ng-template>
 <div *ngIf="loaded;else loaderSpinner">
 	<button mat-raised-button *ngFor="let zone of shownZones" [routerLink]="['/admin/shipping-zones', zone.id]">

@@ -9,7 +9,7 @@ import { AuthService } from '../../services/auth/auth.service';
 import { OtpDialogComponent } from '../../components/otp-dialog/otp-dialog.component';
 
 @Component({
-	selector: 'app-auth',
+	selector: 'sephira-auth',
 	templateUrl: './auth.component.html',
 	styleUrls: ['./auth.component.scss'],
 })

@@ -2,15 +2,15 @@
 <ng-template #nodeTemplateRef let-list="list">
 	<div class="node" *ngFor="let node of list">
 		<div class="node-content">
-			<app-edit-in-place>
+			<sephira-edit-in-place>
 				<ng-template viewMode>[{{ node.text }}]</ng-template>
 				<ng-template editMode><input (change)="editNodeText(node, $event)" [value]="node.text" /></ng-template>
-			</app-edit-in-place>
+			</sephira-edit-in-place>
 			<span>&nbsp;</span>
-			<app-edit-in-place>
+			<sephira-edit-in-place>
 				<ng-template viewMode>({{ node.link }})</ng-template>
 				<ng-template editMode><input (change)="editNodeLink(node, $event)" [value]="node.link" /></ng-template>
-			</app-edit-in-place>
+			</sephira-edit-in-place>
 			<button mat-icon-button (click)="addChildNode(node)"><mat-icon>add</mat-icon></button><button mat-icon-button (click)="removeNode(node)"><mat-icon>remove</mat-icon></button>
 		</div>
 

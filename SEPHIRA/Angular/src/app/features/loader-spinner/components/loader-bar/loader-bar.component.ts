@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'app-loader-bar',
+  selector: 'sephira-loader-bar',
   templateUrl: './loader-bar.component.html',
   styleUrls: ['./loader-bar.component.scss']
 })

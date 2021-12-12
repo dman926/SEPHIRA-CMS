@@ -11,6 +11,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatMenuModule } from '@angular/material/menu';
+import { ProductDisplayComponent } from './components/product-display/product-display.component';
+import { LoaderSpinnerModule } from '../loader-spinner/loader-spinner.module';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 
 @NgModule({
@@ -18,7 +21,8 @@ import { MatMenuModule } from '@angular/material/menu';
 		ShopComponent,
 		CheckoutComponent,
 		CartComponent,
-		CheckoutConfirmComponent
+		CheckoutConfirmComponent,
+  ProductDisplayComponent
 	],
 	imports: [
 		CommonModule,
@@ -27,7 +31,10 @@ import { MatMenuModule } from '@angular/material/menu';
 		MatButtonModule,
 		MatIconModule,
 		MatBadgeModule,
-		MatMenuModule
+		MatMenuModule,
+		MatPaginatorModule,
+
+		LoaderSpinnerModule
 	],
 	exports: [
 		CartComponent

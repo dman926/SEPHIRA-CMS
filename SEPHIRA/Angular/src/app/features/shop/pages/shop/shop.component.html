@@ -1,1 +1,14 @@
-<p>shop works!</p>
+<sephira-product-display *ngIf="isProduct;else shop"></sephira-product-display>
+
+<ng-template #shop id="shop">
+	<!-- TODO: <sephira-search></sephira-search> -->
+	<mat-paginator [length]="productPageEvent.length" [pageSize]="productPageEvent.pageSize" (page)="fetchProducts($event)"></mat-paginator>
+	<ng-template #loaderSpinner>
+    	<sephira-loader-spinner></sephira-loader-spinner>
+	</ng-template>
+	<div *ngIf="loaded;else loaderSpinner" id="products" fxLayoutAlign="stretch">
+	    <div class="product" *ngFor="let product of shownProducts">
+	        <sephira-product-display></sephira-product-display>
+	    </div>
+	</div>
+</ng-template>

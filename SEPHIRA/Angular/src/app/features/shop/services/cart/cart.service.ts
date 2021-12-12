@@ -8,7 +8,7 @@ import { CartItem } from 'src/app/models/cart-item';
 import { Product } from 'src/app/models/posts/product';
 import { User } from 'src/app/models/user';
 import { environment } from 'src/environments/environment';
-import { AuthService } from '../../auth/services/auth/auth.service';
+import { AuthService } from '../../../auth/services/auth/auth.service';
 
 @Injectable({
 	providedIn: 'root',
