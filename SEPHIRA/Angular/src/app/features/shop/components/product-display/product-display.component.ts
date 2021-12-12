@@ -67,6 +67,12 @@ export class ProductDisplayComponent implements OnInit {
 		}
 	}
 
+	get shownReviews(): Review[] {
+		const index = this.reviewPageEvent.pageIndex;
+		const size = this.reviewPageEvent.pageSize;
+		return this.reviews.slice(index * size, index * size + size);
+	}
+
 	fetchReviews(event?: PageEvent): void {
 		if (event) {
 			this.reviewPageEvent = event;
@@ -87,6 +93,26 @@ export class ProductDisplayComponent implements OnInit {
 			},
 			error: err => this.reviewsLoaded = true
 		});
+	}
+
+	ratingUpdated(rating: number): void {
+		this.reviewForm.get('score')!.setValue(rating);
+	}
+
+	submitReview(): void {
+		if (this.reviewForm.valid) {
+			const review: Review = {
+				product: this.product!.id!,
+				score: this.reviewForm.get('score')!.value,
+				review: this.reviewForm.get('review')!.value
+			};
+			this.productService.submitReview(review).subscribe(review => {
+				if (review) {
+					this.reviews.unshift(review);
+					this.product!.totalReviews!++;
+				}
+			})
+		}
 	}
 
 }

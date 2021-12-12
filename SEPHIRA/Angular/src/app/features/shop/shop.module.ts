@@ -17,6 +17,10 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
 
 import { LoaderSpinnerModule } from '../loader-spinner/loader-spinner.module';
+import { StarRatingModule } from '../star-rating/star-rating.module';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
 	declarations: [
@@ -29,6 +33,7 @@ import { LoaderSpinnerModule } from '../loader-spinner/loader-spinner.module';
 	imports: [
 		CommonModule,
 		ShopRoutingModule,
+		ReactiveFormsModule,
 
 		MatButtonModule,
 		MatIconModule,
@@ -37,8 +42,11 @@ import { LoaderSpinnerModule } from '../loader-spinner/loader-spinner.module';
 		MatPaginatorModule,
 		MatCardModule,
 		MatTabsModule,
+		MatFormFieldModule,
+		MatInputModule,
 
-		LoaderSpinnerModule
+		LoaderSpinnerModule,
+		StarRatingModule
 	],
 	exports: [
 		CartComponent
