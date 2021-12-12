@@ -4,7 +4,7 @@
 		<span class="spacer"></span>
 		<app-menu [menuItems]="isAdmin ? adminMenuItems : menuItems" [horizontal]="true" [isAdmin]="isAdmin"></app-menu>
 		<ng-container *ngIf="auth.isSignedIn;else notSignedIn">
-			<app-cart *ngIf="!isAdmin"></app-cart>
+			<app-cart *ngIf="!isAdmin && shopEnabled"></app-cart>
 			<button mat-icon-button routerLink="/settings">
 				<mat-icon>settings</mat-icon>
 			</button>
@@ -39,7 +39,7 @@
 						<button mat-icon-button routerLink="/settings">
 							<mat-icon>settings</mat-icon>
 						</button>
-						<app-cart *ngIf="!isAdmin"></app-cart>
+						<app-cart *ngIf="!isAdmin && shopEnabled"></app-cart>
 					</ng-container>
 				</div>
 			</div>

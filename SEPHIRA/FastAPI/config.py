@@ -50,6 +50,10 @@ class UvicornSettings:
 	LOG_LEVEL: str = 'info' # It is recommended to use 'warning' in production to reduce log clutter
 
 
+class ShopSettings:
+	ENABLE: bool = True # Must be enabled for payment gateways to work
+
+
 class CoinbaseCommerceSettings:
 	ENABLE: bool = True
 	API_KEY: str = COINBASE_API_KEY

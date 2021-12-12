@@ -8,6 +8,6 @@
 			<span>{{ product.name }} x{{ product.qty }}</span>
         </span>
         <p mat-menu-item *ngIf="(cart.cart$ | async)!.length === 0">No items in cart!</p>
-        <button mat-flat-button routerLink="/checkout">View Cart</button>
+        <button mat-flat-button routerLink="/shop/checkout">View Cart</button>
     </mat-menu>
 </section>

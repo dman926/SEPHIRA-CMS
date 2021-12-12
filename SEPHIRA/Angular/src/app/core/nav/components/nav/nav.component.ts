@@ -40,6 +40,7 @@ export class NavComponent implements OnInit {
 	readonly desktopMenuStyle: string = environment.desktopMenuStyle;
 	readonly mobileMenuStyle: string = environment.mobileMenuStyle;
 	readonly adminPath: string = environment.adminPath;
+	readonly shopEnabled: boolean = environment.enableShop;
 	readonly adminMenuItems: MenuItem[] = [
 		{
 			text: 'Home',
