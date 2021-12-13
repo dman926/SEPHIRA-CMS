@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { EMPTY, Observable } from 'rxjs';
 import { CoreService } from 'src/app/core/services/core/core.service';
 import { CartItem } from 'src/app/models/cart-item';
-import { AddressForm } from 'src/app/models/order';
+import { AddressForm, Order } from 'src/app/models/order';
 import { Coupon } from 'src/app/models/posts/coupon';
 import { ShippingRate } from 'src/app/models/shipping-zone';
 import { TaxRate } from 'src/app/models/tax-rate';
@@ -38,22 +38,6 @@ export class CheckoutService {
 		return this.http.post<string>(this.orderBase + 'orders', { products }, { headers });
 	}
 
-	public getShippingRate(country: string, state: string): Observable<ShippingRate[]> {
-		if (this.requiredLoggedIn) {
-			return EMPTY;
-		}
-		const params = new HttpParams().append('state', state);
-		return this.http.get<ShippingRate[]>(this.shippingBase + country, { params });
-	}
-
-	public getTaxRate(country: string, zip: string): Observable<TaxRate> {
-		if (this.requiredLoggedIn) {
-			return EMPTY;
-		}
-		const params = new HttpParams().append('zip', zip);
-		return this.http.get<TaxRate>(this.taxBase + country, { params });
-	}
-
 	public editOrder(id: string, items?: CartItem[], addresses?: AddressForm, coupons?: Coupon[]): Observable<string> {
 		let headers = this.core.createAuthHeader();
 		if (!headers) {
@@ -73,6 +57,33 @@ export class CheckoutService {
 			payload['coupons'] = coupons;
 		}
 		return this.http.put<string>(this.orderBase + 'order/' + id, payload, { headers });
+	}
+
+	public getOrder(id: string): Observable<Order> {
+		let headers = this.core.createAuthHeader();
+		if (!headers) {
+			if (this.requiredLoggedIn) {
+				return EMPTY;
+			}
+			headers = new HttpHeaders();
+		}
+		return this.http.get<Order>(this.orderBase + 'order/' + id, { headers });
+	}
+
+	public getShippingRate(country: string, state: string): Observable<ShippingRate[]> {
+		if (this.requiredLoggedIn) {
+			return EMPTY;
+		}
+		const params = new HttpParams().append('state', state);
+		return this.http.get<ShippingRate[]>(this.shippingBase + country, { params });
+	}
+
+	public getTaxRate(country: string, zip: string): Observable<TaxRate> {
+		if (this.requiredLoggedIn) {
+			return EMPTY;
+		}
+		const params = new HttpParams().append('zip', zip);
+		return this.http.get<TaxRate>(this.taxBase + country, { params });
 	}
 
 	public stripeCheckout(paymentMethodID: string, email: string, addresses: AddressForm, orderID: string): Observable<string> {

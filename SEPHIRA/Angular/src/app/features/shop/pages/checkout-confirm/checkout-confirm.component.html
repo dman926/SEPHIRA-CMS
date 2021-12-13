@@ -1,1 +1,13 @@
-<p>checkout-confirm works!</p>
+<section id="status" *ngIf="loaded;else loaderSpinner">
+	<ng-container *ngIf="order;else notFound">
+		<p>Order Status: {{ order.orderStatus }}</p>
+		<p>Open this window at any time to see the order status</p>	
+	</ng-container>
+	<ng-template #notFound>
+		<p>404</p>
+	</ng-template>
+</section>
+
+<ng-template #loaderSpinner>
+	<sephira-loader-spinner></sephira-loader-spinner>
+</ng-template>

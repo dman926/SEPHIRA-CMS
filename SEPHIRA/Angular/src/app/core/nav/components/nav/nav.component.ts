@@ -61,8 +61,8 @@ export class NavComponent implements OnInit {
 		private platform: PlatformService,
 		private state: TransferState,
 		private router: Router,
+		private snackbar: MatSnackBar,
 		public auth: AuthService,
-		private snackbar: MatSnackBar
 	) {
 		this.isHandset = false;
 		this.isHandset$.subscribe(val => {
