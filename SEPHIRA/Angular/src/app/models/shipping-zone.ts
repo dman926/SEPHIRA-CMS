@@ -1,11 +1,13 @@
 export interface ShippingZone {
 	id?: string;
 	applicableStates?: string[];
-	rates?: {
-		rate: number;
-		type: string;
-		minCutoff: number;
-		maxCutoff: number;
-	}[];
+	rates?: ShippingRate[];
 	default?: boolean;
+}
+
+export interface ShippingRate {
+	rate: number;
+	type: string;
+	minCutoff: number;
+	maxCutoff: number;
 }

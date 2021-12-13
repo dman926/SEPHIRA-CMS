@@ -5,7 +5,8 @@
     "outDir": "./out-tsc/server",
     "target": "es2019",
     "types": [
-      "node"
+      "node",
+	  "stripe-v3"
     ]
   },
   "files": [

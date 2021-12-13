@@ -55,6 +55,7 @@ class UserModel(BaseModel):
 class OrderModel(BaseModel):
 	addresses: Optional[dict] = None
 	coupons: Optional[list[str]] = None
+	items: Optional[list[CartItemIDModel]] = None
 
 class ShippingRateModel(BaseModel):
 	rate: float

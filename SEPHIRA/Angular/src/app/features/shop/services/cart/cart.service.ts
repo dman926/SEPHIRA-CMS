@@ -1,10 +1,11 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable, of } from 'rxjs';
 import { CoreService } from 'src/app/core/services/core/core.service';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
 import { CartItem } from 'src/app/models/cart-item';
+import { Coupon } from 'src/app/models/posts/coupon';
 import { Product } from 'src/app/models/posts/product';
 import { User } from 'src/app/models/user';
 import { environment } from 'src/environments/environment';
@@ -117,5 +118,17 @@ export class CartService {
 			return [];
 		}
 	}
+
+	public addCoupon(orderID: string, code: string): Observable<Coupon> {
+		let headers = this.core.createAuthHeader();
+		if (!headers) {
+			if (environment.requireLoggedInToCheckout) {
+				return EMPTY;
+			}
+			headers = new HttpHeaders();
+		}
+		return this.http.post<Coupon>(this.cartBase + 'couponCheck', { orderID, code }, { headers });
+	}
+
 
 }

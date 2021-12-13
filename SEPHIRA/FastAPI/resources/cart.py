@@ -5,7 +5,7 @@ from config import APISettings
 
 from modules.JWT import get_jwt_identity
 
-from database.models import Product, Coupon, User, CartItemIDModel
+from database.models import Product, Coupon, User, CartItemIDModel, Order
 
 router = APIRouter(
 	prefix=APISettings.ROUTE_BASE + 'cart',
@@ -17,8 +17,8 @@ router = APIRouter(
 ###########
 
 class CouponCheckForm(BaseModel):
+	orderID: str
 	code: str
-	cart: list[CartItemIDModel]
 
 ##########
 # ROUTES #
@@ -55,9 +55,10 @@ async def check_coupon(coupon_check_body: CouponCheckForm):
 			return coupon.serialize()
 		if coupon.maxUses != -1 and coupon.maxUses < coupon.uses:
 			return False
-		for item in coupon_check_body.cart:
+		order = Order.objects.get(id=coupon_check_body.orderID)
+		for item in order.products:
 			try:
-				product = Product.objects.get(id=item.id)
+				product = Product.objects.get(id=item.product.id)
 				if product in coupon.appplicableProducts:
 					return coupon.serialize()
 			except Exception:
