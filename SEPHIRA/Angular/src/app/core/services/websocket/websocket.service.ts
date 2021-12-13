@@ -1,13 +1,17 @@
 import { Injectable } from '@angular/core';
-import { timer } from 'rxjs';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { environment } from 'src/environments/environment';
-import { PlatformService } from '../platform/platform.service';
+import { CookieService } from '../cookie/cookie.service';
 
 interface SocketEl {
 	namespace: string;
 	url: string;
 	socket: WebSocketSubject<any>;
+}
+
+interface Payload {
+	type: string;
+	payload: any;
 }
 
 @Injectable({
@@ -19,7 +23,7 @@ export class WebsocketService {
 	private sockets: SocketEl[];
 	private baseWSServer: string | undefined;
 
-	constructor(private platform: PlatformService) {
+	constructor(private cookie: CookieService) {
 		this.sockets = [];
 		const wsServer = environment.apiServer;
 		if (wsServer.substring(0, 5) === 'https') {
@@ -28,13 +32,6 @@ export class WebsocketService {
 			this.baseWSServer = 'ws' + wsServer.substring(4);
 		} else {
 			throw new Error('`apiServer` environment variable incorrectly defined. Should begin with `https` or `http`');
-			this.baseWSServer = undefined;
-		}
-		if (this.platform.isBrowser) {
-			// Prune the global sockets array every minute to improve performance
-			timer(1000 * 60).subscribe(test => {
-				this.prune();
-			});
 		}
 	}
 
@@ -49,7 +46,6 @@ export class WebsocketService {
 			url = this.baseWSServer;
 			if (!url) {
 				throw new Error('No valid WS server defined. Either define it with `connect(namespace, url)` and/or with `apiServer` environment variable (`apiServer` must be defined anyway for SEPHIRA to work)');
-				return null;
 			}
 		}
 		for (let i = 0; i < this.sockets.length; i++) {
@@ -73,7 +69,7 @@ export class WebsocketService {
 	 */
 	close(websocket: WebSocketSubject<any>): void {
 		websocket.unsubscribe();
-		console.log(websocket.closed);
+		this.prune();
 	}
 
 	/**
@@ -83,6 +79,27 @@ export class WebsocketService {
 	 */
 	public send(websocket: WebSocketSubject<any>, message: any): void {
 		websocket.next(message);
+	}
+
+	/**
+	 * Create a payload with `type` as 'auth' and `payload` as the accessToken cookie
+	 * @returns The auth payload
+	 */
+	public createAuthPayload(): Payload {
+		return this.createPayload('auth', this.cookie.getItem('accessToken'));
+	}
+
+	/**
+	 * Create a payload
+	 * @param type The type of payload
+	 * @param payload The payload
+	 * @returns A Payload
+	 */
+	public createPayload(type: string, payload: any): Payload {
+		return {
+			type,
+			payload
+		};
 	}
 
 	/**

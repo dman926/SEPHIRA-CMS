@@ -4,7 +4,7 @@ from config import APISettings
 from typing import Optional
 from fastapi import Depends
 from modules.JWT.jwt import get_jwt_identity, get_jwt_identity_optional
-from mongoengine.errors import DoesNotExist
+from mongoengine.errors import DoesNotExist, ValidationError
 from resources.errors import NotFoundError, SchemaValidationError
 from database.models import CartItem, CartItemIDModel, Coupon, Order, OrderModel, Product, UsShippingZone, UsTaxJurisdiction
 
@@ -63,7 +63,7 @@ async def get_order(id: str, identity: Optional[str] = Depends(get_jwt_identity_
 			return order.serialize()
 		else:
 			return { 'orderStatus': order.orderStatus }
-	except DoesNotExist:
+	except (DoesNotExist, ValidationError):
 		raise NotFoundError().http_exception
 	except Exception as e:
 		raise e
