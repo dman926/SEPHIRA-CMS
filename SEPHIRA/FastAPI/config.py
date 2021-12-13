@@ -45,6 +45,10 @@ class APISettings:
 	ROUTE_BASE: str = '/' # There must be a leading and trailing '/'
 
 
+class FastAPISettings:
+	DEBUG: bool = True # You should turn this off in production
+
+
 class UvicornSettings:
 	USE_RELOADER: bool = True # You should most definitely set this to 'False' in production as it takes a lot of resources to use
 	LOG_LEVEL: str = 'info' # It is recommended to use 'warning' in production to reduce log clutter

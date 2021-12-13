@@ -1,11 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from config import CORSSettings, UvicornSettings
+from config import CORSSettings, FastAPISettings, UvicornSettings
 import logging
 
 logging.basicConfig(filename="log.log", level=logging.INFO, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
 logger = logging.getLogger(__name__)
-app = FastAPI(debug=True)
+app = FastAPI(debug=FastAPISettings.DEBUG)
 
 app.add_middleware(
 	CORSMiddleware,
