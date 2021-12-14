@@ -35,7 +35,7 @@ export class CheckoutService {
 			}
 			headers = new HttpHeaders();
 		}
-		return this.http.post<string>(this.orderBase + 'orders', { products }, { headers });
+		return this.http.post<string>(this.orderBase + 'orders', products, { headers });
 	}
 
 	public editOrder(id: string, items?: CartItem[], addresses?: AddressForm, coupons?: Coupon[]): Observable<string> {

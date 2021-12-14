@@ -1,11 +1,11 @@
 import { COMMA, ENTER, P } from '@angular/cdk/keycodes';
-import { AfterContentInit, Component, OnInit } from '@angular/core';
+import { AfterContentInit, Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { CartItem } from 'src/app/models/cart-item';
 import { Coupon } from 'src/app/models/posts/coupon';
 import { CheckoutService, CoinbaseRes } from '../../services/checkout/checkout.service';
 import { AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { TaxRate } from 'src/app/models/tax-rate';
-import { ShippingRate, ShippingZone } from 'src/app/models/shipping-zone';
+import { ShippingRate } from 'src/app/models/shipping-zone';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
 import { DynamicScriptLoaderService } from 'src/app/core/services/dynamic-script-loader/dynamic-script-loader.service';
 import { environment } from 'src/environments/environment';
@@ -28,13 +28,19 @@ interface Intent {
 	templateUrl: './checkout.component.html',
 	styleUrls: ['./checkout.component.scss'],
 })
-export class CheckoutComponent implements OnInit, AfterContentInit {
+export class CheckoutComponent implements OnInit, AfterContentInit, OnDestroy {
+
+	@ViewChild('stripePayButton') private stripePayButton: HTMLButtonElement | undefined;
+	@ViewChild('stripeCardError') private stripeCardError: HTMLElement | undefined;
+	@ViewChild('stripeForm') private stripeForm: ElementRef | undefined;
+	@ViewChild('paypalButtonContainer') private paypalButtonContainer: HTMLElement | undefined;
 
 	products: CartItem[];
 	coupons: Coupon[];
 
 	stripe: stripe.Stripe | null;
 	stripeIntent: Intent | null;
+	stripeListener: (() => void) | null;
 
 	coinbaseCommerceRes: CoinbaseRes | null;
 
@@ -50,18 +56,20 @@ export class CheckoutComponent implements OnInit, AfterContentInit {
 	stripeReady: boolean;
 	paypalReady: boolean;
 
+	readonly requireLogin: boolean = environment.requireLoggedInToCheckout;
+	readonly enableStripe: boolean = environment.enableStripe;
+	readonly enablePayPal: boolean = environment.enablePayPal;
+	readonly enableCoinbaseCommerce: boolean = environment.enableCoinbaseCommerce;
 	readonly separatorKeyCodes = [ENTER, COMMA] as const;
-
-	private readonly requireLogin: boolean = environment.requireLoggedInToCheckout;
-	private readonly enableStripe: boolean = environment.enableStripe;
-	private readonly enablePayPal: boolean = environment.enablePayPal;
-	private readonly enableCoinbaseCommerce: boolean = environment.enableCoinbaseCommerce;
 	
-	constructor(private cart: CartService, private checkout: CheckoutService, private platform: PlatformService, private scriptLoader: DynamicScriptLoaderService, private router: Router) {
+	private stripeCard: any;
+
+	constructor(private cart: CartService, private checkout: CheckoutService, private platform: PlatformService, private scriptLoader: DynamicScriptLoaderService, private router: Router, private renderer: Renderer2) {
 		this.products = [];
 		this.coupons = [];
 		this.stripe = null;
 		this.stripeIntent = null;
+		this.stripeListener = null;
 		this.coinbaseCommerceRes = null;
 		this.addressForm = new FormGroup({
 			fullName: new FormControl('', [Validators.required]),
@@ -90,6 +98,7 @@ export class CheckoutComponent implements OnInit, AfterContentInit {
 		this.canEdit = false;
 		this.stripeReady = false;
 		this.paypalReady = false;
+		this.stripeCard = null;
 	}
 
 	ngOnInit(): void {
@@ -97,6 +106,9 @@ export class CheckoutComponent implements OnInit, AfterContentInit {
 			// TODO: I don't know if I want to subscribe to the local or server cart
 			this.cart.getCart().subscribe(cart => {
 				this.products = cart;
+				this.checkout.createOrder(this.products).subscribe(orderID => {
+					this.orderID = orderID;
+				});
 			});
 			if (this.enablePayPal) {
 				this.scriptLoader.load('paypal').then(data => {
@@ -133,36 +145,22 @@ export class CheckoutComponent implements OnInit, AfterContentInit {
 								iconColor: '#fa755a'
 							}
 						};
-						const card = elements.create('card', { style });
+						this.stripeCard = elements.create('card', { style });
 						setTimeout(() => {
-							card.mount('#card-element');
-							card.on('change', event => {
+							this.stripeCard.mount('#card-element');
+							this.stripeCard.on('change', (event: any) => {
 								// Disable the Pay button if there are no card details in the Card Element
-								const button = document.querySelector('button');
-								const cardError = document.querySelector('#card-error');
-								if (event && event.error && button && cardError) {
-									button.disabled = event.empty;
-									cardError.textContent = event.error ? event.error.message ? event.error.message : null : '';
+								if (event && event.error && this.stripePayButton && this.stripeCardError) {
+									this.stripePayButton.disabled = event.empty;
+									this.stripeCardError.textContent = event.error ? event.error.message ? event.error.message : null : '';
 								}
 							});
-							const form = document.getElementById('stripe-payment-form');
-							if (form) {
-								form.addEventListener('submit', event => {
-									event.preventDefault();
-									// Complete payment when the submit button is clicked
-									this.createStripePaymentMethod(card);
-								});
-							}
 						});
 					} else {
 						throw new Error('`stripe` failed to load');
 					}
 				});
 			}
-			this.checkout.createOrder(this.products).subscribe(orderID => {
-				this.orderID = orderID;
-			});
-			
 			const addressState = this.addressForm.get('stateProvidenceRegion')!;
 			addressState.valueChanges.pipe(
 				debounceTime(500)
@@ -194,6 +192,12 @@ export class CheckoutComponent implements OnInit, AfterContentInit {
 					this.taxRate = null;
 				}
 			});
+		}
+	}
+
+	ngOnDestroy(): void {
+		if (this.stripeListener !== null) {
+			this.stripeListener();
 		}
 	}
 
@@ -232,8 +236,21 @@ export class CheckoutComponent implements OnInit, AfterContentInit {
 			return;
 		}
 		const returnLoc = window.location.protocol + '//' + window.location.hostname + ':' + window.location.port;
-		document.getElementById('paypal-butotn-container')!.innerHTML = '';
+		if (this.paypalButtonContainer) {
+			this.paypalButtonContainer.innerHTML = '';
+		}
 		this.coinbaseCommerceRes = null;
+		if (this.enableStripe) {
+			// TODO: I don't know if I should unlisten then listen again, or just leave the listener intact
+			if (!this.stripeListener && this.stripeForm) {
+				this.stripeListener = this.renderer.listen(this.stripeForm.nativeElement, 'submit', event => {
+					event.preventDefault();
+					// Complete payment when the submit button is clicked
+					this.createStripePaymentMethod(this.stripeCard);
+				});
+			}
+
+		}
 		this.checkout.editOrder(orderID, this.products, this.getAddressDetails(), this.coupons).subscribe(res => {
 			paypal.Buttons({
 				createOrder: async (data: any, actions: any) => {
@@ -244,13 +261,15 @@ export class CheckoutComponent implements OnInit, AfterContentInit {
 						this.onApprove(res);
 					});
 				}
-			}).render('#apaypal-button-container');
-			this.checkout.getCoinbaseCommerceRes(orderID, returnLoc).pipe(map(res => {
-				res.expires_at = new Date(res.expires_at);
-				return res;
-			})).subscribe(res => {
-				this.coinbaseCommerceRes = res;
-			});
+			}).render('#paypal-button-container');
+			if (this.enableCoinbaseCommerce) {
+				this.checkout.getCoinbaseCommerceRes(orderID, returnLoc).pipe(map(res => {
+					res.expires_at = new Date(res.expires_at);
+					return res;
+				})).subscribe(res => {
+					this.coinbaseCommerceRes = res;
+				});
+			}
 		});
 	}
 

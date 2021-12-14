@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Inject, Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 
 interface Script {
@@ -18,7 +19,7 @@ export class DynamicScriptLoaderService {
 
 	private scripts: any = {};
 
-	constructor() {
+	constructor(@Inject(DOCUMENT) private document: Document) {
 		ScriptStore.forEach(script => {
 			this.scripts[script.name] = {
 				loaded: false,
@@ -37,7 +38,7 @@ export class DynamicScriptLoaderService {
 		return new Promise((resolve, reject) => {
 			if (!this.scripts[name].loaded) {
 				// Load script
-				let script = document.createElement('script');
+				let script = this.document.createElement('script');
 				script.type = 'text/javascript';
 				script.src = this.scripts[name].src;
 				script.onload = () => {
@@ -45,7 +46,7 @@ export class DynamicScriptLoaderService {
 					resolve({ script: name, loaded: true, status: 'loaded' });
 				};
 				script.onerror = (error: any) => resolve({ script: name, loaded: false, status: 'not loaded' });
-				document.getElementsByTagName('head')[0].appendChild(script);
+				this.document.head.appendChild(script);
 			} else {
 				resolve({ script: name, loaded: true, status: 'already loaded' });
 			}

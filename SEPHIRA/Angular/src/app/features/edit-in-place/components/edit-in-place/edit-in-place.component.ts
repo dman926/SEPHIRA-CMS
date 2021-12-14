@@ -1,4 +1,5 @@
-import { Component, ContentChild, ElementRef, EventEmitter, OnInit, Output, TemplateRef } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, ContentChild, ElementRef, EventEmitter, Inject, OnInit, Output, TemplateRef } from '@angular/core';
 import { filter, fromEvent, Observable, Subject, Subscription, switchMapTo, take } from 'rxjs';
 import { EditModeDirective } from '../../directives/edit-mode.directive';
 import { ViewModeDirective } from '../../directives/view-mode.directive';
@@ -19,7 +20,7 @@ export class EditInPlaceComponent implements OnInit {
 	editMode: Subject<any>;
 	editMode$: Observable<any>;
 
-	constructor(private host: ElementRef) {
+	constructor(private host: ElementRef, @Inject(DOCUMENT) private document: Document) {
 		this.update = new EventEmitter();
 		this.mode = 'view';
 		this.editMode = new Subject();
@@ -47,7 +48,7 @@ export class EditInPlaceComponent implements OnInit {
 	}
 
 	private editModeHandler(): void {
-		const clickOutside$ = fromEvent(document, 'click').pipe(
+		const clickOutside$ = fromEvent(this.document, 'click').pipe(
 			filter(({ target }) => this.element.contains(target) === false),
 			take(1)
 		);

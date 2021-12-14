@@ -33,7 +33,7 @@ async def get_cart(identity: str = Depends(get_jwt_identity)):
 		raise e
 
 @router.put('/cart')
-async def update_cart(cart: list[CartItemIDModel] = Body(..., embed=True), identity: str = Depends(get_jwt_identity)):
+async def update_cart(cart: list[CartItemIDModel], identity: str = Depends(get_jwt_identity)):
 	try:
 		user = User.objects.get(id=identity)
 		for i in range(0, len(cart)):

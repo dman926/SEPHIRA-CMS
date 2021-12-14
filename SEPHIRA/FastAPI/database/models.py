@@ -38,6 +38,8 @@ class ProductModel(BaseModel):
 class CartItemIDModel(BaseModel):
 	id: str
 	qty: int
+	name: Optional[str] = None
+	price: Optional[float] = None
 
 class CartItemModel(BaseModel):
 	product: ProductModel

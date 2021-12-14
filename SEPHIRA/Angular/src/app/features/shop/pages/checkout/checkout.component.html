@@ -85,17 +85,17 @@
 		<mat-step>
 			<button mat-button matStepperPrevious>Back</button>
 			<section id="payment-forms">
-				<a *ngIf="coinbaseCommerceRes && coinbaseCommerceRes.expires_at > now" [href]="coinbaseCommerceRes.hosted_url">Pay with Coinbase</a>
-				<div id="paypal-button-container"></div>
-				<form id="stripe-payment-form">
+				<a *ngIf="coinbaseCommerceRes && coinbaseCommerceRes.expires_at > now && enableCoinbaseCommerce" [href]="coinbaseCommerceRes.hosted_url">Pay with Coinbase</a>
+				<div #paypalButtonContainer id="paypal-button-container" *ngIf="enablePayPal"></div>
+				<form #stripeForm id="stripe-payment-form" *ngIf="enableStripe">
 					<div id="card-element">
 						<!--Stripe.js injects the Card Element-->
 					</div>
-					<button id="submit">
+					<button #stripePayButton id="submit">
 						<div class="spinner hidden" id="spinner"></div>
 						<span id="button-text">Pay with Stripe</span>
 					</button>
-					<p id="card-error" role="alert"></p>
+					<p #stripeCardError id="card-error" role="alert"></p>
 				</form>
 			</section>
 		</mat-step>
