@@ -19,7 +19,6 @@ class UserAlreadyExistsError(Exception):
 class UnauthorizedError(Exception):
 	def __init__(self, detail: Optional[str] = ''):
 		self.detail = detail
-		print(self.detail)
 		self.http_exception = HTTPException(status_code=self.status_code, detail=self.detail)
 
 	status_code = 401

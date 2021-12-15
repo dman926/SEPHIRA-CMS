@@ -25,13 +25,16 @@ router = APIRouter(
 # HELPERS #
 ###########
 
-def allowed_file(filename):
+def allowed_file(filename: str) -> bool:
 	return '.' in filename and filename.rsplit('.', 1)[1].lower() in UploadSettings.ALLOWED_EXTENSIONS
 
-def is_image(filename):
+def allowed_image_ratio(ratio: str) -> bool:
+	return ratio in UploadSettings.ALLOWED_IMAGE_RATIOS
+
+def is_image(filename: str) -> bool:
 	return '.' in filename and filename.rsplit('.', 1)[1].lower() in UploadSettings.IMAGE_EXTENSIONS
 
-def image_to_new_height(image: Image, requestedHeight: float):
+def image_to_new_height(image: Image, requestedHeight: float) -> Image:
 	width = image.size[0]
 	height = image.size[1]
 	heightMult = 1 / (requestedHeight / (width / height))
@@ -41,28 +44,38 @@ def image_to_new_height(image: Image, requestedHeight: float):
 	background.paste(image, offset)
 	return background
 
+def fraction_to_float(fraction: str) -> float:
+	''' Expects a non-mixed fraction (ex. `16/9`) '''
+	try:
+		return float(fraction)
+	except ValueError:
+		num, denom = fraction.split('/')
+		return float(num) / float(denom)
+
 ###########
 # SCHEMAS #
 ###########
 
 class UploadForm(BaseModel):
-	isThumbnail: Optional[bool] = None
+	file: UploadFile = File(...)
+	folder: str
+	ratio: Optional[str] = None
 
 ##########
 # ROUTES #
 ##########
 
 @router.post('/upload')
-async def upload_file(upload_body: UploadForm, file: UploadFile = File(...), identity: str = Depends(get_jwt_identity)):
+async def upload_file(upload_body: UploadForm, identity: str = Depends(get_jwt_identity)):
 	try:
-		if file.filename == '':
+		if upload_body.file.filename == '':
 			raise SchemaValidationError
-		if allowed_file(file.filename):
-			requestedPath = path.join(UploadSettings.UPLOAD_FOLDER, identity)
+		if allowed_file(upload_body.file.filename):
+			requestedPath = path.join(UploadSettings.UPLOAD_FOLDER, identity, upload_body.folder)
 			if not path.isdir(requestedPath):
 				makedirs(requestedPath)
 			# Handle filename collisions
-			savePath = path.join(requestedPath, file.filename)
+			savePath = path.join(requestedPath, upload_body.file.filename)
 			if path.isfile(savePath):
 				counter = 2
 				pathSplit = savePath.rsplit('.', 1)
@@ -72,25 +85,24 @@ async def upload_file(upload_body: UploadForm, file: UploadFile = File(...), ide
 					newPath = pathSplit[0] + '_' + str(counter) + '.' + pathSplit[1]
 				savePath = newPath
 			
-			if is_image(file.filename):
-				image = Image.open(file.file)
+			if is_image(upload_body.file.filename):
+				if upload_body.ratio:
+					ratio = upload_body.ratio
+				else:
+					ratio = UploadSettings.DEFAULT_IMAGE_RATIO
+				image = Image.open(upload_body.file.file)
 				size = image.size
 				width = size[0]
 				height = size[1]
 				quality = UploadSettings.IMAGE_COMPRESSION_AMOUNT
-				if upload_body.isThumbnail:
-					if width / height != 1:
-						image_to_new_height(image, 1).save(savePath, optimize=True, quality=quality)
-					else:
-						image.save(savePath, optimize=True, quality=quality)
+				ratio = fraction_to_float(ratio)
+				if ratio != width / height:
+					image_to_new_height(image, 1).save(savePath, optimize=True, quality=quality)
 				else:
-					if width / height != (16 / 9):
-						image_to_new_height(image, 16 / 9).save(savePath, optimize=True, quality=quality)
-					else:
-						image.save(savePath, optimize=True, quality=quality)
+					image.save(savePath, optimize=True, quality=quality)
 			else:
 				with Path(savePath).open('wb') as dirBuf:
-					shutil.copyfileobj(file.file, dirBuf)
+					shutil.copyfileobj(upload_body.file.file, dirBuf)
 		return '/assets/uploads/' + identity + '/' + savePath.rsplit('/', 1)[1]
 	except SchemaValidationError:
 		raise SchemaValidationError().http_exception
