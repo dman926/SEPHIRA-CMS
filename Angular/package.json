@@ -32,7 +32,7 @@
     "@nguniversal/express-engine": "^12.1.1",
     "@techiediaries/ngx-qrcode": "^9.1.0",
     "@types/stripe-v3": "^3.1.26",
-    "angular-google-tag-manager": "^1.4.2",
+    "angular-google-tag-manager": "^1.4.4",
     "bufferutil": "^4.0.5",
     "cors": "^2.8.5",
     "express": "^4.15.2",
