@@ -41,7 +41,7 @@
     "ngx-cookie-backend": "^5.0.2",
     "path": "^0.12.7",
     "rxjs": "~6.6.7",
-    "socket.io-client": "^4.3.2",
+    "socket.io-client": "^4.4.0",
     "swagger-ui-dist": "^3.52.5",
     "tslib": "^2.3.1",
     "utf-8-validate": "^5.0.7",
