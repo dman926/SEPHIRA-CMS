@@ -36,3 +36,12 @@ def base_model_to_clean_dict(model):
 	Returns a `cleaned` dictionary (a dictionary with all None values removed) for easily exploding a BaseModel to a dictionary
 	'''
 	return { k: v for k, v, in model.dict().items() if v is not None }
+
+def class_name_to_class(name: str, class_name: str):
+	'''
+	A safer way to dynamically `eval` post types
+
+	`name` should always be `__name__`, `class_name` should be the post type name.
+	'''
+	from sys import modules
+	return getattr(getattr(modules[name], class_name.rsplit('.', 1)[0]), class_name.rsplit('.', 1)[1])

@@ -8,7 +8,7 @@ from modules.JWT import get_jwt_identity
 
 import database.models as models
 from resources.errors import InvalidPostTypeError, NotFoundError, UnauthorizedError, SchemaValidationError
-from services.util_service import all_subclasses, is_post, base_model_to_clean_dict
+from services.util_service import all_subclasses, is_post, base_model_to_clean_dict, class_name_to_class
 
 from datetime import datetime
 
@@ -135,7 +135,7 @@ async def get_post_schema(post: str, identity: str = Depends(get_jwt_identity)):
 	try:
 		get_admin_user(identity)
 		try:
-			postType = eval(post)
+			postType = class_name_to_class(__name__, post)
 			if not is_post(postType):
 				raise InvalidPostTypeError
 		except Exception:
@@ -153,7 +153,7 @@ async def get_posts(post: str, page: Optional[int] = None, size: Optional[int] =
 	try:
 		get_admin_user(identity)
 		try:
-			postType = eval(post)
+			postType = class_name_to_class(__name__, post)
 			if not is_post(postType):
 				raise InvalidPostTypeError
 		except Exception:
@@ -179,7 +179,7 @@ async def add_post(post_body: PostForm, identity: str = Depends(get_jwt_identity
 	try:
 		user = get_admin_user(identity)
 		try:
-			postType = eval(post_body.post)
+			postType = class_name_to_class(__name__, post_body.post)
 			if not is_post(postType):
 				raise InvalidPostTypeError
 		except Exception:
@@ -211,7 +211,7 @@ async def get_post(post: str, id: str, withSchema: Optional[bool] = False, ident
 		raise UnauthorizedError('User is not admin')
 	try:
 		try:
-			postType = eval(post)
+			postType = class_name_to_class(__name__, post)
 			if not is_post(postType):
 				raise InvalidPostTypeError
 		except Exception:
@@ -236,7 +236,7 @@ async def update_post(id: str, post_body: PostForm, identity: str = Depends(get_
 		raise UnauthorizedError('User is not admin')
 	try:
 		try:
-			postType = eval(post_body.post)
+			postType = class_name_to_class(__name__, post_body.post)
 			if not is_post(postType):
 				raise InvalidPostTypeError
 		except Exception:
@@ -268,7 +268,7 @@ async def delete_post(post: str, id: str, identity: str = Depends(get_jwt_identi
 	try:
 		get_admin_user(identity)
 		try:
-			postType = eval(post)
+			postType = class_name_to_class(__name__, post)
 			if not is_post(postType):
 				raise InvalidPostTypeError
 		except Exception:
@@ -290,7 +290,7 @@ async def is_post_slug_taken(post: str, slug: str, identity: str = Depends(get_j
 		raise UnauthorizedError('User is not admin')
 	try:
 		try:
-			postType = eval(post)
+			postType = class_name_to_class(__name__, post)
 			if not is_post(postType):
 				raise InvalidPostTypeError
 		except Exception:

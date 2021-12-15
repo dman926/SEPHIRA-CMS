@@ -2,9 +2,9 @@ from fastapi import APIRouter
 from config import APISettings
 
 from typing import Optional
-from services.util_service import is_post
 from mongoengine.errors import DoesNotExist
 from resources.errors import InvalidPostTypeError, NotFoundError, SchemaValidationError
+from services.util_service import class_name_to_class, is_post
 import database.models as models
 
 router = APIRouter(
@@ -25,9 +25,8 @@ router = APIRouter(
 @router.get('/posts')
 async def get_posts(post: str, page: Optional[int] = None, size: Optional[int] = None, search: Optional[str] = None):
 	try:
-		print('fire 1')
 		try:
-			postType = eval(post)
+			postType = class_name_to_class(__name__, post)
 		except Exception:
 			raise InvalidPostTypeError
 		if not is_post(postType):
@@ -53,7 +52,7 @@ async def get_posts(post: str, page: Optional[int] = None, size: Optional[int] =
 async def get_post(post: str, id: str):
 	try:
 		try:
-			postType = eval(post)
+			postType = class_name_to_class(__name__, post)
 		except Exception:
 			raise InvalidPostTypeError
 		if not is_post(postType):
@@ -71,7 +70,7 @@ async def get_post(post: str, id: str):
 async def get_post_from_slug(post: str, slug: str):
 	try:
 		try:
-			postType = eval(post)
+			postType = class_name_to_class(__name__, post)
 		except Exception:
 			raise InvalidPostTypeError
 		if not is_post(postType):
@@ -89,7 +88,7 @@ async def get_post_from_slug(post: str, slug: str):
 async def is_post_slug_taken(post: str, slug: str):
 	try:
 		try:
-			postType = eval(post)
+			postType = class_name_to_class(__name__, post)
 			if not is_post(postType):
 				raise InvalidPostTypeError
 		except Exception:
