@@ -1,5 +1,5 @@
 import { HttpEvent, HttpEventType } from '@angular/common/http';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormGroup, FormGroupDirective } from '@angular/forms';
 import { PageEvent } from '@angular/material/paginator';
 import { Observable } from 'rxjs';
@@ -12,6 +12,8 @@ import { FileService } from '../../services/file/file.service';
 	styleUrls: ['./media-browser.component.scss'],
 })
 export class MediaBrowserComponent implements OnInit {
+
+	@Input() allowMultiple: boolean;
 
 	@ViewChild('fileUpload') fileUpload: HTMLInputElement | undefined;
 
@@ -26,6 +28,8 @@ export class MediaBrowserComponent implements OnInit {
 	uploadPercent: number;
 
 	constructor(private file: FileService, private rootFormGrou: FormGroupDirective) {
+		this.allowMultiple = false;
+
 		this.files = [];
 		this.filteredFiles = [];
 		this.filePageEvent = {

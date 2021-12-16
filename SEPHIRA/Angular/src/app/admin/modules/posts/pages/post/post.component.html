@@ -41,7 +41,7 @@
 		</div>
 
 		<div *ngSwitchCase="'media-browser'" class="spaceout">
-			<!-- TODO: <sephira-media-browser [formArrayName]="schema.name" [allowMultiple]="schema.multiple ? schema.multiple : false">{{ schema.niceName }}</sephira-media-browser> -->
+			<sephira-media-browser [formArrayName]="schema.name" [allowMultiple]="schema.multiple ? schema.multiple : false">{{ schema.niceName }}</sephira-media-browser>
 		</div>
 
 		<div *ngSwitchCase="'post-select'" class="spaceout">

@@ -556,4 +556,4 @@ class Coupon(Post):
 
 User.register_delete_rule(Post, 'author', CASCADE)
 
-# Import any aditional post types here so Post knows about them
+# DEFINE ADDITIONAL POST TYPES BELOW THIS LINE IN CASE OF FUTURE CHANGES

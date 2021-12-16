@@ -17,6 +17,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ReactiveFormsModule } from '@angular/forms';
 import { LoaderSpinnerModule } from 'src/app/features/loader-spinner/loader-spinner.module';
 import { AngularEditorModule } from '@kolkov/angular-editor';
+import { MediaBrowserModule } from 'src/app/features/media-browser/media-browser.module';
 
 
 @NgModule({
@@ -40,6 +41,7 @@ import { AngularEditorModule } from '@kolkov/angular-editor';
 
 		PostSelectModule,
 		LoaderSpinnerModule,
+		MediaBrowserModule,
 
 		AngularEditorModule
 	]
