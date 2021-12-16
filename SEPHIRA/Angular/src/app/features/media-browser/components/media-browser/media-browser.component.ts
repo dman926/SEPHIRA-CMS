@@ -19,6 +19,7 @@ export class MediaBrowserComponent implements OnInit {
 	@Input() formArrayName: string | undefined;
 	@Input() allowMultiple: boolean;
 	@Input() allowUpload: boolean;
+	@Input() opened: boolean;
 
 	@ViewChild('fileUpload') fileUpload: ElementRef | undefined;
 
@@ -37,6 +38,7 @@ export class MediaBrowserComponent implements OnInit {
 	constructor(public core: CoreService, private file: FileService, private dialog: MatDialog, private rootFormGroup: FormGroupDirective) {
 		this.allowMultiple = false;
 		this.allowUpload = true;
+		this.opened = false;
 
 		this.files = [];
 		this.folders = [];
@@ -84,7 +86,7 @@ export class MediaBrowserComponent implements OnInit {
 			this.uploadPercent = 0;
 			this.uploading = true;
 			const ratio = this.ratio;
-			this.file.upload(file, this.folder, ratio === '*' ? undefined : ratio).subscribe({
+			this.file.upload(file, this.folder, true, ratio === '*' ? undefined : ratio).subscribe({
 				next: res => {
 					if (res.type === HttpEventType.Response) {
 						// Done uploading

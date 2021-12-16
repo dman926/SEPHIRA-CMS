@@ -1,4 +1,4 @@
-<mat-expansion-panel #panel>
+<mat-expansion-panel #panel [expanded]="opened">
 	<mat-expansion-panel-header>
 		<mat-panel-title><ng-content></ng-content></mat-panel-title>
 		<mat-panel-description>{{ panel.expanded ? 'Close' : 'Open' }} Media Browser</mat-panel-description>

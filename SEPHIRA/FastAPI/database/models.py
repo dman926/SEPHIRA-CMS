@@ -7,7 +7,7 @@ from __future__ import annotations
 from typing import List
 
 from typing import Optional
-from mongoengine import Document, EmbeddedDocument, EmbeddedDocumentListField, ReferenceField, StringField, ListField, IntField, DateTimeField, BooleanField, EmailField, DecimalField, FloatField, DictField, CASCADE
+from mongoengine import Document, EmbeddedDocument, EmbeddedDocumentListField, ReferenceField, StringField, ListField, IntField, DateTimeField, BooleanField, EmailField, DecimalField, FloatField, DictField, LazyReferenceField, FileField, CASCADE
 from passlib.context import CryptContext
 from pydantic import BaseModel, EmailStr
 import onetimepass
@@ -288,6 +288,14 @@ class UsShippingZone(Document):
 			'rates': mappedRates,
 			'default': self.default
 		}
+
+class Media(Document):
+	owner = LazyReferenceField('User')
+	filename = StringField(unique_with='folder')
+	file = FileField()
+	mimeType = StringField()
+	folder = StringField()
+	size: IntField()
 
 #########
 # POSTS #

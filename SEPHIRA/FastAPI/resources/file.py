@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from starlette.responses import StreamingResponse
 from config import APISettings
 
 from fastapi import Depends, UploadFile, File, Form
@@ -8,7 +9,7 @@ from modules.JWT import get_jwt_identity
 
 from mongoengine.errors import DoesNotExist
 from resources.errors import NotFoundError, SchemaValidationError, UnauthorizedError
-from database.models import User, Post
+from database.models import User, Post, Media
 from services.util_service import all_subclasses
 
 from mongoengine.context_managers import no_dereference
@@ -20,6 +21,9 @@ import shutil
 from pathlib import Path
 import os
 from config import UploadSettings
+
+import mimetypes
+from sys import getsizeof
 
 router = APIRouter(
 	prefix=APISettings.ROUTE_BASE + 'file',
@@ -69,7 +73,8 @@ class FolderForm(BaseModel):
 ##########
 
 @router.post('/upload')
-async def upload_file(file: UploadFile = File(...), folder: Optional[str] = Form(''), ratio: Optional[str] = Form(None), identity: str = Depends(get_jwt_identity)):
+async def upload_file(file: UploadFile = File(...), folder: Optional[str] = Form(''), db: Optional[bool] = Form(False), ratio: Optional[str] = Form(None), identity: str = Depends(get_jwt_identity)):
+	# TODO: optimize
 	try:
 		if file.filename == '' or (len(folder) > 0 and folder[0] == '/'):
 			raise SchemaValidationError
@@ -103,16 +108,32 @@ async def upload_file(file: UploadFile = File(...), folder: Optional[str] = Form
 				quality = UploadSettings.IMAGE_COMPRESSION_AMOUNT
 				ratio = fraction_to_float(ratio)
 				if ratio != width / height:
-					image_to_new_height(image, ratio).save(savePath, optimize=True, quality=quality)
+					image = image_to_new_height(image, ratio)
+					if db:
+						media = Media(owner=identity, filename=savePath.rsplit('/', 1)[1], file=image, mimeType=mimetypes.MimeTypes().guess_type(file.filename)[0], folder=folder, size=getsizeof(file.file)).save()
+					else:
+						image.save(savePath, optimize=True, quality=quality)
 				else:
-					image.save(savePath, optimize=True, quality=quality)
+					if db:
+						media = Media(owner=identity, filename=savePath.rsplit('/', 1)[1], file=image, mimeType=mimetypes.MimeTypes().guess_type(file.filename)[0], folder=folder, size=getsizeof(file.file)).save()
+					else:
+						image.save(savePath, optimize=True, quality=quality)
 			else:
-				with Path(savePath).open('wb') as dirBuf:
-					shutil.copyfileobj(file.file, dirBuf)
-			size = os.stat(savePath).st_size
+				if db:
+					media = Media(owner=identity, filename=savePath.rsplit('/', 1)[1], file=file.file, mimeType=mimetypes.MimeTypes().guess_type(file.filename)[0], folder=folder, size=getsizeof(file.file)).save()
+				else:
+					with Path(savePath).open('wb') as dirBuf:
+						shutil.copyfileobj(file.file, dirBuf)
+			if db:
+				size = media.size
+			else:
+				size = os.stat(savePath).st_size
 		else:
 			raise SchemaValidationError
-		out['path'] = '/assets/uploads/' + identity + '/' + savePath.rsplit('/', 1)[1],
+		if db:
+			out['path'] = media.folder + '/' + media.filename
+		else:
+			out['path'] = '/assets/uploads/' + identity + '/' + savePath.rsplit('/', 1)[1],
 		out['size'] = size
 		return out
 	except SchemaValidationError:
@@ -216,3 +237,17 @@ async def delete_media(path: str, identity: str = Depends(get_jwt_identity)):
 		raise NotFoundError().http_exception
 	except Exception as e:
 		raise e
+
+@router.get('/fs-stream')
+def stream(file: str):
+	def iterfile(file):
+		with open(file, mode='rb') as file_obj:
+			yield from file_obj
+	return StreamingResponse(iterfile(file), media_type=mimetypes.MimeTypes().guess_type(file)[0])
+
+@router.get('/db-stream')
+def stream(file: str):
+	def iterfile(file):
+		with open(file, mode='rb') as file_obj:
+			yield from file_obj
+	return StreamingResponse(iterfile(file), media_type=mimetypes.MimeTypes().guess_type(file)[0])

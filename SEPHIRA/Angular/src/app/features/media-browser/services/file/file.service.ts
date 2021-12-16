@@ -19,12 +19,15 @@ export class FileService {
 
 	constructor(private http: HttpClient, private core: CoreService) { }
 
-	public upload(file: File, folder: string, ratio?: string): Observable<HttpEvent<Media>> {
+	public upload(file: File, folder: string, db?: boolean, ratio?: string): Observable<HttpEvent<Media>> {
 		const headers = this.core.createAuthHeader();
 		if (headers) {
 			const body = new FormData();
 			body.append('file', file);
 			body.append('folder', folder);
+			if (db) {
+				body.append('db', db.toString());
+			}
 			if (ratio) {
 				body.append('ratio', ratio);
 			}
@@ -61,6 +64,10 @@ export class FileService {
 		} else {
 			return EMPTY;
 		}
+	}
+
+	public getStreamUrl(file: string, pre: string): string {
+		return this.fileBase + pre + '-stream?file=' + encodeURIComponent(file);
 	}
 
 }

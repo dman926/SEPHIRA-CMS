@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AdminRoutingModule } from './home-routing.module';
+import { HomeRoutingModule } from './home-routing.module';
 
 import { HomeComponent } from './pages/home/home.component';
 
@@ -14,7 +14,7 @@ import { VideoPlayerModule } from 'src/app/features/video-player/video-player.mo
 	],
 	imports: [
 		CommonModule,
-		AdminRoutingModule,
+		HomeRoutingModule,
 
 		MatButtonModule,
 
