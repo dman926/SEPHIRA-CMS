@@ -34,7 +34,6 @@ export class PageComponent implements OnInit, OnDestroy {
 		} else {
 			this.page = this.state.get(this.pageStateKey, null);
 			if (!this.page || this.page.slug !== this.router.url) {
-				console.log('fire 1');
 				this.fetchPage();
 			} else if (this.page) {
 				if (this.page.content && typeof this.page.content === 'string') {
@@ -42,13 +41,11 @@ export class PageComponent implements OnInit, OnDestroy {
 				}
 				this.loaded = true;
 			} else {
-				console.log('fire 2');
 				this.fetchPage();
 			}
 			this.loaded = true;
 			this.routerSub = this.router.events.subscribe(ev => {
 				if (ev instanceof NavigationEnd) {
-					console.log('fire 3');
 					this.fetchPage();
 				}
 			});
