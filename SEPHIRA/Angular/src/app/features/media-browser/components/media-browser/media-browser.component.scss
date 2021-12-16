@@ -15,6 +15,7 @@ div#browser {
 	grid-template-columns: 25em auto;
 	div#image-preview {
 		position: relative;
+		min-height: 15em;
 		button {
 			position: absolute;
 			top: 0.25em;

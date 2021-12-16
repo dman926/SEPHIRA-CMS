@@ -11,7 +11,7 @@ class NotImplementedError(Exception):
 
 
 class UserAlreadyExistsError(Exception):
-	status_code = 400
+	status_code = 409
 	detail = 'User with details already exists'
 	http_exception = HTTPException(status_code=status_code, detail=detail)
 
@@ -47,4 +47,10 @@ class NotFoundError(Exception):
 class InvalidPostTypeError(Exception):
 	status_code = 422
 	detail = 'Invalid Post Type'
+	http_exception = HTTPException(status_code=status_code, detail=detail)
+
+
+class AlreadyExistsError(Exception):
+	status_code = 409
+	detail = 'Item with given details already exists'
 	http_exception = HTTPException(status_code=status_code, detail=detail)

@@ -1,4 +1,4 @@
-import { HttpClient, HttpEvent, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { EMPTY, Observable } from 'rxjs';
 import { CoreService } from 'src/app/core/services/core/core.service';
@@ -19,28 +19,22 @@ export class FileService {
 
 	constructor(private http: HttpClient, private core: CoreService) { }
 
-	public upload(file: File, folder: string, db?: boolean, ratio?: string): Observable<HttpEvent<Media>> {
+	public upload(file: File, folder: string): Observable<HttpEvent<Media>> {
 		const headers = this.core.createAuthHeader();
 		if (headers) {
 			const body = new FormData();
 			body.append('file', file);
 			body.append('folder', folder);
-			if (db) {
-				body.append('db', db.toString());
-			}
-			if (ratio) {
-				body.append('ratio', ratio);
-			}
 			return this.http.post<Media>(this.fileBase + 'upload', body, { headers, reportProgress: true, observe: 'events' });
 		} else {
 			return EMPTY;
 		}
 	}
 
-	public createFolder(folder: string): Observable<boolean> {
+	public createFolder(folder: string): Observable<Media> {
 		const headers = this.core.createAuthHeader();
 		if (headers) {
-			return this.http.post<boolean>(this.fileBase + 'folder', { folder }, { headers });
+			return this.http.post<Media>(this.fileBase + 'folder', { folder }, { headers });
 		} else {
 			return EMPTY;
 		}
@@ -56,18 +50,26 @@ export class FileService {
 		}
 	}
 
-	public deleteFile(path: string): Observable<string> {
+	public deleteMedia(folder: string, filename?: string): Observable<string> {
 		const headers = this.core.createAuthHeader();
 		if (headers) {
-			const params = new HttpParams().append('path', path);
+			let params = new HttpParams().append('folder', folder);
+			if (filename) {
+				params = params.append('filename', filename);
+			}
 			return this.http.delete<string>(this.fileBase + 'media', { headers, params });
 		} else {
 			return EMPTY;
 		}
 	}
 
-	public getStreamUrl(file: string, pre: string): string {
-		return this.fileBase + pre + '-stream?file=' + encodeURIComponent(file);
+	public getStream(folder: string, filename: string): Observable<Blob> {
+		const params = new HttpParams().append('folder', folder).append('filename', filename);
+		return this.http.get(this.fileBase + 'stream', { params, responseType: 'blob' });
+	}
+
+	public getStreamUrl(folder: string, filename: string): string {
+		return this.fileBase + 'stream?folder=' + encodeURIComponent(folder) + '&file=' + encodeURIComponent(filename);
 	}
 
 }

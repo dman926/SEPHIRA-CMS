@@ -29,12 +29,7 @@ class OAuth2Settings:
 
 
 class UploadSettings:
-	UPLOAD_FOLDER: str = path.join(path.dirname(__file__), '..', 'Angular', 'src', 'assets', 'uploads')
-	ALLOWED_EXTENSIONS: set[str] = { 'png', 'jpg', 'jpeg', 'gif' }
-	IMAGE_EXTENSIONS: set[str] = { 'png', 'jpg', 'jpeg', 'gif' } # Should be a subset of ALLOWED_EXTENSIONS
-	ALLOWED_IMAGE_RATIOS: set[str] = { '1', '16/9' } # Ratios should be none-mixed fraction (ex. `16/9`)
-	DEFAULT_IMAGE_RATIO: str = '16/9'
-	IMAGE_COMPRESSION_AMOUNT: int = 75 # Shouldn't be below 65
+	ALLOWED_EXTENSIONS: set[str] = { 'png', 'jpg', 'jpeg', 'gif', 'mp4' }
 
 
 class CORSSettings:

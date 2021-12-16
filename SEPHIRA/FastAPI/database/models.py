@@ -7,7 +7,7 @@ from __future__ import annotations
 from typing import List
 
 from typing import Optional
-from mongoengine import Document, EmbeddedDocument, EmbeddedDocumentListField, ReferenceField, StringField, ListField, IntField, DateTimeField, BooleanField, EmailField, DecimalField, FloatField, DictField, LazyReferenceField, FileField, CASCADE
+from mongoengine import Document, EmbeddedDocument, EmbeddedDocumentListField, ReferenceField, StringField, ListField, IntField, DateTimeField, BooleanField, EmailField, DecimalField, FloatField, DictField, LazyReferenceField, FileField, CASCADE, PULL
 from passlib.context import CryptContext
 from pydantic import BaseModel, EmailStr
 import onetimepass
@@ -290,12 +290,27 @@ class UsShippingZone(Document):
 		}
 
 class Media(Document):
-	owner = LazyReferenceField('User')
+	owner = LazyReferenceField('User', required=True)
+	folder = StringField(required=True)
 	filename = StringField(unique_with='folder')
 	file = FileField()
-	mimeType = StringField()
-	folder = StringField()
-	size: IntField()
+	size = IntField()
+	dir = BooleanField()
+
+	def serialize(self):
+		out = {
+			'id': str(self.id),
+			'owner': str(self.owner.id),
+			'folder': self.folder,
+			'filename': self.filename
+		}
+		if self.size:
+			out['size'] = self.size
+		if self.dir:
+			out['dir'] = self.dir
+		if self.file:
+			out['mimetype'] = self.file.content_type
+		return out
 
 #########
 # POSTS #
@@ -423,7 +438,7 @@ class Page(Post):
 
 class Product(Post):
 	sku = StringField()
-	img = ListField(StringField())
+	img = ListField(ReferenceField('Media', reverse_delete_rule=PULL))
 	price = DecimalField(precision=2)
 	digital = BooleanField(default=False)
 	taxable = BooleanField(default=True)
@@ -488,7 +503,7 @@ class Product(Post):
 		return {
 			**super().serialize(),
 			'sku': self.sku,
-			'img': self.img,
+			'img': list(map(lambda m: { 'folder': m.folder, 'filename': m.filename }, self.img)),
 			'price': float(self.price) if self.price else None,
 			"digital": self.digital,
 			"taxable": self.taxable,

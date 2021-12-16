@@ -13,20 +13,24 @@
 	<div id="browser">
 		<div id="list" *ngIf="loaded;else loaderSpinner">
 			<mat-selection-list [multiple]="false" (selectionChange)="enterFolder($event)">
-				<mat-list-option value=".." *ngIf="folder !== ''"><mat-icon>north</mat-icon></mat-list-option>
-				<mat-list-option *ngFor="let folder of folders" [value]="folder.path">
-					<mat-icon mat-list-icon>folder</mat-icon> {{ folder.path.split('/').pop() }}
+				<mat-list-option [value]="{ owner: '', folder: '..', filename: '' }" *ngIf="folder !== ''"><mat-icon>north</mat-icon></mat-list-option>
+				<mat-list-option *ngFor="let folder of folders" [value]="folder">
+					<mat-icon mat-list-icon>folder</mat-icon> {{ folder.filename }}
 				</mat-list-option>
 			</mat-selection-list>
 			<mat-selection-list (selectionChange)="onFileSelected($event)" [multiple]="allowMultiple">
-				<mat-list-option color="primary" *ngFor="let file of files" [value]="file" [selected]="isSelected(file.path)">
-					{{ file.path.split('/').pop() }} ({{ core.formatBytes(file.size) }})
+				<mat-list-option *ngIf="!allowMultiple">Clear Selection</mat-list-option>
+				<mat-list-option color="primary" *ngFor="let file of files" [value]="file" [selected]="isSelected(file.id!)">
+					{{ file.filename }} ({{ file.size ? core.formatBytes(file.size) : '?' }})
 				</mat-list-option>
 			</mat-selection-list>
 		</div>
 		<div id="image-preview" *ngIf="lastSelectedFile !== undefined">
 			<button mat-raised-button class="round-button" type="button" (click)="deleteLastSelectedFile()"><mat-icon>clear</mat-icon></button>
-			<img [src]="lastSelectedFile.ratio ? lastSelectedFile.path : '/assets/img/placeholder.png'" />
+			<ng-container [ngSwitch]="lastSelectedFile.mimetype === 'video/mp4' && imageLoaded">
+				<sephira-video-player *ngSwitchCase="true" [options]="videoOptions"></sephira-video-player>
+				<img *ngSwitchDefault [src]="lastSelectedFile ? displayedImage : '/assets/img/placeholder.png'" />
+			</ng-container>
 			<!-- Attribution for placeholder.png: Missing-image-232x150.png by DJKA | CC BY-SA 4.0 -->		
 		</div>	
 	</div>
