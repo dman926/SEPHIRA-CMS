@@ -10,7 +10,7 @@ cffi==1.15.0
 charset-normalizer==2.0.9
 click==8.0.3
 coinbase-commerce==1.0.1
-cryptography==36.0.0
+cryptography==36.0.1
 Deprecated==1.2.13
 dnspython==2.1.0
 ecdsa==0.17.0
