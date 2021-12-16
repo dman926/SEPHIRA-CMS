@@ -26,6 +26,7 @@ export class MediaBrowserComponent implements OnInit {
 	loaded: boolean;
 
 	folder: string;
+	lastSelectedFile: Media | undefined;
 
 	uploading: boolean;
 	uploadPercent: number;
@@ -50,6 +51,7 @@ export class MediaBrowserComponent implements OnInit {
 		this.loaded = false;
 		this.files = [];
 		this.folders = [];
+		this.lastSelectedFile = undefined;
 		this.file.getMedia(this.folder).subscribe({
 			next: files => {
 				files.forEach(file => {
@@ -135,6 +137,17 @@ export class MediaBrowserComponent implements OnInit {
 				this.folder = value.substring(i);
 			}
 			this.fetchFiles();
+		}
+	}
+
+	onFileSelected(file: MatSelectionListChange): void {
+		if (file.options.length > 0) {
+			if (file.options[0].selected) {
+				const value: Media = file.options[0].value;
+				this.lastSelectedFile = value;	
+			} else {
+				this.lastSelectedFile = undefined;
+			}
 		}
 	}
 

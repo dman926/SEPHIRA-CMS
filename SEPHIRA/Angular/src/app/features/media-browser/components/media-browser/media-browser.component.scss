@@ -9,3 +9,19 @@
 	height: 3em;
 	padding: 0;
 }
+
+div#browser {
+	display: grid;
+	grid-template-columns: 25em auto;
+	div#image-preview {
+		img {
+			width: 100%;
+		}
+	}
+}
+
+@media screen and (max-width: 762px) {
+	div#browser {
+		grid-template-columns: auto;
+	}
+}
