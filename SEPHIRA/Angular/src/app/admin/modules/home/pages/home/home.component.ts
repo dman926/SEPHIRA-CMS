@@ -12,6 +12,16 @@ export class HomeComponent implements OnInit {
 
 	types: string[];
 
+	readonly options = {
+		fluid: true,
+		sources: [
+			{
+				src: '/assets/uploads/61afb7e5ce6aa74cd086250c/sample-mp4-file.mp4',
+				type: 'video/mp4'
+			}
+		]
+	}
+
 	constructor(private admin: AdminService, private platform: PlatformService, private state: TransferState) {
 		this.types = [];
 	}

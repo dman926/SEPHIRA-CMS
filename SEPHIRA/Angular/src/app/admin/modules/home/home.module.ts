@@ -5,6 +5,7 @@ import { AdminRoutingModule } from './home-routing.module';
 import { HomeComponent } from './pages/home/home.component';
 
 import { MatButtonModule } from '@angular/material/button';
+import { VideoPlayerModule } from 'src/app/features/video-player/video-player.module';
 
 
 @NgModule({
@@ -15,7 +16,9 @@ import { MatButtonModule } from '@angular/material/button';
 		CommonModule,
 		AdminRoutingModule,
 
-		MatButtonModule
+		MatButtonModule,
+
+		VideoPlayerModule
 	]
 })
 export class AdminModule { }
