@@ -19,7 +19,7 @@ export class FileService {
 
 	constructor(private http: HttpClient, private core: CoreService) { }
 
-	public upload(file: File, folder: string, ratio?: string): Observable<HttpEvent<string>> {
+	public upload(file: File, folder: string, ratio?: string): Observable<HttpEvent<Media>> {
 		const headers = this.core.createAuthHeader();
 		if (headers) {
 			const body = new FormData();
@@ -28,20 +28,26 @@ export class FileService {
 			if (ratio) {
 				body.append('ratio', ratio);
 			}
-			return this.http.post<string>(this.fileBase + 'uploader', body, { headers, reportProgress: true, observe: 'events' });
+			return this.http.post<Media>(this.fileBase + 'upload', body, { headers, reportProgress: true, observe: 'events' });
 		} else {
 			return EMPTY;
 		}
 	}
 
-	public getMedia(page?: number, size?: number): Observable<AllMedia> {
+	public createFolder(folder: string): Observable<boolean> {
 		const headers = this.core.createAuthHeader();
 		if (headers) {
-			let params = new HttpParams();
-			if (page && size) {
-				params = params.append('page', page).append('size', size);
-			}
-			return this.http.get<AllMedia>(this.fileBase + 'media', { headers, params });
+			return this.http.post<boolean>(this.fileBase + 'folder', { folder }, { headers });
+		} else {
+			return EMPTY;
+		}
+	}
+
+	public getMedia(folder: string): Observable<Media[]> {
+		const headers = this.core.createAuthHeader();
+		if (headers) {
+			const params = new HttpParams().append('folder', folder);
+			return this.http.get<Media[]>(this.fileBase + 'media', { headers, params });
 		} else {
 			return EMPTY;
 		}

@@ -36,4 +36,4 @@ async def shutdown():
 
 if __name__== '__main__':
 	import uvicorn
-	uvicorn.run('main:app', reload=UvicornSettings.USE_RELOADER, log_level=UvicornSettings.LOG_LEVEL)
+	uvicorn.run('main:app', reload=UvicornSettings.USE_RELOADER, log_level=UvicornSettings.LOG_LEVEL, port=UvicornSettings.PORT)

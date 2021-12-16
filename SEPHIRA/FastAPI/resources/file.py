@@ -1,19 +1,21 @@
 from fastapi import APIRouter
+from mongoengine.errors import DoesNotExist
 from config import APISettings
 
-from fastapi import Depends, UploadFile, File
+from fastapi import Depends, UploadFile, File, Form
 from typing import Optional
 from pydantic import BaseModel
 from modules.JWT import get_jwt_identity
 
-from resources.errors import NotFoundError, SchemaValidationError
+from resources.errors import NotFoundError, SchemaValidationError, UnauthorizedError
+from database.models import User
 
 from PIL import Image
 from fractions import Fraction
 
 import shutil
 from pathlib import Path
-from os import path, makedirs, scandir, remove
+from os import path, makedirs, scandir, remove, stat
 from config import UploadSettings
 
 router = APIRouter(
@@ -56,26 +58,26 @@ def fraction_to_float(fraction: str) -> float:
 # SCHEMAS #
 ###########
 
-class UploadForm(BaseModel):
-	file: UploadFile = File(...)
+class FolderForm(BaseModel):
 	folder: str
-	ratio: Optional[str] = None
 
 ##########
 # ROUTES #
 ##########
 
 @router.post('/upload')
-async def upload_file(upload_body: UploadForm, identity: str = Depends(get_jwt_identity)):
+async def upload_file(file: UploadFile = File(...), folder: Optional[str] = Form(''), ratio: Optional[str] = Form(None), identity: str = Depends(get_jwt_identity)):
 	try:
-		if upload_body.file.filename == '':
+		if file.filename == '' or (len(folder) > 0 and folder[0] == '/'):
 			raise SchemaValidationError
-		if allowed_file(upload_body.file.filename):
-			requestedPath = path.join(UploadSettings.UPLOAD_FOLDER, identity, upload_body.folder)
+		User.objects.get(id=identity) # make sure the user exists
+		if allowed_file(file.filename):
+			out = { }
+			requestedPath = path.join(UploadSettings.UPLOAD_FOLDER, identity, folder)
 			if not path.isdir(requestedPath):
 				makedirs(requestedPath)
 			# Handle filename collisions
-			savePath = path.join(requestedPath, upload_body.file.filename)
+			savePath = path.join(requestedPath, file.filename)
 			if path.isfile(savePath):
 				counter = 2
 				pathSplit = savePath.rsplit('.', 1)
@@ -85,61 +87,93 @@ async def upload_file(upload_body: UploadForm, identity: str = Depends(get_jwt_i
 					newPath = pathSplit[0] + '_' + str(counter) + '.' + pathSplit[1]
 				savePath = newPath
 			
-			if is_image(upload_body.file.filename):
-				if upload_body.ratio:
-					ratio = upload_body.ratio
+			if is_image(file.filename):
+				if ratio:
+					ratio = ratio
 				else:
 					ratio = UploadSettings.DEFAULT_IMAGE_RATIO
-				image = Image.open(upload_body.file.file)
+				out['ratio'] = ratio
+				image = Image.open(file.file)
 				size = image.size
 				width = size[0]
 				height = size[1]
 				quality = UploadSettings.IMAGE_COMPRESSION_AMOUNT
 				ratio = fraction_to_float(ratio)
 				if ratio != width / height:
-					image_to_new_height(image, 1).save(savePath, optimize=True, quality=quality)
+					image_to_new_height(image, ratio).save(savePath, optimize=True, quality=quality)
 				else:
 					image.save(savePath, optimize=True, quality=quality)
 			else:
 				with Path(savePath).open('wb') as dirBuf:
-					shutil.copyfileobj(upload_body.file.file, dirBuf)
-		return '/assets/uploads/' + identity + '/' + savePath.rsplit('/', 1)[1]
+					shutil.copyfileobj(file.file, dirBuf)
+			size = stat(savePath).st_size
+		else:
+			raise SchemaValidationError
+		out['path'] = '/assets/uploads/' + identity + '/' + savePath.rsplit('/', 1)[1],
+		out['size'] = size
+		return out
 	except SchemaValidationError:
 		raise SchemaValidationError().http_exception
+	except DoesNotExist:
+		raise UnauthorizedError().http_exception
+	except Exception as e:
+		raise e
+
+
+@router.post('/folder')
+async def create_folder(folder_body: FolderForm, identity: str = Depends(get_jwt_identity)):
+	try:
+		User.objects.get(id=identity)
+		if len(folder_body.folder) > 0 and folder_body.folder[0] == '/':
+			raise SchemaValidationError
+		requestedPath = path.join(UploadSettings.UPLOAD_FOLDER, identity, folder_body.folder)
+		if not path.isdir(requestedPath):
+			makedirs(requestedPath)
+			return True
+		return False
+	except SchemaValidationError:
+		raise SchemaValidationError().http_exception
+	except DoesNotExist:
+		raise UnauthorizedError().http_exception
 	except Exception as e:
 		raise e
 
 @router.get('/media')
-async def get_media(page: Optional[int] = None, size: Optional[int] = None, identity: str = Depends(get_jwt_identity)):
+async def get_media(folder: Optional[str] = '', page: Optional[int] = None, size: Optional[int] = None, identity: str = Depends(get_jwt_identity)):
 	try:
-		mediaPath = path.join(UploadSettings.UPLOAD_FOLDER, identity)
+		if len(folder) > 0 and folder[0] == '/':
+			raise SchemaValidationError
+		User.objects.get(id=identity)
+		mediaPath = path.join(UploadSettings.UPLOAD_FOLDER, identity, folder)
 		if path.isdir(mediaPath):
 			filenames = []
 			with scandir(mediaPath) as it:
 				for entry in it:
-					if entry.is_file():
-						filenames.append(entry.name)
-			def mapImageFilenames(file):
+					filenames.append(entry.name)
+			def mapFilenames(file):
+				out = {
+					'path': '/assets/uploads/' + identity + folder + '/' + file
+				}
 				if is_image(file):
 					image = Image.open(path.join(mediaPath, file))
-					return {
-						'path': '/assets/uploads/' + identity + '/' + file,
-						'ratio': str(Fraction(image.size[0], image.size[1]))
-					}
-				else:
-					return {
-						'path': '/assets/uploads/' + identity + '/' + file,
-						'ratio': None
-					}
+					out['ratio'] = str(Fraction(image.size[0], image.size[1]))
+				absPath = path.join(mediaPath, file)
+				out['size'] = stat(absPath).st_size
+				isDir = path.isdir(absPath)
+				if isDir:
+					out['dir'] = True
+				return out
 			if page == None:
 				page = 0
 				size = len(filenames)
 			elif size == None:
 				raise SchemaValidationError
-			return list(map(mapImageFilenames, filenames[page * size : page * size + size]))
+			return list(map(mapFilenames, filenames[page * size : page * size + size]))
 		return { 'count': 0, 'files': [] }
 	except SchemaValidationError:
 		raise SchemaValidationError().http_exception
+	except DoesNotExist:
+		raise UnauthorizedError().http_exception
 	except Exception as e:
 		raise e
 

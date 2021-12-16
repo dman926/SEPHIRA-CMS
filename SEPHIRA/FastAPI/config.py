@@ -54,6 +54,7 @@ class FastAPISettings:
 class UvicornSettings:
 	USE_RELOADER: bool = True # You should most definitely set this to 'False' in production as it takes a lot of resources to use
 	LOG_LEVEL: str = 'info' # It is recommended to use 'warning' in production to reduce log clutter
+	PORT: int = 8000
 
 
 class ShopSettings:

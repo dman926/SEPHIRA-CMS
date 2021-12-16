@@ -1,4 +1,6 @@
 export interface Media {
 	path: string;
-	ratio: string;
+	size: number;
+	ratio?: string;
+	dir?: boolean;
 }

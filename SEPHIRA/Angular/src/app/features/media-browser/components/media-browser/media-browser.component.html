@@ -1,1 +1,30 @@
-<p>media-browser works!</p>
+<mat-expansion-panel #panel>
+	<mat-expansion-panel-header>
+		<mat-panel-title><ng-content></ng-content></mat-panel-title>
+		<mat-panel-description>{{ panel.expanded ? 'Close' : 'Open' }} Media Browser</mat-panel-description>
+	</mat-expansion-panel-header>
+	<section id="header">
+		<ng-container *ngIf="allowUpload">
+			<input type="file" class="hidden" (change)="onFileUploaderSelected($event)" #fileUpload />
+			<button mat-raised-button class="round-button" type="button" color="primary" (click)="fileUpload.click()"><mat-icon>attach_file</mat-icon></button>
+			<button mat-raised-button class="round-button" type="button" color="primary" (click)="openCreateFolder()"><mat-icon>add</mat-icon></button>
+		</ng-container>
+	</section>
+	<div id="list" *ngIf="loaded;else loaderSpinner">
+		<mat-selection-list [multiple]="false" (selectionChange)="enterFolder($event)">
+			<mat-list-option value=".." *ngIf="folder !== ''"><mat-icon>north</mat-icon></mat-list-option>
+			<mat-list-option *ngFor="let folder of folders" [value]="folder.path">
+				<mat-icon mat-list-icon>folder</mat-icon> {{ folder.path.split('/').pop() }}
+			</mat-list-option>
+		</mat-selection-list>
+		<mat-selection-list>
+			<mat-list-option *ngFor="let file of files">
+				{{ file.path.split('/').pop() }} ({{ core.formatBytes(file.size) }})
+			</mat-list-option>
+		</mat-selection-list>	
+	</div>
+</mat-expansion-panel>
+
+<ng-template #loaderSpinner>
+	<sephira-loader-spinner></sephira-loader-spinner>
+</ng-template>
