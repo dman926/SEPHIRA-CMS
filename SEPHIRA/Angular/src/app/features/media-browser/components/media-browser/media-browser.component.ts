@@ -120,6 +120,29 @@ export class MediaBrowserComponent implements OnInit {
 		}
 	}
 
+	deleteLastSelectedFile(): void {
+		if (this.lastSelectedFile) {
+			this.loaded = false;
+			for (let i = 0; i < this.formArray!.length; i++) {
+				if (this.formArray!.at(i).value === this.lastSelectedFile.path) {
+					this.formArray!.removeAt(i);
+					break;
+				}
+			}
+			this.file.deleteFile(this.lastSelectedFile.path).subscribe({
+				next: res => {
+					this.files.splice(this.files.indexOf(this.lastSelectedFile!), 1);
+					this.lastSelectedFile = undefined;
+					this.loaded = true;
+				},
+				error: err => {
+					this.lastSelectedFile = undefined;
+					this.loaded = true;
+				}
+			});
+		}
+	}
+
 	openCreateFolder(): void {
 		this.dialog.open(CreateFolderDialogComponent, {
 			width: '250px'
@@ -140,13 +163,7 @@ export class MediaBrowserComponent implements OnInit {
 			if (value === '..' && this.folder) {
 				this.folder = this.folder.substring(0, this.folder.lastIndexOf('/'));
 			} else {
-				let count = 0;
-				let i = 0;
-				// find the start index of the actual subfolder
-				while (count < 4 && (i = value.indexOf('/', i) + 1)) {
-					count++;
-				}
-				this.folder = value.substring(i);
+				this.folder = this.pathToFileName(value);
 			}
 			this.fetchFiles();
 		}
@@ -196,6 +213,16 @@ export class MediaBrowserComponent implements OnInit {
 
 	get ratio(): string {
 		return '*';
+	}
+
+	private pathToFileName(path: string): string {
+		let count = 0;
+		let i = 0;
+		// find the start index of the actual subfolder
+		while (count < 4 && (i = path.indexOf('/', i) + 1)) {
+			count++;
+		}
+		return path.substring(i);
 	}
 
 }

@@ -22,9 +22,10 @@
 				<mat-list-option color="primary" *ngFor="let file of files" [value]="file" [selected]="isSelected(file.path)">
 					{{ file.path.split('/').pop() }} ({{ core.formatBytes(file.size) }})
 				</mat-list-option>
-			</mat-selection-list>	
+			</mat-selection-list>
 		</div>
 		<div id="image-preview" *ngIf="lastSelectedFile !== undefined">
+			<button mat-raised-button class="round-button" type="button" (click)="deleteLastSelectedFile()"><mat-icon>clear</mat-icon></button>
 			<img [src]="lastSelectedFile.ratio ? lastSelectedFile.path : '/assets/img/placeholder.png'" />
 			<!-- Attribution for placeholder.png: Missing-image-232x150.png by DJKA | CC BY-SA 4.0 -->		
 		</div>	

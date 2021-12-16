@@ -41,7 +41,6 @@ async def get_posts(post: str, page: Optional[int] = None, size: Optional[int] =
 			raise SchemaValidationError
 		return { 'total': posts.count(), 'posts': list(map(lambda p: p.serialize(), posts[page * size : page * size + size])) }
 	except InvalidPostTypeError:
-		print('fire')
 		raise InvalidPostTypeError().http_exception
 	except SchemaValidationError:
 		raise SchemaValidationError().http_exception

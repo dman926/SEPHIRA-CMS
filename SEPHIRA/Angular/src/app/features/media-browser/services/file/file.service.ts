@@ -53,10 +53,11 @@ export class FileService {
 		}
 	}
 
-	public deleteFile(filename: string): Observable<string> {
+	public deleteFile(path: string): Observable<string> {
 		const headers = this.core.createAuthHeader();
 		if (headers) {
-			return this.http.delete<string>(this.fileBase + 'media/' + filename, { headers });
+			const params = new HttpParams().append('path', path);
+			return this.http.delete<string>(this.fileBase + 'media', { headers, params });
 		} else {
 			return EMPTY;
 		}

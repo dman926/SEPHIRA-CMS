@@ -14,6 +14,13 @@ div#browser {
 	display: grid;
 	grid-template-columns: 25em auto;
 	div#image-preview {
+		position: relative;
+		button {
+			position: absolute;
+			top: 0.25em;
+			right: 0.25em;
+			z-index: 999;
+		}
 		img {
 			width: 100%;
 		}
