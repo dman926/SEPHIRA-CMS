@@ -248,7 +248,7 @@ async def update_post(id: str, post_body: PostForm, identity: str = Depends(get_
 			if post_body.obj['applicableProducts']:
 					post_body.obj['applicableProducts'] = list(map(lambda p: models.Product.objects.get(id=p), post_body.obj['applicableProducts']))
 
-		toUpdate.update(**base_model_to_clean_dict(post_body.obj))
+		toUpdate.update(**post_body.obj)
 		toUpdate.reload()
 		toUpdate.modified = datetime.now
 		toUpdate.generateNgrams()

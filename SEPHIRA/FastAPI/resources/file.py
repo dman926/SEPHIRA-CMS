@@ -152,7 +152,7 @@ async def get_media(folder: Optional[str] = '', page: Optional[int] = None, size
 					filenames.append(entry.name)
 			def mapFilenames(file):
 				out = {
-					'path': '/assets/uploads/' + identity + folder + '/' + file
+					'path': path.join('/assets/uploads/', identity, folder, file)
 				}
 				if is_image(file):
 					image = Image.open(path.join(mediaPath, file))

@@ -1,6 +1,6 @@
 import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
-import { FormArray, FormGroup, FormGroupDirective } from '@angular/forms';
+import { FormArray, FormControl, FormGroup, FormGroupDirective, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSelectionListChange } from '@angular/material/list';
 import { PageEvent } from '@angular/material/paginator';
@@ -16,6 +16,7 @@ import { CreateFolderDialogComponent } from '../create-folder-dialog/create-fold
 })
 export class MediaBrowserComponent implements OnInit {
 
+	@Input() formArrayName: string | undefined;
 	@Input() allowMultiple: boolean;
 	@Input() allowUpload: boolean;
 
@@ -31,6 +32,8 @@ export class MediaBrowserComponent implements OnInit {
 	uploading: boolean;
 	uploadPercent: number;
 
+	formArray: FormArray | undefined;
+
 	constructor(public core: CoreService, private file: FileService, private dialog: MatDialog, private rootFormGroup: FormGroupDirective) {
 		this.allowMultiple = false;
 		this.allowUpload = true;
@@ -44,7 +47,15 @@ export class MediaBrowserComponent implements OnInit {
 	}
 
 	ngOnInit(): void {
-		this.fetchFiles();
+		if (this.formArrayName) {
+			this.formArray = this.rootFormGroup.control.get(this.formArrayName) as FormArray;
+			if (!this.formArray) {
+				throw new Error('`formArrayName` does not map to a valid form array');
+			}
+			this.fetchFiles();
+		} else {
+			throw new Error('`formArrayName` is a required input');
+		}
 	}
 
 	fetchFiles(): void {
@@ -131,6 +142,7 @@ export class MediaBrowserComponent implements OnInit {
 			} else {
 				let count = 0;
 				let i = 0;
+				// find the start index of the actual subfolder
 				while (count < 4 && (i = value.indexOf('/', i) + 1)) {
 					count++;
 				}
@@ -142,13 +154,44 @@ export class MediaBrowserComponent implements OnInit {
 
 	onFileSelected(file: MatSelectionListChange): void {
 		if (file.options.length > 0) {
+			const value: Media = file.options[0].value;
+
+			if (this.allowMultiple) {
+				let foundIndex = -1;
+				for (let i = 0; i < this.formArray!.length; i++) {
+					if (this.formArray!.at(i).value === value.path) {
+						foundIndex = i;
+						break;
+					}
+				}
+				if (foundIndex === -1) {
+					this.formArray!.push(new FormControl(value.path, [Validators.required]));
+				} else {
+					this.formArray!.removeAt(foundIndex);
+				}
+			} else {
+				if (this.formArray!.length > 0) {
+					this.formArray!.at(0).setValue(value.path);
+				} else {
+					this.formArray!.push(new FormControl(value.path, [Validators.required]));
+				}
+			}
+
 			if (file.options[0].selected) {
-				const value: Media = file.options[0].value;
 				this.lastSelectedFile = value;	
 			} else {
 				this.lastSelectedFile = undefined;
 			}
 		}
+	}
+
+	isSelected(path: string): boolean {
+		for (let i = 0; i < this.formArray!.length; i++) {
+			if (this.formArray!.at(i).value === path) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	get ratio(): string {

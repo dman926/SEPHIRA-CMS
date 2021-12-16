@@ -71,7 +71,7 @@ export class PostComponent implements OnInit {
 			const post: Post = this.postFormGroup!.value;
 			post.id = this.id!;
 			this.saving = true;
-			this.admin.editPost(this.postType!, post).toPromise().then(res => {
+			this.admin.editPost(this.postType!, post).subscribe(res => {
 				this.saved = true;
 				this.saving = false;
 				this.postData = post;
@@ -81,7 +81,7 @@ export class PostComponent implements OnInit {
 	}
 
 	deletePost(): void {
-		this.admin.deletePost(this.postType!, this.id!).toPromise().then(res => {
+		this.admin.deletePost(this.postType!, this.id!).subscribe(res => {
 			this.router.navigate(['../'], {relativeTo: this.route});
 		});
 	}
@@ -140,7 +140,7 @@ export class PostComponent implements OnInit {
 			default:
 				absControl = new FormControl(postVal, validators, asyncValidators);
 		}
-		return absControl!;
+		return absControl;
 	}
 
 }

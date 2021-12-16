@@ -18,8 +18,8 @@
 					<mat-icon mat-list-icon>folder</mat-icon> {{ folder.path.split('/').pop() }}
 				</mat-list-option>
 			</mat-selection-list>
-			<mat-selection-list (selectionChange)="onFileSelected($event)">
-				<mat-list-option *ngFor="let file of files" [value]="file" color="primary">
+			<mat-selection-list (selectionChange)="onFileSelected($event)" [multiple]="allowMultiple">
+				<mat-list-option color="primary" *ngFor="let file of files" [value]="file" [selected]="isSelected(file.path)">
 					{{ file.path.split('/').pop() }} ({{ core.formatBytes(file.size) }})
 				</mat-list-option>
 			</mat-selection-list>	
