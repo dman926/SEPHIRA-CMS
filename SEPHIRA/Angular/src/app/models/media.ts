@@ -6,4 +6,5 @@ export interface Media {
 	size?: number;
 	dir?: boolean;
 	mimetype?: string;
+	associatedMeda?: string[];
 }

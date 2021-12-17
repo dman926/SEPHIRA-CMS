@@ -8,6 +8,7 @@ import { CoreService } from 'src/app/core/services/core/core.service';
 import { VideoPlayerComponent } from 'src/app/features/video-player/components/video-player/video-player.component';
 import { Media } from 'src/app/models/media';
 import { FileService } from '../../services/file/file.service';
+import { AssociatedMediaDialogComponent } from '../associated-media-dialog/associated-media-dialog.component';
 import { CreateFolderDialogComponent } from '../create-folder-dialog/create-folder-dialog.component';
 
 @Component({
@@ -21,6 +22,7 @@ export class MediaBrowserComponent implements OnInit {
 	@Input() allowMultiple: boolean;
 	@Input() allowUpload: boolean;
 	@Input() opened: boolean;
+	@Input() showPreview: boolean;
 
 	@ViewChild('fileUpload') fileUpload: ElementRef | undefined;
 	@ViewChild('player') player: VideoPlayerComponent | undefined;
@@ -45,6 +47,7 @@ export class MediaBrowserComponent implements OnInit {
 		this.allowMultiple = false;
 		this.allowUpload = true;
 		this.opened = false;
+		this.showPreview = true;
 
 		this.files = [];
 		this.folders = [];
@@ -91,34 +94,37 @@ export class MediaBrowserComponent implements OnInit {
 
 	onFileUploaderSelected(event: any): void {
 		const file: File = event.target.files[0];
+		if (this.fileUpload) {
+			this.fileUpload.nativeElement.value = '';
+		}
 		if (file) {
-			this.uploadPercent = 0;
-			this.uploading = true;
-			this.file.upload(file, this.folder).subscribe({
-				next: res => {
-					if (res.type === HttpEventType.Response) {
-						// Done uploading
-						if (this.fileUpload) {
-							this.fileUpload.nativeElement.value = '';
+			this.dialog.open(AssociatedMediaDialogComponent, {
+				maxWidth: '800px'
+			}).afterClosed().subscribe((media: string[] | undefined) => {
+				this.uploadPercent = 0;
+				this.uploading = true;
+				this.file.upload(file, this.folder, media).subscribe({
+					next: res => {
+						if (res.type === HttpEventType.Response) {
+							// Done uploading
+							this.uploadPercent = 0;
+							this.uploading = false;
+							if (res.body) {
+								this.files.unshift(res.body);
+							}
+						} else if (res.type === HttpEventType.UploadProgress) {
+							// Update progress
+							if (res.total) {
+								this.uploadPercent = 100 * res.loaded / res.total;
+							}
 						}
+					},
+					error: err => {
+						console.error(err);
+						this.uploadPercent = 0;
 						this.uploading = false;
-						if (res.body) {
-							this.files.unshift(res.body);
-						}
-					} else if (res.type === HttpEventType.UploadProgress) {
-						// Update progress
-						if (res.total) {
-							this.uploadPercent = 100 * res.loaded / res.total;
-						}
 					}
-				},
-				error: err => {
-					if (this.fileUpload) {
-						this.fileUpload.nativeElement.value = '';
-					}
-					console.error(err);
-					this.uploading = false;
-				}
+				});
 			});
 		}
 	}
@@ -216,6 +222,7 @@ export class MediaBrowserComponent implements OnInit {
 					this.lastSelectedFile = value;
 					this.displayedImage = undefined;
 					this.imageLoaded = false;
+					console.log(this.player);
 					if (this.isVideo) {
 						this.displayedImage = this.file.getStreamUrl(this.lastSelectedFile.folder, this.lastSelectedFile.filename);
 						if (this.player && this.lastSelectedFile.mimetype) {

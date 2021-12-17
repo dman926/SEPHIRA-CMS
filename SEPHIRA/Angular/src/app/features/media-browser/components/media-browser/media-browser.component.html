@@ -3,13 +3,17 @@
 		<mat-panel-title><ng-content></ng-content></mat-panel-title>
 		<mat-panel-description>{{ panel.expanded ? 'Close' : 'Open' }} Media Browser</mat-panel-description>
 	</mat-expansion-panel-header>
-	<section id="header">
+	<div id="header">
 		<ng-container *ngIf="allowUpload">
-			<input type="file" class="hidden" (change)="onFileUploaderSelected($event)" #fileUpload />
-			<button mat-raised-button class="round-button" type="button" color="primary" (click)="fileUpload.click()"><mat-icon>attach_file</mat-icon></button>
+			<div id="upload">
+				<input type="file" class="hidden" (change)="onFileUploaderSelected($event)" #fileUpload />
+				<mat-progress-spinner color="accent" diameter="52" [value]="uploadPercent"></mat-progress-spinner>
+				<button mat-raised-button class="round-button" type="button" color="primary" (click)="fileUpload.click()"><mat-icon>attach_file</mat-icon></button>
+			</div>
 			<button mat-raised-button class="round-button" type="button" color="primary" (click)="openCreateFolder()"><mat-icon>add</mat-icon></button>
 		</ng-container>
-	</section>
+		<button mat-raised-button class="round-button" type="button" color="primary" (clicK)="fetchFiles()"><mat-icon>refresh</mat-icon></button>
+	</div>
 	<div id="browser">
 		<div id="list" *ngIf="loaded;else loaderSpinner">
 			<mat-selection-list [multiple]="false" (selectionChange)="enterFolder($event)">
@@ -25,7 +29,7 @@
 				</mat-list-option>
 			</mat-selection-list>
 		</div>
-		<div id="image-preview" [hidden]="lastSelectedFile === undefined">
+		<div id="image-preview" [hidden]="lastSelectedFile === undefined" *ngIf="showPreview">
 			<button mat-raised-button class="round-button" type="button" (click)="deleteLastSelectedFile()"><mat-icon>clear</mat-icon></button>
 			<sephira-video-player #player [hidden]="!isVideo"></sephira-video-player>
 			<img [hidden]="isVideo" [src]="displayedImage" />

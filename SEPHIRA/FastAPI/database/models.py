@@ -296,6 +296,7 @@ class Media(Document):
 	file = FileField()
 	size = IntField()
 	dir = BooleanField()
+	associatedMedia = ListField(LazyReferenceField('Media', reverse_delete_rule=PULL))
 
 	def serialize(self):
 		out = {
@@ -310,6 +311,8 @@ class Media(Document):
 			out['dir'] = self.dir
 		if self.file:
 			out['mimetype'] = self.file.content_type
+		if self.associatedMedia:
+			out['associatedMedia'] = list(map(lambda m: str(m.id), self.associatedMedia))
 		return out
 
 #########

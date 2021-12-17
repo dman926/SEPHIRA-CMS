@@ -10,6 +10,21 @@
 	padding: 0;
 }
 
+div#header {
+	display: flex;
+	gap: 0.5em;
+	div#upload {
+		height: 3em;
+		margin: 4px;
+		position: relative;
+		mat-progress-spinner {
+			position: absolute;
+			top: -5px;
+			left: -5px;
+		}
+	}
+}
+
 div#browser {
 	display: grid;
 	grid-template-columns: 25em auto;

@@ -14,12 +14,15 @@ export class FileService {
 
 	constructor(private http: HttpClient, private core: CoreService) { }
 
-	public upload(file: File, folder: string): Observable<HttpEvent<Media>> {
+	public upload(file: File, folder: string, childOf?: string[]): Observable<HttpEvent<Media>> {
 		const headers = this.core.createAuthHeader();
 		if (headers) {
 			const body = new FormData();
 			body.append('file', file);
 			body.append('folder', folder);
+			if (childOf) {
+				body.append('childOf', childOf.toString());
+			}
 			return this.http.post<Media>(this.fileBase + 'upload', body, { headers, reportProgress: true, observe: 'events' });
 		} else {
 			return EMPTY;

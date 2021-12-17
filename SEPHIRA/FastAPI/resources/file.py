@@ -40,7 +40,7 @@ class FolderForm(BaseModel):
 ##########
 
 @router.post('/upload')
-async def upload_file(file: UploadFile = File(...), folder: Optional[str] = Form(''), identity: str = Depends(get_jwt_identity)):
+async def upload_file(file: UploadFile = File(...), folder: Optional[str] = Form(''), childOf: Optional[str] = Form([]), identity: str = Depends(get_jwt_identity)):
 	try:
 		if file.filename == '' or (len(folder) > 0 and folder[0] == '/'):
 			raise SchemaValidationError
@@ -65,6 +65,12 @@ async def upload_file(file: UploadFile = File(...), folder: Optional[str] = Form
 				mimetype = mimetypes.MimeTypes().guess_type(file.filename)
 			media.file.put(file.file, content_type=mimetype)
 			media.save()
+			for parent in childOf.split(','):
+				try:
+					if parent:
+						Media.objects.get(id=parent).update(push__associatedMedia=media)
+				except DoesNotExist:
+					pass
 			return media.serialize()
 		raise SchemaValidationError
 	except SchemaValidationError:
@@ -138,8 +144,6 @@ def stream(filename: str, folder: Optional[str] = '', range: Optional[str] = Hea
 		chunk_size = FileSettings.MAX_STREAM_CHUNK_SIZE
 		if start_byte + chunk_size  > media.size:
 			chunk_size = media.size - 1 - start_byte
-		print(start_byte+chunk_size)
-		print(media.size - 1)
 		return StreamingResponse(
 			content=iterfile(
 				media.file.read(),

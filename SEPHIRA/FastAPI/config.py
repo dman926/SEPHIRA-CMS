@@ -1,6 +1,6 @@
 from pydantic import AnyHttpUrl, EmailStr
+from typing import Optional
 from datetime import timedelta
-from os import path
 
 # This is just for development purposes. Feel free to put the raw values in this file if people seeing them is not an issue (ie. private code base)
 from secret import COINBASE_API_KEY, COINBASE_SHARED_SECRET, PAYPAL_ID, PAYPAL_SECRET, STRIPE_SK
@@ -30,7 +30,7 @@ class OAuth2Settings:
 
 class FileSettings:
 	ALLOWED_EXTENSIONS: set[str] = { 'png', 'jpg', 'jpeg', 'gif', 'mp4', 'webm' }
-	MAX_STREAM_CHUNK_SIZE: int = 1024 # file stream paypload size in bytes
+	MAX_STREAM_CHUNK_SIZE: int = 14 * 1024 # File stream paypload size in bytes
 
 
 class CORSSettings:
@@ -51,6 +51,7 @@ class UvicornSettings:
 	USE_RELOADER: bool = True # You should most definitely set this to 'False' in production as it takes a lot of resources to use
 	LOG_LEVEL: str = 'info' # It is recommended to use 'warning' in production to reduce log clutter
 	PORT: int = 8000
+	MAX_CONTENT_SIZE: Optional[int] = None # The max post content size. Set to `None` for unlimitted (not recommended if users can upload). Should also set this in your web server.
 
 
 class ShopSettings:

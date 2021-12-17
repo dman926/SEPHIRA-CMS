@@ -1,7 +1,36 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from starlette import status
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+from starlette.requests import Request
+from starlette.responses import Response
+from starlette.types import ASGIApp
+
 from config import CORSSettings, FastAPISettings, UvicornSettings
 import logging
+
+####
+# Custom Middlewares #
+####
+
+class LimitPostContentSizeMiddleware(BaseHTTPMiddleware):
+	def __init__(self, app: ASGIApp, max_upload_size: int) -> None:
+		super().__init__(app)
+		self.max_upload_size = max_upload_size
+
+	async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+		if request.method == 'POST':
+			if 'content-length' not in request.headers:
+				return Response(status_code=status.HTTP_411_LENGTH_REQUIRED)
+			content_length = int(request.headers['content-lenght'])
+			if content_length > self.max_upload_size:
+				return Response(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE)
+		return await call_next(request)
+
+####
+#  #
+####
 
 logging.basicConfig(filename="log.log", level=logging.INFO, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
 logger = logging.getLogger(__name__)
@@ -13,6 +42,12 @@ app.add_middleware(
 	allow_methods=['*'],
 	allow_headers=['*']
 )
+
+if UvicornSettings.MAX_CONTENT_SIZE:
+	app.add_middleware(
+		LimitPostContentSizeMiddleware,
+		max_upload_size=UvicornSettings.MAX_CONTENT_SIZE
+	)
 
 @app.on_event('startup')
 async def startup():
