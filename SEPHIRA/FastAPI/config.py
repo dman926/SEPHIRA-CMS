@@ -30,7 +30,7 @@ class OAuth2Settings:
 
 class FileSettings:
 	ALLOWED_EXTENSIONS: set[str] = { 'png', 'jpg', 'jpeg', 'gif', 'mp4', 'webm' }
-	MAX_STREAM_CHUNK_SIZE: int = 14 * 1024 # File stream paypload size in bytes
+	MAX_STREAM_CHUNK_SIZE: int = 1024 # File stream paypload size in bytes
 
 
 class CORSSettings:
