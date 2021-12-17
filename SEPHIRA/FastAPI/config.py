@@ -28,8 +28,9 @@ class OAuth2Settings:
 	TOKEN_URL: str = 'auth/docs-login' # Don't change this unless you change the login route for some reason
 
 
-class UploadSettings:
-	ALLOWED_EXTENSIONS: set[str] = { 'png', 'jpg', 'jpeg', 'gif', 'mp4' }
+class FileSettings:
+	ALLOWED_EXTENSIONS: set[str] = { 'png', 'jpg', 'jpeg', 'gif', 'mp4', 'webm' }
+	MAX_STREAM_CHUNK_SIZE: int = 1024 # file stream paypload size in bytes
 
 
 class CORSSettings:

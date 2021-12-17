@@ -1,14 +1,9 @@
-import { HttpClient, HttpEvent, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpParams, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { EMPTY, Observable } from 'rxjs';
 import { CoreService } from 'src/app/core/services/core/core.service';
 import { Media } from 'src/app/models/media';
 import { environment } from 'src/environments/environment';
-
-interface AllMedia {
-	count: number;
-	files: Media[];
-}
 
 @Injectable({
 	providedIn: 'root',
@@ -69,7 +64,7 @@ export class FileService {
 	}
 
 	public getStreamUrl(folder: string, filename: string): string {
-		return this.fileBase + 'stream?folder=' + encodeURIComponent(folder) + '&file=' + encodeURIComponent(filename);
+		return this.fileBase + 'stream?folder=' + encodeURIComponent(folder) + '&filename=' + encodeURIComponent(filename);
 	}
 
 }

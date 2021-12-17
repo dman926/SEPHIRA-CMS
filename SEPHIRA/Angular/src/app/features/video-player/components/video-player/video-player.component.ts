@@ -1,5 +1,4 @@
-import { AfterContentInit, Component, ElementRef, Input, OnDestroy, ViewChild, ViewEncapsulation } from '@angular/core';
-import videojs, { VideoJsPlayer, VideoJsPlayerOptions } from 'video.js';
+import { Component, ElementRef, Renderer2, ViewChild, ViewEncapsulation } from '@angular/core';
 
 @Component({
 	selector: 'sephira-video-player',
@@ -7,34 +6,28 @@ import videojs, { VideoJsPlayer, VideoJsPlayerOptions } from 'video.js';
 	styleUrls: ['./video-player.component.scss'],
 	encapsulation: ViewEncapsulation.None
 })
-export class VideoPlayerComponent implements AfterContentInit, OnDestroy {
+export class VideoPlayerComponent {
 
-	@Input() options: VideoJsPlayerOptions;
+	@ViewChild('media') private video: ElementRef | undefined;
 
-	@ViewChild('target', { static: true }) target: ElementRef | undefined;
+	constructor(private renderer: Renderer2) { }
 
-	private player: VideoJsPlayer | null;
-
-	constructor() {
-		this.options = {
-			controls: true,
-			fluid: true
-		};
-		this.player = null;
+	addSource(source: string, type: string): HTMLSourceElement | null {
+		if (this.video) {
+			const sourceEl: HTMLSourceElement = this.renderer.createElement('source');
+			sourceEl.setAttribute('src', source);
+			sourceEl.setAttribute('type', type);
+			this.video.nativeElement.appendChild(sourceEl);
+			return sourceEl;
+		}
+		return null;
 	}
 
-	ngAfterContentInit(): void {
-		if (this.target) {
-			this.player = videojs(this.target.nativeElement, this.options, () => {
-				console.log('onPlayerReady', this);
-			});	
+	removeSource(el: HTMLSourceElement): boolean {
+		if (this.video) {
+			return !!this.video.nativeElement.removeChild(el);
 		}
-	}
-
-	ngOnDestroy(): void {
-		if (this.player) {
-			this.player.dispose();
-		}
+		return false;
 	}
 
 }

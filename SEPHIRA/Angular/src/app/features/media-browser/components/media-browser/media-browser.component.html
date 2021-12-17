@@ -25,13 +25,10 @@
 				</mat-list-option>
 			</mat-selection-list>
 		</div>
-		<div id="image-preview" *ngIf="lastSelectedFile !== undefined">
+		<div id="image-preview" [hidden]="lastSelectedFile === undefined">
 			<button mat-raised-button class="round-button" type="button" (click)="deleteLastSelectedFile()"><mat-icon>clear</mat-icon></button>
-			<ng-container [ngSwitch]="lastSelectedFile.mimetype === 'video/mp4' && imageLoaded">
-				<sephira-video-player *ngSwitchCase="true" [options]="videoOptions"></sephira-video-player>
-				<img *ngSwitchDefault [src]="lastSelectedFile ? displayedImage : '/assets/img/placeholder.png'" />
-			</ng-container>
-			<!-- Attribution for placeholder.png: Missing-image-232x150.png by DJKA | CC BY-SA 4.0 -->		
+			<sephira-video-player #player [hidden]="!isVideo"></sephira-video-player>
+			<img [hidden]="isVideo" [src]="displayedImage" />
 		</div>	
 	</div>
 </mat-expansion-panel>

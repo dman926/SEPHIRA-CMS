@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from starlette.responses import StreamingResponse
 from config import APISettings
 
-from fastapi import Depends, UploadFile, File, Form
+from fastapi import Depends, UploadFile, File, Form, Header
 from typing import Optional
 from pydantic import BaseModel
 from modules.JWT import get_jwt_identity
@@ -11,7 +11,7 @@ from mongoengine.errors import DoesNotExist, NotUniqueError
 from resources.errors import NotFoundError, SchemaValidationError, UnauthorizedError, AlreadyExistsError
 from database.models import User, Media
 
-from config import UploadSettings
+from config import FileSettings
 
 import mimetypes
 from io import BytesIO
@@ -26,7 +26,7 @@ router = APIRouter(
 ###########
 
 def allowed_file(filename: str) -> bool:
-	return '.' in filename and filename.rsplit('.', 1)[1].lower() in UploadSettings.ALLOWED_EXTENSIONS
+	return '.' in filename and filename.rsplit('.', 1)[1].lower() in FileSettings.ALLOWED_EXTENSIONS
 
 ###########
 # SCHEMAS #
@@ -60,7 +60,10 @@ async def upload_file(file: UploadFile = File(...), folder: Optional[str] = Form
 					break
 			media = Media(owner=identity, filename=filename, folder=folder, size=len(file.file.read()))
 			file.file.seek(0)
-			media.file.put(file.file, content_type=mimetypes.MimeTypes().guess_type(file.filename)[0])
+			mimetype = file.content_type
+			if not mimetype:
+				mimetype = mimetypes.MimeTypes().guess_type(file.filename)
+			media.file.put(file.file, content_type=mimetype)
 			media.save()
 			return media.serialize()
 		raise SchemaValidationError
@@ -118,14 +121,40 @@ async def delete_media(folder: str, filename: Optional[str] = None, identity: st
 		raise e
 
 @router.get('/stream')
-def stream(filename: str, folder: Optional[str] = ''):
+def stream(filename: str, folder: Optional[str] = '', range: Optional[str] = Header(None)):
 	try:
-		def iterfile(file):
+		def iterfile(file, chunk_size, start, size):
 			with BytesIO(file) as file_obj:
-				yield from file_obj
+				bytes_read = 0
+				file_obj.seek(start)
+				while bytes_read < size:
+					bytes_to_read = min(chunk_size, size - bytes_read)
+					yield file_obj.read(bytes_to_read)
+					bytes_read += bytes_to_read
+				file_obj.close()
+		asked = range or 'bytes=0-'
 		media = Media.objects.get(folder=folder, filename=filename)
-		print(media.file.content_type)
-		return StreamingResponse(iterfile(media.file.read()), media_type=media.file.content_type)
+		start_byte = int(asked.split('=')[-1].split('-')[0])
+		chunk_size = FileSettings.MAX_STREAM_CHUNK_SIZE
+		if start_byte + chunk_size  > media.size:
+			chunk_size = media.size - 1 - start_byte
+		print(start_byte+chunk_size)
+		print(media.size - 1)
+		return StreamingResponse(
+			content=iterfile(
+				media.file.read(),
+				chunk_size,
+				start_byte,
+				media.size
+			),
+			status_code=206,
+			headers={
+				"Accept-Ranges": 'bytes',
+        		"Content-Range": f'bytes {start_byte}-{start_byte+chunk_size}/{media.size - 1}',
+        		"Content-Type": media.file.content_type
+			},
+			media_type=media.file.content_type
+		)
 	except DoesNotExist:
 		raise NotFoundError().http_exception
 	except Exception as e:

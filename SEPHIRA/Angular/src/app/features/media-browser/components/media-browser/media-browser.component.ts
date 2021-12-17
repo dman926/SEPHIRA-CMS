@@ -5,8 +5,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSelectionListChange } from '@angular/material/list';
 import { DomSanitizer } from '@angular/platform-browser';
 import { CoreService } from 'src/app/core/services/core/core.service';
+import { VideoPlayerComponent } from 'src/app/features/video-player/components/video-player/video-player.component';
 import { Media } from 'src/app/models/media';
-import { VideoJsPlayerOptions } from 'video.js';
 import { FileService } from '../../services/file/file.service';
 import { CreateFolderDialogComponent } from '../create-folder-dialog/create-folder-dialog.component';
 
@@ -23,6 +23,7 @@ export class MediaBrowserComponent implements OnInit {
 	@Input() opened: boolean;
 
 	@ViewChild('fileUpload') fileUpload: ElementRef | undefined;
+	@ViewChild('player') player: VideoPlayerComponent | undefined;
 
 	files: Media[];
 	folders: Media[];
@@ -32,12 +33,13 @@ export class MediaBrowserComponent implements OnInit {
 	lastSelectedFile: Media | undefined;
 	displayedImage: any | undefined;
 	imageLoaded: boolean;
-	videoOptions: VideoJsPlayerOptions;
 
 	uploading: boolean;
 	uploadPercent: number;
 
 	formArray: FormArray | undefined;
+
+	currentVideoSource: HTMLSourceElement | null;
 
 	constructor(public core: CoreService, private file: FileService, private dialog: MatDialog, private rootFormGroup: FormGroupDirective, private sanitizer: DomSanitizer) {
 		this.allowMultiple = false;
@@ -49,19 +51,9 @@ export class MediaBrowserComponent implements OnInit {
 		this.loaded = false;
 		this.folder = '';
 		this.imageLoaded = false;
-		this.videoOptions = {
-			fluid: true,
-			controls: true,
-			controlBar: {
-				playToggle: true
-			},
-			sources: [{
-				src: '',
-				type: 'video/mp4'
-			}]
-		};
 		this.uploading = false;
 		this.uploadPercent = 0;
+		this.currentVideoSource = null;
 	}
 
 	ngOnInit(): void {
@@ -224,22 +216,33 @@ export class MediaBrowserComponent implements OnInit {
 					this.lastSelectedFile = value;
 					this.displayedImage = undefined;
 					this.imageLoaded = false;
-					this.file.getStream(this.lastSelectedFile.folder, this.lastSelectedFile.filename).subscribe(data => {
-						if (data) {
-							const reader = new FileReader();
-							reader.onload = () => {
-								console.log('fire');
-								this.displayedImage = this.sanitizer.bypassSecurityTrustUrl(reader.result as string);
-								if (this.lastSelectedFile?.mimetype === 'video/mp4') {
-									this.videoOptions.sources![0].src = this.displayedImage;
-								} else {
-									this.videoOptions.sources![0].src = '';
-								}
-								this.imageLoaded = true;
-							};
-							reader.readAsDataURL(data);
+					if (this.isVideo) {
+						this.displayedImage = this.file.getStreamUrl(this.lastSelectedFile.folder, this.lastSelectedFile.filename);
+						if (this.player && this.lastSelectedFile.mimetype) {
+							if (this.currentVideoSource) {
+								this.player.removeSource(this.currentVideoSource);
+							}
+							this.currentVideoSource = this.player.addSource(this.displayedImage, this.lastSelectedFile.mimetype);
+							this.imageLoaded = true;
 						}
-					});
+					} else {
+						if (this.player) {
+							if (this.currentVideoSource) {
+								this.player.removeSource(this.currentVideoSource);
+							}
+							this.currentVideoSource = null;
+						}
+						this.file.getStream(this.lastSelectedFile.folder, this.lastSelectedFile.filename).subscribe(data => {
+							if (data) {
+								const reader = new FileReader();
+								reader.onload = () => {
+									this.displayedImage = this.sanitizer.bypassSecurityTrustUrl(reader.result as string);
+									this.imageLoaded = true;
+								};
+								reader.readAsDataURL(data);
+							}
+						});
+					}
 				} else {
 					this.lastSelectedFile = undefined;
 					this.displayedImage = undefined;
@@ -256,6 +259,13 @@ export class MediaBrowserComponent implements OnInit {
 			if (this.formArray!.at(i).value === path) {
 				return true;
 			}
+		}
+		return false;
+	}
+
+	get isVideo(): boolean {
+		if (this.lastSelectedFile) {
+			return this.lastSelectedFile.mimetype?.substring(0, 5) === 'video';
 		}
 		return false;
 	}
