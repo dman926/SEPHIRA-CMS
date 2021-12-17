@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { FormArray, FormGroup } from '@angular/forms';
 
 @Component({
-	selector: 'app-media',
+	selector: 'sephira-media',
 	templateUrl: './media.component.html',
 	styleUrls: ['./media.component.scss'],
 })

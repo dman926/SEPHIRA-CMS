@@ -26,7 +26,7 @@
 		<mat-checkbox *ngSwitchCase="'checkbox'" color="primary" [formControlName]="schema.name">{{ schema.niceName }}</mat-checkbox>
 
 		<div *ngSwitchCase="'wysiwyg'" class="spaceout">
-			<angular-editor [formControlName]="schema.name" [config]="editorConfig"></angular-editor>
+			<!-- TODO: Find a WYSIWYG editor -->
 		</div>
 
 		<div *ngSwitchCase="'FormArray'" class="spaceout">

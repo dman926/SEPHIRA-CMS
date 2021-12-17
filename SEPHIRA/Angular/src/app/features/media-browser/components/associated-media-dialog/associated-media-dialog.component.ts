@@ -3,7 +3,7 @@ import { FormArray, FormGroup } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-	selector: 'app-associated-media-dialog',
+	selector: 'sephira-associated-media-dialog',
 	templateUrl: './associated-media-dialog.component.html',
 	styleUrls: ['./associated-media-dialog.component.scss'],
 })
