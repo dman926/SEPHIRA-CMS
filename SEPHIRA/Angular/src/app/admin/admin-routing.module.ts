@@ -23,6 +23,10 @@ const routes: Routes = [
 		loadChildren: () => import('./modules/menu-items/menu-items.module').then(m => m.MenuItemsModule)
 	},
 	{
+		path: 'media',
+		loadChildren: () => import('./modules/media/media.module').then(m => m.MediaModule)
+	},
+	{
 		path: ':postType',
 		loadChildren: () => import('./modules/posts/posts.module').then(m => m.PostsModule)
 	}

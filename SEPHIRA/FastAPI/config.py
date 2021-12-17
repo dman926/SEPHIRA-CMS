@@ -28,13 +28,9 @@ class OAuth2Settings:
 	TOKEN_URL: str = 'auth/docs-login' # Don't change this unless you change the login route for some reason
 
 
-class UploadSettings:
-	UPLOAD_FOLDER: str = path.join(path.dirname(__file__), '..', 'Angular', 'src', 'assets', 'uploads')
-	ALLOWED_EXTENSIONS: set[str] = { 'png', 'jpg', 'jpeg', 'gif' }
-	IMAGE_EXTENSIONS: set[str] = { 'png', 'jpg', 'jpeg', 'gif' } # Should be a subset of ALLOWED_EXTENSIONS
-	ALLOWED_IMAGE_RATIOS: set[str] = { '1', '16/9' } # Ratios should be none-mixed fraction (ex. `16/9`)
-	DEFAULT_IMAGE_RATIO: str = '16/9'
-	IMAGE_COMPRESSION_AMOUNT: int = 75 # Shouldn't be below 65
+class FileSettings:
+	ALLOWED_EXTENSIONS: set[str] = { 'png', 'jpg', 'jpeg', 'gif', 'mp4', 'webm' }
+	MAX_STREAM_CHUNK_SIZE: int = 1024 # file stream paypload size in bytes
 
 
 class CORSSettings:

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
+import { FileService } from 'src/app/features/media-browser/services/file/file.service';
 import { AdminService } from '../../../../servies/admin.service';
 
 @Component({
@@ -12,7 +13,7 @@ export class HomeComponent implements OnInit {
 
 	types: string[];
 
-	constructor(private admin: AdminService, private platform: PlatformService, private state: TransferState) {
+	constructor(private admin: AdminService, private platform: PlatformService, private state: TransferState, private file: FileService) {
 		this.types = [];
 	}
 

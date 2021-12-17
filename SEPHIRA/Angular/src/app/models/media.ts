@@ -1,6 +1,9 @@
 export interface Media {
-	path: string;
-	size: number;
-	ratio?: string;
+	id?: string;
+	owner: string;
+	folder: string;
+	filename: string;
+	size?: number;
 	dir?: boolean;
+	mimetype?: string;
 }

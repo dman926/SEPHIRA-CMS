@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AdminRoutingModule } from './home-routing.module';
+import { HomeRoutingModule } from './home-routing.module';
 
 import { HomeComponent } from './pages/home/home.component';
 
@@ -13,7 +13,7 @@ import { MatButtonModule } from '@angular/material/button';
 	],
 	imports: [
 		CommonModule,
-		AdminRoutingModule,
+		HomeRoutingModule,
 
 		MatButtonModule
 	]

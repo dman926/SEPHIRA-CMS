@@ -12,6 +12,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { LoaderSpinnerModule } from '../loader-spinner/loader-spinner.module';
+import { VideoPlayerModule } from '../video-player/video-player.module';
 
 
 
@@ -32,7 +33,8 @@ import { LoaderSpinnerModule } from '../loader-spinner/loader-spinner.module';
 		MatFormFieldModule,
 		MatInputModule,
 
-		LoaderSpinnerModule
+		LoaderSpinnerModule,
+		VideoPlayerModule
 	],
 	exports: [
 		MediaBrowserComponent
