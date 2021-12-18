@@ -358,7 +358,8 @@ export class CheckoutComponent implements OnInit, AfterContentInit, OnDestroy {
 			const candidates: ShippingRate[] = [];
 			const price = this.calcDiscountPrice();
 			this.shippingRates.forEach(rate => {
-				if (((rate.minCutoff !== null && rate.minCutoff < price) || rate.minCutoff === null) && ((rate.maxCutoff !== null && rate.maxCutoff > price) || rate.maxCutoff === null)) {
+				// TODO: remove the `!` and properly check it. Can't be bothered to do the math right now
+				if (((rate.minCutoff !== null && rate.minCutoff! < price) || rate.minCutoff === null) && ((rate.maxCutoff !== null && rate.maxCutoff! > price) || rate.maxCutoff === null)) {
 					candidates.push(rate);
 				}
 			});
@@ -371,7 +372,8 @@ export class CheckoutComponent implements OnInit, AfterContentInit, OnDestroy {
 						match = candidate;
 					} else if (match.maxCutoff === null && candidate.maxCutoff !== null) {
 						match = candidate;
-					} else if (match.maxCutoff - match.minCutoff > candidate.maxCutoff - candidate.minCutoff) {
+					// TODO: fix this by removing `!` and properly checking. Can't be bothred to do the math right now
+					} else if (match.maxCutoff - match.minCutoff > candidate.maxCutoff! - candidate.minCutoff!) {
 						match = candidate;
 					}
 				}

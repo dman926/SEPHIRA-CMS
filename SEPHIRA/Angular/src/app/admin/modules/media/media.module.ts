@@ -4,6 +4,7 @@ import { MediaRoutingModule } from './media-routing.module';
 import { MediaComponent } from './pages/media/media.component';
 import { MediaBrowserModule } from 'src/app/features/media-browser/media-browser.module';
 import { ReactiveFormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
 
 
 
@@ -15,6 +16,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 		CommonModule,
 		MediaRoutingModule,
 		ReactiveFormsModule,
+
+		MatButtonModule,
 
 		MediaBrowserModule
 	]

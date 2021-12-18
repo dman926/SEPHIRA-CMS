@@ -262,12 +262,15 @@ class ShippingRate(EmbeddedDocument):
 	maxCutoff = FloatField()
 
 	def serialize(self):
-		return {
+		out = {
 			'rate': self.rate,
 			'type': self.type,
-			'minCutoff': self.minCutoff,
-			'maxCutoff': self.maxCutoff
 		}
+		if self.minCutoff != None:
+			out['minCutoff'] = self.minCutoff
+		if self.maxCutoff != None:
+			out['maxCutoff'] = self.maxCutoff
+		return out
 
 class UsShippingZone(Document):
 	applicableStates = ListField(StringField(unique=True, choices=[
@@ -294,8 +297,8 @@ class Media(Document):
 	folder = StringField(required=True)
 	filename = StringField(unique_with='folder')
 	file = FileField()
-	size = IntField()
 	dir = BooleanField()
+	metadata = DictField()
 	associatedMedia = ListField(LazyReferenceField('Media', reverse_delete_rule=PULL))
 
 	def serialize(self, associatedMedia: Optional[bool] = False):
@@ -305,12 +308,13 @@ class Media(Document):
 			'folder': self.folder,
 			'filename': self.filename
 		}
-		if self.size:
-			out['size'] = self.size
 		if self.dir and not associatedMedia:
 			out['dir'] = self.dir
 		if self.file:
 			out['mimetype'] = self.file.content_type
+			out['size'] = self.file.length
+		if self.metadata:
+			out['metadata'] = self.metadata
 		if self.associatedMedia and not associatedMedia:
 			out['associatedMedia'] = list(map(lambda m: m.fetch().serialize(True), self.associatedMedia))
 		return out
@@ -506,7 +510,7 @@ class Product(Post):
 		return {
 			**super().serialize(),
 			'sku': self.sku,
-			'img': list(map(lambda m: { 'folder': m.folder, 'filename': m.filename }, self.img)),
+			'img': list(map(lambda m: str(m.id), self.img)),
 			'price': float(self.price) if self.price else None,
 			"digital": self.digital,
 			"taxable": self.taxable,

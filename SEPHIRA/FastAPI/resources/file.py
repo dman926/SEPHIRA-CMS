@@ -58,8 +58,7 @@ async def upload_file(file: UploadFile = File(...), folder: Optional[str] = Form
 					counter += 1
 				except DoesNotExist:
 					break
-			media = Media(owner=identity, filename=filename, folder=folder, size=len(file.file.read()))
-			file.file.seek(0)
+			media = Media(owner=identity, filename=filename, folder=folder)
 			mimetype = file.content_type
 			if not mimetype:
 				mimetype = mimetypes.MimeTypes().guess_type(file.filename)
@@ -154,19 +153,20 @@ def stream(filename: Optional[str] = '', folder: Optional[str] = '', id: Optiona
 			media = Media.objects.get(folder=folder, filename=filename)
 		start_byte = int(asked.split('=')[-1].split('-')[0])
 		chunk_size = FileSettings.MAX_STREAM_CHUNK_SIZE
-		if start_byte + chunk_size  > media.size:
-			chunk_size = media.size - 1 - start_byte
+		size = media.file.size
+		if start_byte + chunk_size  > size:
+			chunk_size = size - 1 - start_byte
 		return StreamingResponse(
 			content=iterfile(
 				media.file.read(),
 				chunk_size,
 				start_byte,
-				media.size
+				size
 			),
 			status_code=206,
 			headers={
 				'Accept-Ranges': 'bytes',
-        		'Content-Range': f'bytes {start_byte}-{start_byte+chunk_size}/{media.size - 1}',
+        		'Content-Range': f'bytes {start_byte}-{start_byte+chunk_size}/{size - 1}',
         		'Content-Type': media.file.content_type,
 				'Content-Disposition': f'inline; filename="{media.filename.rsplit(".", 1)[0]}"'
 			},

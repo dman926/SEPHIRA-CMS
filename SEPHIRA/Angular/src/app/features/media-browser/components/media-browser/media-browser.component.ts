@@ -122,7 +122,8 @@ export class MediaBrowserComponent implements OnInit {
 							this.uploadPercent = 0;
 							this.uploading = false;
 							if (res.body) {
-								this.files.unshift(res.body);
+								// TODO: think about manually inserting new media object
+								this.fetchFiles();
 							}
 						} else if (res.type === HttpEventType.UploadProgress) {
 							// Update progress
@@ -177,7 +178,8 @@ export class MediaBrowserComponent implements OnInit {
 			if (folder) {
 				this.file.createFolder(this.folder ? this.folder + '/' + folder : folder).subscribe(res => {
 					if (res) {
-						this.folders.push(res);
+						// TODO: think about manually inserting media object
+						this.fetchFiles();
 					}
 				});
 			}
@@ -239,21 +241,7 @@ export class MediaBrowserComponent implements OnInit {
 					this.imageLoaded = false;
 					if (this.isVideo) {
 						if (this.player) {
-							this.player.setSource(this.file.getStreamUrl(undefined, undefined, this.lastSelectedFile.id), this.lastSelectedFile.mimetype!);
-							if (this.lastSelectedFile.associatedMedia) {
-								for (let i = 0; i < this.lastSelectedFile.associatedMedia.length; i++) {
-									const media = this.lastSelectedFile.associatedMedia[i];
-									if (media.mimetype === 'text/vtt') {
-										this.player.addTrack({
-											kind: 'subtitles',
-											mode: 'showing',
-											srclang: 'en',
-											src: this.file.getStreamUrl(media.folder, media.filename, media.id),
-											default: true
-										});	
-									}
-								}
-							}
+							this.player.addMedia(this.lastSelectedFile, true);
 						}
 						this.videoPlaying = true;
 					} else {
