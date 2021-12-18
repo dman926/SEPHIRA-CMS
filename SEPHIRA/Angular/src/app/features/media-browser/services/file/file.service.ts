@@ -70,6 +70,15 @@ export class FileService {
 		}
 	}
 
+	public setMetadata(id: string, metadata: Object): Observable<boolean> {
+		const headers = this.core.createAuthHeader();
+		if (headers) {
+			return this.http.post<boolean>(this.fileBase + 'media/' + id + '/metadata', { metadata }, { headers });
+		} else {
+			return EMPTY;
+		}
+	}
+
 	public getStream(folder?: string, filename?: string, id?: string): Observable<Blob> {
 		let params = new HttpParams()
 		if (id) {

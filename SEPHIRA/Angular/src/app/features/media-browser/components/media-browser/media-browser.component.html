@@ -39,7 +39,10 @@
 			</mat-selection-list>
 		</div>
 		<div id="image-preview" [hidden]="lastSelectedFile === undefined" *ngIf="showPreview">
-			<button mat-raised-button class="round-button" type="button" (click)="deleteLastSelectedFile()"><mat-icon>clear</mat-icon></button>
+			<div>
+				<button mat-raised-button class="round-button" type="button" (click)="deleteLastSelectedFile()"><mat-icon>clear</mat-icon></button>
+				<button mat-raised-button class="round-button" type="button" (click)="editMetadata()"><mat-icon>edit</mat-icon></button>
+			</div>
 			<sephira-video-player #player [hidden]="!isVideo || !videoPlaying"></sephira-video-player>
 			<img *ngIf="!isVideo" [src]="isImg ? displayedImage : '/assets/img/placeholder.png'" />
 			<!-- Attribution for placeholder.png: Missing-image-232x150.png by DJKA | CC BY-SA 4.0 -->

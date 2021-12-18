@@ -1,0 +1,44 @@
+<form [formGroup]="formGroup" (ngSubmit)="submit()">
+	<div id="content" mat-dialog-content>
+		<div *ngIf="image">
+			<p>File type not valid for metadata editing</p>
+		</div>
+		<div *ngIf="video">
+			<p>File type not valid for metadata editing</p>
+		</div>
+		<div *ngIf="text">
+			<mat-form-field appearance="fill">
+				<mat-label>Kind</mat-label>
+				<mat-select formControlName="kind" required>
+					<mat-option *ngFor="let kind of kinds" [value]="kind">
+						{{ kind | titlecase }}
+					</mat-option>
+				</mat-select>
+			</mat-form-field>
+			<mat-form-field appearance="fill">
+				<mat-label>Mode</mat-label>
+				<mat-select formControlName="mode" required>
+					<mat-option *ngFor="let mode of modes" [value]="mode">
+						{{ mode | titlecase }}
+					</mat-option>
+				</mat-select>
+			</mat-form-field>
+			<mat-form-field appearance="fill">
+				<mat-label>Source Language</mat-label>
+				<input matInput formControlName="srclang" required />
+			</mat-form-field>
+			<mat-form-field appearance="fill">
+				<mat-label>Label</mat-label>
+				<input matInput formControlName="label" required />
+			</mat-form-field>
+			<mat-checkbox formControlName="default" color="primary">Default Track?</mat-checkbox>
+		</div>
+	</div>
+	<div *ngIf="!(image || video || text)">
+		<p>File type not valid for metadata editing</p>
+	</div>
+	<div mat-dialog-actions>
+		<button mat-flat-button type="button" color="warn" (click)="dialogRef.close()">Cancel</button>
+		<button mat-flat-button type="submit" color="primary" [disabled]="formGroup.invalid">Save</button>
+	</div>
+</form>

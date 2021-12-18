@@ -1,4 +1,4 @@
-import { COMMA, ENTER, P } from '@angular/cdk/keycodes';
+import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { AfterContentInit, Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { CartItem } from 'src/app/models/cart-item';
 import { Coupon } from 'src/app/models/posts/coupon';

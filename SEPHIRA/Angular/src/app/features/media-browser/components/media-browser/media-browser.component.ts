@@ -6,10 +6,11 @@ import { MatSelectionListChange } from '@angular/material/list';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { CoreService } from 'src/app/core/services/core/core.service';
 import { VideoPlayerComponent } from 'src/app/features/video-player/components/video-player/video-player.component';
-import { AssociatedMedia, Media } from 'src/app/models/media';
+import { Media } from 'src/app/models/media';
 import { FileService } from '../../services/file/file.service';
 import { AssociatedMediaDialogComponent } from '../associated-media-dialog/associated-media-dialog.component';
 import { CreateFolderDialogComponent } from '../create-folder-dialog/create-folder-dialog.component';
+import { MetadataEditorComponent } from '../metadata-editor/metadata-editor.component';
 
 @Component({
 	selector: 'sephira-media-browser',
@@ -142,6 +143,30 @@ export class MediaBrowserComponent implements OnInit {
 		}
 	}
 
+	editMetadata(): void {
+		if (this.lastSelectedFile) {
+			this.dialog.open(MetadataEditorComponent, {
+				maxWidth: '600px',
+				data: { media: this.lastSelectedFile }
+			}).afterClosed().subscribe((metadata: Object | undefined) => {
+				if (metadata && this.lastSelectedFile && this.lastSelectedFile.id) {
+					this.file.setMetadata(this.lastSelectedFile.id, metadata).subscribe(res => {
+						if (res) {
+							this.lastSelectedFile = undefined;
+							this.displayedImage = undefined;
+							this.formArray?.clear();
+							if (this.player && this.videoPlaying) {
+								this.player.resetPlayer();
+								this.videoPlaying = false;
+							}
+							this.fetchFiles();
+						}
+					});
+				}
+			});
+		}
+	}
+
 	deleteLastSelectedFile(): void {
 		if (this.lastSelectedFile) {
 			this.loaded = false;
@@ -269,6 +294,7 @@ export class MediaBrowserComponent implements OnInit {
 				this.displayedImage = undefined;
 				if (this.player && this.videoPlaying) {
 					this.player.resetPlayer();
+					this.videoPlaying = false;
 				}
 			}
 		}

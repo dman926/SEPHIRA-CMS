@@ -13,10 +13,12 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { LoaderSpinnerModule } from '../loader-spinner/loader-spinner.module';
 import { VideoPlayerModule } from '../video-player/video-player.module';
 import { MatSelectModule } from '@angular/material/select';
+import { MetadataEditorComponent } from './components/metadata-editor/metadata-editor.component';
 
 
 
@@ -24,7 +26,8 @@ import { MatSelectModule } from '@angular/material/select';
 	declarations: [
 		MediaBrowserComponent,
 		CreateFolderDialogComponent,
-		AssociatedMediaDialogComponent
+		AssociatedMediaDialogComponent,
+		MetadataEditorComponent
 	],
 	imports: [
 		CommonModule,
@@ -39,6 +42,7 @@ import { MatSelectModule } from '@angular/material/select';
 		MatInputModule,
 		MatProgressSpinnerModule,
 		MatSelectModule,
+		MatCheckboxModule,
 
 		LoaderSpinnerModule,
 		VideoPlayerModule

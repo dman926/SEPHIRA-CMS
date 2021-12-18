@@ -32,8 +32,13 @@ def allowed_file(filename: str) -> bool:
 # SCHEMAS #
 ###########
 
+
 class FolderForm(BaseModel):
 	folder: str
+
+
+class MetadataForm(BaseModel):
+	metadata: dict
 
 ##########
 # ROUTES #
@@ -78,7 +83,6 @@ async def upload_file(file: UploadFile = File(...), folder: Optional[str] = Form
 		raise UnauthorizedError().http_exception
 	except Exception as e:
 		raise e
-
 
 @router.post('/folder')
 async def create_folder(folder_body: FolderForm, identity: str = Depends(get_jwt_identity)):
@@ -129,6 +133,16 @@ async def get_media(folder: Optional[str] = '', ids: Optional[str] = None, sort:
 async def delete_media(folder: str, filename: Optional[str] = None, identity: str = Depends(get_jwt_identity)):
 	try:
 		Media.objects.get(owner=identity, folder=folder, filename=filename).delete()
+	except DoesNotExist:
+		raise NotFoundError().http_exception
+	except Exception as e:
+		raise e
+
+@router.post('/media/{id}/metadata')
+async def set_metadata(id: str, metadata_body: MetadataForm, identity: str = Depends(get_jwt_identity)):
+	try:
+		Media.objects.get(id=id, owner=identity).update(metadata=metadata_body.metadata)
+		return True
 	except DoesNotExist:
 		raise NotFoundError().http_exception
 	except Exception as e:

@@ -1,4 +1,5 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { LEFT_ARROW, RIGHT_ARROW, SPACE, F } from '@angular/cdk/keycodes';
 import { FileService } from 'src/app/features/media-browser/services/file/file.service';
 import { Media } from 'src/app/models/media';
 import videojs, { VideoJsPlayerOptions } from 'video.js';
@@ -20,7 +21,30 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 	constructor(private file: FileService) {
 		this.player = null;
 		this.options = {
-			fluid: true
+			fluid: true,
+			userActions: {
+				hotkeys: ev => {
+					if (this.player) {
+						if (ev.which === LEFT_ARROW) {
+							this.player.currentTime(this.player.currentTime() - 10);
+						} else if (ev.which === RIGHT_ARROW) {
+							this.player.currentTime(this.player.currentTime() + 10);
+						} else if (ev.which === SPACE) {
+							if (this.player.paused()) {
+								this.player.play();
+							} else {
+								this.player.pause();
+							}
+						} else if (ev.which === F) {
+							if (this.player.isFullscreen()) {
+								this.player.exitFullscreen();
+							} else {
+								this.player.requestFullscreen();
+							}
+						}
+					}
+				}
+			}
 		};
 	}
 
@@ -79,12 +103,9 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 					} else if (this.isImage(media.mimetype)) {
 						this.player.poster(streamUrl);
 					} else if (this.isText(media.mimetype)) {
-						this.player.addRemoteTextTrack({
-							kind: 'subtitles',
-							srclang: 'en',
-							src: streamUrl,
-							label: 'English'
-						}, false);
+						let metadata: any = media.metadata ? media.metadata : {};
+						metadata.src = streamUrl;
+						this.player.addRemoteTextTrack(metadata as videojs.TextTrackOptions, false);
 					}
 				}
 			});
