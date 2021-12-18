@@ -61,30 +61,12 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	setSource(src: string, type: string): boolean {
-		if (this.player) {
-			this.player.src({
-				src,
-				type
-			});
-			return true;
-		}
-		return false
-	}
-
 	resetPlayer(): boolean {
 		if (this.player) {
 			this.player.reset();
 			return true;
 		}
 		return false;
-	}
-
-	addTrack(options: videojs.TextTrackOptions, manualCleanup?: boolean): HTMLTrackElement | null {
-		if (this.player) {
-			return this.player.addRemoteTextTrack(options, manualCleanup ? manualCleanup : false);
-		}
-		return null;
 	}
 
 	addMedia(media: Media, reset?: boolean): boolean {
