@@ -22,6 +22,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 		this.player = null;
 		this.options = {
 			fluid: true,
+			preload: 'auto',
 			userActions: {
 				hotkeys: ev => {
 					if (this.player) {
