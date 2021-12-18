@@ -4,7 +4,8 @@
   "compilerOptions": {
     "outDir": "./out-tsc/app",
     "types": [
-		"stripe-v3"
+		"stripe-v3",
+		"video.js"
 	]
   },
   "files": [

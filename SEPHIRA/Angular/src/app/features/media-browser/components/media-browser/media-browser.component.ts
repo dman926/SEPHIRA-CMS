@@ -41,9 +41,8 @@ export class MediaBrowserComponent implements OnInit {
 
 	formArray: FormArray | undefined;
 
-	currentVideoSource: HTMLSourceElement | null;
-	currentAssociatedTracks: HTMLTrackElement[];
-
+	videoPlaying: boolean;
+	
 	sortType: string;
 	sortDirection: string;
 	sortFormControl: FormControl;
@@ -61,9 +60,8 @@ export class MediaBrowserComponent implements OnInit {
 		this.imageLoaded = false;
 		this.uploading = false;
 		this.uploadPercent = 0;
-		this.currentVideoSource = null;
-		this.currentAssociatedTracks = [];
-
+		this.videoPlaying = false;
+		
 		this.sortType = 'filename';
 		this.sortDirection = '';
 		this.sortFormControl = new FormControl(this.sortType);
@@ -153,8 +151,8 @@ export class MediaBrowserComponent implements OnInit {
 					break;
 				}
 			}
-			if (this.player && this.currentVideoSource) {
-				this.player.removeEl(this.currentVideoSource);
+			if (this.player && this.videoPlaying) {
+				this.player.resetPlayer();
 			}
 			this.file.deleteMedia(this.lastSelectedFile.folder, this.lastSelectedFile.filename).subscribe({
 				next: res => {
@@ -240,41 +238,30 @@ export class MediaBrowserComponent implements OnInit {
 					this.displayedImage = undefined;
 					this.imageLoaded = false;
 					if (this.isVideo) {
-						const stream = this.file.getStreamUrl(this.lastSelectedFile.folder, this.lastSelectedFile.filename);
-						if (this.player && this.lastSelectedFile.mimetype) {
-							if (this.currentVideoSource) {
-								this.player.removeEl(this.currentVideoSource);
-							}
-							for (let i = 0; i < this.currentAssociatedTracks.length; i++) {
-								this.player.removeEl(this.currentAssociatedTracks[i]);
-							}
-							this.currentAssociatedTracks = [];
-							//this.currentVideoSource = this.player.addSource(stream, this.lastSelectedFile.mimetype);
+						if (this.player) {
+							this.player.setSource(this.file.getStreamUrl(undefined, undefined, this.lastSelectedFile.id), this.lastSelectedFile.mimetype!);
 							if (this.lastSelectedFile.associatedMedia) {
 								for (let i = 0; i < this.lastSelectedFile.associatedMedia.length; i++) {
-									const media: AssociatedMedia = this.lastSelectedFile.associatedMedia[i];
+									const media = this.lastSelectedFile.associatedMedia[i];
 									if (media.mimetype === 'text/vtt') {
-										console.log(this.file.getStreamUrl(undefined, undefined, media.id));
-										this.file.getStream(undefined, undefined, media.id).subscribe(blob => {
-											if (this.player) {
-												const track = this.player.addTrack(URL.createObjectURL(blob), 'subtitle', 'English', 'en', true);
-												if (track) {
-													this.currentAssociatedTracks.push(track);
-												}
-											}
-										});
+										this.player.addTrack({
+											kind: 'subtitles',
+											mode: 'showing',
+											srclang: 'en',
+											src: this.file.getStreamUrl(media.folder, media.filename, media.id),
+											default: true
+										});	
 									}
 								}
-							} else {
-								this.imageLoaded = true;
 							}
 						}
+						this.videoPlaying = true;
 					} else {
 						if (this.player) {
-							if (this.currentVideoSource) {
-								this.player.removeEl(this.currentVideoSource);
+							if (this.videoPlaying) {
+								this.player.resetPlayer();
+								this.videoPlaying = false;
 							}
-							this.currentVideoSource = null;
 						}
 						this.file.getStream(this.lastSelectedFile.folder, this.lastSelectedFile.filename).subscribe(data => {
 							if (data) {
@@ -292,6 +279,9 @@ export class MediaBrowserComponent implements OnInit {
 			} else {
 				this.lastSelectedFile = undefined;
 				this.displayedImage = undefined;
+				if (this.player && this.videoPlaying) {
+					this.player.resetPlayer();
+				}
 			}
 		}
 	}

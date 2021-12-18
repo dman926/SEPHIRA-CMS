@@ -1,6 +1,5 @@
-import { Component, ElementRef, Renderer2, ViewChild, ViewEncapsulation } from '@angular/core';
-import { SafeUrl } from '@angular/platform-browser';
-import { IPlayable, VgApiService } from '@videogular/ngx-videogular/core';
+import { AfterContentInit, Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild, ViewEncapsulation } from '@angular/core';
+import videojs, { VideoJsPlayerOptions } from 'video.js';
 
 @Component({
 	selector: 'sephira-video-player',
@@ -8,61 +7,59 @@ import { IPlayable, VgApiService } from '@videogular/ngx-videogular/core';
 	styleUrls: ['./video-player.component.scss'],
 	encapsulation: ViewEncapsulation.None
 })
-export class VideoPlayerComponent {
+export class VideoPlayerComponent implements OnInit, OnDestroy {
 
-	@ViewChild('media') private video: ElementRef | undefined;
+	@Input() private options: VideoJsPlayerOptions;
 
-	api: VgApiService | null;
+	@ViewChild('media', { static: true }) private video: ElementRef | undefined;
+
+	player: videojs.Player | null;
 
 	constructor(private renderer: Renderer2) {
-		this.api = null;
+		this.player = null;
+		this.options = {
+			fluid: true
+		};
 	}
 
-	onPlayerReady(api: VgApiService): void {
-		this.api = api;
-		console.log('video api loaded');
+	ngOnInit(): void {
+		console.log(this.video);
+		this.player = videojs('main', this.options, () => {
+			console.log('player ready');
+			console.log('onPlayerReady', this);
+		});
 	}
 
-	addSource(id: string, source: string, type: string): HTMLSourceElement | null {
-		if (this.video && this.api) {
-			const sourceEl: HTMLSourceElement = this.renderer.createElement('source');
-			sourceEl.setAttribute('src', source);
-			sourceEl.setAttribute('type', type);
-			//this.video.nativeElement.appendChild(sourceEl);
-
-			//this.api.registerMedia();
-			return sourceEl;
+	ngOnDestroy(): void {
+		if (this.player) {
+			this.player.dispose();
 		}
-		return null;
 	}
 
-	addTrack(source: string | SafeUrl, kind: string, label?: string, srclang?: string, d?: boolean): HTMLTrackElement | null {
-		console.log(this.api);
-		if (this.video && this.api) {
-			const trackEl: HTMLTrackElement = this.renderer.createElement('track');
-			this.renderer.setProperty(trackEl, 'src', source);
-			this.renderer.setProperty(trackEl, 'kind', kind);
-			if (label) {
-				this.renderer.setProperty(trackEl, 'label', label);
-			}
-			if (srclang) {
-				this.renderer.setProperty(trackEl, 'srclang', srclang);
-			}
-			if (d) {
-				this.renderer.setProperty(trackEl, 'default', true);
-			}
-			/*this.renderer.appendChild(this.video.nativeElement, trackEl);*/
-			this.api.addTextTrack(kind, label, srclang);
-			return trackEl;
+	setSource(src: string, type: string): boolean {
+		if (this.player) {
+			this.player.src({
+				src,
+				type
+			});
+			return true;
 		}
-		return null;
+		return false
 	}
 
-	removeEl(el: HTMLElement): boolean {
-		if (this.video) {
-			return !!this.video.nativeElement.removeChild(el);
+	resetPlayer(): boolean {
+		if (this.player) {
+			this.player.reset();
+			return true;
 		}
 		return false;
+	}
+
+	addTrack(options: videojs.TextTrackOptions, manualCleanup?: boolean): HTMLTrackElement | null {
+		if (this.player) {
+			return this.player.addRemoteTextTrack(options, manualCleanup ? manualCleanup : false);
+		}
+		return null;
 	}
 
 }
