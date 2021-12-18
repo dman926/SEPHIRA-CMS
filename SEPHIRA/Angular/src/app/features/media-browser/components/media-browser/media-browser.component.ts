@@ -240,6 +240,20 @@ export class MediaBrowserComponent implements OnInit {
 					if (this.isVideo) {
 						if (this.player) {
 							this.player.setSource(this.file.getStreamUrl(undefined, undefined, this.lastSelectedFile.id), this.lastSelectedFile.mimetype!);
+							if (this.lastSelectedFile.associatedMedia) {
+								for (let i = 0; i < this.lastSelectedFile.associatedMedia.length; i++) {
+									const media = this.lastSelectedFile.associatedMedia[i];
+									if (media.mimetype === 'text/vtt') {
+										this.player.addTrack({
+											kind: 'subtitles',
+											mode: 'showing',
+											srclang: 'en',
+											src: this.file.getStreamUrl(media.folder, media.filename, media.id),
+											default: true
+										});	
+									}
+								}
+							}
 						}
 						this.videoPlaying = true;
 					} else {
@@ -265,6 +279,9 @@ export class MediaBrowserComponent implements OnInit {
 			} else {
 				this.lastSelectedFile = undefined;
 				this.displayedImage = undefined;
+				if (this.player && this.videoPlaying) {
+					this.player.resetPlayer();
+				}
 			}
 		}
 	}

@@ -55,4 +55,11 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 		return false;
 	}
 
+	addTrack(options: videojs.TextTrackOptions, manualCleanup?: boolean): HTMLTrackElement | null {
+		if (this.player) {
+			return this.player.addRemoteTextTrack(options, manualCleanup ? manualCleanup : false);
+		}
+		return null;
+	}
+
 }
