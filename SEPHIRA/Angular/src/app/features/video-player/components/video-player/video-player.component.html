@@ -1,4 +1,4 @@
-<vg-player>
+<vg-player (onPlayerReady)="onPlayerReady($event)">
 	<vg-overlay-play></vg-overlay-play>
 	<vg-buffering></vg-buffering>
 
@@ -25,5 +25,5 @@
         <vg-fullscreen></vg-fullscreen>
 	</vg-controls>
 
-	<video [vgMedia]="$any(media)" #media></video>
+	<video [vgMedia]="$any(media)" #media crossorigin="anonymous"></video>
 </vg-player>

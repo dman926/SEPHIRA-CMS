@@ -29,15 +29,14 @@ class OAuth2Settings:
 
 
 class FileSettings:
-	ALLOWED_EXTENSIONS: set[str] = { 'png', 'jpg', 'jpeg', 'gif', 'mp4', 'webm', 'srt' }
+	ALLOWED_EXTENSIONS: set[str] = { 'png', 'jpg', 'jpeg', 'gif', 'mp4', 'webm', 'vtt' }
 	MAX_STREAM_CHUNK_SIZE: int = 1024 # File stream paypload size in bytes
 
 
 class CORSSettings:
 	ALLOW_ORIGINS: list[AnyHttpUrl] = [
-		'*'
+		'http://localhost:4200'
 	]
-
 
 class APISettings:
 	ROUTE_BASE: str = '/' # There must be a leading and trailing '/'

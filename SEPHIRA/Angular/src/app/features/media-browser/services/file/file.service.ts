@@ -70,8 +70,16 @@ export class FileService {
 		}
 	}
 
-	public getStream(folder: string, filename: string): Observable<Blob> {
-		const params = new HttpParams().append('folder', folder).append('filename', filename);
+	public getStream(folder?: string, filename?: string, id?: string): Observable<Blob> {
+		let params = new HttpParams()
+		if (id) {
+			params = params.append('id', id);
+		} else if (filename) {
+			if (folder) {
+				params = params.append('folder', folder);
+			}
+			params = params.append('filename', filename);
+		}
 		return this.http.get(this.fileBase + 'stream', { params, responseType: 'blob' });
 	}
 
@@ -84,11 +92,20 @@ export class FileService {
 		return '';
 	}
 
-	loadFileFromBlob(blob: Blob): Promise<SafeUrl> {
+	loadFileFromBlob(blob: Blob, sanitize?: boolean): Promise<SafeUrl | string> {
 		const reader = new FileReader();
 		return new Promise((resolve, reject) => {
 			reader.onload = () => {
-				resolve(this.sanitizer.bypassSecurityTrustUrl(reader.result as string));
+				let out: SafeUrl | string;
+				if (sanitize) {
+					out = this.sanitizer.bypassSecurityTrustUrl(reader.result as string);
+				} else {
+					out = reader.result as string;
+				}
+				resolve(out);
+			}
+			reader.onerror = err => {
+				reject(err);
 			}
 			reader.readAsDataURL(blob);
 		});

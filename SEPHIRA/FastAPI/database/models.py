@@ -298,7 +298,7 @@ class Media(Document):
 	dir = BooleanField()
 	associatedMedia = ListField(LazyReferenceField('Media', reverse_delete_rule=PULL))
 
-	def serialize(self):
+	def serialize(self, associatedMedia: Optional[bool] = False):
 		out = {
 			'id': str(self.id),
 			'owner': str(self.owner.id),
@@ -307,12 +307,12 @@ class Media(Document):
 		}
 		if self.size:
 			out['size'] = self.size
-		if self.dir:
+		if self.dir and not associatedMedia:
 			out['dir'] = self.dir
 		if self.file:
 			out['mimetype'] = self.file.content_type
-		if self.associatedMedia:
-			out['associatedMedia'] = list(map(lambda m: str(m.id), self.associatedMedia))
+		if self.associatedMedia and not associatedMedia:
+			out['associatedMedia'] = list(map(lambda m: m.fetch().serialize(True), self.associatedMedia))
 		return out
 
 #########

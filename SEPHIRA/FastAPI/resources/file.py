@@ -136,7 +136,7 @@ async def delete_media(folder: str, filename: Optional[str] = None, identity: st
 		raise e
 
 @router.get('/stream')
-def stream(filename: Optional[str] = None, folder: Optional[str] = '', id: Optional[str] = None, range: Optional[str] = Header(None)):
+def stream(filename: Optional[str] = '', folder: Optional[str] = '', id: Optional[str] = None, range: Optional[str] = Header(None)):
 	try:
 		def iterfile(file, chunk_size, start, size):
 			with BytesIO(file) as file_obj:
@@ -165,9 +165,10 @@ def stream(filename: Optional[str] = None, folder: Optional[str] = '', id: Optio
 			),
 			status_code=206,
 			headers={
-				"Accept-Ranges": 'bytes',
-        		"Content-Range": f'bytes {start_byte}-{start_byte+chunk_size}/{media.size - 1}',
-        		"Content-Type": media.file.content_type
+				'Accept-Ranges': 'bytes',
+        		'Content-Range': f'bytes {start_byte}-{start_byte+chunk_size}/{media.size - 1}',
+        		'Content-Type': media.file.content_type,
+				'Content-Disposition': f'inline; filename="{media.filename.rsplit(".", 1)[0]}"'
 			},
 			media_type=media.file.content_type
 		)

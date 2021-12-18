@@ -6,5 +6,14 @@ export interface Media {
 	size?: number;
 	dir?: boolean;
 	mimetype?: string;
-	associatedMedia?: string[];
+	associatedMedia?: AssociatedMedia[];
+}
+
+export interface AssociatedMedia {
+	id: string;
+	owner: string;
+	folder: string;
+	filename: string;
+	size: number;
+	mimetype: string;
 }

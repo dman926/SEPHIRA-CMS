@@ -3,10 +3,10 @@ import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormControl, FormGroupDirective, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSelectionListChange } from '@angular/material/list';
-import { DomSanitizer } from '@angular/platform-browser';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { CoreService } from 'src/app/core/services/core/core.service';
 import { VideoPlayerComponent } from 'src/app/features/video-player/components/video-player/video-player.component';
-import { Media } from 'src/app/models/media';
+import { AssociatedMedia, Media } from 'src/app/models/media';
 import { FileService } from '../../services/file/file.service';
 import { AssociatedMediaDialogComponent } from '../associated-media-dialog/associated-media-dialog.component';
 import { CreateFolderDialogComponent } from '../create-folder-dialog/create-folder-dialog.component';
@@ -33,7 +33,7 @@ export class MediaBrowserComponent implements OnInit {
 
 	folder: string;
 	lastSelectedFile: Media | undefined;
-	displayedImage: any | undefined;
+	displayedImage: SafeUrl | string | undefined;
 	imageLoaded: boolean;
 
 	uploading: boolean;
@@ -240,7 +240,7 @@ export class MediaBrowserComponent implements OnInit {
 					this.displayedImage = undefined;
 					this.imageLoaded = false;
 					if (this.isVideo) {
-						this.displayedImage = this.file.getStreamUrl(this.lastSelectedFile.folder, this.lastSelectedFile.filename);
+						const stream = this.file.getStreamUrl(this.lastSelectedFile.folder, this.lastSelectedFile.filename);
 						if (this.player && this.lastSelectedFile.mimetype) {
 							if (this.currentVideoSource) {
 								this.player.removeEl(this.currentVideoSource);
@@ -249,27 +249,22 @@ export class MediaBrowserComponent implements OnInit {
 								this.player.removeEl(this.currentAssociatedTracks[i]);
 							}
 							this.currentAssociatedTracks = [];
-							this.currentVideoSource = this.player.addSource(this.displayedImage, this.lastSelectedFile.mimetype);
+							//this.currentVideoSource = this.player.addSource(stream, this.lastSelectedFile.mimetype);
 							if (this.lastSelectedFile.associatedMedia) {
-								this.file.getMedia(undefined, this.lastSelectedFile.associatedMedia).subscribe(media => {
-									if (this.player) {
-										for (let i = 0; i < media.length; i++) {
-											if (media[i].mimetype === 'application/x-subrip') {
-												this.file.getStream(media[i].folder, media[i].filename).subscribe(blob => {
-													this.file.loadFileFromBlob(blob).then(file => {
-														if (this.player && file) {
-															const track = this.player.addTrack(file, 'subtitles', 'English', 'en', true);
-															if (track) {
-																this.currentAssociatedTracks.push(track);
-															}
-														}
-													});
-												});
+								for (let i = 0; i < this.lastSelectedFile.associatedMedia.length; i++) {
+									const media: AssociatedMedia = this.lastSelectedFile.associatedMedia[i];
+									if (media.mimetype === 'text/vtt') {
+										console.log(this.file.getStreamUrl(undefined, undefined, media.id));
+										this.file.getStream(undefined, undefined, media.id).subscribe(blob => {
+											if (this.player) {
+												const track = this.player.addTrack(URL.createObjectURL(blob), 'subtitle', 'English', 'en', true);
+												if (track) {
+													this.currentAssociatedTracks.push(track);
+												}
 											}
-										}
+										});
 									}
-									this.imageLoaded = true;
-								});
+								}
 							} else {
 								this.imageLoaded = true;
 							}
@@ -283,7 +278,7 @@ export class MediaBrowserComponent implements OnInit {
 						}
 						this.file.getStream(this.lastSelectedFile.folder, this.lastSelectedFile.filename).subscribe(data => {
 							if (data) {
-								this.file.loadFileFromBlob(data).then(file => {
+								this.file.loadFileFromBlob(data, true).then(file => {
 									this.displayedImage = file;
 									this.imageLoaded = true;
 								});
@@ -319,6 +314,13 @@ export class MediaBrowserComponent implements OnInit {
 	get isVideo(): boolean {
 		if (this.lastSelectedFile) {
 			return this.lastSelectedFile.mimetype?.substring(0, 5) === 'video';
+		}
+		return false;
+	}
+
+	get isImg(): boolean {
+		if (this.lastSelectedFile) {
+			return this.lastSelectedFile.mimetype?.substring(0, 5) === 'image';
 		}
 		return false;
 	}
