@@ -153,7 +153,7 @@ def stream(filename: Optional[str] = '', folder: Optional[str] = '', id: Optiona
 			media = Media.objects.get(folder=folder, filename=filename)
 		start_byte = int(asked.split('=')[-1].split('-')[0])
 		chunk_size = FileSettings.MAX_STREAM_CHUNK_SIZE
-		size = media.file.size
+		size = media.file.length
 		if start_byte + chunk_size  > size:
 			chunk_size = size - 1 - start_byte
 		return StreamingResponse(
