@@ -39,14 +39,17 @@ export class FileService {
 		}
 	}
 
-	public getMedia(folder?: string, ids?: string[], sort?: string): Observable<Media[]> {
+	public getMedia(folder?: string, ids?: string[], p?: boolean, sort?: string): Observable<Media[]> {
 		const headers = this.core.createAuthHeader();
 		if (headers) {
 			let params = new HttpParams()
-			if (folder) {
-				params = params.append('folder', folder);
-			} else if (ids) {
+			if (ids) {
 				params = params.append('ids', ids.toString());
+			} else if (folder !== undefined) {
+				params = params.append('folder', folder);
+				if (p) {
+					params = params.append('private', p);
+				}
 			}
 			if (sort) {
 				params = params.append('sort', sort);

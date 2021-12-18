@@ -12,7 +12,8 @@
 			</div>
 			<button mat-raised-button class="round-button" type="button" color="primary" (click)="openCreateFolder()"><mat-icon>add</mat-icon></button>
 		</ng-container>
-		<button mat-raised-button class="round-button" type="button" color="primary" (clicK)="fetchFiles()"><mat-icon>refresh</mat-icon></button>
+		<button mat-raised-button class="round-button" type="button" color="primary" (click)="fetchFiles()"><mat-icon>refresh</mat-icon></button>
+		<button mat-raised-button class="round-button" type="button" color="primary" (click)="showPrivate = !showPrivate"><mat-icon>{{ showPrivate ? 'visibility' : 'visibility_off' }}</mat-icon></button>
 		<mat-form-field appearance="fill">
 			<mat-label>Sort By</mat-label>
 			<mat-select [formControl]="sortFormControl">

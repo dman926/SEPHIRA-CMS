@@ -5,6 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSelectionListChange } from '@angular/material/list';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { CoreService } from 'src/app/core/services/core/core.service';
+import { PlatformService } from 'src/app/core/services/platform/platform.service';
 import { VideoPlayerComponent } from 'src/app/features/video-player/components/video-player/video-player.component';
 import { Media } from 'src/app/models/media';
 import { FileService } from '../../services/file/file.service';
@@ -44,11 +45,12 @@ export class MediaBrowserComponent implements OnInit {
 
 	videoPlaying: boolean;
 	
+	showPrivate: boolean;
 	sortType: string;
 	sortDirection: string;
 	sortFormControl: FormControl;
 
-	constructor(public core: CoreService, private file: FileService, private dialog: MatDialog, private rootFormGroup: FormGroupDirective, private sanitizer: DomSanitizer) {
+	constructor(public core: CoreService, private file: FileService, private platform: PlatformService, private dialog: MatDialog, private rootFormGroup: FormGroupDirective, private sanitizer: DomSanitizer) {
 		this.allowMultiple = false;
 		this.allowUpload = true;
 		this.opened = false;
@@ -63,24 +65,27 @@ export class MediaBrowserComponent implements OnInit {
 		this.uploadPercent = 0;
 		this.videoPlaying = false;
 		
+		this.showPrivate = false;
 		this.sortType = 'filename';
 		this.sortDirection = '';
 		this.sortFormControl = new FormControl(this.sortType);
 	}
 
 	ngOnInit(): void {
-		if (this.formArrayName) {
-			this.formArray = this.rootFormGroup.control.get(this.formArrayName) as FormArray;
-			if (!this.formArray) {
-				throw new Error('`formArrayName` does not map to a valid form array');
-			}
-			this.sortFormControl.valueChanges.subscribe(sortType => {
-				this.sortType = sortType;
+		if (this.platform.isBrowser) {
+			if (this.formArrayName) {
+				this.formArray = this.rootFormGroup.control.get(this.formArrayName) as FormArray;
+				if (!this.formArray) {
+					throw new Error('`formArrayName` does not map to a valid form array');
+				}
+				this.sortFormControl.valueChanges.subscribe(sortType => {
+					this.sortType = sortType;
+					this.fetchFiles();
+				});
 				this.fetchFiles();
-			});
-			this.fetchFiles();
-		} else {
-			throw new Error('`formArrayName` is a required input');
+			} else {
+				throw new Error('`formArrayName` is a required input');
+			}
 		}
 	}
 
@@ -90,7 +95,7 @@ export class MediaBrowserComponent implements OnInit {
 		this.folders = [];
 		this.lastSelectedFile = undefined;
 		this.displayedImage = undefined;
-		this.file.getMedia(this.folder, undefined, this.sortDirection + this.sortType).subscribe({
+		this.file.getMedia(this.folder, undefined, this.showPrivate, this.sortDirection + this.sortType).subscribe({
 			next: files => {
 				files.forEach(file => {
 					if (file.dir) {
@@ -101,7 +106,7 @@ export class MediaBrowserComponent implements OnInit {
 				})
 				this.loaded = true;
 			},
-			error: err => this.loaded = true
+			error: err => this.loaded = true,
 		});
 	}
 

@@ -69,6 +69,10 @@ async def upload_file(file: UploadFile = File(...), folder: Optional[str] = Form
 				mimetype = mimetypes.MimeTypes().guess_type(file.filename)
 			media.file.put(file.file, content_type=mimetype)
 			media.save()
+
+			if mimetype[:5] == 'video':
+				pass
+
 			for parent in childOf.split(','):
 				try:
 					if parent:
@@ -107,7 +111,7 @@ async def create_folder(folder_body: FolderForm, identity: str = Depends(get_jwt
 		raise e
 
 @router.get('/media')
-async def get_media(folder: Optional[str] = '', ids: Optional[str] = None, sort: Optional[str] = 'filename', identity: str = Depends(get_jwt_identity)):
+async def get_media(folder: Optional[str] = '', ids: Optional[str] = None, private: Optional[bool] = False, sort: Optional[str] = 'filename', identity: str = Depends(get_jwt_identity)):
 	try:
 		out = []
 		if ids:
@@ -120,7 +124,7 @@ async def get_media(folder: Optional[str] = '', ids: Optional[str] = None, sort:
 			if (len(folder) > 0 and folder[0] == '/') or sort not in ['filename', 'folder', 'size', '-filename', '-folder', '-size']:
 				raise SchemaValidationError
 			User.objects.get(id=identity)
-			out = Media.objects(folder=folder).order_by(sort)
+			out = Media.objects(folder=folder, private=private).order_by(sort)
 		return list(map(lambda m: m.serialize(), out))
 	except SchemaValidationError:
 		raise SchemaValidationError().http_exception
