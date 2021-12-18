@@ -16,6 +16,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { LoaderSpinnerModule } from '../loader-spinner/loader-spinner.module';
 import { VideoPlayerModule } from '../video-player/video-player.module';
+import { MatSelectModule } from '@angular/material/select';
 
 
 
@@ -37,6 +38,7 @@ import { VideoPlayerModule } from '../video-player/video-player.module';
 		MatFormFieldModule,
 		MatInputModule,
 		MatProgressSpinnerModule,
+		MatSelectModule,
 
 		LoaderSpinnerModule,
 		VideoPlayerModule

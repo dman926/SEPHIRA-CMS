@@ -1,4 +1,5 @@
 import { Component, ElementRef, Renderer2, ViewChild, ViewEncapsulation } from '@angular/core';
+import { SafeUrl } from '@angular/platform-browser';
 
 @Component({
 	selector: 'sephira-video-player',
@@ -23,7 +24,28 @@ export class VideoPlayerComponent {
 		return null;
 	}
 
-	removeSource(el: HTMLSourceElement): boolean {
+	addTrack(source: string | SafeUrl, kind: string, label?: string, srclang?: string, d?: boolean): HTMLTrackElement | null {
+		if (this.video) {
+			const trackEl: HTMLTrackElement = this.renderer.createElement('track');
+			this.renderer.setProperty(trackEl, 'src', source);
+			//trackEl.setAttribute('src', source);
+			trackEl.setAttribute('kind', kind);
+			if (label) {
+				trackEl.setAttribute('label', label);
+			}
+			if (srclang) {
+				trackEl.setAttribute('srclang', srclang);
+			}
+			if (d) {
+				trackEl.setAttribute('default', '');
+			}
+			this.video.nativeElement.appendChild(trackEl);
+			return trackEl;
+		}
+		return null;
+	}
+
+	removeEl(el: HTMLElement): boolean {
 		if (this.video) {
 			return !!this.video.nativeElement.removeChild(el);
 		}

@@ -13,6 +13,15 @@
 			<button mat-raised-button class="round-button" type="button" color="primary" (click)="openCreateFolder()"><mat-icon>add</mat-icon></button>
 		</ng-container>
 		<button mat-raised-button class="round-button" type="button" color="primary" (clicK)="fetchFiles()"><mat-icon>refresh</mat-icon></button>
+		<mat-form-field appearance="fill">
+			<mat-label>Sort By</mat-label>
+			<mat-select [formControl]="sortFormControl">
+				<mat-option *ngFor="let option of ['filename', 'size']" [value]="option">
+					{{ option | titlecase }}
+				</mat-option>
+			</mat-select>
+			<button mat-icon-button (click)="changeSortDirection(); $event.stopPropagation()" matSuffix><mat-icon>{{ sortDirection === '' ? 'north' : 'south' }}</mat-icon></button>
+		</mat-form-field>
 	</div>
 	<div id="browser">
 		<div id="list" *ngIf="loaded;else loaderSpinner">

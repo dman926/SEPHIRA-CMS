@@ -29,7 +29,7 @@ class OAuth2Settings:
 
 
 class FileSettings:
-	ALLOWED_EXTENSIONS: set[str] = { 'png', 'jpg', 'jpeg', 'gif', 'mp4', 'webm' }
+	ALLOWED_EXTENSIONS: set[str] = { 'png', 'jpg', 'jpeg', 'gif', 'mp4', 'webm', 'srt' }
 	MAX_STREAM_CHUNK_SIZE: int = 1024 # File stream paypload size in bytes
 
 

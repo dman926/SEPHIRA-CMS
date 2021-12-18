@@ -13,9 +13,9 @@
 div#header {
 	display: flex;
 	gap: 0.5em;
+	margin: 4px 0;
 	div#upload {
 		height: 3em;
-		margin: 4px;
 		position: relative;
 		mat-progress-spinner {
 			position: absolute;

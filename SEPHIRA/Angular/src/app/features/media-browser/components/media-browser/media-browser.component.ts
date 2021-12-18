@@ -42,6 +42,11 @@ export class MediaBrowserComponent implements OnInit {
 	formArray: FormArray | undefined;
 
 	currentVideoSource: HTMLSourceElement | null;
+	currentAssociatedTracks: HTMLTrackElement[];
+
+	sortType: string;
+	sortDirection: string;
+	sortFormControl: FormControl;
 
 	constructor(public core: CoreService, private file: FileService, private dialog: MatDialog, private rootFormGroup: FormGroupDirective, private sanitizer: DomSanitizer) {
 		this.allowMultiple = false;
@@ -57,6 +62,11 @@ export class MediaBrowserComponent implements OnInit {
 		this.uploading = false;
 		this.uploadPercent = 0;
 		this.currentVideoSource = null;
+		this.currentAssociatedTracks = [];
+
+		this.sortType = 'filename';
+		this.sortDirection = '';
+		this.sortFormControl = new FormControl(this.sortType);
 	}
 
 	ngOnInit(): void {
@@ -65,6 +75,10 @@ export class MediaBrowserComponent implements OnInit {
 			if (!this.formArray) {
 				throw new Error('`formArrayName` does not map to a valid form array');
 			}
+			this.sortFormControl.valueChanges.subscribe(sortType => {
+				this.sortType = sortType;
+				this.fetchFiles();
+			});
 			this.fetchFiles();
 		} else {
 			throw new Error('`formArrayName` is a required input');
@@ -77,7 +91,7 @@ export class MediaBrowserComponent implements OnInit {
 		this.folders = [];
 		this.lastSelectedFile = undefined;
 		this.displayedImage = undefined;
-		this.file.getMedia(this.folder).subscribe({
+		this.file.getMedia(this.folder, undefined, this.sortDirection + this.sortType).subscribe({
 			next: files => {
 				files.forEach(file => {
 					if (file.dir) {
@@ -138,6 +152,9 @@ export class MediaBrowserComponent implements OnInit {
 					this.formArray!.removeAt(i);
 					break;
 				}
+			}
+			if (this.player && this.currentVideoSource) {
+				this.player.removeEl(this.currentVideoSource);
 			}
 			this.file.deleteMedia(this.lastSelectedFile.folder, this.lastSelectedFile.filename).subscribe({
 				next: res => {
@@ -222,31 +239,54 @@ export class MediaBrowserComponent implements OnInit {
 					this.lastSelectedFile = value;
 					this.displayedImage = undefined;
 					this.imageLoaded = false;
-					console.log(this.player);
 					if (this.isVideo) {
 						this.displayedImage = this.file.getStreamUrl(this.lastSelectedFile.folder, this.lastSelectedFile.filename);
 						if (this.player && this.lastSelectedFile.mimetype) {
 							if (this.currentVideoSource) {
-								this.player.removeSource(this.currentVideoSource);
+								this.player.removeEl(this.currentVideoSource);
 							}
+							for (let i = 0; i < this.currentAssociatedTracks.length; i++) {
+								this.player.removeEl(this.currentAssociatedTracks[i]);
+							}
+							this.currentAssociatedTracks = [];
 							this.currentVideoSource = this.player.addSource(this.displayedImage, this.lastSelectedFile.mimetype);
-							this.imageLoaded = true;
+							if (this.lastSelectedFile.associatedMedia) {
+								this.file.getMedia(undefined, this.lastSelectedFile.associatedMedia).subscribe(media => {
+									if (this.player) {
+										for (let i = 0; i < media.length; i++) {
+											if (media[i].mimetype === 'application/x-subrip') {
+												this.file.getStream(media[i].folder, media[i].filename).subscribe(blob => {
+													this.file.loadFileFromBlob(blob).then(file => {
+														if (this.player && file) {
+															const track = this.player.addTrack(file, 'subtitles', 'English', 'en', true);
+															if (track) {
+																this.currentAssociatedTracks.push(track);
+															}
+														}
+													});
+												});
+											}
+										}
+									}
+									this.imageLoaded = true;
+								});
+							} else {
+								this.imageLoaded = true;
+							}
 						}
 					} else {
 						if (this.player) {
 							if (this.currentVideoSource) {
-								this.player.removeSource(this.currentVideoSource);
+								this.player.removeEl(this.currentVideoSource);
 							}
 							this.currentVideoSource = null;
 						}
 						this.file.getStream(this.lastSelectedFile.folder, this.lastSelectedFile.filename).subscribe(data => {
 							if (data) {
-								const reader = new FileReader();
-								reader.onload = () => {
-									this.displayedImage = this.sanitizer.bypassSecurityTrustUrl(reader.result as string);
+								this.file.loadFileFromBlob(data).then(file => {
+									this.displayedImage = file;
 									this.imageLoaded = true;
-								};
-								reader.readAsDataURL(data);
+								});
 							}
 						});
 					}
@@ -268,6 +308,12 @@ export class MediaBrowserComponent implements OnInit {
 			}
 		}
 		return false;
+	}
+
+	changeSortDirection(): void {
+		this.sortDirection = this.sortDirection === '' ? '-' : ''
+		this.files = this.files.reverse();
+		this.folders = this.folders.reverse();
 	}
 
 	get isVideo(): boolean {

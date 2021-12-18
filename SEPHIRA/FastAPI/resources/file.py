@@ -40,7 +40,7 @@ class FolderForm(BaseModel):
 ##########
 
 @router.post('/upload')
-async def upload_file(file: UploadFile = File(...), folder: Optional[str] = Form(''), childOf: Optional[str] = Form([]), identity: str = Depends(get_jwt_identity)):
+async def upload_file(file: UploadFile = File(...), folder: Optional[str] = Form(''), childOf: Optional[str] = Form(''), identity: str = Depends(get_jwt_identity)):
 	try:
 		if file.filename == '' or (len(folder) > 0 and folder[0] == '/'):
 			raise SchemaValidationError
@@ -104,12 +104,21 @@ async def create_folder(folder_body: FolderForm, identity: str = Depends(get_jwt
 		raise e
 
 @router.get('/media')
-async def get_media(folder: Optional[str] = '', identity: str = Depends(get_jwt_identity)):
+async def get_media(folder: Optional[str] = '', ids: Optional[str] = None, sort: Optional[str] = 'filename', identity: str = Depends(get_jwt_identity)):
 	try:
-		if len(folder) > 0 and folder[0] == '/':
-			raise SchemaValidationError
-		User.objects.get(id=identity)
-		return list(map(lambda m: m.serialize(), Media.objects(folder=folder)))
+		out = []
+		if ids:
+			for id in ids.split(','):
+				try:
+					out.append(Media.objects.get(id=id))
+				except DoesNotExist:
+					pass
+		else:
+			if (len(folder) > 0 and folder[0] == '/') or sort not in ['filename', 'folder', 'size', '-filename', '-folder', '-size']:
+				raise SchemaValidationError
+			User.objects.get(id=identity)
+			out = Media.objects(folder=folder).order_by(sort)
+		return list(map(lambda m: m.serialize(), out))
 	except SchemaValidationError:
 		raise SchemaValidationError().http_exception
 	except DoesNotExist:
@@ -127,7 +136,7 @@ async def delete_media(folder: str, filename: Optional[str] = None, identity: st
 		raise e
 
 @router.get('/stream')
-def stream(filename: str, folder: Optional[str] = '', range: Optional[str] = Header(None)):
+def stream(filename: Optional[str] = None, folder: Optional[str] = '', id: Optional[str] = None, range: Optional[str] = Header(None)):
 	try:
 		def iterfile(file, chunk_size, start, size):
 			with BytesIO(file) as file_obj:
@@ -139,7 +148,10 @@ def stream(filename: str, folder: Optional[str] = '', range: Optional[str] = Hea
 					bytes_read += bytes_to_read
 				file_obj.close()
 		asked = range or 'bytes=0-'
-		media = Media.objects.get(folder=folder, filename=filename)
+		if id:
+			media = Media.objects.get(id=id)
+		else:
+			media = Media.objects.get(folder=folder, filename=filename)
 		start_byte = int(asked.split('=')[-1].split('-')[0])
 		chunk_size = FileSettings.MAX_STREAM_CHUNK_SIZE
 		if start_byte + chunk_size  > media.size:
@@ -161,5 +173,7 @@ def stream(filename: str, folder: Optional[str] = '', range: Optional[str] = Hea
 		)
 	except DoesNotExist:
 		raise NotFoundError().http_exception
+	except SchemaValidationError:
+		raise SchemaValidationError().http_exception
 	except Exception as e:
 		raise e
