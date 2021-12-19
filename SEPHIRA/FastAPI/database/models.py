@@ -299,6 +299,7 @@ class Media(Document):
 	file = FileField()
 	dir = BooleanField()
 	metadata = DictField()
+	processing = BooleanField(default=False)
 	private = BooleanField(default=False)
 	associatedMedia = ListField(LazyReferenceField('Media', reverse_delete_rule=PULL))
 
@@ -320,7 +321,12 @@ class Media(Document):
 			def filterAssociatedMedia(media):
 				media = media.fetch()
 				return None if media.private else media.serialize(True)
-			out['associatedMedia'] = list(filter(None, map(filterAssociatedMedia, self.associatedMedia)))
+			#out['associatedMedia'] = list(filter(None, map(filterAssociatedMedia, self.associatedMedia)))
+			out['associatedMedia'] = list(map(lambda m: m.fetch().serialize(True), self.associatedMedia))
+		if self.processing:
+			out['processing'] = self.processing
+		if self.private:
+			out['private'] = self.private
 		return out
 
 #########

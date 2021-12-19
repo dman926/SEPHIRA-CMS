@@ -31,7 +31,8 @@ class OAuth2Settings:
 class FileSettings:
 	ALLOWED_EXTENSIONS: set[str] = { 'png', 'jpg', 'jpeg', 'gif', 'mp4', 'webm', 'vtt' }
 	MAX_STREAM_CHUNK_SIZE: int = 1024 # File stream paypload size in bytes
-
+	ENABLE_FFMPEG: bool = True # Requires ffmpeg and ffprobe to be installed and in the command path. If you aren't sure if it is set up correctly, enter `ffmpeg` and `ffprobe` in the terminal/command prompt and see if it works
+	ENABLE_FILE_PROCESSING: bool = True # If an uploaded file should be 'processed'. Depends on the type of file. For exampe, `application/x-subrip` files are converted to `text/vtt` and `video/...` files are broken into their stream components with the aid of FFMPEG
 
 class CORSSettings:
 	ALLOW_ORIGINS: list[AnyHttpUrl] = [

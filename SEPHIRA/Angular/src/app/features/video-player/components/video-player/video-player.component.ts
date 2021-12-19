@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild, ViewEncapsulation } from '@angular/core';
 import { LEFT_ARROW, RIGHT_ARROW, SPACE, F } from '@angular/cdk/keycodes';
 import { FileService } from 'src/app/features/media-browser/services/file/file.service';
 import { Media } from 'src/app/models/media';
@@ -15,10 +15,11 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 	@Input() private options: VideoJsPlayerOptions;
 
 	@ViewChild('media', { static: true }) private video: ElementRef | undefined;
+	@ViewChild('audio', { static: true }) private audio: ElementRef | undefined;
 
 	player: videojs.Player | null;
 
-	constructor(private file: FileService) {
+	constructor(private file: FileService, private renderer: Renderer2) {
 		this.player = null;
 		this.options = {
 			fluid: true,
@@ -76,13 +77,23 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 			}
 			const toAdd = [media].concat(media.associatedMedia ? media.associatedMedia : []);
 			toAdd.forEach(media => {
-				if (this.player) {
-				const streamUrl = this.file.getStreamUrl(media.folder, media.filename, media.id);
+				if (this.player && this.audio) {
+					const streamUrl = this.file.getStreamUrl(media.folder, media.filename, media.id);
+					console.log(media);
 					if (this.isVideo(media.mimetype)) {
 						this.player.src({
 							src: streamUrl,
 							type: media.mimetype
 						});
+					} else if (this.isAudio(media.mimetype)) {
+						const audioEl: HTMLAudioElement = this.audio.nativeElement;
+						const audioSrc: HTMLSourceElement = this.renderer.createElement('source');
+						audioSrc.src = streamUrl;
+						if (media.mimetype) {
+							audioSrc.type = media.mimetype;
+						}
+						audioEl.append(audioSrc);
+						audioEl.play();
 					} else if (this.isImage(media.mimetype)) {
 						this.player.poster(streamUrl);
 					} else if (this.isText(media.mimetype)) {
@@ -107,6 +118,13 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 	private isVideo(mimetype?: string): boolean {
 		if (mimetype) {
 			return mimetype.substring(0, 5) === 'video';
+		}
+		return false;
+	}
+
+	private isAudio(mimetype?: string): boolean {
+		if (mimetype) {
+			return mimetype.substring(0, 5) === 'audio';
 		}
 		return false;
 	}

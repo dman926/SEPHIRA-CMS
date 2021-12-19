@@ -54,3 +54,9 @@ class AlreadyExistsError(Exception):
 	status_code = 409
 	detail = 'Item with given details already exists'
 	http_exception = HTTPException(status_code=status_code, detail=detail)
+
+
+class MediaProcessingError(Exception):
+	status_code = 422
+	detail = 'There was an error processing the media file'
+	http_exception = HTTPException(status_code=status_code, detail=detail)
