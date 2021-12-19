@@ -1,5 +1,5 @@
 from pydantic import AnyHttpUrl, EmailStr
-from typing import Optional
+from typing import Optional, Union
 from datetime import timedelta
 
 # This is just for development purposes. Feel free to put the raw values in this file if people seeing them is not an issue (ie. private code base)
@@ -29,10 +29,14 @@ class OAuth2Settings:
 
 
 class FileSettings:
-	ALLOWED_EXTENSIONS: set[str] = { 'png', 'jpg', 'jpeg', 'gif', 'mp4', 'webm', 'vtt' }
+	ALLOWED_EXTENSIONS: Union[set[str], str] = { 'png', 'jpg', 'jpeg', 'gif', 'mp4', 'webm', 'vtt' } # Set to `*` to allow all file types (not recommended)
 	MAX_STREAM_CHUNK_SIZE: int = 1024 # File stream paypload size in bytes
 	ENABLE_FFMPEG: bool = True # Requires ffmpeg and ffprobe to be installed and in the command path. If you aren't sure if it is set up correctly, enter `ffmpeg` and `ffprobe` in the terminal/command prompt and see if it works
+	# Below settings are only used if `ENABLE_FFMPEG` is `True`
 	ENABLE_FILE_PROCESSING: bool = True # If an uploaded file should be 'processed'. Depends on the type of file. For exampe, `application/x-subrip` files are converted to `text/vtt` and `video/...` files are broken into their stream components with the aid of FFMPEG
+	VIDEO_EXTENSION: str = 'webm' # The file format a video file's video should be decomposed to
+	AUDIO_EXTENSION: str = 'aac' # The file format a video file's audio should be decomposed to
+	SUBTITLE_EXTENSION: str = 'vtt' # The file format a video file's subtitle should be decomosed to. AT THE TIME OF WRITING, ONLY VTT IS SUPPORTED BY MAJOR BROWSERS
 
 class CORSSettings:
 	ALLOW_ORIGINS: list[AnyHttpUrl] = [

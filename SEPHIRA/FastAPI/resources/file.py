@@ -1,10 +1,9 @@
 from fastapi import APIRouter
-from starlette.responses import StreamingResponse
 from config import APISettings
 
-from fastapi import Depends, UploadFile, File, Form, Header
-from typing import Optional, Union, IO
-from tempfile import SpooledTemporaryFile
+from fastapi import Depends, UploadFile, File, Form, Header, BackgroundTasks, Response
+from starlette.responses import StreamingResponse
+from typing import Optional
 from pydantic import BaseModel
 from modules.JWT import get_jwt_identity
 
@@ -31,80 +30,124 @@ router = APIRouter(
 ###########
 
 def allowed_file(filename: str) -> bool:
+	if FileSettings.ALLOWED_EXTENSIONS == '*':
+		return True
 	return '.' in filename and filename.rsplit('.', 1)[1].lower() in FileSettings.ALLOWED_EXTENSIONS
 
-# ffmpeg/ffprobe functions
-
-def probe(format: str, file: bytes) -> dict:
-	args = ["ffprobe", "-show_streams", "-of", "json", "-v", "quiet", '-f', format, "pipe:0"]
-	p = Popen(args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-	out, err = p.communicate(input=file)
-	if err:
-		raise SubprocessError
+def processMedia(file: UploadFile, filename: str, folder: str, mimetype: str, owner: str) -> None:
 	try:
-		return loads(out)
-	except Exception as e:
-		raise e
+		media = None
+		file_format = filename.rsplit('.', 1)[1]
+		requestedFileName = filename
 
-def createFaststartFile(format: str, file: Union[SpooledTemporaryFile[bytes], IO]) -> bytes:
-	# Have to save the file to disk to allow ffmpeg to seek
-	filename = f'{str(uuid4())}.{format}'
-	filename2 = f'{str(uuid4())}.{format}'
-	if not path.isdir('media_processing'):
-		mkdir('media_processing')
-	with open(f'media_processing/{filename}', 'wb+') as file_obj:
-		file_obj.write(file.read())
-		args = ['ffmpeg', '-i', f'media_processing/{filename}', '-c', 'copy', '-movflags', '+faststart', '-v', 'quiet', f'media_processing/{filename2}']
+		# Use ffmpeg to move metadata to the front
+		filename = None
+		while filename == None:
+			filename = str(uuid4())
+			if path.isfile(f'media_processing/{filename}.{file_format}'):
+				filename == None
+		filename2 = None
+		while filename2 == None:
+			filename2 = str(uuid4())
+			if path.isfile(f'media_processing/{filename2}.{file_format}'):
+				filename2 == None
+		if not path.isdir('media_processing'):
+			mkdir('media_processing')
+		with open(f'media_processing/{filename}.{file_format}', 'wb+') as file_obj:
+			file_obj.write(file.file.read())
+			file_obj.close()
+		args = ['ffmpeg', '-i', f'media_processing/{filename}.{file_format}', '-c', 'copy', '-movflags', '+faststart', '-v', 'quiet', f'media_processing/{filename2}.{file_format}']
 		p = Popen(args)
 		if p.wait() != 0:
 			raise MediaProcessingError
-		with open(f'media_processing/{filename2}', 'rb') as out_file_obj:
-			out_file = out_file_obj.read()
-			remove(f'media_processing/{filename}')
-			remove(f'media_processing/{filename2}')
-			if len(listdir('media_processing')) == 0:
-				rmdir('media_processing')
-			return out_file
+		remove(f'media_processing/{filename}.{file_format}')
+		mkdir(f'media_processing/{filename}')
 
-def extractVideo(format: str, file: bytes, stream_index: int, codec_name: str) -> bytes:
-	if codec_name == 'h.264':
-		pass
-	args = ['ffmpeg', '-f', format, '-i', 'pipe:0', '-map', '0:' + str(stream_index), '-v', 'quiet', '-f', 'webm', 'pipe:1']
-	p = Popen(args, stdin=PIPE, stdout=PIPE)
-	out = p.communicate(input=file)[0]
-	if p.wait() != 0:
-		raise SubprocessError
-	return out
+		args = ['ffprobe', '-show_streams', '-of', 'json', '-v', 'quiet', f'media_processing/{filename2}.{file_format}']
+		p = Popen(args, stdout=PIPE)
+		out = p.communicate()[0]
+		if p.wait() != 0:
+			raise SubprocessError
+		streams = loads(out)['streams']
 
-def processAudio(format: str, file: bytes, stream_index: int, owner: str, filename: str, folder: str) -> str:
-	args = ['ffmpeg', '-f', format, '-i', 'pipe:0', '-map', '0:' + str(stream_index), '-v', 'quiet', '-f', 'opus', 'pipe:1']
-	p = Popen(args, stdin=PIPE, stdout=PIPE)
-	out = p.communicate(input=file)[0]
-	if p.wait() != 0:
-		raise SubprocessError
-	try:
-		with BytesIO(out) as file_obj:
-			media = Media(owner=owner, filename=filename.rsplit('.', 1)[0] + '.opus', folder=folder, private=True)
-			media.file.put(file_obj, content_type='audio/opus')
-			media.save()
-			return str(media.id)
-	except Exception as e:
-		raise e
+		for stream in streams:
+			# Create the main media object (video component)
+			if 'codec_type' in stream:
+				if stream['codec_type'] == 'video' and 'index' in stream:
+					video_filename = str(uuid4())
+					args = ['ffmpeg', '-i', f'media_processing/{filename2}.{file_format}', '-map', '0:' + str(stream['index']), '-v', 'quiet', f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}']
+					p = Popen(args)
+					p.communicate()
+					if p.wait() != 0:
+						raise SubprocessError
+					with open(f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}', 'rb') as video_file_obj:
+						media = Media(owner=owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}.{FileSettings.VIDEO_EXTENSION}', folder=folder, processing=True)
+						mimetype = mimetypes.guess_type(f'{video_filename}.{FileSettings.VIDEO_EXTENSION}')[0]
+						if mimetype == None:
+							mimetype = f'video/{FileSettings.VIDEO_EXTENSION}'
+						media.file.put(video_file_obj, content_type=mimetype)
+						media.save()
+				remove(f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}')
+				break # Only allow the first video stream
 
-def processSubtitles(format: str, file: bytes, stream_index: int, owner: str, filename: str, folder: str) -> str:
-	args = ['ffmpeg', '-f', format, '-i', 'pipe:0', '-map', '0:' + str(stream_index), '-f', 'vtt', 'pipe:1']
-	p = Popen(args, stdin=PIPE, stdout=PIPE)
-	out = p.communicate(input=file)
-	if p.wait() != 0:
-		raise SubprocessError
-	try:
-		with BytesIO(out) as file_obj:
-			media = Media(owner=owner, filename=filename.rsplit('.', 1)[0] + '.vtt', folder=folder, private=True)
-			media.file.put(file_obj, content_type='text/vtt')
-			media.save()
-			return str(media.id)
-	except Exception as e:
-		raise e
+		for stream in streams:
+			# Create sub media objects (audio/subtitles)
+			if 'codec_type' in stream and 'index' in stream:
+				if stream['codec_type'] == 'audio':
+					audio_filename = str(uuid4())
+					args = ['ffmpeg', '-i', f'media_processing/{filename2}.{file_format}', '-map', '0:' + str(stream['index']), '-v', 'quiet', f'media_processing/{filename}/{audio_filename}.{FileSettings.AUDIO_EXTENSION}']
+					p = Popen(args)
+					p.communicate()[0]
+					if p.wait() != 0:
+						raise SubprocessError					
+					with open(f'media_processing/{filename}/{audio_filename}.{FileSettings.AUDIO_EXTENSION}', 'rb') as audio_file_obj:
+						subMedia = Media(owner=owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}.{FileSettings.AUDIO_EXTENSION}', folder=folder, private=True)
+						mimetype = mimetypes.guess_type(f'{audio_filename}.{FileSettings.AUDIO_EXTENSION}')[0]
+						if mimetype == None:
+							mimetype = f'audio/{FileSettings.AUDIO_EXTENSION}'
+						subMedia.file.put(audio_file_obj, content_type=mimetype)
+						subMedia.save()
+						media.update(push__associatedMedia=subMedia)
+					remove(f'media_processing/{filename}/{audio_filename}.{FileSettings.AUDIO_EXTENSION}')
+				elif stream['codec_type'] == 'subtitle':
+					subtitle_filename = str(uuid4())
+					args = ['ffmpeg', '-f', f'media_processing/{filename2}.{file_format}', '-map', '0:' + str(stream['index']), '-v', 'quiet', f'media_processing/{filename}/{subtitle_filename}.{FileSettings.SUBTITLE_EXTENSION}']
+					p = Popen(args)
+					p.communicate()[0]
+					if p.wait() != 0:
+						raise SubprocessError					
+					with open(f'media_processing/{filename}/{subtitle_filename}.{FileSettings.SUBTITLE_EXTENSION}', 'rb') as subtitle_file_obj:
+						subMedia = Media(owner=owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}.{FileSettings.SUBTITLE_EXTENSION}', folder=folder, private=True)
+						mimetype = mimetypes.guess_type(f'{subtitle_filename}.{FileSettings.SUBTITLE_EXTENSION}')[0]
+						if mimetype == None:
+							mimetype = f'text/{FileSettings.SUBTITLE_EXTENSION}'
+						subMedia.file.put(subtitle_file_obj, content_type=mimetype)
+						subMedia.save()
+						media.update(push__associatedMedia=subMedia)
+					remove(f'media_processing/{filename}/{subtitle_filename}.{FileSettings.SUBTITLE_EXTENSION}')
+		media.reload()
+		media.processing = False
+		media.save()
+	except Exception:
+		# Clean up media and sub-media objects
+		if media:
+			media.reload()
+			for subMedia in media.associatedMedia:
+				subMedia = subMedia.fetch()
+				if subMedia.private:
+					subMedia.delete()
+			media.delete()
+	finally:
+		# Clean up temp files
+		try:
+			for f in listdir(f'media_processing/{filename}'):
+				remove(f'media_processing/{filename}/{f}')
+			rmdir(f'media_processing/{filename}')
+		except FileNotFoundError:
+			pass # Directory doesn't exist. Ignore
+		remove(f'media_processing/{filename2}.{file_format}')
+		if len(listdir('media_processing')) == 0:
+			rmdir('media_processing')
 
 ###########
 # SCHEMAS #
@@ -123,7 +166,7 @@ class MetadataForm(BaseModel):
 ##########
 
 @router.post('/upload')
-async def upload_file(file: UploadFile = File(...), folder: Optional[str] = Form(''), childOf: Optional[str] = Form(''), identity: str = Depends(get_jwt_identity)):
+async def upload_file(background_tasks: BackgroundTasks, response: Response, file: UploadFile = File(...), folder: Optional[str] = Form(''), childOf: Optional[str] = Form(''), identity: str = Depends(get_jwt_identity)):
 	try:
 		if file.filename == '' or (len(folder) > 0 and folder[0] == '/'):
 			raise SchemaValidationError
@@ -145,49 +188,26 @@ async def upload_file(file: UploadFile = File(...), folder: Optional[str] = Form
 			if not mimetype:
 				mimetype = mimetypes.MimeTypes().guess_type(filename)
 			
-			media = None
-
 			if FileSettings.ENABLE_FFMPEG and FileSettings.ENABLE_FILE_PROCESSING and mimetype[:5] == 'video':
 				# Process the file
-				file_format = filename.rsplit('.', 1)[1]
-				file_bytes = createFaststartFile(file_format, file.file)
-				try:
-					streams = probe(file_format, file_bytes)['streams']
-				except Exception:
-					raise MediaProcessingError
-				for stream in streams:
-					if 'codec_type' in stream:
-						if stream['codec_type'] == 'video' and 'index' in stream:
-							media = Media(owner=identity, filename=filename.rsplit('.', 1)[0] + '.webm', folder=folder, processing=True)
-							with BytesIO(extractVideo(file_format, file_bytes, stream['index'], stream['codec_name'])) as file_obj:
-								media.file.put(file_obj, content_type=mimetype)
-							media.save()
-							break # Only allow the first video stream
-
-				if media:
-					for stream in streams:
-						if 'codec_type' in stream and 'index' in stream:
-							if stream['codec_type'] == 'audio':
-								media.update(push__associatedMedia=processAudio(file_format, file_bytes, stream['index'], identity, filename, folder))
-							elif stream['codec_type'] == 'subtitle':
-								media.update(push__associatedMedia=processSubtitles(file_format, file_bytes, stream['index'], identity, filename, folder))
+				#background_tasks.add_task(processMedia, file, filename, folder, mimetype, identity)
+				response.status_code = 202
+				processMedia(file, filename, folder, mimetype, identity)
+				return 'processing...'
 			else:
 				media = Media(owner=identity, filename=filename, folder=folder)
 				media.file.put(file.file, content_type=mimetype)
 				media.save()
 
-			if not media:
-				raise MediaProcessingError
-
-			for parent in childOf.split(','):
-				try:
-					if parent:
-						Media.objects.get(id=parent).update(push__associatedMedia=media)
-				except DoesNotExist:
-					pass
-			return media.serialize()
+				for parent in childOf.split(','):
+					try:
+						if parent:
+							Media.objects.get(id=parent).update(push__associatedMedia=media)
+					except DoesNotExist:
+						pass
+				return media.serialize()
 		raise SchemaValidationError
-	except SchemaValidationError:
+	except SchemaValidationError as e:
 		raise SchemaValidationError().http_exception
 	except DoesNotExist:
 		raise UnauthorizedError().http_exception
@@ -244,7 +264,12 @@ async def get_media(folder: Optional[str] = '', ids: Optional[str] = None, priva
 @router.delete('/media')
 async def delete_media(folder: str, filename: Optional[str] = None, identity: str = Depends(get_jwt_identity)):
 	try:
-		Media.objects.get(owner=identity, folder=folder, filename=filename).delete()
+		media = Media.objects.get(owner=identity, folder=folder, filename=filename)
+		for subMedia in media.associatedMedia:
+			subMedia = subMedia.fetch()
+			if subMedia.private:
+				subMedia.delete()
+		media.delete()
 	except DoesNotExist:
 		raise NotFoundError().http_exception
 	except Exception as e:

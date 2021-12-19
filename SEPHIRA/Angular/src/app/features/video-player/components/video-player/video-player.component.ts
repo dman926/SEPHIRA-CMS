@@ -67,6 +67,14 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 			this.player.reset();
 			return true;
 		}
+		if (this.audio) {
+			const audioEl: HTMLAudioElement = this.audio.nativeElement;
+			audioEl.pause();
+			audioEl.currentTime = 0;
+			while (audioEl.lastChild) {
+				audioEl.removeChild(audioEl.lastChild)
+			}
+		}
 		return false;
 	}
 
@@ -79,7 +87,6 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 			toAdd.forEach(media => {
 				if (this.player && this.audio) {
 					const streamUrl = this.file.getStreamUrl(media.folder, media.filename, media.id);
-					console.log(media);
 					if (this.isVideo(media.mimetype)) {
 						this.player.src({
 							src: streamUrl,
@@ -93,7 +100,6 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 							audioSrc.type = media.mimetype;
 						}
 						audioEl.append(audioSrc);
-						audioEl.play();
 					} else if (this.isImage(media.mimetype)) {
 						this.player.poster(streamUrl);
 					} else if (this.isText(media.mimetype)) {
@@ -103,6 +109,11 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 					}
 				}
 			});
+			if (this.audio) {
+				const audioEl: HTMLAudioElement = this.audio.nativeElement;
+				audioEl.load();
+				audioEl.play();
+			}
 			return true;
 		}
 		return false;

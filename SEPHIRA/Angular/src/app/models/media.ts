@@ -26,6 +26,10 @@ export interface Media {
 		/** If text. If the default track */
 		default?: boolean;
 	};
+	/** If the media is still processing */
+	readonly processing?: boolean;
+	/** If the media is private (ex. an audio component of a video) */
+	readonly private?: boolean;
 	/** Child `Media` */
 	associatedMedia?: AssociatedMedia[];
 }

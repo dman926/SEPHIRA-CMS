@@ -119,31 +119,35 @@ export class MediaBrowserComponent implements OnInit {
 			this.dialog.open(AssociatedMediaDialogComponent, {
 				maxWidth: '800px'
 			}).afterClosed().subscribe((media: string[] | undefined) => {
-				this.uploadPercent = 0;
-				this.uploading = true;
-				this.file.upload(file, this.folder, media).subscribe({
-					next: res => {
-						if (res.type === HttpEventType.Response) {
-							// Done uploading
+				if (media) {
+					this.uploadPercent = 0;
+					this.uploading = true;
+					this.file.upload(file, this.folder, media).subscribe({
+						next: res => {
+							if (res.type === HttpEventType.Response) {
+								// Done uploading
+								this.uploadPercent = 0;
+								this.uploading = false;
+								if (res.status === 200) {
+									// TODO: think about manually inserting new media object
+									this.fetchFiles();
+								} else {
+									console.log(res.body)
+								}
+							} else if (res.type === HttpEventType.UploadProgress) {
+								// Update progress
+								if (res.total) {
+									this.uploadPercent = 100 * res.loaded / res.total;
+								}
+							}
+						},
+						error: err => {
+							console.error(err);
 							this.uploadPercent = 0;
 							this.uploading = false;
-							if (res.body) {
-								// TODO: think about manually inserting new media object
-								this.fetchFiles();
-							}
-						} else if (res.type === HttpEventType.UploadProgress) {
-							// Update progress
-							if (res.total) {
-								this.uploadPercent = 100 * res.loaded / res.total;
-							}
 						}
-					},
-					error: err => {
-						console.error(err);
-						this.uploadPercent = 0;
-						this.uploading = false;
-					}
-				});
+					});
+				}
 			});
 		}
 	}
