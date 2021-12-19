@@ -1,6 +1,8 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from typing import Optional
 
+from modules.JWT import get_jwt_identity_optional
+
 import base64
 import os
 
@@ -74,7 +76,7 @@ class ConnectionManager:
 	def set_jwt_from_sid(self, sid: str, jwt: Optional[str] = None) -> None:
 		for connection in self.active_connections:
 			if connection.sid == sid:
-				connection.jwt = jwt
+				connection.jwt = get_jwt_identity_optional(jwt)
 				break
 
 	def get_sockets_from_jwt(self, jwt: Optional[str] = None) -> list[WebSocket]:
@@ -118,3 +120,18 @@ async def order_update_socket(websocket: WebSocket, orderID: str):
 					await orderUpdateManager.send_message({ 'type': 'auth', 'payload': 'authenticated' }, websocket)
 	except WebSocketDisconnect:
 		orderUpdateManager.disconnect(websocket)
+
+mediaBrowserManager = ConnectionManager()
+
+@router.websocket('/media-player')
+async def media_browser_socket(websocket: WebSocket):
+	sid = await mediaBrowserManager.connect(websocket)
+	try:
+		while True:
+			payload = await websocket.receive_json()
+			if 'type' in payload and 'payload' in payload:
+				if payload['type'] == 'auth' and payload['payload'] != None:
+					mediaBrowserManager.set_jwt_from_sid(sid, payload['payload'])
+					await mediaBrowserManager.send_message({ 'type': 'auth', 'payload': 'authenticated' }, websocket)
+	except WebSocketDisconnect:
+		mediaBrowserManager.disconnect(websocket)

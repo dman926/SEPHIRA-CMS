@@ -190,9 +190,8 @@ async def upload_file(background_tasks: BackgroundTasks, response: Response, fil
 			
 			if FileSettings.ENABLE_FFMPEG and FileSettings.ENABLE_FILE_PROCESSING and mimetype[:5] == 'video':
 				# Process the file
-				#background_tasks.add_task(processMedia, file, filename, folder, mimetype, identity)
+				background_tasks.add_task(processMedia, file, filename, folder, mimetype, identity)
 				response.status_code = 202
-				processMedia(file, filename, folder, mimetype, identity)
 				return 'processing...'
 			else:
 				media = Media(owner=identity, filename=filename, folder=folder)
