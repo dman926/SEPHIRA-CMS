@@ -3,6 +3,7 @@ import { LEFT_ARROW, RIGHT_ARROW, SPACE, F } from '@angular/cdk/keycodes';
 import { FileService } from 'src/app/features/media-browser/services/file/file.service';
 import { Media } from 'src/app/models/media';
 import videojs, { VideoJsPlayerOptions } from 'video.js';
+import { PlatformService } from 'src/app/core/services/platform/platform.service';
 
 @Component({
 	selector: 'sephira-video-player',
@@ -14,28 +15,40 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 
 	@Input() private options: VideoJsPlayerOptions;
 
-	@ViewChild('media', { static: true }) private video: ElementRef | undefined;
-	@ViewChild('audio', { static: true }) private audio: ElementRef | undefined;
+	@ViewChild('video', { static: true }) private video: ElementRef<HTMLVideoElement> | undefined;
+	@ViewChild('audio', { static: true }) private audio: ElementRef<HTMLAudioElement> | undefined;
 
 	player: videojs.Player | null;
 
-	constructor(private file: FileService, private renderer: Renderer2) {
+	audioTracks: Media[];
+
+	constructor(private file: FileService, private platform: PlatformService, private renderer: Renderer2) {
 		this.player = null;
+		this.audioTracks = [];
 		this.options = {
 			fluid: true,
 			preload: 'auto',
+			textTrackSettings: {
+				persistTextTrackSettings: true
+			},
 			userActions: {
 				hotkeys: ev => {
-					if (this.player) {
+					if (this.player && this.audio) {
 						if (ev.which === LEFT_ARROW) {
-							this.player.currentTime(this.player.currentTime() - 10);
+							const newTime = Math.max(this.player.currentTime() - 10, 0)
+							this.player.currentTime(newTime);
+							this.audio.nativeElement.currentTime = newTime;
 						} else if (ev.which === RIGHT_ARROW) {
-							this.player.currentTime(this.player.currentTime() + 10);
+							const newTime = this.player.currentTime() + 10
+							this.player.currentTime(newTime);
+							this.audio.nativeElement.currentTime = newTime;
 						} else if (ev.which === SPACE) {
 							if (this.player.paused()) {
 								this.player.play();
+								this.audio.nativeElement.play();
 							} else {
 								this.player.pause();
+								this.audio.nativeElement.pause();
 							}
 						} else if (ev.which === F) {
 							if (this.player.isFullscreen()) {
@@ -51,9 +64,37 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 	}
 
 	ngOnInit(): void {
-		this.player = videojs('main', this.options, () => {
-			
-		});
+		if (this.video) {
+			this.player = videojs(this.video.nativeElement, this.options, () => {
+				if (this.platform.isBrowser) {
+					setInterval(() => {
+						if (this.player && this.audio) {
+							this.audio.nativeElement.currentTime = this.player.currentTime();
+						}
+					}, 100);
+				}
+			});
+			this.player.on('play', () => {
+				if (this.audio) {
+					this.audio.nativeElement.play();
+				}
+			});
+			this.player.on('pause', () => {
+				if (this.audio) {
+					this.audio.nativeElement.pause();
+				}
+			});
+			this.player.on('volumechange', () => {
+				if (this.player && this.audio) {
+					this.audio.nativeElement.volume = this.player.volume();
+				}
+			});
+			this.player.on('seeking', () => {
+				if (this.player && this.audio) {
+					this.audio.nativeElement.currentTime = this.player.currentTime();
+				}
+			});
+		}
 	}
 
 	ngOnDestroy(): void {
@@ -62,26 +103,25 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	resetPlayer(): boolean {
+	resetPlayer(): void {
 		if (this.player) {
 			this.player.reset();
-			return true;
 		}
 		if (this.audio) {
-			const audioEl: HTMLAudioElement = this.audio.nativeElement;
+			const audioEl = this.audio.nativeElement;
 			audioEl.pause();
 			audioEl.currentTime = 0;
 			while (audioEl.lastChild) {
 				audioEl.removeChild(audioEl.lastChild)
 			}
+			this.audioTracks = [];
 		}
-		return false;
 	}
 
 	addMedia(media: Media, reset?: boolean): boolean {
 		if (this.player) {
 			if (reset) {
-				this.player.reset();
+				this.resetPlayer();
 			}
 			const toAdd = [media].concat(media.associatedMedia ? media.associatedMedia : []);
 			toAdd.forEach(media => {
@@ -93,25 +133,37 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 							type: media.mimetype
 						});
 					} else if (this.isAudio(media.mimetype)) {
-						const audioEl: HTMLAudioElement = this.audio.nativeElement;
-						const audioSrc: HTMLSourceElement = this.renderer.createElement('source');
-						audioSrc.src = streamUrl;
-						if (media.mimetype) {
-							audioSrc.type = media.mimetype;
+						if (media.metadata?.default) {
+							const sourceEl: HTMLSourceElement = this.renderer.createElement('source');
+							sourceEl.src = streamUrl;
+							if (media.mimetype) {
+								sourceEl.type = media.mimetype;
+							}
+							this.audio.nativeElement.append(sourceEl);	
 						}
-						audioEl.append(audioSrc);
+						this.audioTracks.push(media);
 					} else if (this.isImage(media.mimetype)) {
 						this.player.poster(streamUrl);
 					} else if (this.isText(media.mimetype)) {
-						let metadata: any = media.metadata ? media.metadata : {};
+						let metadata: videojs.TextTrackOptions = {};
+						if (media.metadata) {
+							metadata = {
+								kind: media.metadata.textKind,
+								mode: media.metadata.mode,
+								srclang: media.metadata.srclang,
+								label: media.metadata.label,
+								default: media.metadata.default
+							};
+						}
 						metadata.src = streamUrl;
-						this.player.addRemoteTextTrack(metadata as videojs.TextTrackOptions, false);
+						this.player.addRemoteTextTrack(metadata, false);
 					}
 				}
 			});
 			if (this.audio) {
-				(this.audio.nativeElement as HTMLAudioElement).load();
+				//this.audio.nativeElement.load();
 			}
+			console.log(this.audioTracks);
 			return true;
 		}
 		return false;

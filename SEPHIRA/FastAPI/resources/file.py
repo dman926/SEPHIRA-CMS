@@ -14,7 +14,6 @@ from database.models import User, Media
 from config import FileSettings
 
 import mimetypes
-from io import BytesIO
 from subprocess import Popen, PIPE, SubprocessError
 from json import loads
 from os import mkdir, listdir, remove, rmdir, path
@@ -83,6 +82,7 @@ def processMedia(file: UploadFile, filename: str, folder: str, owner: str) -> No
 			# Create the main media object (video component)
 			if 'codec_type' in stream:
 				if stream['codec_type'] == 'video':
+					standard_size = True
 					if 'index' in stream:
 						args = ['ffprobe', '-show_streams', '-show_entries', 'stream=width,height', '-of', 'json', '-v', 'quiet', f'media_processing/{filename2}.{file_format}']
 						p = Popen(args, stdout=PIPE)
@@ -92,16 +92,20 @@ def processMedia(file: UploadFile, filename: str, folder: str, owner: str) -> No
 						width = loads(out)['streams'][stream['index']]
 						height = width['height']
 						width = width['width']
-						
+
 						if FileSettings.FORCE_DIMENSION:
 							for dimension in FileSettings.VIDEO_DIMENSIONS:
-								if width > dimension[0] and height > dimension[1]:
+								if width >= dimension[0] and height >= dimension[1]:
+									standard_size = width == dimension[0] and height == dimension[1]
 									width = dimension[0]
 									height = dimension[1]
 									break
 
 					video_filename = str(uuid4())
-					args = ['ffmpeg', '-i', f'media_processing/{filename2}.{file_format}', '-map', '0:' + str(stream['index']), '-s', f'{width}x{height}', '-v', 'quiet', f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}']
+					if standard_size:
+						args = ['ffmpeg', '-i', f'media_processing/{filename2}.{file_format}', '-map', '0:' + str(stream['index']), '-v', 'quiet', f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}']
+					else:
+						args = ['ffmpeg', '-i', f'media_processing/{filename2}.{file_format}', '-map', '0:' + str(stream['index']), '-s', f'{width}x{height}', '-v', 'quiet', f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}']
 					p = Popen(args)
 					p.communicate()
 					if p.wait() != 0:
@@ -154,7 +158,10 @@ def processMedia(file: UploadFile, filename: str, folder: str, owner: str) -> No
 
 		if width > 0 or height > 0:
 			random.seed(int(duration * 100)) # use duration to make thumbnails generate at the same point for the same file. Collisions shouldn't matter 
-			args = ['ffmpeg', '-ss', f'{round(random.random() * duration, 2)}', '-i', f'media_processing/{filename2}.{file_format}', '-vframes', '1', '-s', f'{width}x{height}', '-v', 'quiet', '-f', 'image2', f'media_processing/{filename}/poster.png']
+			if standard_size:
+				args = ['ffmpeg', '-ss', f'{round(random.random() * duration, 2)}', '-i', f'media_processing/{filename2}.{file_format}', '-vframes', '1', '-v', 'quiet', '-f', 'image2', f'media_processing/{filename}/poster.png']
+			else:
+				args = ['ffmpeg', '-ss', f'{round(random.random() * duration, 2)}', '-i', f'media_processing/{filename2}.{file_format}', '-vframes', '1', '-s', f'{width}x{height}', '-v', 'quiet', '-f', 'image2', f'media_processing/{filename}/poster.png']
 			random.seed() # reset seed
 			p = Popen(args)
 			p.communicate()
