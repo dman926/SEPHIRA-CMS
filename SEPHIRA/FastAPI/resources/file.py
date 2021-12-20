@@ -334,14 +334,12 @@ async def set_metadata(id: str, metadata_body: MetadataForm, identity: str = Dep
 def stream(filename: Optional[str] = '', folder: Optional[str] = '', id: Optional[str] = None, range: Optional[str] = Header(None)):
 	try:
 		def iterfile(file, chunk_size, start, size):
-			with BytesIO(file) as file_obj:
-				bytes_read = 0
-				file_obj.seek(start)
-				while bytes_read < size:
-					bytes_to_read = min(chunk_size, size - bytes_read)
-					yield file_obj.read(bytes_to_read)
-					bytes_read += bytes_to_read
-				file_obj.close()
+			bytes_read = 0
+			file.seek(start)
+			while bytes_read < size:
+				bytes_to_read = min(chunk_size, size - bytes_read)
+				yield file.read(bytes_to_read)
+				bytes_read += bytes_to_read
 		asked = range or 'bytes=0-'
 		if id:
 			media = Media.objects.get(id=id)
@@ -354,7 +352,8 @@ def stream(filename: Optional[str] = '', folder: Optional[str] = '', id: Optiona
 			chunk_size = size - 1 - start_byte
 		return StreamingResponse(
 			content=iterfile(
-				media.file.read(),
+				#media.file.read(),
+				media.file,
 				chunk_size,
 				start_byte,
 				size
