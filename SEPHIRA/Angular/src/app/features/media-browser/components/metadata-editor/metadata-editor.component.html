@@ -6,11 +6,29 @@
 		<div *ngIf="video">
 			<p>File type not valid for metadata editing</p>
 		</div>
+		<div *ngIf="audio">
+			<mat-form-field appearance="fill">
+				<mat-label>Kind</mat-label>
+				<mat-select formControlName="audioKind" required>
+					<mat-option *ngFor="let kind of audioKinds" [value]="kind">
+						{{ kind | titlecase }}
+					</mat-option>
+				</mat-select>
+			</mat-form-field>
+			<mat-form-field appearance="fill">
+				<mat-label>Source Language</mat-label>
+				<input matInput formControlName="srclang" required />
+			</mat-form-field>
+			<mat-form-field appearance="fill">
+				<mat-label>Label</mat-label>
+				<input matInput formControlName="label" required />
+			</mat-form-field>
+		</div>
 		<div *ngIf="text">
 			<mat-form-field appearance="fill">
 				<mat-label>Kind</mat-label>
-				<mat-select formControlName="kind" required>
-					<mat-option *ngFor="let kind of kinds" [value]="kind">
+				<mat-select formControlName="textKind" required>
+					<mat-option *ngFor="let kind of textKinds" [value]="kind">
 						{{ kind | titlecase }}
 					</mat-option>
 				</mat-select>

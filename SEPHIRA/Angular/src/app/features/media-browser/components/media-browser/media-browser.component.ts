@@ -10,7 +10,7 @@ import { CoreService } from 'src/app/core/services/core/core.service';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
 import { WebsocketService } from 'src/app/core/services/websocket/websocket.service';
 import { VideoPlayerComponent } from 'src/app/features/video-player/components/video-player/video-player.component';
-import { Media } from 'src/app/models/media';
+import { Media, Metadata } from 'src/app/models/media';
 import { FileService } from '../../services/file/file.service';
 import { AssociatedMediaDialogComponent } from '../associated-media-dialog/associated-media-dialog.component';
 import { CreateFolderDialogComponent } from '../create-folder-dialog/create-folder-dialog.component';
@@ -207,18 +207,11 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 			this.dialog.open(MetadataEditorComponent, {
 				maxWidth: '600px',
 				data: { media: this.lastSelectedFile }
-			}).afterClosed().subscribe((metadata: Object | undefined) => {
+			}).afterClosed().subscribe((metadata: Metadata | undefined) => {
 				if (metadata && this.lastSelectedFile && this.lastSelectedFile.id) {
 					this.file.setMetadata(this.lastSelectedFile.id, metadata).subscribe(res => {
-						if (res) {
-							this.lastSelectedFile = undefined;
-							this.displayedImage = undefined;
-							this.formArray?.clear();
-							if (this.player && this.videoPlaying) {
-								this.player.resetPlayer();
-								this.videoPlaying = false;
-							}
-							this.fetchFiles();
+						if (res && this.lastSelectedFile) {
+							this.lastSelectedFile.metadata = metadata;
 						}
 					});
 				}
