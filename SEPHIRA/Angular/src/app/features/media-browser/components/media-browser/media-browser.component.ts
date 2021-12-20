@@ -1,11 +1,14 @@
 import { HttpEventType } from '@angular/common/http';
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormControl, FormGroupDirective, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSelectionListChange } from '@angular/material/list';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { SafeUrl } from '@angular/platform-browser';
+import { retry } from 'rxjs';
+import { WebSocketSubject } from 'rxjs/webSocket';
 import { CoreService } from 'src/app/core/services/core/core.service';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
+import { WebsocketService } from 'src/app/core/services/websocket/websocket.service';
 import { VideoPlayerComponent } from 'src/app/features/video-player/components/video-player/video-player.component';
 import { Media } from 'src/app/models/media';
 import { FileService } from '../../services/file/file.service';
@@ -13,18 +16,27 @@ import { AssociatedMediaDialogComponent } from '../associated-media-dialog/assoc
 import { CreateFolderDialogComponent } from '../create-folder-dialog/create-folder-dialog.component';
 import { MetadataEditorComponent } from '../metadata-editor/metadata-editor.component';
 
+interface IUpdate {
+	id: number;
+	createTime: number;
+	folder: string;
+	created: boolean;
+	opacity: number;
+}
+
 @Component({
 	selector: 'sephira-media-browser',
 	templateUrl: './media-browser.component.html',
 	styleUrls: ['./media-browser.component.scss'],
 })
-export class MediaBrowserComponent implements OnInit {
+export class MediaBrowserComponent implements OnInit, OnDestroy {
 
 	@Input() formArrayName: string | undefined;
 	@Input() allowMultiple: boolean;
 	@Input() allowUpload: boolean;
 	@Input() opened: boolean;
 	@Input() showPreview: boolean;
+	@Input() useSocket: boolean;
 
 	@ViewChild('fileUpload') fileUpload: ElementRef | undefined;
 	@ViewChild('player') player: VideoPlayerComponent | undefined;
@@ -50,11 +62,17 @@ export class MediaBrowserComponent implements OnInit {
 	sortDirection: string;
 	sortFormControl: FormControl;
 
-	constructor(public core: CoreService, private file: FileService, private platform: PlatformService, private dialog: MatDialog, private rootFormGroup: FormGroupDirective, private sanitizer: DomSanitizer) {
+	websocket: WebSocketSubject<any> | null;
+	updatedList: IUpdate[];
+	now: number;
+	readonly updatedListRemoveTime: number = 15; // in seconds
+
+	constructor(public core: CoreService, private file: FileService, private platform: PlatformService, private ws: WebsocketService, private dialog: MatDialog, private rootFormGroup: FormGroupDirective) {
 		this.allowMultiple = false;
 		this.allowUpload = true;
 		this.opened = false;
 		this.showPreview = true;
+		this.useSocket = true;
 
 		this.files = [];
 		this.folders = [];
@@ -69,6 +87,10 @@ export class MediaBrowserComponent implements OnInit {
 		this.sortType = 'filename';
 		this.sortDirection = '';
 		this.sortFormControl = new FormControl(this.sortType);
+
+		this.websocket = null;
+		this.now = Date.now();
+		this.updatedList = [];
 	}
 
 	ngOnInit(): void {
@@ -83,9 +105,40 @@ export class MediaBrowserComponent implements OnInit {
 					this.fetchFiles();
 				});
 				this.fetchFiles();
+				if (this.useSocket) {
+					this.websocket = this.ws.connect('media-browser');
+					if (this.websocket) {
+						this.websocket.pipe(retry()).subscribe(data => {
+							if (data['type'] === 'update') {
+								const id = Math.trunc(Math.random() * 1000000);
+								this.updatedList.push({
+									id,
+									createTime: this.now,
+									folder: data['payload']['folder'],
+									created: data['payload']['created'],
+									opacity: 1
+								});
+								setTimeout(() => {
+									this.removeUpdate(id);
+								}, this.updatedListRemoveTime * 1000);
+							}
+						});
+						this.ws.send(this.websocket, this.ws.createAuthPayload());
+					}
+					setInterval(() => {
+						this.now = Date.now();
+					}, 250);
+				}
 			} else {
 				throw new Error('`formArrayName` is a required input');
 			}
+		}
+	}
+
+	ngOnDestroy(): void {
+		if (this.websocket) {
+			this.websocket.unsubscribe();
+
 		}
 	}
 
@@ -131,8 +184,6 @@ export class MediaBrowserComponent implements OnInit {
 								if (res.status === 200) {
 									// TODO: think about manually inserting new media object
 									this.fetchFiles();
-								} else {
-									console.log(res.body)
 								}
 							} else if (res.type === HttpEventType.UploadProgress) {
 								// Update progress
@@ -142,7 +193,6 @@ export class MediaBrowserComponent implements OnInit {
 							}
 						},
 						error: err => {
-							console.error(err);
 							this.uploadPercent = 0;
 							this.uploading = false;
 						}
@@ -191,10 +241,9 @@ export class MediaBrowserComponent implements OnInit {
 			}
 			this.file.deleteMedia(this.lastSelectedFile.folder, this.lastSelectedFile.filename).subscribe({
 				next: res => {
-					this.files.splice(this.files.indexOf(this.lastSelectedFile!), 1);
 					this.lastSelectedFile = undefined;
 					this.displayedImage = undefined;
-					this.loaded = true;
+					this.fetchFiles();
 				},
 				error: err => {
 					this.lastSelectedFile = undefined;
@@ -322,6 +371,23 @@ export class MediaBrowserComponent implements OnInit {
 		this.sortDirection = this.sortDirection === '' ? '-' : ''
 		this.files = this.files.reverse();
 		this.folders = this.folders.reverse();
+	}
+
+	togglePrivateVisibility(): void {
+		this.showPrivate = !this.showPrivate;
+		this.fetchFiles();
+	}
+
+	removeUpdate(id: number): void {
+		for (let i = 0; i < this.updatedList.length; i++) {
+			if (this.updatedList[i].id === id) {
+				this.updatedList[i].opacity = 0;
+				setTimeout(() => {
+					this.updatedList.splice(i, 1);
+				}, 250);
+				break;
+			}
+		}
 	}
 
 	get isVideo(): boolean {

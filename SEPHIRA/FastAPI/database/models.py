@@ -4,17 +4,17 @@ Models to serialize between MongoDB and Python
 
 # to make the recursive MenuItemModel work
 from __future__ import annotations
-from typing import List
 
-from typing import Optional
-from mongoengine import Document, EmbeddedDocument, EmbeddedDocumentListField, ReferenceField, StringField, ListField, IntField, DateTimeField, BooleanField, EmailField, DecimalField, FloatField, DictField, LazyReferenceField, FileField, CASCADE, PULL
+from typing import Optional, List
+from mongoengine import signals, Document, EmbeddedDocument, EmbeddedDocumentListField, ReferenceField, StringField, ListField, IntField, DateTimeField, BooleanField, EmailField, DecimalField, FloatField, DictField, LazyReferenceField, FileField, CASCADE, PULL
 from passlib.context import CryptContext
 from pydantic import BaseModel, EmailStr
 import onetimepass
 
 from services.util_service import make_ngrams
+from resources.sockets import mediaBrowserManager
 
-import random, string, datetime, re
+import random, string, datetime, re, asyncio
 
 ###########
 # HELPERS #
@@ -303,6 +303,27 @@ class Media(Document):
 	private = BooleanField(default=False)
 	associatedMedia = ListField(LazyReferenceField('Media', reverse_delete_rule=PULL))
 
+	@classmethod
+	def post_save(cls, sender, document, **kwargs):
+		if not (document.private or document.processing):
+			created = kwargs['created']
+			message = {
+				'type': 'update',
+				'payload': {
+					'folder': document.folder,
+					'created': created
+				}
+			}
+			try:
+				loop = asyncio.get_running_loop()
+			except RuntimeError:
+				loop = None
+
+			if loop and loop.is_running():
+				loop.create_task(mediaBrowserManager.broadcast(message))
+			else:
+				asyncio.run(mediaBrowserManager.broadcast(message))
+
 	def serialize(self, associatedMedia: Optional[bool] = False):
 		out = {
 			'id': str(self.id),
@@ -318,16 +339,14 @@ class Media(Document):
 		if self.metadata:
 			out['metadata'] = self.metadata
 		if self.associatedMedia and not associatedMedia:
-			def filterAssociatedMedia(media):
-				media = media.fetch()
-				return None if media.private else media.serialize(True)
-			#out['associatedMedia'] = list(filter(None, map(filterAssociatedMedia, self.associatedMedia)))
 			out['associatedMedia'] = list(map(lambda m: m.fetch().serialize(True), self.associatedMedia))
 		if self.processing:
 			out['processing'] = self.processing
 		if self.private:
 			out['private'] = self.private
 		return out
+
+signals.post_save.connect(Media.post_save, sender=Media)
 
 #########
 # POSTS #

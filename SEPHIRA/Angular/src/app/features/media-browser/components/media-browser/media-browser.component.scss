@@ -10,6 +10,10 @@
 	padding: 0;
 }
 
+.spacer {
+	flex-grow: 1;
+}
+
 div#header {
 	display: flex;
 	gap: 0.5em;
@@ -41,6 +45,25 @@ div#browser {
 		}
 		img {
 			width: 100%;
+		}
+	}
+}
+
+div#updates {
+	mat-card {
+		display: flex;
+		background-color: red;
+		color: white;
+		opacity: 1;
+		transition: opacity 0.25s;
+		div {
+			height: 3em;
+			position: relative;
+			mat-progress-spinner {
+				position: absolute;
+				top: -5px;
+				left: -5px;
+			}
 		}
 	}
 }

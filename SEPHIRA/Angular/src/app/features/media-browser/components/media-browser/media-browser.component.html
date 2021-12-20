@@ -13,7 +13,7 @@
 			<button mat-raised-button class="round-button" type="button" color="primary" (click)="openCreateFolder()"><mat-icon>add</mat-icon></button>
 		</ng-container>
 		<button mat-raised-button class="round-button" type="button" color="primary" (click)="fetchFiles()"><mat-icon>refresh</mat-icon></button>
-		<button mat-raised-button class="round-button" type="button" color="primary" (click)="showPrivate = !showPrivate"><mat-icon>{{ showPrivate ? 'visibility' : 'visibility_off' }}</mat-icon></button>
+		<button mat-raised-button class="round-button" type="button" color="primary" (click)="togglePrivateVisibility()"><mat-icon>{{ showPrivate ? 'visibility' : 'visibility_off' }}</mat-icon></button>
 		<mat-form-field appearance="fill">
 			<mat-label>Sort By</mat-label>
 			<mat-select [formControl]="sortFormControl">
@@ -34,8 +34,8 @@
 			</mat-selection-list>
 			<mat-selection-list (selectionChange)="onFileSelected($event)" [multiple]="allowMultiple">
 				<mat-list-option *ngIf="!allowMultiple">Clear Selection</mat-list-option>
-				<mat-list-option color="primary" *ngFor="let file of files" [value]="file" [selected]="isSelected(file.id!)">
-					{{ file.filename }} ({{ file.size ? core.formatBytes(file.size) : '?' }})
+				<mat-list-option color="primary" *ngFor="let file of files" [value]="file" [selected]="isSelected(file.id!)" [disabled]="file.processing">
+					<mat-icon mat-list-icon *ngIf="file.private">lock</mat-icon> {{ file.filename }} ({{ file.size ? core.formatBytes(file.size) : '?' }}) <mat-progress-bar mode="indeterminate" *ngIf="file.processing"></mat-progress-bar>
 				</mat-list-option>
 			</mat-selection-list>
 		</div>
@@ -48,6 +48,16 @@
 			<img *ngIf="!isVideo" [src]="isImg ? displayedImage : '/assets/img/placeholder.png'" />
 			<!-- Attribution for placeholder.png: Missing-image-232x150.png by DJKA | CC BY-SA 4.0 -->
 		</div>
+	</div>
+	<div id="updates" *ngIf="useSocket">
+		<mat-card *ngFor="let update of updatedList" [ngStyle]="{opacity: update.opacity}">
+			<p>{{ update.created ? 'New' : 'Updated' }} media in {{ folder == update.folder ? 'this' : update.folder == '' ? 'root' : update.folder }} folder</p>
+			<span class="spacer"></span>
+			<div>
+				<mat-progress-spinner color="accent" diameter="52" [value]="100 - ((now - update.createTime) / 1000 / updatedListRemoveTime * 100)"></mat-progress-spinner>
+				<button mat-raised-button class="round-button" type="button" color="primary" (click)="removeUpdate(update.id)"><mat-icon>clear</mat-icon></button>
+			</div>
+		</mat-card>	
 	</div>
 </mat-expansion-panel>
 

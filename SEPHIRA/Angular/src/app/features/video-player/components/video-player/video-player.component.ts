@@ -110,9 +110,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 				}
 			});
 			if (this.audio) {
-				const audioEl: HTMLAudioElement = this.audio.nativeElement;
-				audioEl.load();
-				audioEl.play();
+				(this.audio.nativeElement as HTMLAudioElement).load();
 			}
 			return true;
 		}

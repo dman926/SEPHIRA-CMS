@@ -1,7 +1,7 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException
 from typing import Optional
 
-from modules.JWT import get_jwt_identity_optional
+from modules.JWT import get_jwt_identity
 
 import base64
 import os
@@ -54,7 +54,7 @@ class ConnectionManager:
 
 	async def broadcast(self, message: dict) -> None:
 		for connection in self.active_connections:
-			await connection.send_json(message)
+			await connection.socket.send_json(message)
 	
 	def get_socket_from_sid(self, sid: str) -> Optional[WebSocket]:
 		for connection in self.active_connections:
@@ -73,11 +73,15 @@ class ConnectionManager:
 			if connection.sid == sid:
 				return connection.metadata
 
-	def set_jwt_from_sid(self, sid: str, jwt: Optional[str] = None) -> None:
+	def set_jwt_from_sid(self, sid: str, jwt: Optional[str] = None) -> bool:
 		for connection in self.active_connections:
 			if connection.sid == sid:
-				connection.jwt = get_jwt_identity_optional(jwt)
-				break
+				try:
+					connection.jwt = get_jwt_identity(jwt)
+				except HTTPException: # Bad token
+					return False
+				return True
+		return False
 
 	def get_sockets_from_jwt(self, jwt: Optional[str] = None) -> list[WebSocket]:
 		sockets: list[WebSocket] = []
@@ -116,14 +120,16 @@ async def order_update_socket(websocket: WebSocket, orderID: str):
 			payload = await websocket.receive_json()
 			if 'type' in payload and 'payload' in payload:
 				if payload['type'] == 'auth' and payload['payload'] != None:
-					orderUpdateManager.set_jwt_from_sid(sid, payload['payload'])
-					await orderUpdateManager.send_message({ 'type': 'auth', 'payload': 'authenticated' }, websocket)
+					if (orderUpdateManager.set_jwt_from_sid(sid, payload['payload'])):
+						await orderUpdateManager.send_message({ 'type': 'auth', 'payload': 'authenticated' }, websocket)
+					else:
+						await orderUpdateManager.send_message({ 'type': 'auth', 'payload': 'not authenticated' }, websocket)
 	except WebSocketDisconnect:
 		orderUpdateManager.disconnect(websocket)
 
 mediaBrowserManager = ConnectionManager()
 
-@router.websocket('/media-player')
+@router.websocket('/media-browser')
 async def media_browser_socket(websocket: WebSocket):
 	sid = await mediaBrowserManager.connect(websocket)
 	try:
@@ -131,7 +137,9 @@ async def media_browser_socket(websocket: WebSocket):
 			payload = await websocket.receive_json()
 			if 'type' in payload and 'payload' in payload:
 				if payload['type'] == 'auth' and payload['payload'] != None:
-					mediaBrowserManager.set_jwt_from_sid(sid, payload['payload'])
-					await mediaBrowserManager.send_message({ 'type': 'auth', 'payload': 'authenticated' }, websocket)
+					if (mediaBrowserManager.set_jwt_from_sid(sid, payload['payload'])):
+						await mediaBrowserManager.send_message({ 'type': 'auth', 'payload': 'authenticated' }, websocket)
+					else:
+						await mediaBrowserManager.send_message({ 'type': 'auth', 'payload': 'not authenticated' }, websocket)
 	except WebSocketDisconnect:
 		mediaBrowserManager.disconnect(websocket)

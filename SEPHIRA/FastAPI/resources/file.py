@@ -19,6 +19,7 @@ from subprocess import Popen, PIPE, SubprocessError
 from json import loads
 from os import mkdir, listdir, remove, rmdir, path
 from uuid import uuid4
+import random
 
 router = APIRouter(
 	prefix=APISettings.ROUTE_BASE + 'file',
@@ -34,7 +35,7 @@ def allowed_file(filename: str) -> bool:
 		return True
 	return '.' in filename and filename.rsplit('.', 1)[1].lower() in FileSettings.ALLOWED_EXTENSIONS
 
-def processMedia(file: UploadFile, filename: str, folder: str, mimetype: str, owner: str) -> None:
+def processMedia(file: UploadFile, filename: str, folder: str, owner: str) -> None:
 	try:
 		media = None
 		file_format = filename.rsplit('.', 1)[1]
@@ -63,32 +64,57 @@ def processMedia(file: UploadFile, filename: str, folder: str, mimetype: str, ow
 		remove(f'media_processing/{filename}.{file_format}')
 		mkdir(f'media_processing/{filename}')
 
-		args = ['ffprobe', '-show_streams', '-of', 'json', '-v', 'quiet', f'media_processing/{filename2}.{file_format}']
+		args = ['ffprobe', '-show_streams', '-show_entries', 'format=duration', '-of', 'json', '-v', 'quiet', f'media_processing/{filename2}.{file_format}']
 		p = Popen(args, stdout=PIPE)
 		out = p.communicate()[0]
 		if p.wait() != 0:
 			raise SubprocessError
-		streams = loads(out)['streams']
+		streams = loads(out)
+		duration = float(streams['format']['duration'])
+		streams = streams['streams']
+
+		width = -1
+		height = -1
+
+		media = Media(owner=owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}.{FileSettings.VIDEO_EXTENSION}', folder=folder, processing=True)
+		media.save()
 
 		for stream in streams:
 			# Create the main media object (video component)
 			if 'codec_type' in stream:
-				if stream['codec_type'] == 'video' and 'index' in stream:
+				if stream['codec_type'] == 'video':
+					if 'index' in stream:
+						args = ['ffprobe', '-show_streams', '-show_entries', 'stream=width,height', '-of', 'json', '-v', 'quiet', f'media_processing/{filename2}.{file_format}']
+						p = Popen(args, stdout=PIPE)
+						out = p.communicate()[0]
+						if p.wait() != 0:
+							raise SubprocessError
+						width = loads(out)['streams'][stream['index']]
+						height = width['height']
+						width = width['width']
+						
+						if FileSettings.FORCE_DIMENSION:
+							for dimension in FileSettings.VIDEO_DIMENSIONS:
+								if width > dimension[0] and height > dimension[1]:
+									width = dimension[0]
+									height = dimension[1]
+									break
+
 					video_filename = str(uuid4())
-					args = ['ffmpeg', '-i', f'media_processing/{filename2}.{file_format}', '-map', '0:' + str(stream['index']), '-v', 'quiet', f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}']
+					args = ['ffmpeg', '-i', f'media_processing/{filename2}.{file_format}', '-map', '0:' + str(stream['index']), '-s', f'{width}x{height}', '-v', 'quiet', f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}']
 					p = Popen(args)
 					p.communicate()
 					if p.wait() != 0:
 						raise SubprocessError
 					with open(f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}', 'rb') as video_file_obj:
-						media = Media(owner=owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}.{FileSettings.VIDEO_EXTENSION}', folder=folder, processing=True)
 						mimetype = mimetypes.guess_type(f'{video_filename}.{FileSettings.VIDEO_EXTENSION}')[0]
 						if mimetype == None:
 							mimetype = f'video/{FileSettings.VIDEO_EXTENSION}'
 						media.file.put(video_file_obj, content_type=mimetype)
 						media.save()
-				remove(f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}')
-				break # Only allow the first video stream
+					remove(f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}')
+
+					break # Only allow the first video stream
 
 		for stream in streams:
 			# Create sub media objects (audio/subtitles)
@@ -125,6 +151,23 @@ def processMedia(file: UploadFile, filename: str, folder: str, mimetype: str, ow
 						subMedia.save()
 						media.update(push__associatedMedia=subMedia)
 					remove(f'media_processing/{filename}/{subtitle_filename}.{FileSettings.SUBTITLE_EXTENSION}')
+
+		if width > 0 or height > 0:
+			random.seed(int(duration * 100)) # use duration to make thumbnails generate at the same point for the same file. Collisions shouldn't matter 
+			args = ['ffmpeg', '-ss', f'{round(random.random() * duration, 2)}', '-i', f'media_processing/{filename2}.{file_format}', '-vframes', '1', '-s', f'{width}x{height}', '-v', 'quiet', '-f', 'image2', f'media_processing/{filename}/poster.png']
+			random.seed() # reset seed
+			p = Popen(args)
+			p.communicate()
+			if p.wait() != 0:
+				raise SubprocessError
+			with open(f'media_processing/{filename}/poster.png', 'rb') as poster_file_obj:
+				subMedia = Media(owner=owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}.png', folder=folder, private=True)
+				subMedia.file.put(poster_file_obj, content_type='image/png')
+				subMedia.save()
+				media.update(push__associatedMedia=subMedia)
+			remove(f'media_processing/{filename}/poster.png')
+
+		# Manually reload and save to get signal to fire
 		media.reload()
 		media.processing = False
 		media.save()
@@ -139,12 +182,9 @@ def processMedia(file: UploadFile, filename: str, folder: str, mimetype: str, ow
 			media.delete()
 	finally:
 		# Clean up temp files
-		try:
-			for f in listdir(f'media_processing/{filename}'):
-				remove(f'media_processing/{filename}/{f}')
-			rmdir(f'media_processing/{filename}')
-		except FileNotFoundError:
-			pass # Directory doesn't exist. Ignore
+		for f in listdir(f'media_processing/{filename}'):
+			remove(f'media_processing/{filename}/{f}')
+		rmdir(f'media_processing/{filename}')
 		remove(f'media_processing/{filename2}.{file_format}')
 		if len(listdir('media_processing')) == 0:
 			rmdir('media_processing')
@@ -190,7 +230,7 @@ async def upload_file(background_tasks: BackgroundTasks, response: Response, fil
 			
 			if FileSettings.ENABLE_FFMPEG and FileSettings.ENABLE_FILE_PROCESSING and mimetype[:5] == 'video':
 				# Process the file
-				background_tasks.add_task(processMedia, file, filename, folder, mimetype, identity)
+				background_tasks.add_task(processMedia, file, filename, folder, identity)
 				response.status_code = 202
 				return 'processing...'
 			else:
@@ -251,7 +291,10 @@ async def get_media(folder: Optional[str] = '', ids: Optional[str] = None, priva
 			if (len(folder) > 0 and folder[0] == '/') or sort not in ['filename', 'folder', 'size', '-filename', '-folder', '-size']:
 				raise SchemaValidationError
 			User.objects.get(id=identity)
-			out = Media.objects(folder=folder, private=private).order_by(sort)
+			if private:
+				out = Media.objects(folder=folder).order_by(sort)
+			else:
+				out = Media.objects(folder=folder, private=False).order_by(sort)
 		return list(map(lambda m: m.serialize(), out))
 	except SchemaValidationError:
 		raise SchemaValidationError().http_exception
@@ -265,9 +308,12 @@ async def delete_media(folder: str, filename: Optional[str] = None, identity: st
 	try:
 		media = Media.objects.get(owner=identity, folder=folder, filename=filename)
 		for subMedia in media.associatedMedia:
-			subMedia = subMedia.fetch()
-			if subMedia.private:
-				subMedia.delete()
+			try:
+				subMedia = subMedia.fetch()
+				if subMedia.private:
+					subMedia.delete()
+			except DoesNotExist:
+				pass # media doesn't exist
 		media.delete()
 	except DoesNotExist:
 		raise NotFoundError().http_exception

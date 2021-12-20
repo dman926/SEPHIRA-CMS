@@ -37,6 +37,9 @@ class FileSettings:
 	VIDEO_EXTENSION: str = 'webm' # The file format a video file's video should be decomposed to
 	AUDIO_EXTENSION: str = 'aac' # The file format a video file's audio should be decomposed to
 	SUBTITLE_EXTENSION: str = 'vtt' # The file format a video file's subtitle should be decomosed to. AT THE TIME OF WRITING, ONLY VTT IS SUPPORTED BY MAJOR BROWSERS
+	FORCE_DIMENSION: bool = True # Force a standard video dimension based on `VIDEO_DIMENSIONS`
+	VIDEO_DIMENSIONS: list[tuple[int]] = [(3840, 2160), (2560, 1440), (1080, 720), (720, 480), (854, 480), (640, 360), (426, 240)] # A list of acceptable video dimensions. Each element is defined as (width, height) in pixels. By default, the standard YouTube dimensions are used
+
 
 class CORSSettings:
 	ALLOW_ORIGINS: list[AnyHttpUrl] = [

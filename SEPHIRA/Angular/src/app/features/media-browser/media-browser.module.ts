@@ -19,6 +19,8 @@ import { LoaderSpinnerModule } from '../loader-spinner/loader-spinner.module';
 import { VideoPlayerModule } from '../video-player/video-player.module';
 import { MatSelectModule } from '@angular/material/select';
 import { MetadataEditorComponent } from './components/metadata-editor/metadata-editor.component';
+import { MatCardModule } from '@angular/material/card';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 
 
@@ -41,8 +43,10 @@ import { MetadataEditorComponent } from './components/metadata-editor/metadata-e
 		MatFormFieldModule,
 		MatInputModule,
 		MatProgressSpinnerModule,
+		MatProgressBarModule,
 		MatSelectModule,
 		MatCheckboxModule,
+		MatCardModule,
 
 		LoaderSpinnerModule,
 		VideoPlayerModule
