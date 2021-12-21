@@ -298,13 +298,14 @@ class Media(Document):
 	filename = StringField(unique_with='folder')
 	file = FileField()
 	dir = BooleanField()
+	container = BooleanField(default=False)
 	metadata = DictField()
 	processing = BooleanField(default=False)
 	private = BooleanField(default=False)
 	associatedMedia = ListField(LazyReferenceField('Media', reverse_delete_rule=PULL))
 
 	@classmethod
-	def post_save(cls, sender, document, **kwargs):
+	def post_save(cls, sender, document: Media, **kwargs):
 		if not (document.private or document.processing):
 			created = kwargs['created']
 			message = {
@@ -321,12 +322,12 @@ class Media(Document):
 				loop = None
 
 			if loop and loop.is_running():
-				loop.create_task(mediaBrowserManager.broadcast(message, True))
+				loop.create_task(mediaBrowserManager.broadcast(message))
 			else:
-				asyncio.run(mediaBrowserManager.broadcast(message, True))
+				asyncio.run(mediaBrowserManager.broadcast(message))
 
 	@classmethod
-	def send_processing_update(cls, document, percentDone):
+	def send_processing_update(cls, document: Media, percentDone: float):
 		if document.processing:
 			message = {
 				'type': 'processing update',
@@ -342,9 +343,9 @@ class Media(Document):
 				loop = None
 
 			if loop and loop.is_running():
-				loop.create_task(mediaBrowserManager.broadcast(message, True))
+				loop.create_task(mediaBrowserManager.broadcast(message))
 			else:
-				asyncio.run(mediaBrowserManager.broadcast(message, True))
+				asyncio.run(mediaBrowserManager.broadcast(message))
 
 	def serialize(self, associatedMedia: Optional[bool] = False):
 		out = {
@@ -355,6 +356,14 @@ class Media(Document):
 		}
 		if self.dir and not associatedMedia:
 			out['dir'] = self.dir
+		if self.container:
+			out['container'] = self.container
+			size = 0
+			for subMedia in self.associatedMedia:
+				subMedia = subMedia.fetch()
+				if subMedia.file:
+					size += subMedia.file.length
+			out['size'] = size
 		if self.file:
 			out['mimetype'] = self.file.content_type
 			out['size'] = self.file.length

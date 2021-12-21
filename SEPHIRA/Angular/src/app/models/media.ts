@@ -11,6 +11,8 @@ export interface Media {
 	size?: number;
 	/** Is this media actually a folder */
 	dir?: boolean;
+	/** Is this media actually a container for private media */
+	container?: boolean;
 	/** The content type */
 	mimetype?: string;
 	/** Metadata for the file. Depends on the mimetype, so check the object for valid fields */

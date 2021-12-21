@@ -20,10 +20,12 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 
 	player: videojs.Player | null;
 
+	videoTracks: Media[];
 	audioTracks: Media[];
 
 	constructor(private file: FileService, private platform: PlatformService, private renderer: Renderer2) {
 		this.player = null;
+		this.videoTracks = [];
 		this.audioTracks = [];
 		this.options = {
 			fluid: true,
@@ -123,13 +125,16 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 			}
 			const toAdd = [media].concat(media.associatedMedia ? media.associatedMedia : []);
 			toAdd.forEach(media => {
-				if (this.player && this.audio) {
+				if (this.player && this.audio && !media.container) {
 					const streamUrl = this.file.getStreamUrl(media.folder, media.filename, media.id);
 					if (this.isVideo(media.mimetype)) {
-						this.player.src({
-							src: streamUrl,
-							type: media.mimetype
-						});
+						if (media.metadata?.default) {
+							this.player.src({
+								src: streamUrl,
+								type: media.mimetype
+							});	
+						}
+						this.videoTracks.push(media);
 					} else if (this.isAudio(media.mimetype)) {
 						if (media.metadata?.default) {
 							const sourceEl: HTMLSourceElement = this.renderer.createElement('source');

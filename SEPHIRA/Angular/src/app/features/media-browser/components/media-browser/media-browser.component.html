@@ -42,7 +42,7 @@
 							(processing)
 						</ng-container>
 						<ng-container *ngIf="file.percentDone === 100">
-							(file is complete, but children may still be processing)
+							(file is complete, please reload)
 						</ng-container>
 					</ng-container>
 					<mat-progress-bar *ngIf="file.media.processing && (file.percentDone ? file.percentDone < 100 : false)" mode="determinate" [value]="file.percentDone"></mat-progress-bar>

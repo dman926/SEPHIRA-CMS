@@ -1,3 +1,5 @@
+# TODO: need a way to broadcast to clients that authentication is required again after server restart
+
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException
 from typing import Optional
 
@@ -76,10 +78,10 @@ class ConnectionManager:
 				return connection.metadata
 
 	def set_jwt_from_sid(self, sid: str, jwt: Optional[str] = None) -> bool:
-		for connection in self.active_connections:
-			if connection.sid == sid:
+		for i in range(len(self.active_connections)):
+			if self.active_connections[i].sid == sid:
 				try:
-					connection.jwt = get_jwt_identity(jwt)
+					self.active_connections[i].jwt = get_jwt_identity(jwt)
 				except HTTPException: # Bad token
 					return False
 				return True

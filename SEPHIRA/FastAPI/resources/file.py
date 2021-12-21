@@ -36,36 +36,34 @@ def allowed_file(filename: str) -> bool:
 		return True
 	return '.' in filename and filename.rsplit('.', 1)[1].lower() in FileSettings.ALLOWED_EXTENSIONS
 
-def processMedia(file: UploadFile, filename: str, folder: str, owner: str) -> None:
+def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 	try:
-		media = None
-		file_format = filename.rsplit('.', 1)[1]
-		requestedFileName = filename
-
-		# Use ffmpeg to move metadata to the front
 		filename = None
+		requestedFileName = mainMedia.filename
+		Media.send_processing_update(mainMedia, 1)
+		# Use ffmpeg to move metadata to the front
 		while filename == None:
 			filename = str(uuid4())
-			if path.isfile(f'media_processing/{filename}.{file_format}'):
+			if path.isfile(f'media_processing/{filename}.{container}'):
 				filename == None
 		filename2 = None
 		while filename2 == None:
 			filename2 = str(uuid4())
-			if path.isfile(f'media_processing/{filename2}.{file_format}'):
+			if path.isfile(f'media_processing/{filename2}.{container}'):
 				filename2 == None
 		if not path.isdir('media_processing'):
 			mkdir('media_processing')
-		with open(f'media_processing/{filename}.{file_format}', 'wb+') as file_obj:
+		with open(f'media_processing/{filename}.{container}', 'wb+') as file_obj:
 			file_obj.write(file.file.read())
 			file_obj.close()
-		args = ['ffmpeg', '-i', f'media_processing/{filename}.{file_format}', '-c', 'copy', '-movflags', '+faststart', '-v', 'quiet', f'media_processing/{filename2}.{file_format}']
+		args = ['ffmpeg', '-i', f'media_processing/{filename}.{container}', '-c', 'copy', '-movflags', '+faststart', '-v', 'quiet', f'media_processing/{filename2}.{container}']
 		p = Popen(args)
 		if p.wait() != 0:
 			raise MediaProcessingError
-		remove(f'media_processing/{filename}.{file_format}')
+		remove(f'media_processing/{filename}.{container}')
 		mkdir(f'media_processing/{filename}')
 
-		args = ['ffprobe', '-show_streams', '-show_entries', 'format=duration', '-of', 'json', '-v', 'quiet', f'media_processing/{filename2}.{file_format}']
+		args = ['ffprobe', '-show_streams', '-show_entries', 'format=duration', '-of', 'json', '-v', 'quiet', f'media_processing/{filename2}.{container}']
 		p = Popen(args, stdout=PIPE)
 		out = p.communicate()[0]
 		if p.wait() != 0:
@@ -74,40 +72,80 @@ def processMedia(file: UploadFile, filename: str, folder: str, owner: str) -> No
 		duration = float(streams['format']['duration']) # in seconds
 		streams = streams['streams']
 
-		width = -1
-		height = -1
-
-		media = Media(owner=owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}.{FileSettings.VIDEO_EXTENSION}', folder=folder, processing=True)
-		media.save()
-
-		for stream in streams:
-			# Create the main media object (video component)
-			if 'codec_type' in stream:
-				if stream['codec_type'] == 'video':
-					standard_size = True
-					if 'index' in stream:
-						args = ['ffprobe', '-show_streams', '-show_entries', 'stream=width,height', '-of', 'json', '-v', 'quiet', f'media_processing/{filename2}.{file_format}']
+		audioCount = 0
+		subtitleCount = 0
+		videoPass = False
+		audioPass = False
+		subtitlePass = False
+		for i in range(len(streams)):
+			# Create sub media objects (audio/subtitles)
+			if 'codec_type' in streams[i] and 'index' in streams[i]:
+				if streams[i]['codec_type'] == 'video':
+					if not videoPass:
+						videoPass = True
+						dimensions = []
+						args = ['ffprobe', '-show_streams', '-show_entries', 'stream=width,height', '-of', 'json', '-v', 'quiet', f'media_processing/{filename2}.{container}']
 						p = Popen(args, stdout=PIPE)
 						out = p.communicate()[0]
 						if p.wait() != 0:
 							raise SubprocessError
-						width = loads(out)['streams'][stream['index']]
+						width = loads(out)['streams'][streams[i]['index']]
 						height = width['height']
 						width = width['width']
 
 						if FileSettings.FORCE_DIMENSION:
 							for dimension in FileSettings.VIDEO_DIMENSIONS:
 								if width >= dimension[0] and height >= dimension[1]:
-									standard_size = width == dimension[0] and height == dimension[1]
-									width = dimension[0]
-									height = dimension[1]
-									break
+									dimensions.append(dimension)
+									if not FileSettings.CREATE_SMALLER_DIMENSIONS:
+										break
+											
+						if len(dimensions) == 0:
+							dimensions.append(FileSettings.VIDEO_DIMENSIONS[-1])
 
-					video_filename = str(uuid4())
-					args = ['ffmpeg', '-hide_banner', '-i', f'media_processing/{filename2}.{file_format}', '-map', f'0:{str(stream["index"])}', '-progress', 'pipe:1', f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}']
-					if not standard_size:
-						args.insert(6, '-s')
-						args.insert(7, f'{width}x{height}')
+						for j in range(len(dimensions)):
+							if j == 0:
+								metadata = {
+									'default': True
+								}
+							else:
+								metadata = { }
+							media = Media(owner=mainMedia.owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}_{j}.{FileSettings.VIDEO_EXTENSION}', folder=mainMedia.folder, private=True, processing=True, metadata=metadata)
+							media.save()
+							video_filename = str(uuid4())
+							args = ['ffmpeg', '-hide_banner', '-i', f'media_processing/{filename2}.{container}', '-map', f'0:{str(streams[i]["index"])}', '-s', f'{dimensions[j][0]}x{dimensions[j][1]}', '-progress', 'pipe:1', f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}']
+							p = Popen(args, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+							for stdout_line in p.stdout:
+								stdout_line = stdout_line.split('=')
+								if stdout_line[0] == 'out_time_us':
+									updateTime = float(stdout_line[1]) / 10000
+									if updateTime > 0:
+										Media.send_processing_update(media, min(updateTime / duration, 100))
+							if p.wait() != 0:
+								raise SubprocessError
+							with open(f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}', 'rb') as video_file_obj:
+								mimetype = mimetypes.guess_type(f'{video_filename}.{FileSettings.VIDEO_EXTENSION}')[0]
+								if mimetype == None:
+									mimetype = f'video/{FileSettings.VIDEO_EXTENSION}'
+								media.file.put(video_file_obj, content_type=mimetype)
+								media.processing = False
+								media.save()
+								mainMedia.update(push__associatedMedia=media)
+							Media.send_processing_update(media, 100)
+							Media.send_processing_update(mainMedia, (j + 1) / len(dimensions) / (i + 1) / len(streams) * 100)
+							remove(f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}')
+				elif streams[i]['codec_type'] == 'audio':
+					if audioPass:
+						metadata = {}
+					else:
+						audioPass = True
+						metadata = {
+							'default': True
+						}
+					media = Media(owner=mainMedia.owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}_{audioCount}.{FileSettings.AUDIO_EXTENSION}', folder=mainMedia.folder, private=True, metadata=metadata)
+					media.save()
+					audio_filename = str(uuid4())
+					args = ['ffmpeg', '-i', f'media_processing/{filename2}.{container}', '-map', '0:' + str(streams[i]['index']), '-progress', 'pipe:1', f'media_processing/{filename}/{audio_filename}.{FileSettings.AUDIO_EXTENSION}']
 					p = Popen(args, stdout=PIPE, stderr=PIPE, universal_newlines=True)
 					for stdout_line in p.stdout:
 						stdout_line = stdout_line.split('=')
@@ -116,108 +154,94 @@ def processMedia(file: UploadFile, filename: str, folder: str, owner: str) -> No
 							if updateTime > 0:
 								Media.send_processing_update(media, min(updateTime / duration, 100))
 					if p.wait() != 0:
-						raise SubprocessError
-					with open(f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}', 'rb') as video_file_obj:
-						mimetype = mimetypes.guess_type(f'{video_filename}.{FileSettings.VIDEO_EXTENSION}')[0]
-						if mimetype == None:
-							mimetype = f'video/{FileSettings.VIDEO_EXTENSION}'
-						media.file.put(video_file_obj, content_type=mimetype)
-						media.save()
-					Media.send_processing_update(media, 100)
-					remove(f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}')
-
-					break # Only allow the first video stream
-
-		audioPass = False
-		subtitlePass = False
-		for stream in streams:
-			# Create sub media objects (audio/subtitles)
-			if 'codec_type' in stream and 'index' in stream:
-				if stream['codec_type'] == 'audio':
-					audio_filename = str(uuid4())
-					args = ['ffmpeg', '-i', f'media_processing/{filename2}.{file_format}', '-map', '0:' + str(stream['index']), '-v', 'quiet', f'media_processing/{filename}/{audio_filename}.{FileSettings.AUDIO_EXTENSION}']
-					p = Popen(args)
-					p.communicate()[0]
-					if p.wait() != 0:
 						raise SubprocessError					
 					with open(f'media_processing/{filename}/{audio_filename}.{FileSettings.AUDIO_EXTENSION}', 'rb') as audio_file_obj:
-						if audioPass:
-							metadata = {}
-						else:
-							audioPass = True
-							metadata = {
-								'default': True
-							}
-						subMedia = Media(owner=owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}.{FileSettings.AUDIO_EXTENSION}', folder=folder, private=True, metadata=metadata)
 						mimetype = mimetypes.guess_type(f'{audio_filename}.{FileSettings.AUDIO_EXTENSION}')[0]
 						if mimetype == None:
 							mimetype = f'audio/{FileSettings.AUDIO_EXTENSION}'
-						subMedia.file.put(audio_file_obj, content_type=mimetype)
-						subMedia.save()
-						media.update(push__associatedMedia=subMedia)
+						media.file.put(audio_file_obj, content_type=mimetype)
+						media.processing = False
+						media.save()
+						mainMedia.update(push__associatedMedia=media)
+					Media.send_processing_update(media, 100)
+					Media.send_processing_update(mainMedia, (i + 1) / len(streams) * 100)
 					remove(f'media_processing/{filename}/{audio_filename}.{FileSettings.AUDIO_EXTENSION}')
-				elif stream['codec_type'] == 'subtitle':
+					audioCount += 1
+				elif streams[i]['codec_type'] == 'subtitle':
+					if subtitlePass:
+						metadata = {}
+					else:
+						subtitlePass = True
+						metadata = {
+							'default': True
+						}
+					media = Media(owner=mainMedia.owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}_{subtitleCount}.{FileSettings.SUBTITLE_EXTENSION}', folder=mainMedia.folder, private=True, metadata=metadata)
+					media.save()
 					subtitle_filename = str(uuid4())
-					args = ['ffmpeg', '-f', f'media_processing/{filename2}.{file_format}', '-map', '0:' + str(stream['index']), '-v', 'quiet', f'media_processing/{filename}/{subtitle_filename}.{FileSettings.SUBTITLE_EXTENSION}']
-					p = Popen(args)
-					p.communicate()[0]
+					args = ['ffmpeg', '-i', f'media_processing/{filename2}.{container}', '-map', f'0:{str(streams[i]["index"])}', '-progress', 'pipe:1', f'media_processing/{filename}/{subtitle_filename}.{FileSettings.SUBTITLE_EXTENSION}']
+					p = Popen(args, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+					for stdout_line in p.stdout:
+						stdout_line = stdout_line.split('=')
+						if stdout_line[0] == 'out_time_us':
+							updateTime = float(stdout_line[1]) / 10000
+							if updateTime > 0:
+								Media.send_processing_update(media, min(updateTime / duration, 100))
 					if p.wait() != 0:
 						raise SubprocessError					
 					with open(f'media_processing/{filename}/{subtitle_filename}.{FileSettings.SUBTITLE_EXTENSION}', 'rb') as subtitle_file_obj:
-						if subtitlePass:
-							metadata = {}
-						else:
-							subtitlePass = True
-							metadata = {
-								'default': True
-							}
-						subMedia = Media(owner=owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}.{FileSettings.SUBTITLE_EXTENSION}', folder=folder, private=True, metadata=metadata)
 						mimetype = mimetypes.guess_type(f'{subtitle_filename}.{FileSettings.SUBTITLE_EXTENSION}')[0]
 						if mimetype == None:
 							mimetype = f'text/{FileSettings.SUBTITLE_EXTENSION}'
-						subMedia.file.put(subtitle_file_obj, content_type=mimetype)
-						subMedia.save()
-						media.update(push__associatedMedia=subMedia)
+						media.file.put(subtitle_file_obj, content_type=mimetype)
+						media.processing = False
+						media.save()
+						mainMedia.update(push__associatedMedia=media)
+					Media.send_processing_update(media, 100)
+					Media.send_processing_update(mainMedia, (i + 1) / len(streams) * 100)
 					remove(f'media_processing/{filename}/{subtitle_filename}.{FileSettings.SUBTITLE_EXTENSION}')
-
-		if width > 0 or height > 0:
-			random.seed(int(duration * 100)) # use duration to make thumbnails generate at the same point for the same file. Collisions shouldn't matter 
-			args = ['ffmpeg', '-ss', f'{round(random.random() * duration, 2)}', '-i', f'media_processing/{filename2}.{file_format}', '-vframes', '1', '-v', 'quiet', '-f', 'image2', f'media_processing/{filename}/poster.png']
-			if not standard_size:
-				args.insert(7, '-s')
-				args.insert(8, f'{width}x{height}')
-			random.seed() # reset seed
-			p = Popen(args)
-			p.communicate()
-			if p.wait() != 0:
-				raise SubprocessError
-			with open(f'media_processing/{filename}/poster.png', 'rb') as poster_file_obj:
-				subMedia = Media(owner=owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}.png', folder=folder, private=True)
-				subMedia.file.put(poster_file_obj, content_type='image/png')
-				subMedia.save()
-				media.update(push__associatedMedia=subMedia)
-			remove(f'media_processing/{filename}/poster.png')
+					subtitleCount += 1
+		media = Media(owner=mainMedia.owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}_poster.png', folder=mainMedia.folder, private=True)
+		media.save()
+		random.seed(int(duration * 100)) # use duration to make thumbnails generate at the same point for the same file. Collisions shouldn't matter 
+		args = ['ffmpeg', '-ss', f'{round(random.random() * duration, 2)}', '-i', f'media_processing/{filename2}.{container}', '-vframes', '1', '-s', f'{dimensions[0][0]}x{dimensions[0][1]}', '-progress', 'pipe:1', '-f', 'image2', f'media_processing/{filename}/poster.png']
+		random.seed() # reset seed
+		p = Popen(args, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+		for stdout_line in p.stdout:
+			stdout_line = stdout_line.split('=')
+			if stdout_line[0] == 'out_time_us':
+				updateTime = float(stdout_line[1]) / 10000
+				if updateTime > 0:
+					Media.send_processing_update(media, min(updateTime / duration, 100))
+		if p.wait() != 0:
+			raise SubprocessError
+		with open(f'media_processing/{filename}/poster.png', 'rb') as poster_file_obj:
+			media.file.put(poster_file_obj, content_type='image/png')
+			media.processing = False
+			media.save()
+			mainMedia.update(push__associatedMedia=media)
+		Media.send_processing_update(media, 100)
+		Media.send_processing_update(mainMedia, 100)
+		remove(f'media_processing/{filename}/poster.png')
 
 		# Manually reload and save to get signal to fire
-		media.reload()
-		media.processing = False
-		media.save()
+		mainMedia.reload()
+		mainMedia.processing = False
+		mainMedia.save()
 	except Exception as e:
 		# Clean up media and sub-media objects
-		if media:
-			media.reload()
-			for subMedia in media.associatedMedia:
-				subMedia = subMedia.fetch()
-				if subMedia.private:
-					subMedia.delete()
-			media.delete()
+		mainMedia.reload()
+		for subMedia in mainMedia.associatedMedia:
+			subMedia = subMedia.fetch()
+			if subMedia.private:
+				subMedia.delete()
+		mainMedia.delete()
 		print_exc(e)
 	finally:
 		# Clean up temp files
 		for f in listdir(f'media_processing/{filename}'):
 			remove(f'media_processing/{filename}/{f}')
 		rmdir(f'media_processing/{filename}')
-		remove(f'media_processing/{filename2}.{file_format}')
+		remove(f'media_processing/{filename2}.{container}')
 		if len(listdir('media_processing')) == 0:
 			rmdir('media_processing')
 
@@ -262,10 +286,13 @@ async def upload_file(background_tasks: BackgroundTasks, response: Response, fil
 			
 			if FileSettings.ENABLE_FFMPEG and FileSettings.ENABLE_FILE_PROCESSING and mimetype[:5] == 'video':
 				# Process the file
-				background_tasks.add_task(processMedia, file, filename, folder, identity)
-				#processMedia(file, filename, folder, identity)
+				splitFilename = filename.rsplit('.', 1)
+				media = Media(owner=identity, filename=splitFilename[0], folder=folder, container=True, processing=True)
+				media.save()
+				background_tasks.add_task(processMedia, media, file, splitFilename[1])
+				#processMedia(media, file)
 				response.status_code = 202
-				return 'processing...'
+				return media.serialize()
 			else:
 				media = Media(owner=identity, filename=filename, folder=folder)
 				media.file.put(file.file, content_type=mimetype)

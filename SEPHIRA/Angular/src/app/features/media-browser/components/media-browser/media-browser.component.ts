@@ -193,10 +193,8 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 								// Done uploading
 								this.uploadPercent = 0;
 								this.uploading = false;
-								if (res.status === 200) {
-									// TODO: think about manually inserting new media object
-									this.fetchFiles();
-								}
+								// TODO: think about manually inserting new media object
+								this.fetchFiles();
 							} else if (res.type === HttpEventType.UploadProgress) {
 								// Update progress
 								if (res.total) {
@@ -333,11 +331,9 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 						}
 						this.videoPlaying = true;
 					} else {
-						if (this.player) {
-							if (this.videoPlaying) {
-								this.player.resetPlayer();
-								this.videoPlaying = false;
-							}
+						if (this.player && this.videoPlaying) {
+							this.player.resetPlayer();
+							this.videoPlaying = false;
 						}
 						this.file.getStream(this.lastSelectedFile.folder, this.lastSelectedFile.filename).subscribe(data => {
 							if (data) {
@@ -397,7 +393,7 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 
 	get isVideo(): boolean {
 		if (this.lastSelectedFile) {
-			return this.lastSelectedFile.mimetype?.substring(0, 5) === 'video';
+			return this.lastSelectedFile.mimetype?.substring(0, 5) === 'video' || this.lastSelectedFile.container === true;
 		}
 		return false;
 	}
