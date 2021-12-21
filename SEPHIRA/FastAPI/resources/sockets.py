@@ -52,8 +52,10 @@ class ConnectionManager:
 	async def send_message(self, message: dict, websocket: WebSocket) -> None:
 		await websocket.send_json(message)
 
-	async def broadcast(self, message: dict) -> None:
+	async def broadcast(self, message: dict, authenticated: Optional[bool] = False) -> None:
 		for connection in self.active_connections:
+			if authenticated and not connection.jwt:
+				continue
 			await connection.socket.send_json(message)
 	
 	def get_socket_from_sid(self, sid: str) -> Optional[WebSocket]:

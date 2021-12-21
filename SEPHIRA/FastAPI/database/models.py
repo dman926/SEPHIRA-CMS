@@ -321,9 +321,9 @@ class Media(Document):
 				loop = None
 
 			if loop and loop.is_running():
-				loop.create_task(mediaBrowserManager.broadcast(message))
+				loop.create_task(mediaBrowserManager.broadcast(message, True))
 			else:
-				asyncio.run(mediaBrowserManager.broadcast(message))
+				asyncio.run(mediaBrowserManager.broadcast(message, True))
 
 	@classmethod
 	def send_processing_update(cls, document, percentDone):
@@ -342,9 +342,9 @@ class Media(Document):
 				loop = None
 
 			if loop and loop.is_running():
-				loop.create_task(mediaBrowserManager.broadcast(message))
+				loop.create_task(mediaBrowserManager.broadcast(message, True))
 			else:
-				asyncio.run(mediaBrowserManager.broadcast(message))
+				asyncio.run(mediaBrowserManager.broadcast(message, True))
 
 	def serialize(self, associatedMedia: Optional[bool] = False):
 		out = {

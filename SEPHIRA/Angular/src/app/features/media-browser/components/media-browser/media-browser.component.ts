@@ -1,5 +1,5 @@
 import { HttpEventType } from '@angular/common/http';
-import { ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormControl, FormGroupDirective, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSelectionListChange } from '@angular/material/list';
@@ -72,7 +72,7 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 	now: number;
 	readonly updatedListRemoveTime: number = 15; // in seconds
 
-	constructor(public core: CoreService, private file: FileService, private platform: PlatformService, private ws: WebsocketService, private dialog: MatDialog, private changeDetector: ChangeDetectorRef, private rootFormGroup: FormGroupDirective) {
+	constructor(public core: CoreService, private file: FileService, private platform: PlatformService, private ws: WebsocketService, private dialog: MatDialog, private rootFormGroup: FormGroupDirective) {
 		this.allowMultiple = false;
 		this.allowUpload = true;
 		this.opened = false;
@@ -130,8 +130,6 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 								for (let i = 0; i < this.files.length; i++) {
 									if (this.files[i].media.id === data.payload['id']) {
 										this.files[i].percentDone = data.payload['percentDone'];
-										console.log(this.files[i]);
-										//this.changeDetector.detectChanges();
 										break;
 									}
 								}
