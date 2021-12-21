@@ -314,6 +314,28 @@ class Media(Document):
 					'created': created
 				}
 			}
+			# Workaround to allow sending in normal and async methods as mediaBrowserManger.broadcast is async
+			try:
+				loop = asyncio.get_running_loop()
+			except RuntimeError:
+				loop = None
+
+			if loop and loop.is_running():
+				loop.create_task(mediaBrowserManager.broadcast(message))
+			else:
+				asyncio.run(mediaBrowserManager.broadcast(message))
+
+	@classmethod
+	def send_processing_update(cls, document, percentDone):
+		if document.processing:
+			message = {
+				'type': 'processing update',
+				'payload': {
+					'id': str(document.id),
+					'percentDone': percentDone
+				}
+			}
+			# Workaround to allow sending in normal and async methods as mediaBrowserManger.broadcast is async
 			try:
 				loop = asyncio.get_running_loop()
 			except RuntimeError:

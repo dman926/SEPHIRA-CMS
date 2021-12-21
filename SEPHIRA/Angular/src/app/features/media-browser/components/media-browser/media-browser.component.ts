@@ -1,5 +1,5 @@
 import { HttpEventType } from '@angular/common/http';
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormControl, FormGroupDirective, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSelectionListChange } from '@angular/material/list';
@@ -8,7 +8,7 @@ import { retry } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { CoreService } from 'src/app/core/services/core/core.service';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
-import { WebsocketService } from 'src/app/core/services/websocket/websocket.service';
+import { Payload, WebsocketService } from 'src/app/core/services/websocket/websocket.service';
 import { VideoPlayerComponent } from 'src/app/features/video-player/components/video-player/video-player.component';
 import { Media, Metadata } from 'src/app/models/media';
 import { FileService } from '../../services/file/file.service';
@@ -22,6 +22,11 @@ interface IUpdate {
 	folder: string;
 	created: boolean;
 	opacity: number;
+}
+
+interface MediaFile {
+	media: Media;
+	percentDone?: number;
 }
 
 @Component({
@@ -41,7 +46,7 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 	@ViewChild('fileUpload') fileUpload: ElementRef | undefined;
 	@ViewChild('player') player: VideoPlayerComponent | undefined;
 
-	files: Media[];
+	files: MediaFile[];
 	folders: Media[];
 	loaded: boolean;
 
@@ -67,7 +72,7 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 	now: number;
 	readonly updatedListRemoveTime: number = 15; // in seconds
 
-	constructor(public core: CoreService, private file: FileService, private platform: PlatformService, private ws: WebsocketService, private dialog: MatDialog, private rootFormGroup: FormGroupDirective) {
+	constructor(public core: CoreService, private file: FileService, private platform: PlatformService, private ws: WebsocketService, private dialog: MatDialog, private changeDetector: ChangeDetectorRef, private rootFormGroup: FormGroupDirective) {
 		this.allowMultiple = false;
 		this.allowUpload = true;
 		this.opened = false;
@@ -108,19 +113,28 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 				if (this.useSocket) {
 					this.websocket = this.ws.connect('media-browser');
 					if (this.websocket) {
-						this.websocket.pipe(retry()).subscribe(data => {
-							if (data['type'] === 'update') {
+						this.websocket.pipe(retry()).subscribe((data: Payload) => {
+							if (data.type === 'update') {
 								const id = Math.trunc(Math.random() * 1000000);
 								this.updatedList.push({
 									id,
 									createTime: this.now,
-									folder: data['payload']['folder'],
-									created: data['payload']['created'],
+									folder: data.payload['folder'],
+									created: data.payload['created'],
 									opacity: 1
 								});
 								setTimeout(() => {
 									this.removeUpdate(id);
 								}, this.updatedListRemoveTime * 1000);
+							} else if (data.type === 'processing update') {
+								for (let i = 0; i < this.files.length; i++) {
+									if (this.files[i].media.id === data.payload['id']) {
+										this.files[i].percentDone = data.payload['percentDone'];
+										console.log(this.files[i]);
+										//this.changeDetector.detectChanges();
+										break;
+									}
+								}
 							}
 						});
 						this.ws.send(this.websocket, this.ws.createAuthPayload());
@@ -154,7 +168,7 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 					if (file.dir) {
 						this.folders.push(file)
 					} else {
-						this.files.push(file);
+						this.files.push({ media: file });
 					}
 				})
 				this.loaded = true;

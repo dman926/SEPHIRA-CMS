@@ -9,7 +9,7 @@ interface SocketEl {
 	socket: WebSocketSubject<any>;
 }
 
-interface Payload {
+export interface Payload {
 	type: string;
 	payload: any;
 }

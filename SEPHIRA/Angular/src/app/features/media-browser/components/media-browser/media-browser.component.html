@@ -34,8 +34,18 @@
 			</mat-selection-list>
 			<mat-selection-list (selectionChange)="onFileSelected($event)" [multiple]="allowMultiple">
 				<mat-list-option *ngIf="!allowMultiple">Clear Selection</mat-list-option>
-				<mat-list-option color="primary" *ngFor="let file of files" [value]="file" [selected]="isSelected(file.id!)" [disabled]="file.processing">
-					<mat-icon mat-list-icon *ngIf="file.private">lock</mat-icon> {{ file.filename }} ({{ file.size ? core.formatBytes(file.size) : '?' }}) <mat-progress-bar mode="indeterminate" *ngIf="file.processing"></mat-progress-bar>
+				<mat-list-option color="primary" *ngFor="let file of files" [value]="file.media" [selected]="isSelected(file.media.id!)" [disabled]="file.media.processing">
+					<mat-icon mat-list-icon *ngIf="file.media.private">lock</mat-icon>
+					{{ file.media.filename }} ({{ file.media.size ? core.formatBytes(file.media.size) : '?' }})
+					<ng-container *ngIf="file.media.processing">
+						<ng-container *ngIf="file.percentDone && file.percentDone < 100">
+							(processing)
+						</ng-container>
+						<ng-container *ngIf="file.percentDone === 100">
+							(file is complete, but children may still be processing)
+						</ng-container>
+					</ng-container>
+					<mat-progress-bar *ngIf="file.media.processing && (file.percentDone ? file.percentDone < 100 : false)" mode="determinate" [value]="file.percentDone"></mat-progress-bar>
 				</mat-list-option>
 			</mat-selection-list>
 		</div>

@@ -45,10 +45,14 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 						} else if (ev.which === SPACE) {
 							if (this.player.paused()) {
 								this.player.play();
-								this.audio.nativeElement.play();
+								if (this.audio.nativeElement.hasChildNodes() && this.audio.nativeElement.paused) {
+									this.audio.nativeElement.play();
+								}
 							} else {
 								this.player.pause();
-								this.audio.nativeElement.pause();
+								if (this.audio.nativeElement.hasChildNodes() && this.audio.nativeElement.paused) {
+									this.audio.nativeElement.pause();
+								}
 							}
 						} else if (ev.which === F) {
 							if (this.player.isFullscreen()) {
@@ -66,21 +70,15 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 	ngOnInit(): void {
 		if (this.video) {
 			this.player = videojs(this.video.nativeElement, this.options, () => {
-				if (this.platform.isBrowser) {
-					setInterval(() => {
-						if (this.player && this.audio) {
-							this.audio.nativeElement.currentTime = this.player.currentTime();
-						}
-					}, 100);
-				}
+				
 			});
 			this.player.on('play', () => {
-				if (this.audio) {
+				if (this.audio && this.audio.nativeElement.hasChildNodes() && this.audio.nativeElement.paused) {
 					this.audio.nativeElement.play();
 				}
 			});
 			this.player.on('pause', () => {
-				if (this.audio) {
+				if (this.audio && this.audio.nativeElement.hasChildNodes() && !this.audio.nativeElement.paused) {
 					this.audio.nativeElement.pause();
 				}
 			});
@@ -160,10 +158,6 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 					}
 				}
 			});
-			if (this.audio) {
-				//this.audio.nativeElement.load();
-			}
-			console.log(this.audioTracks);
 			return true;
 		}
 		return false;
