@@ -20,8 +20,6 @@ from os import mkdir, listdir, remove, rmdir, path
 from uuid import uuid4
 import random
 
-from traceback import print_exc
-
 router = APIRouter(
 	prefix=APISettings.ROUTE_BASE + 'file',
 	tags=['File']
@@ -40,6 +38,7 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 	try:
 		filename = None
 		requestedFileName = mainMedia.filename
+		createdMedia = []
 		Media.send_processing_update(mainMedia, 1)
 		# Use ffmpeg to move metadata to the front
 		while filename == None:
@@ -113,6 +112,7 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 								metadata = { }
 							media = Media(owner=mainMedia.owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}_{j}.{FileSettings.VIDEO_EXTENSION}', folder=mainMedia.folder, private=True, processing=True, metadata=metadata)
 							media.save()
+							createdMedia.append(media)
 							video_filename = str(uuid4())
 							# TODO: dont save first generated video and use that for subsequent ffmpeg calls to speed up downscaling
 							args = ['ffmpeg', '-hide_banner', '-i', '-map', f'0:{str(streams[i]["index"])}', '-s', f'{dimensions[j][0]}x{dimensions[j][1]}', '-progress', 'pipe:1', f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}']
@@ -154,6 +154,7 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 						}
 					media = Media(owner=mainMedia.owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}_{audioCount}.{FileSettings.AUDIO_EXTENSION}', folder=mainMedia.folder, private=True, metadata=metadata)
 					media.save()
+					createdMedia.append(media)
 					audio_filename = str(uuid4())
 					args = ['ffmpeg', '-i', f'media_processing/{filename2}.{container}', '-map', '0:' + str(streams[i]['index']), '-progress', 'pipe:1', f'media_processing/{filename}/{audio_filename}.{FileSettings.AUDIO_EXTENSION}']
 					p = Popen(args, stdout=PIPE, stderr=PIPE, universal_newlines=True)
@@ -187,6 +188,7 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 						}
 					media = Media(owner=mainMedia.owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}_{subtitleCount}.{FileSettings.SUBTITLE_EXTENSION}', folder=mainMedia.folder, private=True, metadata=metadata)
 					media.save()
+					createdMedia.append(media)
 					subtitle_filename = str(uuid4())
 					args = ['ffmpeg', '-i', f'media_processing/{filename2}.{container}', '-map', f'0:{str(streams[i]["index"])}', '-progress', 'pipe:1', f'media_processing/{filename}/{subtitle_filename}.{FileSettings.SUBTITLE_EXTENSION}']
 					p = Popen(args, stdout=PIPE, stderr=PIPE, universal_newlines=True)
@@ -212,6 +214,7 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 					subtitleCount += 1
 		media = Media(owner=mainMedia.owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}_poster.png', folder=mainMedia.folder, private=True)
 		media.save()
+		createdMedia.append(media)
 		random.seed(int(duration * 100)) # use duration to make thumbnails generate at the same point for the same file. Collisions shouldn't matter 
 		args = ['ffmpeg', '-ss', f'{round(random.random() * duration, 2)}', '-i', f'media_processing/{filename2}.{container}', '-vframes', '1', '-s', f'{dimensions[0][0]}x{dimensions[0][1]}', '-progress', 'pipe:1', '-f', 'image2', f'media_processing/{filename}/poster.png']
 		random.seed() # reset seed
@@ -237,15 +240,17 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 		mainMedia.reload()
 		mainMedia.processing = False
 		mainMedia.save()
-	except Exception as e:
+	except Exception:
 		# Clean up media and sub-media objects
+		for created in createdMedia:
+			created.delete()
 		mainMedia.reload()
 		for subMedia in mainMedia.associatedMedia:
 			subMedia = subMedia.fetch()
 			if subMedia.private:
 				subMedia.delete()
 		mainMedia.delete()
-		print_exc(e)
+		# TODO: send websocket to client to inform media player that the file failed to be created
 	finally:
 		# Clean up temp files
 		for f in listdir(f'media_processing/{filename}'):
