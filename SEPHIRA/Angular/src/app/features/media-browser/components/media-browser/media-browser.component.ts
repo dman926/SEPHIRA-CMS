@@ -127,6 +127,7 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 									this.removeUpdate(id);
 								}, this.updatedListRemoveTime * 1000);
 							} else if (data.type === 'processing update') {
+								console.log(data.payload);
 								for (let i = 0; i < this.files.length; i++) {
 									if (this.files[i].media.id === data.payload['id']) {
 										this.files[i].percentDone = data.payload['percentDone'];
@@ -166,7 +167,7 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 					if (file.dir) {
 						this.folders.push(file)
 					} else {
-						this.files.push({ media: file });
+						this.files.push({ media: file, percentDone: file.processing ? 0.1 : undefined });
 					}
 				})
 				this.loaded = true;
@@ -193,7 +194,7 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 								// Done uploading
 								this.uploadPercent = 0;
 								this.uploading = false;
-								// TODO: think about manually inserting new media object
+								// TODO: think about manually inserting new media object	
 								this.fetchFiles();
 							} else if (res.type === HttpEventType.UploadProgress) {
 								// Update progress

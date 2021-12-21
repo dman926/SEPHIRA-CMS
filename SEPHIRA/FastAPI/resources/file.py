@@ -103,6 +103,7 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 						if len(dimensions) == 0:
 							dimensions.append(FileSettings.VIDEO_DIMENSIONS[-1])
 
+						largestVideoFilename = None
 						for j in range(len(dimensions)):
 							if j == 0:
 								metadata = {
@@ -113,7 +114,12 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 							media = Media(owner=mainMedia.owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}_{j}.{FileSettings.VIDEO_EXTENSION}', folder=mainMedia.folder, private=True, processing=True, metadata=metadata)
 							media.save()
 							video_filename = str(uuid4())
-							args = ['ffmpeg', '-hide_banner', '-i', f'media_processing/{filename2}.{container}', '-map', f'0:{str(streams[i]["index"])}', '-s', f'{dimensions[j][0]}x{dimensions[j][1]}', '-progress', 'pipe:1', f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}']
+							# TODO: dont save first generated video and use that for subsequent ffmpeg calls to speed up downscaling
+							args = ['ffmpeg', '-hide_banner', '-i', '-map', f'0:{str(streams[i]["index"])}', '-s', f'{dimensions[j][0]}x{dimensions[j][1]}', '-progress', 'pipe:1', f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}']
+							if largestVideoFilename:
+								args.insert(3, f'media_processing/{filename}/{largestVideoFilename}.{FileSettings.VIDEO_EXTENSION}')
+							else:
+								args.insert(3, f'media_processing/{filename2}.{container}')
 							p = Popen(args, stdout=PIPE, stderr=PIPE, universal_newlines=True)
 							for stdout_line in p.stdout:
 								stdout_line = stdout_line.split('=')
@@ -133,7 +139,11 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 								mainMedia.update(push__associatedMedia=media)
 							Media.send_processing_update(media, 100)
 							Media.send_processing_update(mainMedia, (j + 1) / len(dimensions) / (i + 1) / len(streams) * 100)
-							remove(f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}')
+							if largestVideoFilename:
+								remove(f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}')
+							else:
+								largestVideoFilename = video_filename
+						remove(f'media_processing/{filename}/{largestVideoFilename}.{FileSettings.VIDEO_EXTENSION}')
 				elif streams[i]['codec_type'] == 'audio':
 					if audioPass:
 						metadata = {}
@@ -292,7 +302,6 @@ async def upload_file(background_tasks: BackgroundTasks, response: Response, fil
 				background_tasks.add_task(processMedia, media, file, splitFilename[1])
 				#processMedia(media, file)
 				response.status_code = 202
-				return media.serialize()
 			else:
 				media = Media(owner=identity, filename=filename, folder=folder)
 				media.file.put(file.file, content_type=mimetype)
@@ -304,7 +313,7 @@ async def upload_file(background_tasks: BackgroundTasks, response: Response, fil
 							Media.objects.get(id=parent).update(push__associatedMedia=media)
 					except DoesNotExist:
 						pass
-				return media.serialize()
+			return media.serialize()
 		raise SchemaValidationError
 	except SchemaValidationError as e:
 		raise SchemaValidationError().http_exception
