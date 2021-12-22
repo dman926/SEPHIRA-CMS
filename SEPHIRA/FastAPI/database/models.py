@@ -301,6 +301,7 @@ class Media(Document):
 	container = BooleanField(default=False)
 	metadata = DictField()
 	processing = BooleanField(default=False)
+	percentDone = FloatField()
 	private = BooleanField(default=False)
 	associatedMedia = ListField(LazyReferenceField('Media', reverse_delete_rule=PULL))
 
@@ -373,6 +374,7 @@ class Media(Document):
 			out['associatedMedia'] = list(map(lambda m: m.fetch().serialize(True), self.associatedMedia))
 		if self.processing:
 			out['processing'] = self.processing
+			out['percentDone'] = self.percentDone
 		if self.private:
 			out['private'] = self.private
 		return out

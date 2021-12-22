@@ -41,6 +41,8 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 		requestedFileName = mainMedia.filename
 		createdMedia = []
 		Media.send_processing_update(mainMedia, 1)
+		mainMedia.percentDone = 1
+		mainMedia.save()
 		# Use ffmpeg to move metadata to the front
 		while filename == None:
 			filename = str(uuid4())
@@ -145,7 +147,9 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 								media.save()
 								mainMedia.update(push__associatedMedia=media)
 							Media.send_processing_update(media, 100)
-							Media.send_processing_update(mainMedia, (j + 1) / len(dimensions) / (i + 1) / len(streams) * 100)
+							percentDone = (j + 1) / len(dimensions) / (i + 1) / len(streams) * 100
+							Media.send_processing_update(mainMedia, percentDone)
+							mainMedia.update(set__percentDone=percentDone)
 							if largestVideoFilename:
 								remove(f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}')
 							else:
@@ -187,7 +191,9 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 						media.save()
 						mainMedia.update(push__associatedMedia=media)
 					Media.send_processing_update(media, 100)
-					Media.send_processing_update(mainMedia, (i + 1) / len(streams) * 100)
+					percentDone = (i + 1) / len(streams) * 100
+					Media.send_processing_update(mainMedia, percentDone)
+					mainMedia.update(set__percentDone=percentDone)
 					remove(f'media_processing/{filename}/{audio_filename}.{FileSettings.AUDIO_EXTENSION}')
 					audioCount += 1
 				elif streams[i]['codec_type'] == 'subtitle':
@@ -222,7 +228,9 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 						media.save()
 						mainMedia.update(push__associatedMedia=media)
 					Media.send_processing_update(media, 100)
-					Media.send_processing_update(mainMedia, (i + 1) / len(streams) * 100)
+					percentDone = (i + 1) / len(streams) * 100
+					Media.send_processing_update(mainMedia, percentDone)
+					mainMedia.update(set__percentDone=percentDone)
 					remove(f'media_processing/{filename}/{subtitle_filename}.{FileSettings.SUBTITLE_EXTENSION}')
 					subtitleCount += 1
 		
@@ -250,6 +258,7 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 				mainMedia.update(push__associatedMedia=media)
 			Media.send_processing_update(media, 100)
 			Media.send_processing_update(mainMedia, 100)
+			mainMedia.update(unset__percentDone=True)
 			remove(f'media_processing/{filename}/poster.png')
 
 		# Manually reload and save to get signal to fire

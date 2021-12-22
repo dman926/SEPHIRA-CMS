@@ -19,6 +19,8 @@ export interface Media {
 	metadata?: Metadata;
 	/** If the media is still processing */
 	readonly processing?: boolean;
+	/** The processing percent done */
+	percentDone?: number;
 	/** If the media is private (ex. an audio component of a video) */
 	readonly private?: boolean;
 	/** Child `Media` */

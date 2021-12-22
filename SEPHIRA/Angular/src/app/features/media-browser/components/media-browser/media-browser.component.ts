@@ -24,11 +24,6 @@ interface IUpdate {
 	opacity: number;
 }
 
-interface MediaFile {
-	media: Media;
-	percentDone?: number;
-}
-
 @Component({
 	selector: 'sephira-media-browser',
 	templateUrl: './media-browser.component.html',
@@ -46,7 +41,7 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 	@ViewChild('fileUpload') fileUpload: ElementRef | undefined;
 	@ViewChild('player') player: VideoPlayerComponent | undefined;
 
-	files: MediaFile[];
+	files: Media[];
 	folders: Media[];
 	loaded: boolean;
 
@@ -127,9 +122,8 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 									this.removeUpdate(id);
 								}, this.updatedListRemoveTime * 1000);
 							} else if (data.type === 'processing update') {
-								console.log(data.payload);
 								for (let i = 0; i < this.files.length; i++) {
-									if (this.files[i].media.id === data.payload['id']) {
+									if (this.files[i].id === data.payload['id']) {
 										this.files[i].percentDone = data.payload['percentDone'];
 										break;
 									}
@@ -167,7 +161,7 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 					if (file.dir) {
 						this.folders.push(file)
 					} else {
-						this.files.push({ media: file, percentDone: file.processing ? 0.1 : undefined });
+						this.files.push(file);
 					}
 				})
 				this.loaded = true;
