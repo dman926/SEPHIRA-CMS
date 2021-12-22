@@ -29,13 +29,15 @@ class OAuth2Settings:
 
 
 class FileSettings:
-	ALLOWED_EXTENSIONS: Union[set[str], str] = { 'png', 'jpg', 'jpeg', 'gif', 'mp4', 'webm', 'vtt' } # Set to `*` to allow all file types (not recommended)
+	ALLOWED_EXTENSIONS: Union[set[str], str] = { 'png', 'jpg', 'jpeg', 'gif', 'mp4', 'webm', 'opus', 'vtt' } # Set to `*` to allow all file types (not recommended)
 	MAX_STREAM_CHUNK_SIZE: int = 1024 # File stream paypload size in bytes
 	ENABLE_FFMPEG: bool = True # Requires ffmpeg and ffprobe to be installed and in the command path. If you aren't sure if it is set up correctly, enter `ffmpeg` and `ffprobe` in the terminal/command prompt and see if it works
 	# Below settings are only used if `ENABLE_FFMPEG` is `True`
 	ENABLE_FILE_PROCESSING: bool = True # If an uploaded file should be 'processed'. Depends on the type of file. For exampe, `application/x-subrip` files are converted to `text/vtt` and `video/...` files are broken into their stream components with the aid of FFMPEG
 	VIDEO_EXTENSION: str = 'webm' # The file format a video file's video should be decomposed to
+	VIDEO_CODEC: str = 'vp9' # The codec to use to accompany the VIDEO_EXTENSION. ex.  VIDEO_EXTENSION == 'webm' -> VIDEO_CODEC == 'vp8' or 'vp9' | VIDEO_EXTENSION == 'mp4' -> VIDEO_CODEC == 'h264'
 	AUDIO_EXTENSION: str = 'aac' # The file format a video file's audio should be decomposed to
+	AUDIO_CODEC: str = 'aac' # The codec to use to accompany the AUDIO_EXTENSION. ex. AUDIO_EXTENSION == 'aac' -> VIDEO_CODEC == 'aac'
 	SUBTITLE_EXTENSION: str = 'vtt' # The file format a video file's subtitle should be decomosed to. AT THE TIME OF WRITING, ONLY VTT IS SUPPORTED BY MAJOR BROWSERS
 	FORCE_DIMENSION: bool = True # Force a standard video dimension based on `VIDEO_DIMENSIONS`, Forcing dimensions will MASSIVELY increase media processing times for videos not a standard resolution as ffmpeg will need to downscale.
 	VIDEO_DIMENSIONS: list[tuple[int]] = [(3840, 2160), (2560, 1440), (1080, 720), (720, 480), (854, 480), (640, 360), (426, 240)] # A list of acceptable video dimensions. Each element is defined as (width, height) in pixels. By default, the standard YouTube dimensions are used.

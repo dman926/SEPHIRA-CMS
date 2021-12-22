@@ -295,7 +295,7 @@ class UsShippingZone(Document):
 class Media(Document):
 	owner = LazyReferenceField('User', required=True)
 	folder = StringField(required=True)
-	filename = StringField(unique_with='folder')
+	filename = StringField(unique_with=('folder', 'private'))
 	file = FileField()
 	dir = BooleanField()
 	container = BooleanField(default=False)

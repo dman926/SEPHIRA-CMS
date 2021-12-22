@@ -23,10 +23,15 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 	videoTracks: Media[];
 	audioTracks: Media[];
 
+	videoTrackMenu: videojs.MenuButton | null;
+	audioTrackMenu: videojs.MenuButton | null;
+
 	constructor(private file: FileService, private platform: PlatformService, private renderer: Renderer2) {
 		this.player = null;
 		this.videoTracks = [];
 		this.audioTracks = [];
+		this.videoTrackMenu = null;
+		this.audioTrackMenu = null;
 		this.options = {
 			fluid: true,
 			preload: 'auto',
@@ -71,9 +76,8 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 
 	ngOnInit(): void {
 		if (this.video) {
-			this.player = videojs(this.video.nativeElement, this.options, () => {
-				
-			});
+			this.player = videojs(this.video.nativeElement, this.options);
+			// Listeners to sync audio player with video player
 			this.player.on('play', () => {
 				if (this.audio && this.audio.nativeElement.hasChildNodes() && this.audio.nativeElement.paused) {
 					this.audio.nativeElement.play();
@@ -106,6 +110,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 	resetPlayer(): void {
 		if (this.player) {
 			this.player.reset();
+			this.videoTracks = [];
 		}
 		if (this.audio) {
 			const audioEl = this.audio.nativeElement;
@@ -163,6 +168,12 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 					}
 				}
 			});
+			if (this.videoTracks.length > 1) {
+				
+			}
+			if (this.audioTracks.length > 1) {
+
+			}
 			return true;
 		}
 		return false;

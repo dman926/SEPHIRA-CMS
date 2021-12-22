@@ -19,6 +19,7 @@ from json import loads
 from os import mkdir, listdir, remove, rmdir, path
 from uuid import uuid4
 import random
+from traceback import print_exc
 
 router = APIRouter(
 	prefix=APISettings.ROUTE_BASE + 'file',
@@ -80,6 +81,7 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 			# Create sub media objects (audio/subtitles)
 			if 'codec_type' in streams[i] and 'index' in streams[i]:
 				if streams[i]['codec_type'] == 'video':
+					# Video generation
 					if not videoPass:
 						videoPass = True
 						dimensions = []
@@ -115,11 +117,16 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 							createdMedia.append(media)
 							video_filename = str(uuid4())
 							# TODO: dont save first generated video and use that for subsequent ffmpeg calls to speed up downscaling
-							args = ['ffmpeg', '-hide_banner', '-i', '-map', f'0:{str(streams[i]["index"])}', '-s', f'{dimensions[j][0]}x{dimensions[j][1]}', '-progress', 'pipe:1', f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}']
+							args = ['ffmpeg', '-hide_banner', '-i', '-map', f'0:{str(streams[i]["index"])}', '-s', f'{dimensions[j][0]}x{dimensions[j][1]}', '-c:v', '-progress', 'pipe:1', f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}']
 							if largestVideoFilename:
-								args.insert(3, f'media_processing/{filename}/{largestVideoFilename}.{FileSettings.VIDEO_EXTENSION}')
+								args.insert(args.index('-i') + 1, f'media_processing/{filename}/{largestVideoFilename}.{FileSettings.VIDEO_EXTENSION}')
+								args.insert(args.index('-c:v') + 1, 'copy')
 							else:
-								args.insert(3, f'media_processing/{filename2}.{container}')
+								args.insert(args.index('-i') + 1, f'media_processing/{filename2}.{container}')
+								if 'codec_name' in streams[i] and streams[i]['codec_name'] == FileSettings.VIDEO_CODEC:
+									args.insert(args.index('-c:v') + 1, 'copy')
+								else:
+									args.insert(args.index('-c:v') + 1, FileSettings.VIDEO_CODEC)
 							p = Popen(args, stdout=PIPE, stderr=PIPE, universal_newlines=True)
 							for stdout_line in p.stdout:
 								stdout_line = stdout_line.split('=')
@@ -145,6 +152,7 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 								largestVideoFilename = video_filename
 						remove(f'media_processing/{filename}/{largestVideoFilename}.{FileSettings.VIDEO_EXTENSION}')
 				elif streams[i]['codec_type'] == 'audio':
+					# Audio generation
 					if audioPass:
 						metadata = {}
 					else:
@@ -156,7 +164,11 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 					media.save()
 					createdMedia.append(media)
 					audio_filename = str(uuid4())
-					args = ['ffmpeg', '-i', f'media_processing/{filename2}.{container}', '-map', '0:' + str(streams[i]['index']), '-progress', 'pipe:1', f'media_processing/{filename}/{audio_filename}.{FileSettings.AUDIO_EXTENSION}']
+					args = ['ffmpeg', '-i', f'media_processing/{filename2}.{container}', '-map', f'0:{str(streams[i]["index"])}', '-c:a', '-progress', 'pipe:1', f'media_processing/{filename}/{audio_filename}.{FileSettings.AUDIO_EXTENSION}']
+					if 'codec_name' in streams[i] and streams[i]['codec_name'] == FileSettings.AUDIO_CODEC:
+						args.insert(args.index('-c:a') + 1, 'copy')
+					else:
+						args.insert(args.index('-c:a') + 1, FileSettings.AUDIO_CODEC)
 					p = Popen(args, stdout=PIPE, stderr=PIPE, universal_newlines=True)
 					for stdout_line in p.stdout:
 						stdout_line = stdout_line.split('=')
@@ -179,6 +191,7 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 					remove(f'media_processing/{filename}/{audio_filename}.{FileSettings.AUDIO_EXTENSION}')
 					audioCount += 1
 				elif streams[i]['codec_type'] == 'subtitle':
+					# Subtitle generation
 					if subtitlePass:
 						metadata = {}
 					else:
@@ -212,35 +225,38 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 					Media.send_processing_update(mainMedia, (i + 1) / len(streams) * 100)
 					remove(f'media_processing/{filename}/{subtitle_filename}.{FileSettings.SUBTITLE_EXTENSION}')
 					subtitleCount += 1
-		media = Media(owner=mainMedia.owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}_poster.png', folder=mainMedia.folder, private=True)
-		media.save()
-		createdMedia.append(media)
-		random.seed(int(duration * 100)) # use duration to make thumbnails generate at the same point for the same file. Collisions shouldn't matter 
-		args = ['ffmpeg', '-ss', f'{round(random.random() * duration, 2)}', '-i', f'media_processing/{filename2}.{container}', '-vframes', '1', '-s', f'{dimensions[0][0]}x{dimensions[0][1]}', '-progress', 'pipe:1', '-f', 'image2', f'media_processing/{filename}/poster.png']
-		random.seed() # reset seed
-		p = Popen(args, stdout=PIPE, stderr=PIPE, universal_newlines=True)
-		for stdout_line in p.stdout:
-			stdout_line = stdout_line.split('=')
-			if stdout_line[0] == 'out_time_us':
-				updateTime = float(stdout_line[1]) / 10000
-				if updateTime > 0:
-					Media.send_processing_update(media, min(updateTime / duration, 100))
-		if p.wait() != 0:
-			raise SubprocessError
-		with open(f'media_processing/{filename}/poster.png', 'rb') as poster_file_obj:
-			media.file.put(poster_file_obj, content_type='image/png')
-			media.processing = False
+		
+		# Poster generation
+		if len(dimensions) > 0:
+			media = Media(owner=mainMedia.owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}_poster.png', folder=mainMedia.folder, private=True)
 			media.save()
-			mainMedia.update(push__associatedMedia=media)
-		Media.send_processing_update(media, 100)
-		Media.send_processing_update(mainMedia, 100)
-		remove(f'media_processing/{filename}/poster.png')
+			createdMedia.append(media)
+			random.seed(int(duration * 100)) # use duration to make thumbnails generate at the same point for the same file. Collisions shouldn't matter 
+			args = ['ffmpeg', '-ss', f'{round(random.random() * duration, 2)}', '-i', f'media_processing/{filename2}.{container}', '-vframes', '1', '-s', f'{dimensions[0][0]}x{dimensions[0][1]}', '-progress', 'pipe:1', '-f', 'image2', f'media_processing/{filename}/poster.png']
+			random.seed() # reset seed
+			p = Popen(args, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+			for stdout_line in p.stdout:
+				stdout_line = stdout_line.split('=')
+				if stdout_line[0] == 'out_time_us':
+					updateTime = float(stdout_line[1]) / 10000
+					if updateTime > 0:
+						Media.send_processing_update(media, min(updateTime / duration, 100))
+			if p.wait() != 0:
+				raise SubprocessError
+			with open(f'media_processing/{filename}/poster.png', 'rb') as poster_file_obj:
+				media.file.put(poster_file_obj, content_type='image/png')
+				media.processing = False
+				media.save()
+				mainMedia.update(push__associatedMedia=media)
+			Media.send_processing_update(media, 100)
+			Media.send_processing_update(mainMedia, 100)
+			remove(f'media_processing/{filename}/poster.png')
 
 		# Manually reload and save to get signal to fire
 		mainMedia.reload()
 		mainMedia.processing = False
 		mainMedia.save()
-	except Exception:
+	except Exception as e:
 		# Clean up media and sub-media objects
 		for created in createdMedia:
 			created.delete()
@@ -250,6 +266,7 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 			if subMedia.private:
 				subMedia.delete()
 		mainMedia.delete()
+		print_exc(e)
 		# TODO: send websocket to client to inform media player that the file failed to be created
 	finally:
 		# Clean up temp files
@@ -419,6 +436,8 @@ def stream(filename: Optional[str] = '', folder: Optional[str] = '', id: Optiona
 			media = Media.objects.get(id=id)
 		else:
 			media = Media.objects.get(folder=folder, filename=filename)
+		if not media.file:
+			raise DoesNotExist
 		start_byte = int(asked.split('=')[-1].split('-')[0])
 		chunk_size = FileSettings.MAX_STREAM_CHUNK_SIZE
 		size = media.file.length
