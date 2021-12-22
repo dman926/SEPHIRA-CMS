@@ -34,7 +34,6 @@ export class NavComponent implements OnInit {
 	isAdmin: boolean;
 
 	menuItems: MenuItem[];
-	user: User | null;
 
 	readonly siteTitle: string = environment.siteTitle;
 	readonly desktopMenuStyle: string = environment.desktopMenuStyle;
@@ -73,7 +72,6 @@ export class NavComponent implements OnInit {
 			this.router.url.substring(1, this.adminPath.length + 1) ===
 			this.adminPath;
 		this.menuItems = [];
-		this.user = null;
 
 		this.swipeCoord = [0, 0];
 		this.swipeTime = 0;
@@ -88,7 +86,6 @@ export class NavComponent implements OnInit {
 			});
 		} else {
 			this.menuItems = this.state.get<MenuItem[]>(menuItemsKey, []);
-			this.auth.user$.subscribe(user => this.user = user);
 
 			this.router.events.subscribe((ev) => {
 				if (ev instanceof NavigationEnd) {

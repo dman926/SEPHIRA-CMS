@@ -231,6 +231,7 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 	}
 
 	deleteLastSelectedFile(): void {
+		// TODO: add a confirm dialog here to avoid accidental deletion
 		if (this.lastSelectedFile) {
 			this.loaded = false;
 			for (let i = 0; i < this.formArray!.length; i++) {
