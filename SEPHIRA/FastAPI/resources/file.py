@@ -77,8 +77,6 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 		audioCount = 0
 		subtitleCount = 0
 		videoPass = False
-		audioPass = False
-		subtitlePass = False
 		for i in range(len(streams)):
 			# Create sub media objects (audio/subtitles)
 			if 'codec_type' in streams[i] and 'index' in streams[i]:
@@ -157,10 +155,9 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 						remove(f'media_processing/{filename}/{largestVideoFilename}.{FileSettings.VIDEO_EXTENSION}')
 				elif streams[i]['codec_type'] == 'audio':
 					# Audio generation
-					if audioPass:
+					if audioCount > 0:
 						metadata = {}
 					else:
-						audioPass = True
 						metadata = {
 							'default': True
 						}
@@ -198,10 +195,9 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 					audioCount += 1
 				elif streams[i]['codec_type'] == 'subtitle':
 					# Subtitle generation
-					if subtitlePass:
+					if subtitleCount > 0:
 						metadata = {}
 					else:
-						subtitlePass = True
 						metadata = {
 							'default': True
 						}
