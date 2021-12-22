@@ -23,7 +23,7 @@
 				<img id="product-img" [src]="product.img && product.img.length > 0 ? product.img[selectedImg] : '../../assets/img/placeholder.png'" />
 				<!-- Attribution for placeholder.png: Missing-image-232x150.png by DJKA | CC BY-SA 4.0 -->
 				<div id="img-subgallery" *ngIf="product.img">
-					<img *ngFor="let img of product.img;index as i" [ngClass]="{selected: selectedImg == i}" [src]="img" (click)="selectedImg = i" />
+					<img *ngFor="let img of product.img;index as i" [ngClass]="{selected: selectedImg === i}" [src]="img" (click)="selectedImg = i" />
 				</div>
 			</div>
 			<div>
@@ -47,7 +47,7 @@
 				</form>
 				<mat-paginator [length]="reviewPageEvent.length" [pageSize]="reviewPageEvent.pageSize" (page)="fetchReviews($event)"></mat-paginator>
 				<div id="reviews">
-					<p *ngIf="reviews.length == 0">No reviews yet</p>
+					<p *ngIf="reviews.length === 0">No reviews yet</p>
 					<div *ngFor="let review of shownReviews">
 						<p>{{ review.reviewer!.firstName }} {{ review.score }}</p>
 					</div>

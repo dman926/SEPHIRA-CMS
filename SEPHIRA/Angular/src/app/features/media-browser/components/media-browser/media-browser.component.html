@@ -61,7 +61,7 @@
 	</div>
 	<div id="updates" *ngIf="useSocket">
 		<mat-card *ngFor="let update of updatedList" [ngStyle]="{opacity: update.opacity}">
-			<p>{{ update.created ? 'New' : 'Updated' }} media in {{ folder == update.folder ? 'this' : update.folder == '' ? 'root' : update.folder }} folder</p>
+			<p>{{ update.created ? 'New' : 'Updated' }} media in {{ folder === update.folder ? 'this' : update.folder === '' ? 'root' : update.folder }} folder</p>
 			<span class="spacer"></span>
 			<div>
 				<mat-progress-spinner color="accent" diameter="52" [value]="100 - ((now - update.createTime) / 1000 / updatedListRemoveTime * 100)"></mat-progress-spinner>

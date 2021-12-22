@@ -1,7 +1,8 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "cli": {
-    "analytics": "c1216cdf-9f9e-441b-ab92-01639d2020d3"
+    "analytics": "c1216cdf-9f9e-441b-ab92-01639d2020d3",
+    "defaultCollection": "@angular-eslint/schematics"
   },
   "version": 1,
   "newProjectRoot": "projects",
@@ -29,12 +30,12 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
-			"allowedCommonJsDependencies": [
-				"qrcode",
-				"@videojs/xhr",
-				"global/document",
-				"videojs-vtt.js"
-			],
+            "allowedCommonJsDependencies": [
+              "qrcode",
+              "@videojs/xhr",
+              "global/document",
+              "videojs-vtt.js"
+            ],
             "assets": [
               "src/favicon.ico",
               "src/assets",
@@ -44,8 +45,7 @@
               "./node_modules/@angular/material/prebuilt-themes/purple-green.css",
               "src/styles.scss"
             ],
-            "scripts": [
-            ],
+            "scripts": [],
             "serviceWorker": true,
             "ngswConfigPath": "ngsw-config.json"
           },
@@ -178,6 +178,15 @@
             }
           },
           "defaultConfiguration": "production"
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
+            ]
+          }
         }
       }
     }

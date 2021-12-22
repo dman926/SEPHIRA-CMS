@@ -1,7 +1,7 @@
 import { Directive, TemplateRef } from '@angular/core';
 
 @Directive({
-	selector: '[editMode]',
+	selector: '[sephiraEditMode]',
 })
 export class EditModeDirective {
 

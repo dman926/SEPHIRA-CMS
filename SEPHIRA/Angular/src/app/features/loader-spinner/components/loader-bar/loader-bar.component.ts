@@ -1,15 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
-  selector: 'sephira-loader-bar',
-  templateUrl: './loader-bar.component.html',
-  styleUrls: ['./loader-bar.component.scss']
+	selector: 'sephira-loader-bar',
+	templateUrl: './loader-bar.component.html',
+	styleUrls: ['./loader-bar.component.scss'],
 })
-export class LoaderBarComponent implements OnInit {
+export class LoaderBarComponent {
 
-  constructor() { }
-
-  ngOnInit(): void {
-  }
+	constructor() { }
 
 }

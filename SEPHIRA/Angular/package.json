@@ -10,7 +10,8 @@
     "dev:ssr": "ng run sephira:serve-ssr",
     "serve:ssr": "node dist/sephira/server/main.js",
     "build:ssr": "ng build && ng run sephira:server",
-    "prerender": "ng run sephira:prerender"
+    "prerender": "ng run sephira:prerender",
+    "lint": "ng lint"
   },
   "private": true,
   "dependencies": {
@@ -37,6 +38,11 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~13.1.2",
+    "@angular-eslint/builder": "13.0.1",
+    "@angular-eslint/eslint-plugin": "13.0.1",
+    "@angular-eslint/eslint-plugin-template": "13.0.1",
+    "@angular-eslint/schematics": "13.0.1",
+    "@angular-eslint/template-parser": "13.0.1",
     "@angular/cli": "~13.1.2",
     "@angular/compiler-cli": "~13.1.1",
     "@nguniversal/builders": "^13.0.1",
@@ -46,6 +52,9 @@
     "@types/stripe-checkout": "^1.0.4",
     "@types/stripe-v3": "^3.1.26",
     "@types/video.js": "^7.3.28",
+    "@typescript-eslint/eslint-plugin": "5.3.0",
+    "@typescript-eslint/parser": "5.3.0",
+    "eslint": "^8.2.0",
     "jasmine-core": "~3.10.0",
     "karma": "~6.3.0",
     "karma-chrome-launcher": "~3.1.0",

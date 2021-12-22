@@ -1,15 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
-  selector: 'sephira-loader-spinner',
-  templateUrl: './loader-spinner.component.html',
-  styleUrls: ['./loader-spinner.component.scss']
+	selector: 'sephira-loader-spinner',
+	templateUrl: './loader-spinner.component.html',
+	styleUrls: ['./loader-spinner.component.scss'],
 })
-export class LoaderSpinnerComponent implements OnInit {
+export class LoaderSpinnerComponent {
 
-  constructor() { }
-
-  ngOnInit(): void {
-  }
+	constructor() { }
 
 }

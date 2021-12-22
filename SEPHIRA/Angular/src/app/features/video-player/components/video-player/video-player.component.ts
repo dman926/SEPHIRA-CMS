@@ -23,14 +23,18 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 	videoTracks: Media[];
 	audioTracks: Media[];
 
-	videoTrackMenu: videojs.MenuButton | null;
-	audioTrackMenu: videojs.MenuButton | null;
+	videoTrackMenuButton: videojs.MenuButton | null;
+	videoTrackMenu: videojs.Menu | null;
+	audioTrackMenuButton: videojs.MenuButton | null;
+	audioTrackMenu: videojs.Menu | null;
 
 	constructor(private file: FileService, private platform: PlatformService, private renderer: Renderer2) {
 		this.player = null;
 		this.videoTracks = [];
 		this.audioTracks = [];
+		this.videoTrackMenuButton = null;
 		this.videoTrackMenu = null;
+		this.audioTrackMenuButton = null;
 		this.audioTrackMenu = null;
 		this.options = {
 			fluid: true,
@@ -76,7 +80,14 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 
 	ngOnInit(): void {
 		if (this.video) {
-			this.player = videojs(this.video.nativeElement, this.options);
+			this.player = videojs(this.video.nativeElement, this.options, () => {
+				if (this.player) {
+					this.videoTrackMenuButton = this.player.controlBar.addChild('MenuButton') as videojs.MenuButton;
+					this.videoTrackMenu = this.videoTrackMenuButton.createMenu();
+					this.audioTrackMenuButton = this.player.controlBar.addChild('MenuButton') as videojs.MenuButton;
+					this.audioTrackMenu = this.audioTrackMenuButton.createMenu();
+				}
+			});
 			// Listeners to sync audio player with video player
 			this.player.on('play', () => {
 				if (this.audio && this.audio.nativeElement.hasChildNodes() && this.audio.nativeElement.paused) {
