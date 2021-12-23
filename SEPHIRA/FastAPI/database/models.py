@@ -308,35 +308,23 @@ class Media(Document):
 	@classmethod
 	def post_save(cls, sender, document: Media, **kwargs):
 		if not (document.private or document.processing):
-			created = kwargs['created']
 			message = {
 				'type': 'update',
 				'payload': {
 					'folder': document.folder,
-					'created': created
+					'created': kwargs['created']
 				}
 			}
-			# Workaround to allow sending in normal and async methods as mediaBrowserManger.broadcast is async
-			try:
-				loop = asyncio.get_running_loop()
-			except RuntimeError:
-				loop = None
-
-			if loop and loop.is_running():
-				loop.create_task(mediaBrowserManager.broadcast(message))
-			else:
-				asyncio.run(mediaBrowserManager.broadcast(message))
-
-	@classmethod
-	def send_processing_update(cls, document: Media, percentDone: float):
-		if document.processing:
+		elif document.processing:
 			message = {
 				'type': 'processing update',
 				'payload': {
 					'id': str(document.id),
-					'percentDone': percentDone
+					'percentDone': document.percentDone
 				}
 			}
+		
+		if message:
 			# Workaround to allow sending in normal and async methods as mediaBrowserManger.broadcast is async
 			try:
 				loop = asyncio.get_running_loop()

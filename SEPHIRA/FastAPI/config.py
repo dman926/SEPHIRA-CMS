@@ -33,7 +33,7 @@ class FileSettings:
 	MAX_STREAM_CHUNK_SIZE: int = 1024 # File stream paypload size in bytes
 	ENABLE_FFMPEG: bool = True # Requires ffmpeg and ffprobe to be installed and in the command path. If you aren't sure if it is set up correctly, enter `ffmpeg` and `ffprobe` in the terminal/command prompt and see if it works
 	# Below settings are only used if `ENABLE_FFMPEG` is `True`
-	ENABLE_FILE_PROCESSING: bool = True # If an uploaded file should be 'processed'. Depends on the type of file. For exampe, `application/x-subrip` files are converted to `text/vtt` and `video/...` files are broken into their stream components with the aid of FFMPEG
+	ENABLE_FILE_PROCESSING: bool = True # If an uploaded file should be 'processed'. Depends on the type of file. For exampe, `video/...` files are broken into their stream components with the aid of FFMPEG
 	VIDEO_EXTENSION: str = 'webm' # The file format a video file's video should be decomposed to
 	VIDEO_CODEC: str = 'vp9' # The codec to use to accompany the VIDEO_EXTENSION. ex.  VIDEO_EXTENSION == 'webm' -> VIDEO_CODEC == 'vp8' or 'vp9' | VIDEO_EXTENSION == 'mp4' -> VIDEO_CODEC == 'h264'
 	AUDIO_EXTENSION: str = 'aac' # The file format a video file's audio should be decomposed to

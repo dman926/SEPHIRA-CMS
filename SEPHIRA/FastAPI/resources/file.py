@@ -36,11 +36,11 @@ def allowed_file(filename: str) -> bool:
 	return '.' in filename and filename.rsplit('.', 1)[1].lower() in FileSettings.ALLOWED_EXTENSIONS
 
 def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
+	# TODO: better Media filename checking for sub media objects as there can be collisions right now which cause the decomposition to fail
 	try:
 		filename = None
 		requestedFileName = mainMedia.filename
 		createdMedia = []
-		Media.send_processing_update(mainMedia, 1)
 		mainMedia.percentDone = 1
 		mainMedia.save()
 		# Use ffmpeg to move metadata to the front
@@ -133,7 +133,8 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 								if stdout_line[0] == 'out_time_us':
 									updateTime = float(stdout_line[1]) / 10000
 									if updateTime > 0:
-										Media.send_processing_update(media, min(updateTime / duration, 100))
+										media.percentDone = min(updateTime / duration, 100)
+										media.save()
 							if p.wait() != 0:
 								raise SubprocessError
 							with open(f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}', 'rb') as video_file_obj:
@@ -141,13 +142,14 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 								if mimetype == None:
 									mimetype = f'video/{FileSettings.VIDEO_EXTENSION}'
 								media.file.put(video_file_obj, content_type=mimetype)
-								media.processing = False
-								media.save()
-								mainMedia.update(push__associatedMedia=media)
-							Media.send_processing_update(media, 100)
+							media.percentDone = 100
+							media.save()
+							media.processing = False
+							media.save()
+							mainMedia.update(push__associatedMedia=media)
 							percentDone = (j + 1) / len(dimensions) / (i + 1) / len(streams) * 100
-							Media.send_processing_update(mainMedia, percentDone)
-							mainMedia.update(set__percentDone=percentDone)
+							mainMedia.percentDone = percentDone
+							mainMedia.save()
 							if largestVideoFilename:
 								remove(f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}')
 							else:
@@ -161,7 +163,7 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 						metadata = {
 							'default': True
 						}
-					media = Media(owner=mainMedia.owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}_{audioCount}.{FileSettings.AUDIO_EXTENSION}', folder=mainMedia.folder, private=True, metadata=metadata)
+					media = Media(owner=mainMedia.owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}_{audioCount}.{FileSettings.AUDIO_EXTENSION}', folder=mainMedia.folder, private=True, metadata=metadata, percentDone=1)
 					media.save()
 					createdMedia.append(media)
 					audio_filename = str(uuid4())
@@ -176,7 +178,8 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 						if stdout_line[0] == 'out_time_us':
 							updateTime = float(stdout_line[1]) / 10000
 							if updateTime > 0:
-								Media.send_processing_update(media, min(updateTime / duration, 100))
+								media.percentDone = min(updateTime / duration, 100)
+								media.save()
 					if p.wait() != 0:
 						raise SubprocessError					
 					with open(f'media_processing/{filename}/{audio_filename}.{FileSettings.AUDIO_EXTENSION}', 'rb') as audio_file_obj:
@@ -184,12 +187,14 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 						if mimetype == None:
 							mimetype = f'audio/{FileSettings.AUDIO_EXTENSION}'
 						media.file.put(audio_file_obj, content_type=mimetype)
-						media.processing = False
-						media.save()
-						mainMedia.update(push__associatedMedia=media)
-					Media.send_processing_update(media, 100)
+					media.percentDone = 100
+					media.save()
+					media.processing = False
+					media.save()
+					mainMedia.update(push__associatedMedia=media)
 					percentDone = (i + 1) / len(streams) * 100
-					Media.send_processing_update(mainMedia, percentDone)
+					mainMedia.percentDone = percentDone
+					mainMedia.save()
 					mainMedia.update(set__percentDone=percentDone)
 					remove(f'media_processing/{filename}/{audio_filename}.{FileSettings.AUDIO_EXTENSION}')
 					audioCount += 1
@@ -220,13 +225,14 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 						if mimetype == None:
 							mimetype = f'text/{FileSettings.SUBTITLE_EXTENSION}'
 						media.file.put(subtitle_file_obj, content_type=mimetype)
-						media.processing = False
-						media.save()
-						mainMedia.update(push__associatedMedia=media)
-					Media.send_processing_update(media, 100)
+					media.percentDone = 100
+					media.save()
+					media.processing = False
+					media.save()
+					mainMedia.update(push__associatedMedia=media)
 					percentDone = (i + 1) / len(streams) * 100
-					Media.send_processing_update(mainMedia, percentDone)
-					mainMedia.update(set__percentDone=percentDone)
+					mainMedia.percentDone = percentDone
+					mainMedia.save()
 					remove(f'media_processing/{filename}/{subtitle_filename}.{FileSettings.SUBTITLE_EXTENSION}')
 					subtitleCount += 1
 		
@@ -249,11 +255,13 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 				raise SubprocessError
 			with open(f'media_processing/{filename}/poster.png', 'rb') as poster_file_obj:
 				media.file.put(poster_file_obj, content_type='image/png')
-				media.processing = False
-				media.save()
-				mainMedia.update(push__associatedMedia=media)
-			Media.send_processing_update(media, 100)
-			Media.send_processing_update(mainMedia, 100)
+			media.processing = False
+			media.save()
+			mainMedia.update(push__associatedMedia=media)
+			media.percentDone = 100
+			media.save()
+			mainMedia.percentDone = 100
+			mainMedia.save()
 			mainMedia.update(unset__percentDone=True)
 			remove(f'media_processing/{filename}/poster.png')
 
@@ -319,9 +327,9 @@ async def upload_file(background_tasks: BackgroundTasks, response: Response, fil
 					break
 			mimetype = file.content_type
 			if not mimetype:
-				mimetype = mimetypes.MimeTypes().guess_type(filename)
+				mimetype = mimetypes.guess_type(filename)
 			
-			if FileSettings.ENABLE_FFMPEG and FileSettings.ENABLE_FILE_PROCESSING and mimetype[:5] == 'video':
+			if FileSettings.ENABLE_FFMPEG and FileSettings.ENABLE_FILE_PROCESSING and (mimetype[:6] == 'video/' or mimetype[:6] == 'audio/' or mimetype == 'application/x-subrip' or mimetype == 'application/ttml+xml'):
 				# Process the file
 				splitFilename = filename.rsplit('.', 1)
 				media = Media(owner=identity, filename=splitFilename[0], folder=folder, container=True, processing=True)
