@@ -1,0 +1,31 @@
+
+<ng-template #nodeTemplateRef let-list="list">
+	<div class="node" *ngFor="let node of list">
+		<div class="node-content">
+			<sephira-edit-in-place>
+				<ng-template sephiraViewMode>[{{ node.text }}]</ng-template>
+				<ng-template sephiraEditMode><input (change)="editNodeText(node, $event)" [value]="node.text" /></ng-template>
+			</sephira-edit-in-place>
+			<span>&nbsp;</span>
+			<sephira-edit-in-place>
+				<ng-template sephiraViewMode>({{ node.link }})</ng-template>
+				<ng-template sephiraEditMode><input (change)="editNodeLink(node, $event)" [value]="node.link" /></ng-template>
+			</sephira-edit-in-place>
+			<button mat-icon-button (click)="addChildNode(node)"><mat-icon>add</mat-icon></button><button mat-icon-button (click)="removeNode(node)"><mat-icon>remove</mat-icon></button>
+		</div>
+
+		<ul>
+			<ng-container *ngTemplateOutlet="nodeTemplateRef; context: { list: node.children }">
+			</ng-container>
+		</ul>
+	</div>
+</ng-template>
+
+<button mat-icon-button (click)="addTopLevel()"><mat-icon>add</mat-icon></button>
+<button mat-icon-button (click)="removeTopLevel()"><mat-icon>remove</mat-icon></button>
+<button mat-raised-button color="primary" (click)="saveTree()">Save</button>
+
+<ul>
+	<ng-container *ngTemplateOutlet="nodeTemplateRef; context: { list: menuItems }">
+	</ng-container>
+</ul>

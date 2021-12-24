@@ -1,0 +1,60 @@
+<ng-template #loaderSpinner>
+	<sephira-loader-spinner></sephira-loader-spinner>
+</ng-template>
+<form *ngIf="postFormGroup && loaded;else loaderSpinner" [formGroup]="postFormGroup" (ngSubmit)="editPost()">
+	<ng-container *ngFor="let schema of schemas" [ngSwitch]="schema.controlType">
+
+		<mat-form-field *ngSwitchCase="'input'" appearance="fill">
+			<mat-label>{{ schema.niceName }}</mat-label>
+			<input matInput [formControlName]="schema.name" />
+		</mat-form-field>
+
+		<mat-form-field *ngSwitchCase="'textarea'" appearance="fill">
+			<mat-label>{{ schema.niceName }}</mat-label>
+			<textarea matInput [formControlName]="schema.name"></textarea>
+		</mat-form-field>
+
+		<mat-form-field *ngSwitchCase="'select'" appearance="fill">
+			<mat-label>{{ schema.niceName }}</mat-label>
+			<mat-select [formControlName]="schema.name">
+				<mat-option *ngFor="let option of schema.options!" [value]="option.value">
+					{{ option.key }}
+				</mat-option>
+			</mat-select>		
+		</mat-form-field>
+
+		<mat-checkbox *ngSwitchCase="'checkbox'" color="primary" [formControlName]="schema.name">{{ schema.niceName }}</mat-checkbox>
+
+		<div *ngSwitchCase="'wysiwyg'" class="spaceout">
+			<!-- TODO: Find a WYSIWYG editor -->
+			<p>WYSIWYG coming soon</p>
+		</div>
+
+		<div *ngSwitchCase="'FormArray'" class="spaceout">
+			<p>{{ schema.niceName }}</p>
+			<button mat-icon-button type="button" (click)="addToFormArray(schema.name, schema.array!)"><mat-icon>add</mat-icon></button>
+			<!-- TODO: For now FormArray only support strings, but I'd like to add a recursive template here to allow for anything. including other form arrays :) -->
+			<mat-form-field [formArrayName]="schema.name" *ngFor="let control of getFormArrayControls(schema.name);index as i" appearance="fill">
+				<mat-label>{{ schema.array!.niceName }} {{ i + 1 }}</mat-label>
+				<input matInput [formControlName]="i" />
+				<button mat-icon-button type="button" (click)="removeFromFormArray(schema.name, i)" matSuffix><mat-icon>delete</mat-icon></button>
+			</mat-form-field>
+		</div>
+
+		<div *ngSwitchCase="'media-browser'" class="spaceout">
+			<sephira-media-browser [formArrayName]="schema.name" [allowMultiple]="schema.multiple ? schema.multiple : false">{{ schema.niceName }}</sephira-media-browser>
+		</div>
+
+		<div *ngSwitchCase="'post-select'" class="spaceout">
+			<sephira-post-select [type]="schema.type" [formArrayName]="schema.name" [allowMultiple]="schema.multiple ? schema.multiple : false">{{ schema.niceName }}</sephira-post-select>
+		</div>
+
+		<p *ngSwitchDefault>Schema Error: {{ schema.name }} has an invalid controlType {{ schema.controlType }}</p>
+
+	</ng-container>
+
+	<button mat-raised-button color="primary" type="button" routerLink="../">Back</button>
+	<button mat-raised-button color="warn" type="button" (click)="deletePost()">Delete</button>
+	<button mat-raised-button color="primary" [disabled]="postFormGroup.invalid || saving">Save</button>
+	<p *ngIf="saved">Saved</p>
+</form>

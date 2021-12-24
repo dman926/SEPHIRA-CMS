@@ -1,0 +1,11 @@
+form {
+	display: flex;
+	flex-direction: column;
+	max-width: 35em;
+	justify-content: center;
+	margin: 1em auto 0;
+	padding: 0 1em;
+	button:not(:last-child) {
+		margin-bottom: 1em;
+	}
+}

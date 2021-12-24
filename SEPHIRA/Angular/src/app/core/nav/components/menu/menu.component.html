@@ -1,0 +1,11 @@
+<mat-nav-list [class.horizontal]="horizontal">
+	<ng-container *ngFor="let menuItem of menuItems;index as i">
+		<div class="mat-list-item-wrapper">
+			<a mat-list-item [routerLink]="[menuItem.link]">{{ menuItem.text }}</a>
+			<ng-container *ngIf="menuItem.children && menuItem.children.length > 0">
+				<button mat-icon-button [matMenuTriggerFor]="menu.menu!"><mat-icon>arrow_drop_down</mat-icon></button>
+				<sephira-recursive-menu-items #menu [items]="menuItem.children"></sephira-recursive-menu-items>
+			</ng-container>
+		</div>
+	</ng-container>
+</mat-nav-list>

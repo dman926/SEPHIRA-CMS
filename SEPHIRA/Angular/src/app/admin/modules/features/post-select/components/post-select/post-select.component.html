@@ -1,0 +1,13 @@
+<mat-card>
+	<mat-card-content>
+		<mat-paginator [length]="postPageEvent.length" [pageSize]="postPageEvent.pageSize" (page)="fetchPosts($event)"></mat-paginator>
+		<ng-template #loaderSpinner>
+			<sephira-loader-spinner></sephira-loader-spinner>
+		</ng-template>
+		<ng-container *ngIf="loaded;else loaderSpinner">
+			<div *ngFor="let post of shownPosts">
+				<mat-checkbox (change)="postSelectedChange($event, post.id!)" color="primary" [checked]="isSelected(post.id!)">{{ post.title }} ({{ post.slug }}) ({{ post.status | titlecase }})</mat-checkbox>
+			</div>
+		</ng-container>
+	</mat-card-content>
+</mat-card>

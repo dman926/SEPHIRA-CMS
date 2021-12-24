@@ -1,0 +1,10 @@
+form {
+	display: flex;
+	flex-direction: column;
+	.spaceout {
+		padding-bottom: 1.34375em;
+		::ng-deep angular-editor code#sourceText {
+			color: black;
+		}
+	}
+}

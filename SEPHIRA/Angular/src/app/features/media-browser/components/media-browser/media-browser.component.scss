@@ -1,0 +1,75 @@
+.hidden {
+	display: none;
+}
+
+.round-button {
+	border-radius: 50%;
+	min-width: unset;
+	width: 3em;
+	height: 3em;
+	padding: 0;
+}
+
+.spacer {
+	flex-grow: 1;
+}
+
+div#header {
+	display: flex;
+	gap: 0.5em;
+	margin: 4px 0;
+	div#upload {
+		height: 3em;
+		position: relative;
+		mat-progress-spinner {
+			position: absolute;
+			top: -5px;
+			left: -5px;
+		}
+	}
+}
+
+div#browser {
+	display: grid;
+	grid-template-columns: 25em auto;
+	div#image-preview {
+		position: relative;
+		min-height: 15em;
+		div {
+			display: flex;
+			position: absolute;
+			gap: 0.25em;
+			top: 0.25em;
+			right: 0.25em;
+			z-index: 999;
+		}
+		img {
+			width: 100%;
+		}
+	}
+}
+
+div#updates {
+	mat-card {
+		display: flex;
+		background-color: red;
+		color: white;
+		opacity: 1;
+		transition: opacity 0.25s;
+		div {
+			height: 3em;
+			position: relative;
+			mat-progress-spinner {
+				position: absolute;
+				top: -5px;
+				left: -5px;
+			}
+		}
+	}
+}
+
+@media screen and (max-width: 762px) {
+	div#browser {
+		grid-template-columns: auto;
+	}
+}

@@ -1,0 +1,26 @@
+@import '~video.js/dist/video-js.css';
+
+.video-js .video-stream-selector:before, .video-js .audio-stream-selector:before {
+	font-family: 'Material Icons';
+	font-size: 2em;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	display: grid;
+	place-content: center;
+}
+
+.video-js .video-stream-selector:before {
+	content: 'movie';
+
+}
+
+.video-js .audio-stream-selector:before {
+	content: 'audiotrack';
+}
+
+.video-js .vjs-menu.menu-show {
+	display: unset;
+}

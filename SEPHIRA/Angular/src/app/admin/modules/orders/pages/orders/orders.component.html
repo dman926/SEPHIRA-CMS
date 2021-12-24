@@ -1,0 +1,9 @@
+<mat-paginator [length]="orderPageEvent.length" [pageSize]="orderPageEvent.pageSize" (page)="fetchOrders($event)"></mat-paginator>
+<ng-template #loaderSpinner>
+    <sephira-loader-spinner></sephira-loader-spinner>
+</ng-template>
+<div *ngIf="loaded;else loaderSpinner">
+    <button mat-raised-button *ngFor="let order of shownOrders" [routerLink]="['/admin/orders', order.id]">
+        {{ order.id }}
+	</button>
+</div>

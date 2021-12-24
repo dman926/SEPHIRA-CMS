@@ -1,0 +1,13 @@
+<section id="button-display">
+    <button mat-icon-button [matMenuTriggerFor]="menu">
+		<mat-icon [matBadge]="cartSize$ | async" [matBadgeHidden]="(cart.cart$ | async)!.length === 0">shopping_cart</mat-icon>
+	</button>
+    <mat-menu #menu="matMenu" yPosition="above" xPosition="before">
+        <span *ngFor="let product of (cart.cart$ | async)" (click)="$event.stopPropagation()" mat-menu-item>
+			<button (click)="reduceProduct(product.id, $event)" mat-icon-button><mat-icon>clear</mat-icon></button>
+			<span>{{ product.name }} x{{ product.qty }}</span>
+        </span>
+        <p mat-menu-item *ngIf="(cart.cart$ | async)!.length === 0">No items in cart!</p>
+        <button mat-flat-button *ngIf="(cart.cart$ | async)!.length > 0" routerLink="/shop/checkout">View Cart</button>
+    </mat-menu>
+</section>
