@@ -2,4 +2,4 @@ venv/
 **/.vscode/
 **/__pycache__/
 
-Angular/src/assets/uploads/
+SEPHIRA/FastAPI/media_processing

@@ -1,0 +1,61 @@
+<section if="card" *ngIf="card;else page">
+	<mat-card *ngIf="product">
+		<mat-card-header>
+			<mat-card-title>{{ product.title }}</mat-card-title>
+			<mat-card-subtitle>{{ product.price | currency }}</mat-card-subtitle>
+		</mat-card-header>
+		<img mat-card-image class="cover" [src]="product.img && product.img.length > 0 ? product.img[0] : '../../assets/img/placeholder.png'" />
+		<!-- Attribution for placeholder.png: Missing-image-232x150.png by DJKA | CC BY-SA 4.0 -->
+		<mat-card-content>
+			<p>{{ product.excerpt }}</p>
+		</mat-card-content>
+		<mat-card-actions>
+			<button mat-button (click)="router.navigate([router.url], { queryParams: { p: product.slug } })">View More</button>
+			<button mat-button (click)="cart.addToCart(product)">Add To Cart</button>
+		</mat-card-actions>
+	</mat-card>
+</section>
+
+<ng-template #page>
+	<div *ngIf="product;else notFound">
+		<div id="product-head">
+			<div id="img-gallery">
+				<img id="product-img" [src]="product.img && product.img.length > 0 ? product.img[selectedImg] : '../../assets/img/placeholder.png'" />
+				<!-- Attribution for placeholder.png: Missing-image-232x150.png by DJKA | CC BY-SA 4.0 -->
+				<div id="img-subgallery" *ngIf="product.img">
+					<img *ngFor="let img of product.img;index as i" [ngClass]="{selected: selectedImg === i}" [src]="img" (click)="selectedImg = i" />
+				</div>
+			</div>
+			<div>
+				<h2>{{ product.title }}</h2>
+				<p>{{ product.price | currency }} <span *ngIf="product.hasStock">| {{ product.stock }} in stock</span></p>
+				<button mat-raised-button color="primary" (click)="cart.addToCart(product)">Add to cart</button>
+			</div>
+		</div>
+		<mat-tab-group mat-align-tabs="center">
+			<mat-tab label="Description" *ngIf="product.content">
+				<div [innerHTML]="product.content"></div>
+			</mat-tab>
+			<mat-tab [label]="'Reviews (' + product.totalReviews + ')'">
+				<form *ngIf="reviewAllowed" [formGroup]="reviewForm" (ngSubmit)="submitReview()">
+					<sephira-star-rating (ratingUpdated)="ratingUpdated($event)"></sephira-star-rating>
+					<mat-form-field appearance="fill">
+						<mat-label>Review</mat-label>
+						<input matInput formControlName="review" />
+					</mat-form-field>
+					<button mat-raised-button type="submit" color="primary" [disabled]="reviewForm.invalid">Submit Review</button>
+				</form>
+				<mat-paginator [length]="reviewPageEvent.length" [pageSize]="reviewPageEvent.pageSize" (page)="fetchReviews($event)"></mat-paginator>
+				<div id="reviews">
+					<p *ngIf="reviews.length === 0">No reviews yet</p>
+					<div *ngFor="let review of shownReviews">
+						<p>{{ review.reviewer!.firstName }} {{ review.score }}</p>
+					</div>
+				</div>
+			</mat-tab>
+		</mat-tab-group>
+	</div>
+	<ng-template #notFound>
+		<p>404</p>
+	</ng-template>
+</ng-template>

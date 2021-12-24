@@ -1,0 +1,10 @@
+<form [formGroup]="childOfFormGroup" (ngSubmit)="dialogRef.close(media.value)">
+	<div mat-dialog-content>
+		<sephira-media-browser formArrayName="media" [allowMultiple]="true" [allowUpload]="false" [opened]="true" [showPreview]="false" [useSocket]="false">Parent Media</sephira-media-browser>	
+		<p>Select parent media here (ex. uploading a subtitle file will probably have a video file as a parent)</p>
+	</div>
+	<div mat-dialog-actions>
+		<button mat-flat-button type="button" color="warn" (click)="dialogRef.close()">Cancel</button>
+		<button mat-flat-button type="submit" color="primary">Upload with {{ media.length }} parent files</button>
+	</div>
+</form>

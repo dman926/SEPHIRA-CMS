@@ -1,0 +1,11 @@
+<form [formGroup]="folderFormGroup" (ngSubmit)="onSubmit()">
+	<mat-form-field appearance="fill" mat-dialog-content>
+		<mat-label>Folder Name</mat-label>
+		<input matInput formControlName="folder" />
+		<span matPrefix><mat-icon>folder</mat-icon></span>
+	</mat-form-field>
+	<div mat-dialog-actions>
+		<button mat-flat-button type="button" color="warn" (click)="dialogRef.close()">Close</button>
+		<button mat-flat-button type="submit" color="primary">Create</button>
+	</div>
+</form>

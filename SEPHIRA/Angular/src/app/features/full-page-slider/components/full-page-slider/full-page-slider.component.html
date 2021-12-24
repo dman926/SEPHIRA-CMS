@@ -1,0 +1,21 @@
+
+<section>
+    <div class="slide" *ngFor="let slide of slides;index as i" [style]="'background-image: url(\'' + slide.backgroundImage + '\');width: ' + (i === 0 ? '100%' : '0') + ';'" [@showHidden]="animationStates[i]" [ngClass]="animationStates[i]">
+        <div *ngIf="slide.frontImage" class="front-image"><img [src]="slide.frontImage" /></div>
+        <div class="hero-text" *ngIf="slide.heroText">
+            <h2 [style]="'color: ' + slide.heroText.color">{{ slide.heroText.top }}</h2>
+            <h3 [style]="'color: ' + slide.heroText.color">{{ slide.heroText.bottom }}</h3>
+            <a *ngIf="slide.heroText.button" [routerLink]="[slide.heroText.button.page]" class="hero-button" [style]="'color: ' + slide.heroText.color">{{ slide.heroText.button.text }}</a>
+        </div>
+    </div>
+    <div id="bottom-text">
+        <button mat-button *ngFor="let slide of slides;index as i" (click)="goToSlide(i)">
+			<ng-container *ngIf="slide.bottomText">
+				<div class="progress-bar-wrapper" [style]="'background-color: ' + slide.bottomText.baseColor">
+					<div class="progress-bar" [@progressBar]="animationStates[i]" [style]="'background-color: ' + slide.bottomText.selectedColor"></div>
+				</div>
+				<p>{{ slide.bottomText.heroText }}</p>	
+			</ng-container>
+		</button>
+    </div>
+</section>
