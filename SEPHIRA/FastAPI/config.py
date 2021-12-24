@@ -40,7 +40,7 @@ class FileSettings:
 	AUDIO_CODEC: str = 'aac' # The codec to use to accompany the AUDIO_EXTENSION. ex. AUDIO_EXTENSION == 'aac' -> VIDEO_CODEC == 'aac'
 	SUBTITLE_EXTENSION: str = 'vtt' # The file format a video file's subtitle should be decomosed to. AT THE TIME OF WRITING, ONLY VTT IS SUPPORTED BY MAJOR BROWSERS
 	FORCE_DIMENSION: bool = True # Force a standard video dimension based on `VIDEO_DIMENSIONS`, Forcing dimensions will MASSIVELY increase media processing times for videos not a standard resolution as ffmpeg will need to downscale.
-	VIDEO_DIMENSIONS: list[tuple[int]] = [(3840, 2160), (2560, 1440), (1080, 720), (720, 480), (854, 480), (640, 360), (426, 240)] # A list of acceptable video dimensions. Each element is defined as (width, height) in pixels. By default, the standard YouTube dimensions are used.
+	VIDEO_DIMENSIONS: list[tuple[int]] = [(3840, 2160), (2560, 1440), (1920, 1080), (1280, 720), (854, 480), (640, 360), (426, 240)] # A list of acceptable video dimensions. Each element is defined as (width, height) in pixels. By default, the standard YouTube dimensions are used.
 	CREATE_SMALLER_DIMENSIONS: bool = True # When set to True, create video files for every resolution equal to or smaller than the uploaded video file. Useful for allowing users to select different resolutions in the the video player
 
 

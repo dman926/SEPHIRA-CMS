@@ -92,10 +92,12 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 						this.audio.nativeElement.currentTime = this.player.currentTime();
 						if (this.audioBuffering && this.audio.nativeElement.networkState !== 2) {
 							this.player.play();
+							this.audio.nativeElement.play();
 						}
 						this.audioBuffering = this.audio.nativeElement.networkState === 2;
 						if (this.audioBuffering) {
 							this.player.pause();
+							this.audio.nativeElement.pause();
 						}
 					}
 				}, 500);
@@ -221,7 +223,29 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 						};
 						const item: videojs.MenuItem = new MenuItem(this.player, options);
 						this.videoTrackMenu.addItem(item);
+						item.on('click', () => {
+							if (this.player) {
+								const newMedia = this.videoTracks[i];
+								const streamUrl = this.file.getStreamUrl(newMedia.folder, newMedia.filename, newMedia.id);
+								const currentTime = this.player.currentTime();
+								this.player.src({
+									src: streamUrl,
+									type: newMedia.mimetype
+								});
+								this.player.currentTime(currentTime);
+								this.player.play();
+								if (this.videoTrackMenu) {
+									const menuItems = this.videoTrackMenu.children();
+									for (let j = 0; j < menuItems.length; j++) {
+										if (i !== j) {
+											(menuItems[j] as videojs.MenuItem).selected(false);
+										}
+									}
+								}
+							}
+						});
 					}
+					
 					this.videoTrackMenuButton.on('click', () => {
 						if (this.videoTrackMenu) {
 							if (this.videoTrackMenu.hasClass('menu-show')) {
@@ -246,6 +270,34 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 							selected: i === 0
 						};
 						const item: videojs.MenuItem = new MenuItem(this.player, options);
+						item.on('click', () => {
+							if (this.audio) {
+								const newMedia = this.audioTracks[i];
+								const streamUrl = this.file.getStreamUrl(newMedia.folder, newMedia.filename, newMedia.id);
+								const audioEl = this.audio.nativeElement;
+								while (audioEl.lastChild) {
+									audioEl.removeChild(audioEl.lastChild)
+								}
+								const sourceEl: HTMLSourceElement = this.renderer.createElement('source');
+								sourceEl.src = streamUrl;
+								if (newMedia.mimetype) {
+									sourceEl.type = newMedia.mimetype;
+								}
+								audioEl.append(sourceEl);
+								this.audioBuffering = true;
+								const currentTime = audioEl.currentTime;
+								audioEl.load();
+								audioEl.currentTime = currentTime;
+								if (this.audioTrackMenu) {
+									const menuItems = this.audioTrackMenu.children();
+									for (let j = 0; j < menuItems.length; j++) {
+										if (i !== j) {
+											(menuItems[j] as videojs.MenuItem).selected(false);
+										}
+									}
+								}
+							}
+						});
 						this.audioTrackMenu.addItem(item);
 					}
 					this.audioTrackMenuButton.on('click', () => {
