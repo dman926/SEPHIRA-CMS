@@ -8,11 +8,9 @@ import { AppServerModule } from './src/main.server';
 import { APP_BASE_HREF } from '@angular/common';
 import { existsSync } from 'fs';
 
-import rateLimit from 'express-rate-limit';
 import * as cors from 'cors';
 
 import { REQUEST, RESPONSE } from '@nguniversal/express-engine/tokens';
-import { environment } from 'src/environments/environment';
 
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
