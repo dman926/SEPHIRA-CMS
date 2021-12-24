@@ -28,6 +28,8 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 	audioTrackMenuButton: videojs.MenuButton | null;
 	audioTrackMenu: videojs.Menu | null;
 
+	private audioBuffering = false;
+
 	constructor(private file: FileService, private platform: PlatformService, private renderer: Renderer2) {
 		this.player = null;
 		this.videoTracks = [];
@@ -79,7 +81,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 	}
 
 	ngOnInit(): void {
-		if (this.video) {
+		if (this.video && this.platform.isBrowser) {
 			this.player = videojs(this.video.nativeElement, this.options, () => {
 				if (this.player) {
 					this.videoTrackMenuButton = this.player.controlBar.addChild('MenuButton') as videojs.MenuButton;
@@ -87,6 +89,18 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 					this.audioTrackMenuButton = this.player.controlBar.addChild('MenuButton') as videojs.MenuButton;
 					this.audioTrackMenu = this.audioTrackMenuButton.createMenu();
 				}
+				setInterval(() => {
+					if (this.player && this.audio) {
+						this.audio.nativeElement.currentTime = this.player.currentTime();
+						if (this.audioBuffering && this.audio.nativeElement.networkState !== 2) {
+							this.player.play();
+						}
+						this.audioBuffering = this.audio.nativeElement.networkState === 2;
+						if (this.audioBuffering) {
+							this.player.pause();
+						}
+					}
+				}, 500);
 			});
 			// Listeners to sync audio player with video player
 			this.player.on('play', () => {
@@ -107,6 +121,18 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 			this.player.on('seeking', () => {
 				if (this.player && this.audio) {
 					this.audio.nativeElement.currentTime = this.player.currentTime();
+				}
+			});
+			this.player.on('waiting', () => {
+				console.log('waiting');
+				if (this.audio) {
+					this.audio.nativeElement.pause();
+				}
+			});
+			this.player.on('playing', () => {
+				console.log('playing');
+				if (this.player && !this.player.paused() && this.audio) {
+					this.audio.nativeElement.play();
 				}
 			});
 		}
