@@ -51,7 +51,7 @@
     "@types/node": "^12.20.38",
     "@types/stripe-checkout": "^1.0.4",
     "@types/stripe-v3": "^3.1.26",
-    "@types/video.js": "^7.3.28",
+    "@types/video.js": "^7.3.29",
     "@typescript-eslint/eslint-plugin": "5.3.0",
     "@typescript-eslint/parser": "5.3.0",
     "eslint": "^8.2.0",
