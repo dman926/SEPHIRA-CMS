@@ -6,12 +6,6 @@ export const environment = {
 	apiServer: '/', // Must have a trailing `/`
 	adminPath: 'admin', // The base subdirectory the user must enter to reach the admin section
 	
-	// RATE LIMITING VARIABLES
-	enableRateLimiter: true,
-	rateLimitTime: 1000, // The max amount of time to remember each request
-	rateLimitMax: 25, // The max amount of requests per `rateLimitTime` ms
-	rateLimitMessage: 'You are requesting too fast, please wait a second before refreshing', // The message to display when `rateLimitMax` requests/`rateLimitTime` ms is exceeded
-
 	// SHOP SPECIFIC VARIABLES
 	enableShop: true, // Enables the shop. Should be the same as the FastAPI ShopSettings.ENABLE setting
 	requireLoggedInToCheckout: true, // Requires the user to be logged in to checkout.

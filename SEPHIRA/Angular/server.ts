@@ -44,38 +44,17 @@ export function app(): express.Express {
 		})
 	);
 
-	if (environment.enableRateLimiter) {
-		const webRateLimiter = rateLimit({
-			windowMs: environment.rateLimitTime,
-			max: environment.rateLimitMax,
-			message: environment.rateLimitMessage,
-			standardHeaders: true,
-			legacyHeaders: true
+	// All regular routes use the Universal engine
+	server.get('*', (req, res) => {
+		res.render(indexHtml, {
+			req,
+			providers: [
+				{ provide: APP_BASE_HREF, useValue: req.baseUrl },
+				{ provide: REQUEST, useValue: req },
+				{ provide: RESPONSE, useValue: res }
+			],
 		});
-		// All regular routes use the Universal engine
-		server.get('*', webRateLimiter, (req, res) => {
-			res.render(indexHtml, {
-				req,
-				providers: [
-					{ provide: APP_BASE_HREF, useValue: req.baseUrl },
-					{ provide: REQUEST, useValue: req },
-					{ provide: RESPONSE, useValue: res }
-				],
-			});
-		});
-	} else {
-		// All regular routes use the Universal engine
-		server.get('*', (req, res) => {
-			res.render(indexHtml, {
-				req,
-				providers: [
-					{ provide: APP_BASE_HREF, useValue: req.baseUrl },
-					{ provide: REQUEST, useValue: req },
-					{ provide: RESPONSE, useValue: res }
-				],
-			});
-		});
-	}
+	});
 
 	return server;
 }
