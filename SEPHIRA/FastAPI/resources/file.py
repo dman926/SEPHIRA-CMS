@@ -147,7 +147,7 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 							media.processing = False
 							media.save()
 							mainMedia.update(push__associatedMedia=media)
-							percentDone = (j + 1) / len(dimensions) / (i + 1) / len(streams) * 100
+							percentDone = (j + 1) / len(dimensions) / (i + 1) / (len(streams) + 1) * 100
 							mainMedia.percentDone = percentDone
 							mainMedia.save()
 							if largestVideoFilename:
@@ -163,7 +163,7 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 						metadata = {
 							'default': True
 						}
-					media = Media(owner=mainMedia.owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}_{audioCount}.{FileSettings.AUDIO_EXTENSION}', folder=mainMedia.folder, private=True, metadata=metadata, percentDone=1)
+					media = Media(owner=mainMedia.owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}_{audioCount}.{FileSettings.AUDIO_EXTENSION}', folder=mainMedia.folder, private=True, processing=True, metadata=metadata, percentDone=1)
 					media.save()
 					createdMedia.append(media)
 					audio_filename = str(uuid4())
@@ -192,7 +192,7 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 					media.processing = False
 					media.save()
 					mainMedia.update(push__associatedMedia=media)
-					percentDone = (i + 1) / len(streams) * 100
+					percentDone = (i + 1) / (len(streams) + 1) * 100
 					mainMedia.percentDone = percentDone
 					mainMedia.save()
 					mainMedia.update(set__percentDone=percentDone)
@@ -206,7 +206,7 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 						metadata = {
 							'default': True
 						}
-					media = Media(owner=mainMedia.owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}_{subtitleCount}.{FileSettings.SUBTITLE_EXTENSION}', folder=mainMedia.folder, private=True, metadata=metadata)
+					media = Media(owner=mainMedia.owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}_{subtitleCount}.{FileSettings.SUBTITLE_EXTENSION}', folder=mainMedia.folder, private=True, processing=True, metadata=metadata)
 					media.save()
 					createdMedia.append(media)
 					subtitle_filename = str(uuid4())
@@ -217,7 +217,8 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 						if stdout_line[0] == 'out_time_us':
 							updateTime = float(stdout_line[1]) / 10000
 							if updateTime > 0:
-								Media.send_processing_update(media, min(updateTime / duration, 100))
+								media.percentDone = min(updateTime / duration, 100)
+								media.save()
 					if p.wait() != 0:
 						raise SubprocessError					
 					with open(f'media_processing/{filename}/{subtitle_filename}.{FileSettings.SUBTITLE_EXTENSION}', 'rb') as subtitle_file_obj:
@@ -230,14 +231,14 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 					media.processing = False
 					media.save()
 					mainMedia.update(push__associatedMedia=media)
-					percentDone = (i + 1) / len(streams) * 100
+					percentDone = (i + 1) / (len(streams) + 1) * 100
 					mainMedia.percentDone = percentDone
 					mainMedia.save()
 					remove(f'media_processing/{filename}/{subtitle_filename}.{FileSettings.SUBTITLE_EXTENSION}')
 					subtitleCount += 1
 		
 		# Poster generation
-		if len(dimensions) > 0:
+		if videoPass and len(dimensions) > 0:
 			media = Media(owner=mainMedia.owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}_poster.png', folder=mainMedia.folder, private=True)
 			media.save()
 			createdMedia.append(media)
@@ -250,7 +251,8 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 				if stdout_line[0] == 'out_time_us':
 					updateTime = float(stdout_line[1]) / 10000
 					if updateTime > 0:
-						Media.send_processing_update(media, min(updateTime / duration, 100))
+						media.percentDone = min(updateTime / duration, 100)
+						media.save()
 			if p.wait() != 0:
 				raise SubprocessError
 			with open(f'media_processing/{filename}/poster.png', 'rb') as poster_file_obj:

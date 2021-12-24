@@ -21,6 +21,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MetadataEditorComponent } from './components/metadata-editor/metadata-editor.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { ConfirmModule } from '../confirm/confirm.module';
 
 
 
@@ -49,7 +50,8 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 		MatCardModule,
 
 		LoaderSpinnerModule,
-		VideoPlayerModule
+		VideoPlayerModule,
+		ConfirmModule
 	],
 	exports: [
 		MediaBrowserComponent

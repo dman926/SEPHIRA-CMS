@@ -1,0 +1,5 @@
+<div mat-dialog-content>{{ data.content }}</div>
+<div mat-dialog-actions>
+	<button mat-flat-button color="warn" (click)="dialogRef.close(false)">{{ data.cancelText }}</button>
+	<button mat-flat-button color="primary" (click)="dialogRef.close(true)">{{ data.confirmText }}</button>
+</div>

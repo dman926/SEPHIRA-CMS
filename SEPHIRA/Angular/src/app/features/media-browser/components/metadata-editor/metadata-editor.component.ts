@@ -46,6 +46,7 @@ export class MetadataEditorComponent {
 				audioKind: new FormControl(metadata?.audioKind ? metadata.audioKind : '', [Validators.required, this.audioKindValidator()]),
 				srclang: new FormControl(metadata?.srclang ? metadata.srclang : '', [Validators.required]),
 				label: new FormControl(metadata?.label ? metadata.label : '', [Validators.required]),
+				default: new FormControl(metadata?.default ? metadata.default : false)
 			});
 			this.audio = true
 		} else if (this.isText(mimetype)) {

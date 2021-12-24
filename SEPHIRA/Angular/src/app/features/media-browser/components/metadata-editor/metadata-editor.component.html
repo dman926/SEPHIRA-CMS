@@ -23,6 +23,7 @@
 				<mat-label>Label</mat-label>
 				<input matInput formControlName="label" required />
 			</mat-form-field>
+			<mat-checkbox formControlName="default" color="primary">Default Track?</mat-checkbox>
 		</div>
 		<div *ngIf="text">
 			<mat-form-field appearance="fill">
@@ -52,7 +53,7 @@
 			<mat-checkbox formControlName="default" color="primary">Default Track?</mat-checkbox>
 		</div>
 	</div>
-	<div *ngIf="!(image || video || text)">
+	<div *ngIf="!(image || video || audio || text)">
 		<p>File type not valid for metadata editing</p>
 	</div>
 	<div mat-dialog-actions>

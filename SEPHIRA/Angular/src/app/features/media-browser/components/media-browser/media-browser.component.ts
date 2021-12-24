@@ -9,6 +9,7 @@ import { WebSocketSubject } from 'rxjs/webSocket';
 import { CoreService } from 'src/app/core/services/core/core.service';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
 import { Payload, WebsocketService } from 'src/app/core/services/websocket/websocket.service';
+import { ConfirmDialogComponent } from 'src/app/features/confirm/components/confirm-dialog/confirm-dialog.component';
 import { VideoPlayerComponent } from 'src/app/features/video-player/components/video-player/video-player.component';
 import { Media, Metadata } from 'src/app/models/media';
 import { FileService } from '../../services/file/file.service';
@@ -225,31 +226,41 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 	}
 
 	deleteLastSelectedFile(): void {
-		// TODO: add a confirm dialog here to avoid accidental deletion
 		if (this.lastSelectedFile) {
-			this.loaded = false;
-			for (let i = 0; i < this.formArray!.length; i++) {
-				const el: Media = this.formArray!.at(i).value;
-				if (el.folder === this.lastSelectedFile.folder && el.filename === this.lastSelectedFile.filename) {
-					this.formArray!.removeAt(i);
-					break;
+			this.dialog.open(ConfirmDialogComponent, {
+				width: '250px',
+				data: {
+					content: 'Are you sure you want to delete ' + this.lastSelectedFile.filename + '?',
+					confirmText: 'Delete'
 				}
-			}
-			if (this.player && this.videoPlaying) {
-				this.player.resetPlayer();
-			}
-			this.file.deleteMedia(this.lastSelectedFile.folder, this.lastSelectedFile.filename).subscribe({
-				next: res => {
-					this.lastSelectedFile = undefined;
-					this.displayedImage = undefined;
-					this.fetchFiles();
-				},
-				error: err => {
-					this.lastSelectedFile = undefined;
-					this.displayedImage = undefined;
-					this.loaded = true;
+			}).afterClosed().subscribe(confirm => {
+				if (confirm && this.lastSelectedFile) {
+					this.loaded = false;
+					for (let i = 0; i < this.formArray!.length; i++) {
+						const el: Media = this.formArray!.at(i).value;
+						if (el.folder === this.lastSelectedFile.folder && el.filename === this.lastSelectedFile.filename) {
+							this.formArray!.removeAt(i);
+							break;
+						}
+					}
+					if (this.player && this.videoPlaying) {
+						this.player.resetPlayer();
+					}
+					this.file.deleteMedia(this.lastSelectedFile.folder, this.lastSelectedFile.filename).subscribe({
+						next: res => {
+							this.lastSelectedFile = undefined;
+							this.displayedImage = undefined;
+							this.fetchFiles();
+						},
+						error: err => {
+							this.lastSelectedFile = undefined;
+							this.displayedImage = undefined;
+							this.loaded = true;
+						}
+					});
+		
 				}
-			});
+			})
 		}
 	}
 

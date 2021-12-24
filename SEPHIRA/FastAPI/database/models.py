@@ -307,6 +307,7 @@ class Media(Document):
 
 	@classmethod
 	def post_save(cls, sender, document: Media, **kwargs):
+		message = None
 		if not (document.private or document.processing):
 			message = {
 				'type': 'update',
