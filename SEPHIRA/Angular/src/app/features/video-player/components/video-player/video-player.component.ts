@@ -4,6 +4,7 @@ import { FileService } from 'src/app/features/media-browser/services/file/file.s
 import { Media } from 'src/app/models/media';
 import videojs, { VideoJsPlayerOptions } from 'video.js';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
+import { MenuItemsComponent } from 'src/app/admin/modules/menu-items/pages/menu-items/menu-items.component';
 
 @Component({
 	selector: 'sephira-video-player',
@@ -83,12 +84,6 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 	ngOnInit(): void {
 		if (this.video && this.platform.isBrowser) {
 			this.player = videojs(this.video.nativeElement, this.options, () => {
-				if (this.player) {
-					this.videoTrackMenuButton = this.player.controlBar.addChild('MenuButton') as videojs.MenuButton;
-					this.videoTrackMenu = this.videoTrackMenuButton.createMenu();
-					this.audioTrackMenuButton = this.player.controlBar.addChild('MenuButton') as videojs.MenuButton;
-					this.audioTrackMenu = this.audioTrackMenuButton.createMenu();
-				}
 				setInterval(() => {
 					if (this.player && this.audio) {
 						this.audio.nativeElement.currentTime = this.player.currentTime();
@@ -124,13 +119,11 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 				}
 			});
 			this.player.on('waiting', () => {
-				console.log('waiting');
 				if (this.audio) {
 					this.audio.nativeElement.pause();
 				}
 			});
 			this.player.on('playing', () => {
-				console.log('playing');
 				if (this.player && !this.player.paused() && this.audio) {
 					this.audio.nativeElement.play();
 				}
@@ -205,11 +198,58 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 					}
 				}
 			});
+			const MenuItem = videojs.getComponent('MenuItem');
 			if (this.videoTracks.length > 1) {
-				
+				if (this.player) {
+					this.videoTrackMenuButton = this.player.controlBar.addChild('MenuButton') as videojs.MenuButton;
+					this.videoTrackMenuButton.addClass('video-stream-selector');
+					this.videoTrackMenu = this.videoTrackMenuButton.addChild('Menu') as videojs.Menu;
+					for (let i = 0; i < this.videoTracks.length; i++) {
+						const options: videojs.MenuItemOptions = {
+							label: this.videoTracks[i].filename,
+							multiSelectable: false,
+							selectable: true,
+							selected: i === 0
+						};
+						const item: videojs.MenuItem = new MenuItem(this.player, options);
+						this.videoTrackMenu.addItem(item);
+					}
+					this.videoTrackMenuButton.on('click', () => {
+						if (this.videoTrackMenu) {
+							if (this.videoTrackMenu.hasClass('menu-show')) {
+								this.videoTrackMenu.removeClass('menu-show');
+							} else {
+								this.videoTrackMenu.addClass('menu-show');
+							}
+						}
+					});
+				}
 			}
 			if (this.audioTracks.length > 1) {
-
+				if (this.player) {
+					this.audioTrackMenuButton = this.player.controlBar.addChild('MenuButton') as videojs.MenuButton;
+					this.audioTrackMenuButton.addClass('audio-stream-selector');
+					this.audioTrackMenu = this.audioTrackMenuButton.addChild('Menu') as videojs.Menu;
+					for (let i = 0; i < this.audioTracks.length; i++) {
+						const options: videojs.MenuItemOptions = {
+							label: this.audioTracks[i].filename,
+							multiSelectable: false,
+							selectable: true,
+							selected: i === 0
+						};
+						const item: videojs.MenuItem = new MenuItem(this.player, options);
+						this.audioTrackMenu.addItem(item);
+					}
+					this.audioTrackMenuButton.on('click', () => {
+						if (this.audioTrackMenu) {
+							if (this.audioTrackMenu.hasClass('menu-show')) {
+								this.audioTrackMenu.removeClass('menu-show');
+							} else {
+								this.audioTrackMenu.addClass('menu-show');
+							}
+						}
+					});
+				}
 			}
 			return true;
 		}
