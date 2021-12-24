@@ -29,7 +29,8 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 	audioTrackMenuButton: videojs.MenuButton | null;
 	audioTrackMenu: videojs.Menu | null;
 
-	private audioBuffering = false;
+	private audioBuffering : boolean;
+	private videoAudioSyncInterval: NodeJS.Timeout | null;
 
 	constructor(private file: FileService, private platform: PlatformService, private renderer: Renderer2) {
 		this.player = null;
@@ -39,6 +40,8 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 		this.videoTrackMenu = null;
 		this.audioTrackMenuButton = null;
 		this.audioTrackMenu = null;
+		this.audioBuffering = false;
+		this.videoAudioSyncInterval = null;
 		this.options = {
 			fluid: true,
 			preload: 'auto',
@@ -84,8 +87,8 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 	ngOnInit(): void {
 		if (this.video && this.platform.isBrowser) {
 			this.player = videojs(this.video.nativeElement, this.options, () => {
-				setInterval(() => {
-					if (this.player && this.audio) {
+				this.videoAudioSyncInterval = setInterval(() => {
+					if (this.player && !this.player.paused() && this.audio) {
 						this.audio.nativeElement.currentTime = this.player.currentTime();
 						if (this.audioBuffering && this.audio.nativeElement.networkState !== 2) {
 							this.player.play();
@@ -134,6 +137,11 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 	ngOnDestroy(): void {
 		if (this.player) {
 			this.player.dispose();
+			this.player = null;
+		}
+		if (this.videoAudioSyncInterval) {
+			clearInterval(this.videoAudioSyncInterval);
+			this.videoAudioSyncInterval = null;
 		}
 	}
 
@@ -206,7 +214,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 					this.videoTrackMenu = this.videoTrackMenuButton.addChild('Menu') as videojs.Menu;
 					for (let i = 0; i < this.videoTracks.length; i++) {
 						const options: videojs.MenuItemOptions = {
-							label: this.videoTracks[i].filename,
+							label: this.videoTracks[i].metadata?.label,
 							multiSelectable: false,
 							selectable: true,
 							selected: i === 0
@@ -232,7 +240,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 					this.audioTrackMenu = this.audioTrackMenuButton.addChild('Menu') as videojs.Menu;
 					for (let i = 0; i < this.audioTracks.length; i++) {
 						const options: videojs.MenuItemOptions = {
-							label: this.audioTracks[i].filename,
+							label: this.audioTracks[i].metadata?.label,
 							multiSelectable: false,
 							selectable: true,
 							selected: i === 0

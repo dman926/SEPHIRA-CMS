@@ -145,8 +145,8 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 
 	ngOnDestroy(): void {
 		if (this.websocket) {
-			this.websocket.unsubscribe();
-
+			this.ws.close(this.websocket);
+			this.websocket = null;
 		}
 	}
 

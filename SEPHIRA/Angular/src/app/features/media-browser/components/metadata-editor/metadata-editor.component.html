@@ -4,7 +4,10 @@
 			<p>File type not valid for metadata editing</p>
 		</div>
 		<div *ngIf="video">
-			<p>File type not valid for metadata editing</p>
+			<mat-form-field appearance="fill">
+				<mat-label>Label</mat-label>
+				<input matInput formControlName="label" required />
+			</mat-form-field>
 		</div>
 		<div *ngIf="audio">
 			<mat-form-field appearance="fill">

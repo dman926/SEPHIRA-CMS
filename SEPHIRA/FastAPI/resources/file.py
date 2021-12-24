@@ -112,11 +112,11 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 								}
 							else:
 								metadata = { }
-							media = Media(owner=mainMedia.owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}_{j}.{FileSettings.VIDEO_EXTENSION}', folder=mainMedia.folder, private=True, processing=True, metadata=metadata)
+							metadata['label'] = f'{dimensions[j][1]}p'
+							media = Media(owner=mainMedia.owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}_{j}_{metadata["label"]}.{FileSettings.VIDEO_EXTENSION}', folder=mainMedia.folder, private=True, processing=True, metadata=metadata)
 							media.save()
 							createdMedia.append(media)
 							video_filename = str(uuid4())
-							# TODO: dont save first generated video and use that for subsequent ffmpeg calls to speed up downscaling
 							args = ['ffmpeg', '-hide_banner', '-i', '-map', f'0:{str(streams[i]["index"])}', '-s', f'{dimensions[j][0]}x{dimensions[j][1]}', '-c:v', '-progress', 'pipe:1', f'media_processing/{filename}/{video_filename}.{FileSettings.VIDEO_EXTENSION}']
 							if largestVideoFilename:
 								args.insert(args.index('-i') + 1, f'media_processing/{filename}/{largestVideoFilename}.{FileSettings.VIDEO_EXTENSION}')
@@ -163,6 +163,9 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 						metadata = {
 							'default': True
 						}
+					if 'tags' in streams[i] and 'language' in streams[i]['tags']:
+						metadata['srclang'] = str(streams[i]['tags']['language'])
+						metadata['label'] = str(streams[i]['tags']['language']).title()
 					media = Media(owner=mainMedia.owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}_{audioCount}.{FileSettings.AUDIO_EXTENSION}', folder=mainMedia.folder, private=True, processing=True, metadata=metadata, percentDone=1)
 					media.save()
 					createdMedia.append(media)
@@ -206,6 +209,9 @@ def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 						metadata = {
 							'default': True
 						}
+					if 'tags' in streams[i] and 'language' in streams[i]['tags']:
+						metadata['srclang'] = str(streams[i]['tags']['language'])
+						metadata['label'] = str(streams[i]['tags']['language']).title()
 					media = Media(owner=mainMedia.owner, filename=f'{requestedFileName.rsplit(".", 1)[0]}_{subtitleCount}.{FileSettings.SUBTITLE_EXTENSION}', folder=mainMedia.folder, private=True, processing=True, metadata=metadata)
 					media.save()
 					createdMedia.append(media)

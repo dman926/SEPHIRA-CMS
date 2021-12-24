@@ -38,7 +38,7 @@ export class MetadataEditorComponent {
 			this.image = true;
 		} else if (this.isVideo(mimetype)) {
 			this.formGroup = new FormGroup({
-
+				label: new FormControl(metadata?.label ? metadata.label : '', [Validators.required])
 			});
 			this.video = true
 		} else if (this.isAudio(mimetype)) {
@@ -46,7 +46,7 @@ export class MetadataEditorComponent {
 				audioKind: new FormControl(metadata?.audioKind ? metadata.audioKind : '', [Validators.required, this.audioKindValidator()]),
 				srclang: new FormControl(metadata?.srclang ? metadata.srclang : '', [Validators.required]),
 				label: new FormControl(metadata?.label ? metadata.label : '', [Validators.required]),
-				default: new FormControl(metadata?.default ? metadata.default : false)
+				default: new FormControl(metadata?.default ? metadata.default : false),
 			});
 			this.audio = true
 		} else if (this.isText(mimetype)) {
