@@ -9,6 +9,12 @@ export const environment = {
 	mobileMenuStyle: 'side', // Valid choices: `side`, `top`. Defaults to `side`. Must be exactly `side` for swipe gesture to open/close to work
 	apiServer: 'http://127.0.0.1:8000/', // Must have a trailing `/`
 	adminPath: 'admin', // The base subdirectory the user must enter to reach the admin section
+
+	// RATE LIMITING VARIABLES
+	enableRateLimiter: true,
+	rateLimitTime: 1000, // The max amount of time to remember each request
+	rateLimitMax: 25, // The max amount of requests per `rateLimitTime` ms
+	rateLimitMessage: 'You are requesting too fast, please wait a second before refreshing', // The message to display when `rateLimitMax` requests/`rateLimitTime` ms is exceeded
 	
 	// SHOP SPECIFIC VARIABLES
 	enableShop: true, // Enables the shop. Should be the same as the FastAPI ShopSettings.ENABLE setting
