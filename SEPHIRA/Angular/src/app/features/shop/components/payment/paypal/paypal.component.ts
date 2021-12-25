@@ -1,15 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-paypal',
-  templateUrl: './paypal.component.html',
-  styleUrls: ['./paypal.component.scss']
+	selector: 'sephira-paypal',
+	templateUrl: './paypal.component.html',
+	styleUrls: ['./paypal.component.scss'],
 })
-export class PaypalComponent implements OnInit {
+export class PaypalComponent {
 
-  constructor() { }
-
-  ngOnInit(): void {
-  }
+	constructor() { }
 
 }

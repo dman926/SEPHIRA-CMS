@@ -1,15 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-coinbase',
-  templateUrl: './coinbase.component.html',
-  styleUrls: ['./coinbase.component.scss']
+	selector: 'sephira-coinbase',
+	templateUrl: './coinbase.component.html',
+	styleUrls: ['./coinbase.component.scss'],
 })
-export class CoinbaseComponent implements OnInit {
+export class CoinbaseComponent {
 
-  constructor() { }
-
-  ngOnInit(): void {
-  }
+	constructor() { }
 
 }
