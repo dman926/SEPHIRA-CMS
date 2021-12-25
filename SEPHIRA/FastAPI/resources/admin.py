@@ -9,6 +9,7 @@ from modules.JWT import get_jwt_identity
 import database.models as models
 from resources.errors import InvalidPostTypeError, NotFoundError, UnauthorizedError, SchemaValidationError
 from services.util_service import all_subclasses, is_post, base_model_to_clean_dict, class_name_to_class
+from config import ShopSettings
 
 from datetime import datetime
 
@@ -124,7 +125,10 @@ async def delete_user(id: str, identity: str = Depends(get_jwt_identity)):
 async def get_post_types(identity: str = Depends(get_jwt_identity)):
 	try:
 		get_admin_user(identity)
-		return list(map(lambda s: s.__module__[9:] + '.' + s.__name__, all_subclasses(models.Post)))
+		postTypes = map(lambda s: s.__module__[9:] + '.' + s.__name__, all_subclasses(models.Post))
+		if not ShopSettings.ENABLE:
+			postTypes = filter(lambda p: p != 'models.Product', postTypes)
+		return list(postTypes)
 	except (DoesNotExist, UnauthorizedError):
 		raise UnauthorizedError('User is not admin')
 	except Exception as e:

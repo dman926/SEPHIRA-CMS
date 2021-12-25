@@ -3,7 +3,7 @@ from typing import Optional, Union
 from datetime import timedelta
 
 # This is just for development purposes. Feel free to put the raw values in this file if people seeing them is not an issue (ie. private code base)
-from secret import COINBASE_API_KEY, COINBASE_SHARED_SECRET, PAYPAL_ID, PAYPAL_SECRET, STRIPE_SK
+from secret import COINBASE_API_KEY, COINBASE_SHARED_SECRET, NOWPAYMENTS_API_KEY, NOWPAYMENTS_IPN_SECRET, PAYPAL_ID, PAYPAL_SECRET, STRIPE_SK
 
 
 class MongoSettings:
@@ -74,6 +74,12 @@ class CoinbaseCommerceSettings:
 	SHARED_SECRET: str = COINBASE_SHARED_SECRET
 	CHARGE_NAME: str = 'Test Charge'
 	CHARGE_DESCRIPTION: str = 'Test Description'
+
+
+class NowPaymentsSettings:
+	ENABLE: bool = True
+	API_KEY: str = NOWPAYMENTS_API_KEY
+	IPN_SECRET: str = NOWPAYMENTS_IPN_SECRET
 
 
 class PayPalSettings:
