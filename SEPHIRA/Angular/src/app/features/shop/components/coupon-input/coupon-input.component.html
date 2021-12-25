@@ -1,1 +1,10 @@
-<p>coupon-input works!</p>
+<mat-form-field appearance="fill">
+	<mat-label>Coupons</mat-label>
+	<mat-chip-list #chipList>
+		<mat-chip *ngFor="let coupon of coupons" (removed)="removeCoupon(coupon)">
+			{{ coupon.code }}
+			<mat-icon matChipRemove>cancel</mat-icon>
+		</mat-chip>
+		<input placeholder="Add Coupon..." [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeyCodes" (matChipInputTokenEnd)="addCoupon($event)" [disabled]="disabled">
+	</mat-chip-list>
+</mat-form-field>

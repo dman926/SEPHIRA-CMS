@@ -13,11 +13,15 @@ import { CartService } from '../../services/cart/cart.service';
 export class CouponInputComponent implements OnInit {
 
 	@Input() orderID: string | undefined;
+	@Input() disabled: boolean;
 	@Output() couponEmitter: EventEmitter<Coupon[]>;
 
 	coupons: Coupon[];
+	
+	readonly separatorKeyCodes = [ENTER, COMMA] as const;
 
 	constructor(private cart: CartService) {
+		this.disabled = false;
 		this.couponEmitter = new EventEmitter<Coupon[]>();
 		this.coupons = [];
 	}
