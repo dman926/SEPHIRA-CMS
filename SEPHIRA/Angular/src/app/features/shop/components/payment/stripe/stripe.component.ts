@@ -6,6 +6,8 @@ import { PlatformService } from 'src/app/core/services/platform/platform.service
 import { CartItem } from 'src/app/models/cart-item';
 import { AddressForm } from 'src/app/models/order';
 import { Coupon } from 'src/app/models/posts/coupon';
+import { ShippingZone } from 'src/app/models/shipping-zone';
+import { TaxRate } from 'src/app/models/tax-rate';
 import { environment } from 'src/environments/environment';
 import { CheckoutService } from '../../../services/checkout/checkout.service';
 
@@ -27,6 +29,8 @@ export class StripeComponent implements AfterContentInit {
 	stripeReady: boolean;
 	orderID: string | null;
 	coupons: Coupon[];
+	taxRate: TaxRate | undefined;
+	shippingZone: ShippingZone | undefined;
 
 	addressForm: FormGroup;
 	billingForm: FormGroup;

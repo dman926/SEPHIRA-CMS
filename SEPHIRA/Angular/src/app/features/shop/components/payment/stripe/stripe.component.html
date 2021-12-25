@@ -93,7 +93,7 @@
 		</mat-step>
 	</mat-vertical-stepper>
 	<div id="checkout-right">
-		<sephira-price-total-display></sephira-price-total-display>
+		<sephira-price-total-display [cartItems]="cartItems" [coupons]="coupons" [taxRate]="taxRate" [shippingZone]="shippingZone" [minPrice]="0.5" gateway="Stripe"></sephira-price-total-display>
 		<sephira-coupon-input *ngIf="orderID" [orderID]="orderID"></sephira-coupon-input>
 	</div>
 </section>

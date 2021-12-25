@@ -19,7 +19,7 @@
 	</mat-list>
 	<hr />
 	<button mat-icon-button (click)="selectedPaymentGateway=''" *ngIf="selectedPaymentGateway !== ''"><mat-icon>arrow_back</mat-icon></button>
-	<div [ngSwitch]="selectedPaymentGateway" *ngIf="showCheckoutButtons">
+	<div [ngSwitch]="selectedPaymentGateway" *ngIf="showCheckoutButtons && cartItems.length > 0">
 		<div [@switchTrigger]="'fadeIn'" *ngSwitchCase="'stripe'">
 			<sephira-stripe *ngIf="enableStripe" [cartItems]="cartItems" (paymentSuccess)="onPayment($event)"></sephira-stripe>
 		</div>
