@@ -1,28 +1,52 @@
-section#checkout-wrapper {
-	display: grid;
-	grid-template-columns: repeat(2, 1fr);
-	gap: 1em;
-	mat-vertical-stepper {
-		::ng-deep mat-step-header {
-			pointer-events: none;
-		}
-		img {
-			width: 2em;
-		}
-		span.country-wrapper {
+section#cart-section {
+	mat-list {
+		border: 1px solid white;
+		border-radius: 0.5em;
+		padding: 0;
+		margin-bottom: 1em;
+		div.mat-list-item-content {
+			width: 100%;
 			display: flex;
-			&>span {
-				margin-left: 0.25em;
-				white-space: break-spaces;
-				line-height: 1em;
-			}
+			align-items: center;
 		}
-		form {
+		div.qty-selector {
 			display: flex;
-			flex-direction: column;
+			align-items: center;
+			width: 10em;
 		}
 	}
-	div#checkout-right {}
+	h2 {
+		text-align: center;
+	}
+	mat-grid-list#payment-gateways button {
+			height: 15em;
+			width: 15em;
+			border: 1px solid white;
+			border-radius: 0.5em;
+			padding: 1em;
+			mat-icon {
+				width: 100%;
+				height: 100%;
+			}
+			svg {
+				width: 100%;
+			}
+			span#nowpayments-button {
+				font-size: 1.9em;
+				text-align: center;
+				font-family: syne,sans-serif;
+				font-weight: 300;
+				color: white;
+				.bolded {
+					font-weight: 600;
+					color: #64acff;
+				}
+			}	
+	}
+}
+
+.spacer {
+	flex-grow: 1;
 }
 
 

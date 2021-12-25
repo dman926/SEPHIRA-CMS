@@ -18,12 +18,15 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatStepperModule } from '@angular/material/stepper';
 import { MatListModule } from '@angular/material/list';
-import { MatChipsModule } from '@angular/material/chips';
+import { MatGridListModule } from '@angular/material/grid-list';
 
 import { LoaderSpinnerModule } from '../loader-spinner/loader-spinner.module';
 import { StarRatingModule } from '../star-rating/star-rating.module';
+import { StripeComponent } from './components/payment/stripe/stripe.component';
+import { PaypalComponent } from './components/payment/paypal/paypal.component';
+import { CoinbaseComponent } from './components/payment/coinbase/coinbase.component';
+import { NowpaymentsComponent } from './components/payment/nowpayments/nowpayments.component';
 
 @NgModule({
 	declarations: [
@@ -31,7 +34,11 @@ import { StarRatingModule } from '../star-rating/star-rating.module';
 		CheckoutComponent,
 		CartComponent,
 		CheckoutConfirmComponent,
-		ProductDisplayComponent
+		ProductDisplayComponent,
+  StripeComponent,
+  PaypalComponent,
+  CoinbaseComponent,
+  NowpaymentsComponent
 	],
 	imports: [
 		CommonModule,
@@ -47,9 +54,8 @@ import { StarRatingModule } from '../star-rating/star-rating.module';
 		MatTabsModule,
 		MatFormFieldModule,
 		MatInputModule,
-		MatStepperModule,
 		MatListModule,
-		MatChipsModule,
+		MatGridListModule,
 
 		LoaderSpinnerModule,
 		StarRatingModule

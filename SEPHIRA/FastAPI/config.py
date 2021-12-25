@@ -7,7 +7,7 @@ from secret import COINBASE_API_KEY, COINBASE_SHARED_SECRET, NOWPAYMENTS_API_KEY
 
 
 class MongoSettings:
-	CONNECT_URI: str = 'mongodb://localhost/sephira-test'
+	CONNECT_URI: str = 'mongodb://localhost/sephira-test' # The URI of the mongo server. (mongodb://[username:password@]host1[:port1][,...hostN[:portN]][/[defaultauthdb][?options]])
 
 
 class MailSettings:
@@ -46,6 +46,7 @@ class FileSettings:
 
 class CORSSettings:
 	ALLOW_ORIGINS: list[AnyHttpUrl] = [
+		# List front end urls here for them to be able to use FastAPI. Set to `'*'` for any url (not recommended unless you know what you're doing)
 		'http://localhost:4200'
 	]
 
@@ -60,8 +61,8 @@ class FastAPISettings:
 class UvicornSettings:
 	USE_RELOADER: bool = True # You should most definitely set this to 'False' in production as it takes a lot of resources to use
 	LOG_LEVEL: str = 'info' # It is recommended to use 'warning' in production to reduce log clutter
-	PORT: int = 8000
-	MAX_CONTENT_SIZE: Optional[int] = None # The max post content size. Set to `None` for unlimitted (not recommended if users can upload). Should also set this in your web server.
+	PORT: int = 8000 # The port of the ASGI server. Make sure this port is available on your server
+	MAX_CONTENT_SIZE: Optional[int] = None # The max post content size. Set to `None` for unlimitted (not recommended if users can upload). Should also set this in your web server (NGINX/Apache).
 
 
 class ShopSettings:
@@ -70,26 +71,25 @@ class ShopSettings:
 
 class CoinbaseCommerceSettings:
 	ENABLE: bool = True
-	API_KEY: str = COINBASE_API_KEY
-	SHARED_SECRET: str = COINBASE_SHARED_SECRET
-	CHARGE_NAME: str = 'Test Charge'
-	CHARGE_DESCRIPTION: str = 'Test Description'
+	API_KEY: str = COINBASE_API_KEY # Your API key
+	SHARED_SECRET: str = COINBASE_SHARED_SECRET # Your webhook shared secret
+	CHARGE_NAME: str = 'Test Charge' # The name of the charge
 
 
 class NowPaymentsSettings:
 	ENABLE: bool = True
-	API_KEY: str = NOWPAYMENTS_API_KEY
-	IPN_SECRET: str = NOWPAYMENTS_IPN_SECRET
+	API_KEY: str = NOWPAYMENTS_API_KEY # Your API key
+	IPN_SECRET: str = NOWPAYMENTS_IPN_SECRET # Your IPN (Instant Payment Notifications) secret
 
 
 class PayPalSettings:
 	ENABLE: bool = True
-	CLIENT_ID: str = PAYPAL_ID
-	CLIENT_SECRET: str = PAYPAL_SECRET
-	USE_SANDBOX: bool = True
-	BRAND_NAME: str = 'Test Brand'
+	CLIENT_ID: str = PAYPAL_ID # Your client ID
+	CLIENT_SECRET: str = PAYPAL_SECRET # Your client secret
+	USE_SANDBOX: bool = True # Set to `True` if you would like to test payments without actually getting charged. Remember that your client ID and client secert are different for sandbox and live accounts
+	BRAND_NAME: str = 'Test Brand' # The name of your business on PayPal receipts
 
 
 class StripeSettings:
 	ENABLE: bool = True
-	SECRET_KEY: str = STRIPE_SK
+	SECRET_KEY: str = STRIPE_SK # Your secret key

@@ -14,5 +14,6 @@ export const environment = {
 	enablePayPal: true, // Enables using PayPal for checkout. Shop and FastAPI PayPalSettings.ENABLE must be enabled for this to be used.
 	paypalClientID: 'AWYXNVh-QSGkoNBVUJev6R_mwoIayEfkL6j9xmXnHM5BRYl--OS-Hi_CwHS5747Rc8BjmswVgpMpngrq', // The PayPal client id. Shop and enablePayPal must be enabled for this to be used
 	paypalCurrency: 'USD', // The currency code you would like to use with PayPal. Required here because of how the script is loaded
-	enableCoinbaseCommerce: true // enableStripe: true, // Enables using Coinbase Commerce for checkout. Shop and FastAPI CoinbaseCommerceSettings.ENABLE must be enabled for this to be used.
+	enableCoinbaseCommerce: true, // Enables using Coinbase Commerce for checkout. Shop and FastAPI CoinbaseCommerceSettings.ENABLE must be enabled for this to be used.
+	enableNowPayments: true // Enables using NOWPayments for checkout. Shop and FastAPI NowPaymentSettings.ENABLE must be enabled for this to be used.
 };
