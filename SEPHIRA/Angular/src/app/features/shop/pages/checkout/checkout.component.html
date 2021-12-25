@@ -21,7 +21,7 @@
 	<button mat-icon-button (click)="selectedPaymentGateway=''" *ngIf="selectedPaymentGateway !== ''"><mat-icon>arrow_back</mat-icon></button>
 	<div [ngSwitch]="selectedPaymentGateway" *ngIf="showCheckoutButtons">
 		<div [@switchTrigger]="'fadeIn'" *ngSwitchCase="'stripe'">
-			<sephira-stripe *ngIf="enableStripe" [cartItems]="cartItems"></sephira-stripe>
+			<sephira-stripe *ngIf="enableStripe" [cartItems]="cartItems" (paymentSuccess)="onPayment($event)"></sephira-stripe>
 		</div>
 		<div [@switchTrigger]="'fadeIn'" *ngSwitchCase="'paypal'">
 			<sephira-paypal *ngIf="enablePayPal" [cartItems]="cartItems"></sephira-paypal>

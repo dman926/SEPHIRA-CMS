@@ -26,9 +26,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatStepperModule } from '@angular/material/stepper';
 
 import { LoaderSpinnerModule } from '../loader-spinner/loader-spinner.module';
 import { StarRatingModule } from '../star-rating/star-rating.module';
+import { PriceTotalDisplayComponent } from './components/price-total-display/price-total-display.component';
 
 @NgModule({
 	declarations: [
@@ -41,7 +43,8 @@ import { StarRatingModule } from '../star-rating/star-rating.module';
 		PaypalComponent,
 		CoinbaseComponent,
 		NowpaymentsComponent,
-		CouponInputComponent
+		CouponInputComponent,
+  PriceTotalDisplayComponent
 	],
 	imports: [
 		CommonModule,
@@ -60,6 +63,7 @@ import { StarRatingModule } from '../star-rating/star-rating.module';
 		MatListModule,
 		MatGridListModule,
 		MatChipsModule,
+		MatStepperModule,
 
 		LoaderSpinnerModule,
 		StarRatingModule

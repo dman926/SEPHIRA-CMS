@@ -15,7 +15,7 @@ export interface Order {
 
 export interface AddressForm {
 	/** Billing information */
-	billing: {
+	billing?: {
 		/** The billing city */
 		city?: string;
 		/** the billing country */
@@ -33,7 +33,7 @@ export interface AddressForm {
 		/** The billing postal code */
 		zip?: string;
 	};
-	shipping: {
+	shipping?: {
 		/** The shipping city */
 		city?: string;
 		/** The shipping country */

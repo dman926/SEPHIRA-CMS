@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { AbstractControl, AsyncValidatorFn, ValidationErrors } from '@angular/forms';
+import { AbstractControl, AsyncValidatorFn, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { debounceTime, EMPTY, map, Observable, take } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { CookieService } from '../cookie/cookie.service';
@@ -13,7 +13,7 @@ export class CoreService {
 	/** A regex for validating a URL slug */
 	public slugRegex: string = '^([/]?)+([a-z0-9]?)+(?:-[a-z0-9]+)*$';
 
-	constructor(private cookie: CookieService, private http: HttpClient) {}
+	constructor(private cookie: CookieService, private http: HttpClient) { }
 
 	/**
 	 * Create an Authorization header to be used with the SEPHIRA backend
@@ -63,12 +63,29 @@ export class CoreService {
 	}
 
 	/**
+	 * A ReactiveFormS Validator to check if the input matches a US state
+	 * @returns An observable containing errors if any
+	 */
+	public stateCodeValidator(): ValidatorFn {
+		return (control: AbstractControl): ValidationErrors | null => {
+			const states = [
+				"AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA", 
+				"HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", 
+				"MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", 
+				"NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", 
+				"SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
+			];
+			return states.indexOf(control.value) === -1 ? { invalidState: true } : null;
+		}
+	}
+
+	/**
 	 * Format bytes to the highest posible order (ex. 1024 => 1 KB)
 	 * @param bytes The number of bytes to format
 	 * @param decimals The decimal precision
 	 * @returns A string formatted to the highest possible order
 	 */
-	formatBytes(bytes: number, decimals: number = 2): string {
+	public formatBytes(bytes: number, decimals: number = 2): string {
 		if (bytes === 0) return '0 Bytes';
 	
 		const k = 1024;

@@ -7,6 +7,7 @@ import { environment } from 'src/environments/environment';
 import { CartService } from '../../services/cart/cart.service';
 import { Subscription } from 'rxjs';
 import { CartItem } from 'src/app/models/cart-item';
+import { Router } from '@angular/router';
 
 @Component({
 	selector: 'sephira-checkout',
@@ -30,7 +31,13 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 	readonly enableNowPayments = environment.enableNowPayments;
 	private cartSub: Subscription | null;
 
-	constructor(public cart: CartService, private platform: PlatformService, private iconRegistry: MatIconRegistry, private sanitizer: DomSanitizer) {
+	constructor(
+		public cart: CartService,
+		private platform: PlatformService,
+		private router: Router,
+		private iconRegistry: MatIconRegistry,
+		private sanitizer: DomSanitizer
+	) {
 		this.selectedPaymentGateway = '';
 		this.cartItems = [];
 		this.cartSub = null;
@@ -57,6 +64,11 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
 	ngOnDestroy(): void {
 		this.cartSub?.unsubscribe();		
+	}
+
+	onPayment(id: string) {
+		this.cart.clearCart();
+		this.router.navigate(['/shop/checkout/placed'], { queryParams: { id } });
 	}
 
 }
