@@ -15,10 +15,11 @@ section#cart-section {
 			width: 10em;
 		}
 	}
-	h2 {
-		text-align: center;
-	}
-	mat-grid-list#payment-gateways button {
+	div#payment-gateways {
+		h2 {
+			text-align: center;
+		}
+		button {
 			height: 15em;
 			width: 15em;
 			border: 1px solid white;
@@ -41,7 +42,8 @@ section#cart-section {
 					font-weight: 600;
 					color: #64acff;
 				}
-			}	
+			}
+		}
 	}
 }
 

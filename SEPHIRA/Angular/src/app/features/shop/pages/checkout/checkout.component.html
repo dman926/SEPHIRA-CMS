@@ -18,29 +18,31 @@
 		</mat-list-item>
 	</mat-list>
 	<hr />
-	<h2>Checkout With</h2>
-	<mat-grid-list id="payment-gateways" cols="2">
-		<mat-grid-tile *ngIf="enableStripe">
-			<button mat-icon-button>
-				<mat-icon svgIcon="stripe"></mat-icon>
-			</button>
-		</mat-grid-tile>
-		<mat-grid-tile *ngIf="enablePayPal">
-			<button mat-icon-button>
-				<mat-icon svgIcon="paypal"></mat-icon>
-			</button>
-		</mat-grid-tile>
-		<mat-grid-tile *ngIf="enableCoinbaseCommerce">
-			<button mat-icon-button>
-				<mat-icon svgIcon="coinbase"></mat-icon>
-			</button>
-		</mat-grid-tile>
-		<mat-grid-tile *ngIf="enableNowPayments">
-			<button mat-icon-button>
-				<span id="nowpayments-button">
-					<span class="bolded">NOW</span>Payments
-				</span>
-			</button>			
-		</mat-grid-tile>
-	</mat-grid-list>
+	<div id="payment-gateways" *ngIf="showCheckoutButtons">
+		<h2>Checkout With</h2>
+		<mat-grid-list cols="2">
+			<mat-grid-tile *ngIf="enableStripe">
+				<button mat-icon-button>
+					<mat-icon svgIcon="stripe"></mat-icon>
+				</button>
+			</mat-grid-tile>
+			<mat-grid-tile *ngIf="enablePayPal">
+				<button mat-icon-button>
+					<mat-icon svgIcon="paypal"></mat-icon>
+				</button>
+			</mat-grid-tile>
+			<mat-grid-tile *ngIf="enableCoinbaseCommerce">
+				<button mat-icon-button>
+					<mat-icon svgIcon="coinbase"></mat-icon>
+				</button>
+			</mat-grid-tile>
+			<mat-grid-tile *ngIf="enableNowPayments">
+				<button mat-icon-button>
+					<span id="nowpayments-button">
+						<span class="bolded">NOW</span>Payments
+					</span>
+				</button>
+			</mat-grid-tile>
+		</mat-grid-list>
+	</div>
 </section>
