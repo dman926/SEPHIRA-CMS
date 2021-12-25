@@ -12,7 +12,7 @@ section#cart-section {
 		div.qty-selector {
 			display: flex;
 			align-items: center;
-			width: 10em;
+			min-width: 10em;
 		}
 	}
 	div#payment-gateways {
