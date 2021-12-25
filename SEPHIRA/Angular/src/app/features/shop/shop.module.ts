@@ -8,6 +8,11 @@ import { CheckoutComponent } from './pages/checkout/checkout.component';
 import { CartComponent } from './components/cart/cart.component';
 import { CheckoutConfirmComponent } from './pages/checkout-confirm/checkout-confirm.component';
 import { ProductDisplayComponent } from './components/product-display/product-display.component';
+import { StripeComponent } from './components/payment/stripe/stripe.component';
+import { PaypalComponent } from './components/payment/paypal/paypal.component';
+import { CoinbaseComponent } from './components/payment/coinbase/coinbase.component';
+import { NowpaymentsComponent } from './components/payment/nowpayments/nowpayments.component';
+import { CouponInputComponent } from './components/coupon-input/coupon-input.component';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -20,13 +25,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatGridListModule } from '@angular/material/grid-list';
+import { MatChipsModule } from '@angular/material/chips';
 
 import { LoaderSpinnerModule } from '../loader-spinner/loader-spinner.module';
 import { StarRatingModule } from '../star-rating/star-rating.module';
-import { StripeComponent } from './components/payment/stripe/stripe.component';
-import { PaypalComponent } from './components/payment/paypal/paypal.component';
-import { CoinbaseComponent } from './components/payment/coinbase/coinbase.component';
-import { NowpaymentsComponent } from './components/payment/nowpayments/nowpayments.component';
 
 @NgModule({
 	declarations: [
@@ -35,10 +37,11 @@ import { NowpaymentsComponent } from './components/payment/nowpayments/nowpaymen
 		CartComponent,
 		CheckoutConfirmComponent,
 		ProductDisplayComponent,
-  StripeComponent,
-  PaypalComponent,
-  CoinbaseComponent,
-  NowpaymentsComponent
+		StripeComponent,
+		PaypalComponent,
+		CoinbaseComponent,
+		NowpaymentsComponent,
+		CouponInputComponent
 	],
 	imports: [
 		CommonModule,
@@ -56,6 +59,7 @@ import { NowpaymentsComponent } from './components/payment/nowpayments/nowpaymen
 		MatInputModule,
 		MatListModule,
 		MatGridListModule,
+		MatChipsModule,
 
 		LoaderSpinnerModule,
 		StarRatingModule

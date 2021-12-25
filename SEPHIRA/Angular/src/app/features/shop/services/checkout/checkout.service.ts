@@ -27,7 +27,7 @@ export class CheckoutService {
 
 	constructor(private http: HttpClient, private core: CoreService) { }
 
-	public createOrder(products: CartItem[]): Observable<string> {
+	public createOrder(products: CartItem[], gateway: string): Observable<string> {
 		let headers = this.core.createAuthHeader();
 		if (!headers) {
 			if (this.requiredLoggedIn) {
@@ -35,7 +35,7 @@ export class CheckoutService {
 			}
 			headers = new HttpHeaders();
 		}
-		return this.http.post<string>(this.orderBase + 'orders', products, { headers });
+		return this.http.post<string>(this.orderBase + 'orders', { products, gateway }, { headers });
 	}
 
 	public editOrder(id: string, items?: CartItem[], addresses?: AddressForm, coupons?: Coupon[]): Observable<string> {

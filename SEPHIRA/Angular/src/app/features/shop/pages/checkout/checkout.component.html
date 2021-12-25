@@ -1,17 +1,17 @@
 <section id="cart-section">
 	<mat-list role="list">
-		<mat-list-item *ngIf="(cart.cart$ | async)?.length === 0">No items in your cart!</mat-list-item>
-		<mat-list-item *ngFor="let item of (cart.cart$ | async)">
+		<mat-list-item *ngIf="cartItems.length === 0">No items in your cart!</mat-list-item>
+		<mat-list-item *ngFor="let item of cartItems">
 			{{ item.name }}
 			<span class="spacer"></span>
 			<div class="qty-selector">
-				<button mat-icon-button (click)="cart.removeFromCart(item.id, 1)">
+				<button mat-icon-button (click)="cart.removeFromCart(item.id, 1)" [disabled]="selectedPaymentGateway !== ''">
 					<mat-icon>remove</mat-icon>
 				</button>
 				<span class="spacer"></span>
 				{{ item.qty }}
 				<span class="spacer"></span>
-				<button mat-icon-button (click)="cart.removeFromCart(item.id, -1)">
+				<button mat-icon-button (click)="cart.removeFromCart(item.id, -1)" [disabled]="selectedPaymentGateway !== ''">
 					<mat-icon>add</mat-icon>
 				</button>
 			</div>
@@ -21,16 +21,16 @@
 	<button mat-icon-button (click)="selectedPaymentGateway=''" *ngIf="selectedPaymentGateway !== ''"><mat-icon>arrow_back</mat-icon></button>
 	<div [ngSwitch]="selectedPaymentGateway" *ngIf="showCheckoutButtons">
 		<div [@switchTrigger]="'fadeIn'" *ngSwitchCase="'stripe'">
-			<sephira-stripe></sephira-stripe>
+			<sephira-stripe *ngIf="enableStripe" [cartItems]="cartItems"></sephira-stripe>
 		</div>
 		<div [@switchTrigger]="'fadeIn'" *ngSwitchCase="'paypal'">
-			<sephira-paypal></sephira-paypal>
+			<sephira-paypal *ngIf="enablePayPal" [cartItems]="cartItems"></sephira-paypal>
 		</div>
 		<div [@switchTrigger]="'fadeIn'" *ngSwitchCase="'coinbase'">
-			<sephira-coinbase></sephira-coinbase>
+			<sephira-coinbase *ngIf="enableCoinbaseCommerce" [cartItems]="cartItems"></sephira-coinbase>
 		</div>
 		<div [@switchTrigger]="'fadeIn'" *ngSwitchCase="'nowpayments'">
-			<sephira-nowpayments></sephira-nowpayments>
+			<sephira-nowpayments *ngIf="enableNowPayments" [cartItems]="cartItems"></sephira-nowpayments>
 		</div>
 		<div id="payment-gateways" [@switchTrigger]="'fadeIn'" *ngSwitchDefault>
 			<h2>Checkout With</h2>

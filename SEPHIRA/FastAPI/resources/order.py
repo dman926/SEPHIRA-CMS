@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from pydantic.main import BaseModel
 from config import APISettings
 
 from typing import Optional
@@ -41,13 +42,13 @@ async def get_orders(page: Optional[int] = None, size: Optional[int] = None, ide
 		raise e
 
 @router.post('/orders')
-async def create_order(products: list[CartItemIDModel], identity: Optional[str] = Depends(get_jwt_identity_optional)):
+async def create_order(order_body: OrderModel, identity: Optional[str] = Depends(get_jwt_identity_optional)):
 	try:
 		products = []
-		for p in products:
-			product = Product.objects.get(id=p.id)
+		for p in order_body.items:
+			product: Product = Product.objects.get(id=p.id)
 			products.append(CartItem(product=product, qty=p.qty, price=product.price))
-		order = Order(orderer=identity, orderStatus='not placed', products=products)
+		order = Order(orderer=identity, orderStatus='not placed', gateway=order_body.gateway, products=products)
 		order.save()
 		return str(order.id)
 	except DoesNotExist:
@@ -84,6 +85,12 @@ async def modify_order(id: str, order_body: OrderModel, identity: Optional[str] 
 		if order_body.coupons:
 			coupons = list(map(lambda c: Coupon.objects.get(id=c), order_body.coupons))
 			order.update(coupons=coupons)
+		if order_body.items:
+			products = []
+			for p in order_body.items:
+				product: Product = Product.objects.get(id=p.id)
+				products.append(CartItem(product=product, qty=p.qty, price=product.price))
+			order.update(products=products)
 		return 'ok'
 	except DoesNotExist:
 		raise NotFoundError().http_exception

@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { CartItem } from 'src/app/models/cart-item';
 
 @Component({
 	selector: 'sephira-paypal',
@@ -7,6 +8,10 @@ import { Component } from '@angular/core';
 })
 export class PaypalComponent {
 
-	constructor() { }
+	@Input() cartItems: CartItem[];
+
+	constructor() {
+		this.cartItems = [];
+	}
 
 }

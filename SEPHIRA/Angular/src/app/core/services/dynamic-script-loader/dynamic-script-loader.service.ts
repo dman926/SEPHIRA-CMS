@@ -7,6 +7,12 @@ interface Script {
 	src: string;		
 }
 
+interface ScriptLoad {
+	script: string,
+	loaded: boolean,
+	status: string
+}
+
 export const ScriptStore: Script[] = [
 	{ name: 'stripe', src: 'https://js.stripe.com/v3/' },
 	{ name: 'paypal', src: 'https://www.paypal.com/sdk/js?client-id=' + environment.paypalClientID + '&currency=' + environment.paypalCurrency + '&intent=capture' }
@@ -28,14 +34,14 @@ export class DynamicScriptLoaderService {
 		});
 	}
 
-	load(...scripts: string[]) {
-		const promises: Promise<any>[] = [];
+	load(...scripts: string[]): Promise<ScriptLoad[]> {
+		const promises: Promise<ScriptLoad>[] = [];
 		scripts.forEach(script => promises.push(this.loadScript(script)));
 		return Promise.all(promises);
 	}
 
-	private loadScript(name: string): Promise<any> {
-		return new Promise((resolve, reject) => {
+	private loadScript(name: string): Promise<ScriptLoad> {
+		return new Promise<ScriptLoad>((resolve, reject) => {
 			if (!this.scripts[name].loaded) {
 				// Load script
 				let script = this.document.createElement('script');

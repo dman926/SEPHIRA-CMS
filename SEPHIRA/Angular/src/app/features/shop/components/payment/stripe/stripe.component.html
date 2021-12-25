@@ -1,1 +1,9 @@
-<p>stripe works!</p>
+<section id="stripe-gateway" *ngIf="orderID;else spinnerLoader">
+	<sephira-coupon-input [orderID]="orderID"></sephira-coupon-input>
+
+	<p *ngFor="let coupon of coupons">{{ coupon.code }}</p>
+</section>
+
+<ng-template #spinnerLoader>
+	<sephira-loader-spinner></sephira-loader-spinner>
+</ng-template>
