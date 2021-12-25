@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CartItem } from 'src/app/models/cart-item';
 import { Coupon } from 'src/app/models/posts/coupon';
 import { ShippingRate, ShippingZone } from 'src/app/models/shipping-zone';
@@ -9,7 +9,7 @@ import { TaxRate } from 'src/app/models/tax-rate';
 	templateUrl: './price-total-display.component.html',
 	styleUrls: ['./price-total-display.component.scss'],
 })
-export class PriceTotalDisplayComponent {
+export class PriceTotalDisplayComponent implements OnInit {
 
 	@Input() cartItems: CartItem[];
 	@Input() coupons: Coupon[];
@@ -26,6 +26,10 @@ export class PriceTotalDisplayComponent {
 		this.minPrice = 0;
 		this.gateway = '';
 		this.actualPrice = 0;
+	}
+
+	ngOnInit(): void {
+		this.discountPrice; // generate value for actualPrice
 	}
 
 	get subtotal(): number {

@@ -1,4 +1,4 @@
-import { AfterContentInit, Component, ElementRef, EventEmitter, Input, Output, Renderer2, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, ElementRef, EventEmitter, Input, OnDestroy, Output, Renderer2, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { CoreService } from 'src/app/core/services/core/core.service';
 import { DynamicScriptLoaderService } from 'src/app/core/services/dynamic-script-loader/dynamic-script-loader.service';
@@ -16,7 +16,7 @@ import { CheckoutService } from '../../../services/checkout/checkout.service';
 	templateUrl: './stripe.component.html',
 	styleUrls: ['./stripe.component.scss'],
 })
-export class StripeComponent implements AfterContentInit {
+export class StripeComponent implements AfterContentInit, OnDestroy {
 
 	@Input() cartItems: CartItem[];
 	@Output() paymentSuccess: EventEmitter<string>;
@@ -35,6 +35,7 @@ export class StripeComponent implements AfterContentInit {
 	addressForm: FormGroup;
 	billingForm: FormGroup;
 
+	private stripeListener: (() => void) | undefined;
 	private stripeCard: stripe.elements.Element | null;
 	
 	constructor(
@@ -78,7 +79,7 @@ export class StripeComponent implements AfterContentInit {
 	}
 
 	ngAfterContentInit(): void {
-		if (this.platform.isBrowser && this.cartItems.length > 0) {
+		if (this.platform.isBrowser && this.cartItems.length > 0 && this.stripeForm) {
 			this.scriptLoader.load('stripe').then(data => {
 				if (data[0].loaded) {
 					this.checkout.createOrder(this.cartItems, 'stripe').subscribe(orderID => {
@@ -110,11 +111,25 @@ export class StripeComponent implements AfterContentInit {
 							this.stripeCardError.nativeElement.textContent = event.error ? event.error.message : '';
 						}
 					});
+					if (this.stripeForm) {
+						this.stripeListener = this.renderer.listen(this.stripeForm.nativeElement, 'submit', event => {
+							event.preventDefault();
+							if (this.stripeCard) {
+								this.createStripePaymentMethod(this.stripeCard);
+							}
+						});
+					}
 					this.stripeReady = true;
 				} else {
 					throw new Error('`stripe` failed to load');
 				}
 			});
+		}
+	}
+
+	ngOnDestroy(): void {
+		if (this.stripeListener !== undefined) {
+			this.stripeListener(); // unlisten to stripe form
 		}
 	}
 
