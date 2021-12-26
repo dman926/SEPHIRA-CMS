@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { map } from 'rxjs';
 import { CoreService } from 'src/app/core/services/core/core.service';
@@ -18,7 +18,6 @@ import { CheckoutService, CoinbaseRes } from '../../../services/checkout/checkou
 export class CoinbaseComponent implements OnInit {
 
 	@Input() cartItems: CartItem[];
-	@Output() paymentSuccess: EventEmitter<string>;
 
 	orderID: string | null;
 	coupons: Coupon[];
@@ -31,7 +30,6 @@ export class CoinbaseComponent implements OnInit {
 
 	constructor(private checkout: CheckoutService, private core: CoreService, private platform: PlatformService) {
 		this.cartItems = [];
-		this.paymentSuccess = new EventEmitter<string>();
 		this.orderID = null;
 		this.coupons = [];
 		

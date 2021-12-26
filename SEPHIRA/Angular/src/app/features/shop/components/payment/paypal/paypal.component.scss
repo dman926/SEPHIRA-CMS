@@ -1,0 +1,11 @@
+section#paypal-gateway {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 1em;
+}
+
+@media screen and (max-width: 726px) {
+	section#paypal-gateway {
+		grid-template-columns: auto;
+	}
+}

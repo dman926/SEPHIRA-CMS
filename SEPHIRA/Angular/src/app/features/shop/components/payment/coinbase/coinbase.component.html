@@ -1,4 +1,4 @@
-<section id="stripe-gateway" [hidden]="!orderID">
+<section id="coinbase-gateway" [hidden]="!orderID">
 	<mat-vertical-stepper [linear]="true" #stepper>
 		<mat-step [stepControl]="addressForm" label="Shipping Address">
 			<sephira-checkout-address-form [formGroup]="addressForm" (next)="renderCoinbase()"></sephira-checkout-address-form>
