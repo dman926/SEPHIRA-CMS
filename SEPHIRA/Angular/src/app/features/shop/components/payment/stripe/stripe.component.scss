@@ -2,10 +2,6 @@ section#stripe-gateway {
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
 	gap: 1em;
-	mat-vertical-stepper form {
-		display: flex;
-		flex-direction: column;
-	}
 }
 
 @media screen and (max-width: 726px) {

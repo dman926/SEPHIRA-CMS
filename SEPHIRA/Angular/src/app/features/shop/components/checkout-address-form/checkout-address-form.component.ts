@@ -1,15 +1,24 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angular/core';
+import { FormGroup } from '@angular/forms';
 
 @Component({
-  selector: 'app-checkout-address-form',
-  templateUrl: './checkout-address-form.component.html',
-  styleUrls: ['./checkout-address-form.component.scss']
+	selector: 'sephira-checkout-address-form',
+	templateUrl: './checkout-address-form.component.html',
+	styleUrls: ['./checkout-address-form.component.scss'],
+	encapsulation: ViewEncapsulation.None
 })
-export class CheckoutAddressFormComponent implements OnInit {
+export class CheckoutAddressFormComponent {
 
-  constructor() { }
+	@Input() formGroup: FormGroup | undefined;
+	@Input() allowBack: boolean;
 
-  ngOnInit(): void {
-  }
+	@Output() previous: EventEmitter<undefined>;
+	@Output() next: EventEmitter<undefined>;
+
+	constructor() {
+		this.allowBack = false;
+		this.previous = new EventEmitter<undefined>();
+		this.next = new EventEmitter<undefined>();
+	}
 
 }

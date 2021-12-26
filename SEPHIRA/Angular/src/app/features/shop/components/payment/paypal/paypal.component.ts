@@ -22,7 +22,7 @@ export class PaypalComponent implements OnInit {
 	@Input() cartItems: CartItem[];
 	@Output() paymentSuccess: EventEmitter<string>;
 
-	@ViewChild('paypalButtonContainer', { static: true }) private paypalButtonContainer: ElementRef<HTMLElement> | undefined;
+	@ViewChild('paypalButtonContainer', { static: true }) private paypalButtonContainer: ElementRef<HTMLDivElement> | undefined;
 
 	paypalReady: boolean;
 	orderID: string | null;

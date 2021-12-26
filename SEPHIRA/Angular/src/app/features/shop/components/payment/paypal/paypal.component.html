@@ -1,83 +1,10 @@
 <section id="stripe-gateway" [hidden]="!(orderID && paypalReady)">
 	<mat-vertical-stepper [linear]="true" #stepper>
 		<mat-step [stepControl]="addressForm" label="Shipping Address">
-			<form [formGroup]="addressForm">
-				<mat-form-field appearance="fill">
-					<mat-label>Full Name</mat-label>
-					<input matInput formControlName="fullName" autocomplete="name" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>Country Code</mat-label>
-					<input matInput formControlName="country" autocomplete="country" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>Street Address 1</mat-label>
-					<input matInput formControlName="street1" autocomplete="address-line1" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>Stree Address 2</mat-label>
-					<input matInput formControlName="street2" autocomplete="address-line2" />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>State/Providence/Region</mat-label>
-					<input matInput formControlName="stateProvidenceRegion" autocomplete="address-level1" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>City</mat-label>
-					<input matInput formControlName="city" autocomplete="address-level2" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>Postal Code/ZIP</mat-label>
-					<input matInput formControlName="zip" autocomplete="postal-code" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>Phone Number</mat-label>
-					<input matInput formControlName="phoneNumber" autocomplete="tel" required />
-				</mat-form-field>
-				<button mat-button type="button" matStepperNext>Next</button>
-			</form>
+			<sephira-checkout-address-form [formGroup]="addressForm"></sephira-checkout-address-form>
 		</mat-step>
 		<mat-step [stepControl]="billingForm" label="Billing Address">
-			<form [formGroup]="billingForm">
-				<mat-form-field appearance="fill">
-					<mat-label>Email</mat-label>
-					<input matInput formControlName="email" autocomplete="email" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>Full Name</mat-label>
-					<input matInput formControlName="fullName" autocomplete="name" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>Country Code</mat-label>
-					<input matInput formControlName="country" autocomplete="country" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>Street Address 1</mat-label>
-					<input matInput formControlName="street1" autocomplete="address-line1" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>Stree Address 2</mat-label>
-					<input matInput formControlName="street2" autocomplete="address-line2" />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>State/Providence/Region</mat-label>
-					<input matInput formControlName="stateProvidenceRegion" autocomplete="address-level1" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>City</mat-label>
-					<input matInput formControlName="city" autocomplete="address-level2" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>Postal Code/ZIP</mat-label>
-					<input matInput formControlName="zip" autocomplete="postal-code" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>Phone Number</mat-label>
-					<input matInput formControlName="phoneNumber" autocomplete="tel" required />
-				</mat-form-field>
-				<button mat-button type="button" matStepperPrevious>Back</button>
-				<button mat-button type="button" matStepperNext (click)="renderPayPal()">Next</button>
-			</form>
+			<sephira-checkout-address-form [formGroup]="billingForm" [allowBack]="true" (next)="renderPayPal()"></sephira-checkout-address-form>
 		</mat-step>
 		<mat-step>
 			<div #paypalButtonContainer id="paypal-button-container"></div>

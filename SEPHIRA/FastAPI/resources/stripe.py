@@ -23,6 +23,7 @@ class CheckoutModel(BaseModel):
 	orderID: str
 	paymentMethodID: str
 	email: EmailStr
+	addresses: dict
 
 ##########
 # ROUTES #
@@ -32,12 +33,14 @@ class CheckoutModel(BaseModel):
 async def stripe_checkout(checkout_body: CheckoutModel, identity: Optional[str] = Depends(get_jwt_identity_optional)):
 	try:
 		order = Order.objects.get(id=checkout_body.orderID, orderer=identity)
-		
+		order.addresses = checkout_body.addresses
+		order.save()
+
 		# TODO
 		#if not remove_stock(order.products):
 		#	raise OutOfStockError
 		
-		shipping = order.addresses['shipping']
+		shipping = checkout_body.addresses['shipping']
 		shipping = {
 			'address': {
 				'line1': shipping['street1'],
