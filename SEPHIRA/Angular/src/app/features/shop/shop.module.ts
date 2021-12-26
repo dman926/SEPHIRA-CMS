@@ -31,6 +31,7 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { LoaderSpinnerModule } from '../loader-spinner/loader-spinner.module';
 import { StarRatingModule } from '../star-rating/star-rating.module';
 import { PriceTotalDisplayComponent } from './components/price-total-display/price-total-display.component';
+import { CheckoutAddressFormComponent } from './components/checkout-address-form/checkout-address-form.component';
 
 @NgModule({
 	declarations: [
@@ -44,7 +45,8 @@ import { PriceTotalDisplayComponent } from './components/price-total-display/pri
 		CoinbaseComponent,
 		NowpaymentsComponent,
 		CouponInputComponent,
-  PriceTotalDisplayComponent
+		PriceTotalDisplayComponent,
+		CheckoutAddressFormComponent
 	],
 	imports: [
 		CommonModule,
