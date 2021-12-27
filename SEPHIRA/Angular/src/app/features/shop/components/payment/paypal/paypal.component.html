@@ -1,4 +1,4 @@
-<section id="paypal-gateway" [hidden]="!(orderID && paypalReady)">
+<section id="paypal-gateway" [class.hidden]="!(orderID && paypalReady)">
 	<mat-vertical-stepper [linear]="true" #stepper>
 		<mat-step [stepControl]="addressForm" label="Shipping Address">
 			<sephira-checkout-address-form [formGroup]="addressForm"></sephira-checkout-address-form>
@@ -17,6 +17,6 @@
 	</div>
 </section>
 
-<ng-template *ngIf="!(orderID && paypalReady)">
+<ng-container *ngIf="!(orderID && paypalReady)">
 	<sephira-loader-spinner></sephira-loader-spinner>
-</ng-template>
+</ng-container>

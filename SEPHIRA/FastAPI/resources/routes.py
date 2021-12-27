@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from config import ShopSettings, CoinbaseCommerceSettings, PayPalSettings, StripeSettings
+from config import ShopSettings, StripeSettings, PayPalSettings, CoinbaseCommerceSettings, NowPaymentsSettings
 
 from .admin import router as admin_router
 from .auth import router as auth_router
@@ -16,12 +16,14 @@ if ShopSettings.ENABLE:
 	from .product import router as product_router
 	from .shipping import router as shipping_router
 	from .tax import router as tax_router
-	if CoinbaseCommerceSettings.ENABLE:
-		from .coinbase import router as coinbase_router
-	if PayPalSettings.ENABLE:
-		from .paypal import router as paypal_router
 	if StripeSettings.ENABLE:
 		from .stripe import router as stripe_router
+	if PayPalSettings.ENABLE:
+		from .paypal import router as paypal_router
+	if CoinbaseCommerceSettings.ENABLE:
+		from .coinbase import router as coinbase_router
+	if NowPaymentsSettings.ENABLE:
+		from .nowpayments import router as nowpayments_router
 
 routers = [
 	# REST
@@ -41,12 +43,14 @@ if ShopSettings.ENABLE:
 	routers.append(product_router)
 	routers.append(shipping_router)
 	routers.append(tax_router)
-	if CoinbaseCommerceSettings.ENABLE:
-		routers.append(coinbase_router)
-	if PayPalSettings.ENABLE:
-		routers.append(paypal_router)
 	if StripeSettings.ENABLE:
 		routers.append(stripe_router)
+	if PayPalSettings.ENABLE:
+		routers.append(paypal_router)
+	if CoinbaseCommerceSettings.ENABLE:
+		routers.append(coinbase_router)
+	if NowPaymentsSettings.ENABLE:
+		routers.append(nowpayments_router)
 
 def initialize_routes(app: FastAPI):
 	for router in routers:

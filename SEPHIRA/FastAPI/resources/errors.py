@@ -60,3 +60,9 @@ class MediaProcessingError(Exception):
 	status_code = 422
 	detail = 'There was an error processing the media file'
 	http_exception = HTTPException(status_code=status_code, detail=detail)
+
+
+class ServiceUnavailableError(Exception):
+	status_code = 503
+	detail = 'The requested service is unavailable'
+	http_exception = HTTPException(status_code=status_code, detail=detail)

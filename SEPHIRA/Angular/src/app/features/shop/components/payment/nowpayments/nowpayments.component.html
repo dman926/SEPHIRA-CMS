@@ -1,4 +1,4 @@
-<section id="nowpayments-gateway" [hidden]="!orderID">
+<section id="nowpayments-gateway" [class.hidden]="!orderID">
 	<mat-vertical-stepper [linear]="true" #stepper>
 		<mat-step [stepControl]="addressForm" label="Shipping Address">
 			<sephira-checkout-address-form [formGroup]="addressForm"></sephira-checkout-address-form>
@@ -8,11 +8,11 @@
 		</mat-step>
 	</mat-vertical-stepper>
 	<div id="checkout-right">
-		<sephira-price-total-display [cartItems]="cartItems" [coupons]="coupons" [taxRate]="taxRate" [shippingZone]="shippingZone" [minPrice]="2" gateway="Coinbase"></sephira-price-total-display>
+		<sephira-price-total-display [cartItems]="cartItems" [coupons]="coupons" [taxRate]="taxRate" [shippingZone]="shippingZone" [minPrice]="5" gateway="NOWPayments"></sephira-price-total-display>
 		<sephira-coupon-input *ngIf="orderID" [orderID]="orderID" [disabled]="stepper.selectedIndex === 2" (couponEmitter)="coupons = $event"></sephira-coupon-input>
 	</div>
 </section>
 
-<ng-template *ngIf="!orderID">
+<ng-container *ngIf="!orderID">
 	<sephira-loader-spinner></sephira-loader-spinner>
-</ng-template>
+</ng-container>

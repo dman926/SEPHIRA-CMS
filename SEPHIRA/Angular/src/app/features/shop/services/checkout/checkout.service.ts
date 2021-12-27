@@ -138,4 +138,13 @@ export class CheckoutService {
 
 	// NOWPayments	
 
+	public getNowPaymentsCoins(): Observable<string[]> {
+		return this.http.get<string[]>(this.paymentBase + 'nowpayments/available-coins');
+	}
+
+	public getNowPaymentsEstimatedAmount(coin: string, amount: number): Observable<number> {
+		const params = new HttpParams().append('coin', coin).append('amount', amount)
+		return this.http.get<number>(this.paymentBase + 'nowpayments/estimated-amount', { params })
+	}
+
 }

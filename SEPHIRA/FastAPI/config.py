@@ -67,6 +67,20 @@ class UvicornSettings:
 
 class ShopSettings:
 	ENABLE: bool = True # Must be enabled for payment gateways to work
+	CURRENCY_CODE: str = 'USD'
+
+
+class StripeSettings:
+	ENABLE: bool = True
+	SECRET_KEY: str = STRIPE_SK # Your secret key
+
+
+class PayPalSettings:
+	ENABLE: bool = True
+	CLIENT_ID: str = PAYPAL_ID # Your client ID
+	CLIENT_SECRET: str = PAYPAL_SECRET # Your client secret
+	USE_SANDBOX: bool = True # Set to `True` if you would like to test payments without actually getting charged. Remember that your client ID and client secert are different for sandbox and live accounts
+	BRAND_NAME: str = 'Test Brand' # The name of your business on PayPal receipts
 
 
 class CoinbaseCommerceSettings:
@@ -80,16 +94,4 @@ class NowPaymentsSettings:
 	ENABLE: bool = True
 	API_KEY: str = NOWPAYMENTS_API_KEY # Your API key
 	IPN_SECRET: str = NOWPAYMENTS_IPN_SECRET # Your IPN (Instant Payment Notifications) secret
-
-
-class PayPalSettings:
-	ENABLE: bool = True
-	CLIENT_ID: str = PAYPAL_ID # Your client ID
-	CLIENT_SECRET: str = PAYPAL_SECRET # Your client secret
-	USE_SANDBOX: bool = True # Set to `True` if you would like to test payments without actually getting charged. Remember that your client ID and client secert are different for sandbox and live accounts
-	BRAND_NAME: str = 'Test Brand' # The name of your business on PayPal receipts
-
-
-class StripeSettings:
-	ENABLE: bool = True
-	SECRET_KEY: str = STRIPE_SK # Your secret key
+	STATUS_PING_TIME: int = 60 # Seconds between how often NOWPayments should be pinged if it is working

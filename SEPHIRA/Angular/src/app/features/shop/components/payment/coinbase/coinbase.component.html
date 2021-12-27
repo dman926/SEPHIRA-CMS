@@ -1,4 +1,4 @@
-<section id="coinbase-gateway" [hidden]="!orderID">
+<section id="coinbase-gateway" [class.hidden]="!orderID">
 	<mat-vertical-stepper [linear]="true" #stepper>
 		<mat-step [stepControl]="addressForm" label="Shipping Address">
 			<sephira-checkout-address-form [formGroup]="addressForm" (next)="renderCoinbase()"></sephira-checkout-address-form>
@@ -15,6 +15,6 @@
 	</div>
 </section>
 
-<ng-template *ngIf="!orderID">
+<ng-container *ngIf="!orderID">
 	<sephira-loader-spinner></sephira-loader-spinner>
-</ng-template>
+</ng-container>
