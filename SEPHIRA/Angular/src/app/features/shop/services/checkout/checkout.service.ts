@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { EMPTY, Observable } from 'rxjs';
+import { EMPTY, map, Observable } from 'rxjs';
 import { CoreService } from 'src/app/core/services/core/core.service';
 import { CartItem } from 'src/app/models/cart-item';
 import { AddressForm, Order } from 'src/app/models/order';
@@ -86,6 +86,8 @@ export class CheckoutService {
 		return this.http.get<TaxRate>(this.taxBase + country, { params });
 	}
 
+	// Stripe
+
 	public stripeCheckout(paymentMethodID: string, email: string, addresses: AddressForm, orderID: string): Observable<string> {
 		let headers = this.core.createAuthHeader();
 		if (!headers) {
@@ -96,6 +98,8 @@ export class CheckoutService {
 		}
 		return this.http.post<string>(this.paymentBase + 'stripe/checkout', { paymentMethodID, email, addresses, orderID }, { headers });
 	}
+
+	// PayPal
 
 	public paypalCheckout(orderID: string, location: string): Observable<any> {
 		let headers = this.core.createAuthHeader();
@@ -119,6 +123,8 @@ export class CheckoutService {
 		return this.http.post<any>(this.paymentBase + 'paypal/capture', { orderID }, { headers });
 	}
 
+	// Coinbase
+
 	public getCoinbaseCommerceRes(orderID: string, location: string): Observable<CoinbaseRes> {
 		let headers = this.core.createAuthHeader();
 		if (!headers) {
@@ -129,5 +135,7 @@ export class CheckoutService {
 		}
 		return this.http.post<CoinbaseRes>(this.paymentBase + 'coinbase/checkout', { orderID, location }, { headers })
 	}
+
+	// NOWPayments	
 
 }
