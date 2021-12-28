@@ -171,16 +171,15 @@ class User(Document):
 
 class Order(Document):
 	orderer = ReferenceField('User')
-	orderStatus = StringField(choices=['not placed', 'pending', 'paid', 'shipped', 'completed', 'failed'])
+	orderStatus = StringField(choices=['not placed', 'pending', 'partially paid', 'paid', 'shipped', 'completed', 'failed', 'refunded'])
 	products = EmbeddedDocumentListField('CartItem')
 	coupons = ListField(ReferenceField('Coupon'))
 	taxRate = FloatField()
 	shippingType = StringField(choices=['dollar', 'percent'])
 	shippingRate = FloatField()
 	addresses = DictField()
-	paymentIntentID = StringField()
-	paypalCaptureID = StringField()
 	gateway = StringField()
+	gatewayPaymentID = StringField()
 	createdAt = DateTimeField(default=datetime.datetime.now)
 	modified = DateTimeField(default=datetime.datetime.now)
 

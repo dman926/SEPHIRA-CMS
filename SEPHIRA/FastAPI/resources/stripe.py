@@ -103,7 +103,7 @@ async def stripe_checkout(checkout_body: CheckoutModel, identity: Optional[str] 
 		raise e
 
 @router.post('/webhook')
-async def webhook(payload: dict = Body(..., embed=True)):
+async def webhook(payload: dict = Body(...)):
 	try:
 		event = None
 

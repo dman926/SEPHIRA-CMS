@@ -14,6 +14,11 @@ export interface CoinbaseRes {
 	hosted_url: string;
 }
 
+interface NowPaymentsMinAmountRes {
+	min_amount: number;
+	fiat_equivalent: number;
+}
+
 @Injectable({
 	providedIn: 'root',
 })
@@ -143,8 +148,13 @@ export class CheckoutService {
 	}
 
 	public getNowPaymentsEstimatedAmount(coin: string, amount: number): Observable<number> {
-		const params = new HttpParams().append('coin', coin).append('amount', amount)
+		const params = new HttpParams().append('coin', coin).append('amount', amount);
 		return this.http.get<number>(this.paymentBase + 'nowpayments/estimated-amount', { params })
+	}
+
+	public getNowPaymentsMinAmount(coin: string): Observable<NowPaymentsMinAmountRes> {
+		const params = new HttpParams().append('coin', coin);
+		return this.http.get<NowPaymentsMinAmountRes>(this.paymentBase + 'nowpayments/min-amount', { params })
 	}
 
 }

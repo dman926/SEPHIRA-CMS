@@ -162,7 +162,7 @@ async def capture_transaction(transaction_body: CaptureTransactionModel, identit
 		raise e
 
 @router.post('/webhook')
-async def webhook(payload: dict = Body(..., embed=True)):
+async def webhook(payload: dict = Body(...)):
 	try:
 		if payload['event_type'] == 'CHECKOUT.ORDER.COMPLETED':
 			pass

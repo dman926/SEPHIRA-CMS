@@ -52,15 +52,18 @@ async def coinbase_checkout(body: CoinbaseCheckoutBody, identity: Optional[str] 
 				'currency': 'USD'
 			},
 			'pricing_type': 'fixed_price',
-			'redirect_url': body['location'] + '/checkout/placed?id=' + str(order.id),
+			'redirect_url': body['location'] + '/store/checkout/placed?clear=1?id=' + str(order.id),
+			'cancel_url': body['location'] + '/store/checkout',
 			'metadata': {
 				'order': str(order.id)
 			}
 		}
 		charge = ccClient.charge.create(**charge_info)
+
 		return {
 			'expires_at': charge['expires_at'],
-			'hosted_url': charge['hosted_url']
+			'hosted_url': charge['hosted_url'],
+			'logo_url': charge['logo_url']
 		}
 	except DoesNotExist:
 		raise NotFoundError().http_exception
@@ -68,7 +71,7 @@ async def coinbase_checkout(body: CoinbaseCheckoutBody, identity: Optional[str] 
 		raise e
 
 @router.post('/webhook')
-async def webhook(request: Request):
+async def webhook(payload: dict = Body(...)):
 	try:
 		raise NotImplementedError
 	except NotImplementedError:
