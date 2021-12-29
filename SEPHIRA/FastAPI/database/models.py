@@ -126,6 +126,8 @@ class CartItem(EmbeddedDocument):
 				'id': str(self.product.id),
 				'name': self.product.title,
 				'price': float(self.product.price) if self.product.price else 0,
+				'slug': self.product.slug,
+				'img': self.product.img[0] if len(self.product.img) > 0 else None,
 				'qty': self.qty
 			}
 

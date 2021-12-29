@@ -2,7 +2,10 @@
 	<mat-list role="list">
 		<mat-list-item *ngIf="cartItems.length === 0">No items in your cart!</mat-list-item>
 		<mat-list-item *ngFor="let item of cartItems">
-			{{ item.name }}
+			<div class="cart-image" [style.background-image]="'url(' + (item.img ? item.img : '/assets/img/placeholder.png') + ')'"></div>
+			<!-- Attribution for placeholder.png: Missing-image-232x150.png by DJKA | CC BY-SA 4.0 -->
+			<a *ngIf="item.slug;else noLink" routerLink="/shop" [queryParams]="{ p: item.slug }">{{ item.name }}</a>
+			<ng-template #noLink>{{ item.name }}</ng-template>
 			<span class="spacer"></span>
 			<div class="qty-selector">
 				<button mat-icon-button (click)="cart.removeFromCart(item.id, 1)" [disabled]="selectedPaymentGateway !== ''">
@@ -34,7 +37,7 @@
 		</div>
 		<div id="payment-gateways" [@switchTrigger]="'fadeIn'" *ngSwitchDefault>
 			<h2>Checkout With</h2>
-			<mat-grid-list cols="2">
+			<mat-grid-list [cols]="(isHandset$ | async) ? 1 : 2" rowHeight="16em">
 				<mat-grid-tile *ngIf="enableStripe">
 					<button mat-icon-button (click)="selectedPaymentGateway='stripe'">
 						<mat-icon svgIcon="stripe"></mat-icon>

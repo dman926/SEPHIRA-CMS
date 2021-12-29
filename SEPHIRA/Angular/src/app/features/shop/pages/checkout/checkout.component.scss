@@ -9,6 +9,18 @@ section#cart-section {
 			display: flex;
 			align-items: center;
 		}
+		div.cart-image {
+			background-repeat: no-repeat;
+			background-size: cover;
+			background-position: center;
+			height: 90%;
+			width: 4.5em;
+			border-radius: 0.25em;
+			margin-right: 1em;
+		}
+		a {
+			color: white;
+		}
 		div.qty-selector {
 			display: flex;
 			align-items: center;
@@ -19,28 +31,30 @@ section#cart-section {
 		h2 {
 			text-align: center;
 		}
-		button {
-			height: 15em;
-			width: 15em;
-			border: 1px solid white;
-			border-radius: 0.5em;
-			padding: 1em;
-			mat-icon {
-				width: 100%;
-				height: 100%;
-			}
-			svg {
-				width: 100%;
-			}
-			span#nowpayments-button {
-				font-size: 1.9em;
-				text-align: center;
-				font-family: syne,sans-serif;
-				font-weight: 300;
-				color: white;
-				.bolded {
-					font-weight: 600;
-					color: #64acff;
+		mat-grid-list {
+			width: 32.5em;
+			margin: 0 auto;
+			button {
+				height: 15em;
+				width: 15em;
+				border: 1px solid white;
+				border-radius: 0.5em;
+				padding: 1em;
+				mat-icon, svg {
+					width: 90%;
+					height: 90%;
+					margin: auto;
+				}
+				span#nowpayments-button {
+					font-size: 1.9em;
+					text-align: center;
+					font-family: syne,sans-serif;
+					font-weight: 300;
+					color: white;
+					.bolded {
+						font-weight: 600;
+						color: #64acff;
+					}
 				}
 			}
 		}
@@ -49,4 +63,16 @@ section#cart-section {
 
 .spacer {
 	flex-grow: 1;
+}
+@media screen and (max-width: 726px) {
+	section#cart-section {
+		div#payment-gateways {
+			mat-grid-list {
+				width: auto;
+				button {
+					padding: 0;
+				}
+			}
+		}
+	}
 }

@@ -5,9 +5,10 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
 import { environment } from 'src/environments/environment';
 import { CartService } from '../../services/cart/cart.service';
-import { Subscription } from 'rxjs';
+import { map, Observable, shareReplay, Subscription } from 'rxjs';
 import { CartItem } from 'src/app/models/cart-item';
 import { Router } from '@angular/router';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
 	selector: 'sephira-checkout',
@@ -21,6 +22,13 @@ import { Router } from '@angular/router';
 	]
 })
 export class CheckoutComponent implements OnInit, OnDestroy {
+
+	isHandset$: Observable<boolean> = this.breakpointObserver
+		.observe(Breakpoints.Handset)
+		.pipe(
+			map((result) => result.matches),
+			shareReplay()
+		);
 
 	selectedPaymentGateway: '' | 'stripe' | 'paypal' | 'coinbase' | 'nowpayments';
 	showCheckoutButtons: boolean;
@@ -36,7 +44,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 		private platform: PlatformService,
 		private router: Router,
 		private iconRegistry: MatIconRegistry,
-		private sanitizer: DomSanitizer
+		private sanitizer: DomSanitizer,
+		private breakpointObserver: BreakpointObserver,
 	) {
 		this.selectedPaymentGateway = '';
 		this.cartItems = [];
