@@ -57,9 +57,7 @@ async def get_coins():
 			if nowPaymentStatus:
 				lastPingPong = newPingPongTime
 				r = await http_service.request('GET', nowPaymentsApiBase + 'currencies', headers=nowpayments_auth_headers)
-				print(nowpayments_auth_headers)
 				if r.status_code == 200:
-					print(r.json())
 					cachedAvailableCoins = r.json()['currencies']
 				else:
 					raise ServiceUnavailableError

@@ -12,7 +12,7 @@ import { CheckoutService } from '../../../services/checkout/checkout.service';
 @Component({
 	selector: 'sephira-nowpayments',
 	templateUrl: './nowpayments.component.html',
-	styleUrls: ['./nowpayments.component.scss'],
+	styleUrls: ['./nowpayments.component.scss']
 })
 export class NowpaymentsComponent {
 
@@ -63,6 +63,10 @@ export class NowpaymentsComponent {
 				});
 			}
 		}
+	}
+
+	get coin(): FormControl {
+		return this.coinForm.get('coin')! as FormControl;
 	}
 
 }

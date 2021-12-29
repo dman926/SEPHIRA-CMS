@@ -1,16 +1,22 @@
 <section id="nowpayments-gateway" [class.hidden]="!orderID">
 	<mat-vertical-stepper [linear]="true" #stepper>
 		<mat-step [stepControl]="coinForm" label="Select Coin" *ngIf="checkoutStyle !== 'invoice'">
-			<form [formGroup]="coinForm">
-				<mat-select formControlName="coin" required>
-					<mat-option *ngFor="let coin of availableCoins" [value]="coin">
-						<span>
-							<img [src]="'/assets/img/crypto_logos/' + coin + '.svg'" onerror="this.style.display='none'" />
-							<img [src]="'/assets/img/crypto_logos/' + coin + '.png'" onerror="this.style.display='none'" />
-						</span>
-						<span>{{ coin | uppercase }}</span>
-					</mat-option>
-				</mat-select>
+			<form [formGroup]="coinForm" *ngIf="availableCoins.length > 0;else loaderSpinner">
+				<mat-form-field appearance="fill">
+					<mat-label>Coin To Pay With</mat-label>
+					<mat-select formControlName="coin" required>
+						<mat-option class="coin-option" *ngFor="let coin of availableCoins" [value]="coin">
+							<img [src]="'/assets/img/crypto_logos/' + coin + '.svg'" onerror="this.style.display='none'" matListIcon />
+							<img [src]="'/assets/img/crypto_logos/' + coin + '.png'" onerror="this.style.display='none'" matListIcon />
+							{{ coin | uppercase }}
+						</mat-option>
+						<mat-select-trigger class="coin-option" *ngIf="coin.value">
+							<img class="coin-img" [src]="'/assets/img/crypto_logos/' + coin.value + '.svg'" onerror="this.style.display='none'" />
+							<img class="coin-img" [src]="'/assets/img/crypto_logos/' + coin.value + '.png'" onerror="this.style.display='none'" />
+							{{ coin.value | uppercase }}
+						</mat-select-trigger>
+					</mat-select>
+				</mat-form-field>
 				<button mat-raised-button color="primary" [disabled]="coinForm.invalid" matStepperNext>Next</button>
 			</form>
 		</mat-step>
@@ -30,3 +36,7 @@
 <ng-container *ngIf="!orderID">
 	<sephira-loader-spinner></sephira-loader-spinner>
 </ng-container>
+
+<ng-template #loaderSpinner>
+	<sephira-loader-spinner></sephira-loader-spinner>
+</ng-template>
