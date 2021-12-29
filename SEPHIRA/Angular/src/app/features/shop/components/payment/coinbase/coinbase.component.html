@@ -6,7 +6,7 @@
 		<mat-step>
 			<a *ngIf="coinbaseRes && coinbaseRes.expires_at >= now" [href]="coinbaseRes.hosted_url">Pay With Coinbase</a>
 			<p *ngIf="coinbaseRes && coinbaseRes.expires_at < now">Your Coinbase payment link has expired. <button mat-raised-button color="primary" (click)="renderCoinbase()">Click here to generate a new one</button></p>
-			<button mat-raised-button color="primary" matStepperPrevious>Back</button>
+			<button mat-button matStepperPrevious>Back</button>
 		</mat-step>
 	</mat-vertical-stepper>
 	<div id="checkout-right">

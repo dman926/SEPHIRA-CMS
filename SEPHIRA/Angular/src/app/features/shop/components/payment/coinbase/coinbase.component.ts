@@ -60,7 +60,7 @@ export class CoinbaseComponent implements OnInit {
 		if (!orderID) {
 			return;
 		}
-		const returnLoc = window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/shop/checkout/placed?id=' + orderID;
+		const returnLoc = window.location.protocol + '//' + window.location.hostname + ':' + window.location.port;
 		this.checkout.editOrder(orderID, this.cartItems, this.getAddressDetails(), this.coupons).subscribe(res => {
 			this.checkout.getCoinbaseCommerceRes(orderID, returnLoc).pipe(map(res => {
 				res.expires_at = new Date(res.expires_at);

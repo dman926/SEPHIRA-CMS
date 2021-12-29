@@ -33,6 +33,7 @@ import { StarRatingModule } from '../star-rating/star-rating.module';
 import { PriceTotalDisplayComponent } from './components/price-total-display/price-total-display.component';
 import { CheckoutAddressFormComponent } from './components/checkout-address-form/checkout-address-form.component';
 import { MatSelectModule } from '@angular/material/select';
+import { QrCodeModule } from 'ng-qrcode';
 
 @NgModule({
 	declarations: [
@@ -70,7 +71,9 @@ import { MatSelectModule } from '@angular/material/select';
 		MatSelectModule,
 
 		LoaderSpinnerModule,
-		StarRatingModule
+		StarRatingModule,
+
+		QrCodeModule
 	],
 	exports: [
 		CartComponent

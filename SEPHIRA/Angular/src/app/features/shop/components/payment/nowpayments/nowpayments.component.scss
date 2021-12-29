@@ -2,6 +2,9 @@ section#nowpayments-gateway {
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
 	gap: 1em;
+	a {
+		color: white;
+	}
 }
 
 @media screen and (max-width: 726px) {

@@ -17,14 +17,30 @@
 						</mat-select-trigger>
 					</mat-select>
 				</mat-form-field>
-				<button mat-raised-button color="primary" [disabled]="coinForm.invalid" matStepperNext>Next</button>
+				<button mat-button [disabled]="coinForm.invalid" matStepperNext>Next</button>
 			</form>
 		</mat-step>
 		<mat-step [stepControl]="addressForm" label="Shipping Address">
-			<sephira-checkout-address-form [formGroup]="addressForm" [allowBack]="checkoutStyle !== 'invoice'"></sephira-checkout-address-form>
+			<sephira-checkout-address-form [formGroup]="addressForm" [allowBack]="checkoutStyle !== 'invoice'" (next)="renderNowPayments()"></sephira-checkout-address-form>
 		</mat-step>
 		<mat-step>
-			<button mat-raised-button color="primary" matStepperPrevious>Back</button>
+			<section *ngIf="nowPaymentRes;else loaderSpinner">
+				<div *ngIf="checkoutStyle !== 'invoice';else invoice">
+					<ng-container *ngIf="now.valueOf() < nowPaymentRes.created_at.valueOf() + (5 * 60)">
+						<qr-code [value]="nowPaymentRes.pay_addresss"></qr-code>
+						<p>{{ nowPaymentRes.pay_addresss }}</p>
+						<p>{{ nowPaymentRes.pay_amount | currency:nowPaymentRes.pay_currency }}</p>
+						<p>Expires in {{ (nowPaymentRes.created_at.valueOf() + (5 * 60)) - now.valueOf()| date }}</p>
+					</ng-container>
+					<ng-template #expired>
+						<p>Your payment amount may be out of date. <button mat-raised-button color="primary" (click)="renderNowPayments()">Click here to generate a get the latest rate</button></p>
+					</ng-template>
+				</div>
+				<ng-template #invoice>
+					<a [href]="nowPaymentRes.invoice_url">Finish paying with NOWPayments</a>
+				</ng-template>
+			</section>
+			<button mat-button (click)="nowPaymentRes = null" matStepperPrevious>Back</button>
 		</mat-step>
 	</mat-vertical-stepper>
 	<div id="checkout-right">

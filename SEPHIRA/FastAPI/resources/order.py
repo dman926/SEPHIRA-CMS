@@ -74,7 +74,10 @@ async def modify_order(id: str, order_body: OrderModel, identity: Optional[str] 
 	try:
 		order = Order.objects.get(id=id, orderer=identity)
 		if order_body.addresses:
-			taxJurisdiction = UsTaxJurisdiction.objects.get(zip=order_body.addresses['billing']['zip'])
+			if 'billing' in order_body.addresses:
+				taxJurisdiction = UsTaxJurisdiction.objects.get(zip=order_body.addresses['billing']['zip'])
+			else:
+				taxJurisdiction = UsTaxJurisdiction.objects.get(zip=order_body.addresses['shipping']['zip'])
 			shippingZone = None
 			try:
 				shippingZone = UsShippingZone.objects.get(applicableStates=order_body.addresses['shipping']['region'])
