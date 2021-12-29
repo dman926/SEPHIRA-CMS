@@ -1,0 +1,15 @@
+section#coinbase-gateway {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 1em;
+}
+
+@media screen and (max-width: 726px) {
+	section#coinbase-gateway {
+		grid-template-columns: auto;
+	}
+}
+
+.hidden {
+	display: none !important;
+}

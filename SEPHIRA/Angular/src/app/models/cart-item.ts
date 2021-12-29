@@ -5,6 +5,10 @@ export interface CartItem {
 	name: string;
 	/** The price of the product */
 	price: number;
+	/** The slug of the product */
+	slug?: string;
+	/** The main image of the product */
+	img?: string;
 	/** The quantity of products */
 	qty: number;
 }

@@ -1,0 +1,8 @@
+<p *ngIf="actualPrice < minPrice && gateway">{{ gateway }} requires a minimum total of {{ minPrice | currency }} (Your real total (without tax or shipping) is {{ actualPrice | currency }})</p>
+<mat-list>
+	<mat-list-item>Subtotal: {{ subtotal | currency }}</mat-list-item>
+	<mat-list-item>Discount: {{ subtotal - discountPrice | currency }}</mat-list-item>
+	<mat-list-item>Estimated Tax: {{ discountPrice * taxAmount | currency }}</mat-list-item>
+	<mat-list-item>Shipping: {{ shippingAmount | currency }}</mat-list-item>
+	<mat-list-item>Total: {{ discountPrice + (discountPrice * taxAmount) + shippingAmount | currency }}</mat-list-item>
+</mat-list>

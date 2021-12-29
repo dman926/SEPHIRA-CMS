@@ -84,6 +84,9 @@ export class AuthService {
 
 	public setUser(user: User | null): void {
 		this.userSubject.next(user);
+		if (this.platform.isBrowser && user) {
+			localStorage.setItem('cart', JSON.stringify(user.cart));
+		}
 		this.state.set(this.userStateKey, user);
 	}
 

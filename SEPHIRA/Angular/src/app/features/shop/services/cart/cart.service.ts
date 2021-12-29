@@ -77,7 +77,7 @@ export class CartService {
 			}
 		}
 		if (!flag) {
-			cart.push({id: product.id!, name: product.title ? product.title : '', price: product.price ? product.price : 0, qty: 1});
+			cart.push({id: product.id!, name: product.title ? product.title : '', price: product.price ? product.price : 0, slug: product.slug, img: (product.img && product.img.length > 0) ? product.img[0] : undefined, qty: 1});
 		}
 		localStorage.setItem('cart', JSON.stringify(cart));
 		this.cartSubject.next(cart);

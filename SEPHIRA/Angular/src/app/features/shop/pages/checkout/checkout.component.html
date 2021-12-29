@@ -1,125 +1,66 @@
-<ng-template #loaderSpinner *ngIf="!orderID">
-	<sephira-loader-spinner></sephira-loader-spinner>
-</ng-template>
-<section id="checkout-wrapper" [hidden]="!orderID">
-	<mat-vertical-stepper [linear]="true" #stepper>
-		<mat-step [editable]="canEdit" [stepControl]="addressForm" label="Shipping Address">
-			<form [formGroup]="addressForm">
-				<mat-form-field appearance="fill">
-					<mat-label>Full Name</mat-label>
-					<input matInput formControlName="fullName" autocomplete="name" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>Country Code</mat-label>
-					<input matInput formControlName="country" autocomplete="country" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>Street Address 1</mat-label>
-					<input matInput formControlName="street1" autocomplete="address-line1" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>Stree Address 2</mat-label>
-					<input matInput formControlName="street2" autocomplete="address-line2" />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>State/Providence/Region</mat-label>
-					<input matInput formControlName="stateProvidenceRegion" autocomplete="address-level1" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>City</mat-label>
-					<input matInput formControlName="city" autocomplete="address-level2" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>Postal Code/ZIP</mat-label>
-					<input matInput formControlName="zip" autocomplete="postal-code" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>Phone Number</mat-label>
-					<input matInput formControlName="phoneNumber" autocomplete="tel" required />
-				</mat-form-field>
-				<button mat-button type="button" matStepperNext>Next</button>
-			</form>
-		</mat-step>
-		<mat-step [editable]="canEdit" [stepControl]="billingForm" label="Billing Address">
-			<form [formGroup]="billingForm">
-				<mat-form-field appearance="fill">
-					<mat-label>Email</mat-label>
-					<input matInput formControlName="email" autocomplete="email" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>Full Name</mat-label>
-					<input matInput formControlName="fullName" autocomplete="name" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>Country Code</mat-label>
-					<input matInput formControlName="country" autocomplete="country" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>Street Address 1</mat-label>
-					<input matInput formControlName="street1" autocomplete="address-line1" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>Stree Address 2</mat-label>
-					<input matInput formControlName="street2" autocomplete="address-line2" />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>State/Providence/Region</mat-label>
-					<input matInput formControlName="stateProvidenceRegion" autocomplete="address-level1" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>City</mat-label>
-					<input matInput formControlName="city" autocomplete="address-level2" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>Postal Code/ZIP</mat-label>
-					<input matInput formControlName="zip" autocomplete="postal-code" required />
-				</mat-form-field>
-				<mat-form-field appearance="fill">
-					<mat-label>Phone Number</mat-label>
-					<input matInput formControlName="phoneNumber" autocomplete="tel" required />
-				</mat-form-field>
-				<button mat-button type="button" matStepperPrevious>Back</button>
-				<button mat-button type="button" matStepperNext (click)="renderPayPalCoinbase()">Next</button>
-			</form>
-		</mat-step>
-		<mat-step>
-			<button mat-button matStepperPrevious>Back</button>
-			<section id="payment-forms">
-				<a *ngIf="coinbaseCommerceRes && coinbaseCommerceRes.expires_at > now && enableCoinbaseCommerce" [href]="coinbaseCommerceRes.hosted_url">Pay with Coinbase</a>
-				<div #paypalButtonContainer id="paypal-button-container" *ngIf="enablePayPal"></div>
-				<form #stripeForm id="stripe-payment-form" *ngIf="enableStripe">
-					<div id="card-element">
-						<!--Stripe.js injects the Card Element-->
-					</div>
-					<button #stripePayButton id="submit">
-						<div class="spinner hidden" id="spinner"></div>
-						<span id="button-text">Pay with Stripe</span>
+<section id="cart-section">
+	<mat-list role="list">
+		<mat-list-item *ngIf="cartItems.length === 0">No items in your cart!</mat-list-item>
+		<mat-list-item *ngFor="let item of cartItems">
+			<div class="cart-image" [style.background-image]="'url(' + (item.img ? item.img : '/assets/img/placeholder.png') + ')'"></div>
+			<!-- Attribution for placeholder.png: Missing-image-232x150.png by DJKA | CC BY-SA 4.0 -->
+			<a *ngIf="item.slug;else noLink" routerLink="/shop" [queryParams]="{ p: item.slug }">{{ item.name }}</a>
+			<ng-template #noLink>{{ item.name }}</ng-template>
+			<span class="spacer"></span>
+			<div class="qty-selector">
+				<button mat-icon-button (click)="cart.removeFromCart(item.id, 1)" [disabled]="selectedPaymentGateway !== ''">
+					<mat-icon>remove</mat-icon>
+				</button>
+				<span class="spacer"></span>
+				{{ item.qty }}
+				<span class="spacer"></span>
+				<button mat-icon-button (click)="cart.removeFromCart(item.id, -1)" [disabled]="selectedPaymentGateway !== ''">
+					<mat-icon>add</mat-icon>
+				</button>
+			</div>
+		</mat-list-item>
+	</mat-list>
+	<hr />
+	<button mat-icon-button (click)="selectedPaymentGateway=''" *ngIf="selectedPaymentGateway !== ''"><mat-icon>arrow_back</mat-icon></button>
+	<div [ngSwitch]="selectedPaymentGateway" *ngIf="showCheckoutButtons && cartItems.length > 0">
+		<div [@switchTrigger]="'fadeIn'" *ngSwitchCase="'stripe'">
+			<sephira-stripe *ngIf="enableStripe" [cartItems]="cartItems" (paymentSuccess)="onPayment($event)"></sephira-stripe>
+		</div>
+		<div [@switchTrigger]="'fadeIn'" *ngSwitchCase="'paypal'">
+			<sephira-paypal *ngIf="enablePayPal" [cartItems]="cartItems"></sephira-paypal>
+		</div>
+		<div [@switchTrigger]="'fadeIn'" *ngSwitchCase="'coinbase'">
+			<sephira-coinbase *ngIf="enableCoinbaseCommerce" [cartItems]="cartItems"></sephira-coinbase>
+		</div>
+		<div [@switchTrigger]="'fadeIn'" *ngSwitchCase="'nowpayments'">
+			<sephira-nowpayments *ngIf="enableNowPayments" [cartItems]="cartItems"></sephira-nowpayments>
+		</div>
+		<div id="payment-gateways" [@switchTrigger]="'fadeIn'" *ngSwitchDefault>
+			<h2>Checkout With</h2>
+			<mat-grid-list [cols]="(isHandset$ | async) ? 1 : 2" rowHeight="16em">
+				<mat-grid-tile *ngIf="enableStripe">
+					<button mat-icon-button (click)="selectedPaymentGateway='stripe'">
+						<mat-icon svgIcon="stripe"></mat-icon>
 					</button>
-					<p #stripeCardError id="card-error" role="alert"></p>
-				</form>
-			</section>
-		</mat-step>
-	</mat-vertical-stepper>
-	<div id="checkout-right">
-		<mat-list id="products">
-			<mat-list-item *ngFor="let product of products">
-				{{ product.name }} {{ product.price | currency }} x{{ product.qty }}
-			</mat-list-item>
-			<mat-list-item>Subtotal: {{ calcSubtotal() | currency }}</mat-list-item>
-			<mat-list-item>Discount: {{ calcSubtotal() - calcDiscountPrice() | currency }}</mat-list-item>
-			<mat-list-item>Estimated Tax: {{ calcDiscountPrice() * (taxRate ? taxRate.estimatedCombinedRate : 0) | currency }}</mat-list-item>
-			<mat-list-item>Shipping: {{ shippingAmount | currency }}</mat-list-item>
-			<mat-list-item>Total: {{ calcDiscountPrice() + (calcDiscountPrice() * (taxRate ? taxRate.estimatedCombinedRate : 0)) + shippingAmount | currency }}</mat-list-item>
-		</mat-list>
-		<mat-form-field appearance="fill">
-			<mat-label>Coupons</mat-label>
-			<mat-chip-list #chipList>
-				<mat-chip *ngFor="let coupon of coupons" (removed)="removeCoupon(coupon)">
-					{{ coupon.code }}
-					<mat-icon matChipRemove>cancel</mat-icon>
-				</mat-chip>
-				<input placeholder="Add Coupon..." [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeyCodes" (matChipInputTokenEnd)="addCoupon($event)" [disabled]="stepper.selectedIndex === 2">
-			</mat-chip-list>
-		</mat-form-field>
+				</mat-grid-tile>
+				<mat-grid-tile *ngIf="enablePayPal">
+					<button mat-icon-button (click)="selectedPaymentGateway='paypal'">
+						<mat-icon svgIcon="paypal"></mat-icon>
+					</button>
+				</mat-grid-tile>
+				<mat-grid-tile *ngIf="enableCoinbaseCommerce">
+					<button mat-icon-button (click)="selectedPaymentGateway='coinbase'">
+						<mat-icon svgIcon="coinbase"></mat-icon>
+					</button>
+				</mat-grid-tile>
+				<mat-grid-tile *ngIf="enableNowPayments">
+					<button mat-icon-button (click)="selectedPaymentGateway='nowpayments'">
+						<span id="nowpayments-button">
+							<span class="bolded">NOW</span>Payments
+						</span>
+					</button>
+				</mat-grid-tile>
+			</mat-grid-list>
+		</div>
 	</div>
 </section>

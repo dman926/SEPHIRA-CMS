@@ -19,9 +19,6 @@ export class PageComponent implements OnInit, OnDestroy {
 	private routerSub: Subscription | null;
 	private readonly pageStateKey = makeStateKey<Page>('page');
 
-	// TODO:
-	// For some reason, this component always fires for root if not on a dynamic page
-	// Could have a potential performance improvement, but it's only server-side, so I don't relly care right now
 	constructor(private postService: PostService, private platform: PlatformService, private state: TransferState, private sanitizer: DomSanitizer, private router: Router) {
 		this.loaded = false;
 		this.page = null;
@@ -29,6 +26,7 @@ export class PageComponent implements OnInit, OnDestroy {
 	}
 
 	ngOnInit(): void {
+		console.log(this.router.url);
 		if (this.platform.isServer) {
 			this.fetchPage();
 		} else {

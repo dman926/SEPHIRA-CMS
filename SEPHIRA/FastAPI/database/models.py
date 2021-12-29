@@ -58,6 +58,7 @@ class OrderModel(BaseModel):
 	addresses: Optional[dict] = None
 	coupons: Optional[list[str]] = None
 	items: Optional[list[CartItemIDModel]] = None
+	gateway: Optional[str] = None
 
 class ShippingRateModel(BaseModel):
 	rate: float
@@ -125,6 +126,8 @@ class CartItem(EmbeddedDocument):
 				'id': str(self.product.id),
 				'name': self.product.title,
 				'price': float(self.product.price) if self.product.price else 0,
+				'slug': self.product.slug,
+				'img': self.product.img[0] if len(self.product.img) > 0 else None,
 				'qty': self.qty
 			}
 
@@ -170,15 +173,15 @@ class User(Document):
 
 class Order(Document):
 	orderer = ReferenceField('User')
-	orderStatus = StringField(choices=['not placed', 'pending', 'paid', 'shipped', 'completed', 'failed'])
+	orderStatus = StringField(choices=['not placed', 'pending', 'partially paid', 'paid', 'shipped', 'completed', 'failed', 'refunded'])
 	products = EmbeddedDocumentListField('CartItem')
 	coupons = ListField(ReferenceField('Coupon'))
 	taxRate = FloatField()
 	shippingType = StringField(choices=['dollar', 'percent'])
 	shippingRate = FloatField()
 	addresses = DictField()
-	paymentIntentID = StringField()
-	paypalCaptureID = StringField()
+	gateway = StringField()
+	gatewayPaymentID = StringField()
 	createdAt = DateTimeField(default=datetime.datetime.now)
 	modified = DateTimeField(default=datetime.datetime.now)
 
@@ -189,8 +192,6 @@ class Order(Document):
 	}
 
 	def serialize(self):
-		mappedProducts = list(map(lambda p: p.serialize(True), self.products))
-		mappedCoupons = list(map(lambda c: c.serialize(), self.coupons))
 		orderer = None
 		if self.orderer:
 			orderer = str(self.orderer.id)
@@ -198,12 +199,13 @@ class Order(Document):
 			'id': str(self.id),
 			'orderer': orderer,
 			'orderStatus': self.orderStatus,
-			'products': mappedProducts,
-			'coupons': mappedCoupons,
+			'products': list(map(lambda p: p.serialize(True), self.products)),
+			'coupons': list(map(lambda c: c.serialize(), self.coupons)),
 			'taxRate': self.taxRate,
 			'shippingType': self.shippingType,
 			'shippingRate': self.shippingRate,
 			'addresses': self.addresses,
+			'gateway': self.gateway,
 			'createdAt': str(self.createdAt),
 			'modified': str(self.modified)
 		}
