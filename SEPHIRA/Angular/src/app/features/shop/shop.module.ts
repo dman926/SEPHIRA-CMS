@@ -32,6 +32,7 @@ import { LoaderSpinnerModule } from '../loader-spinner/loader-spinner.module';
 import { StarRatingModule } from '../star-rating/star-rating.module';
 import { PriceTotalDisplayComponent } from './components/price-total-display/price-total-display.component';
 import { CheckoutAddressFormComponent } from './components/checkout-address-form/checkout-address-form.component';
+import { MatSelectModule } from '@angular/material/select';
 
 @NgModule({
 	declarations: [
@@ -66,6 +67,7 @@ import { CheckoutAddressFormComponent } from './components/checkout-address-form
 		MatGridListModule,
 		MatChipsModule,
 		MatStepperModule,
+		MatSelectModule,
 
 		LoaderSpinnerModule,
 		StarRatingModule

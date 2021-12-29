@@ -36,5 +36,5 @@
 		<input matInput formControlName="phoneNumber" autocomplete="tel" required />
 	</mat-form-field>
 	<button mat-button *ngIf="allowBack" type="button" matStepperPrevious (click)="previous.emit()">Back</button>
-	<button mat-button type="button" matStepperNext (click)="next.emit()">Next</button>
+	<button mat-button type="button" [disabled]="formGroup.invalid" matStepperNext (click)="next.emit()">Next</button>
 </form>

@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from config import APISettings, ShopSettings, NowPaymentsSettings
 
 from fastapi import Depends, Body, Header
-from typing import Optional
+from typing import Literal, Optional
 from pydantic import BaseModel, HttpUrl
 from mongoengine.errors import DoesNotExist
 
@@ -40,6 +40,7 @@ cachedAvailableCoins = []
 
 class CheckoutBody(BaseModel):
 	orderID: str
+	case: Optional[Literal['success', 'fail', 'partially_paid']] = None
 	location: Optional[HttpUrl] = None
 
 ##########
@@ -55,7 +56,13 @@ async def get_coins():
 			nowPaymentStatus = (await http_service.request('GET', nowPaymentsApiBase + 'status')).status_code == 200
 			if nowPaymentStatus:
 				lastPingPong = newPingPongTime
-				cachedAvailableCoins = (await http_service.request('GET', nowPaymentsApiBase + 'currencies', headers=nowpayments_auth_headers)).json()['currencies']
+				r = await http_service.request('GET', nowPaymentsApiBase + 'currencies', headers=nowpayments_auth_headers)
+				print(nowpayments_auth_headers)
+				if r.status_code == 200:
+					print(r.json())
+					cachedAvailableCoins = r.json()['currencies']
+				else:
+					raise ServiceUnavailableError
 		if not nowPaymentStatus:
 			raise ServiceUnavailableError
 		return cachedAvailableCoins
@@ -93,7 +100,11 @@ async def min_amount(coin: str):
 		currencyTo = NowPaymentsSettings.DEFAULT_CURRENCY_OUTPUT_CODE.lower()
 		if coin in list(map(lambda c: c.lower(), NowPaymentsSettings.DEFINED_WALLETS)):
 			currencyTo = coin
-		r = await http_service.request('GET', nowPaymentsApiBase + 'min-amount', params={ 'currency_from': coin, 'currency_to': currencyTo }, headers=nowpayments_auth_headers)
+		payload = {
+			'currency_from': currencyTo,
+			'currency_to': coin
+		}
+		r = await http_service.request('GET', nowPaymentsApiBase + 'min-amount', params=payload, headers=nowpayments_auth_headers)
 		if r.status_code == 200:
 			out = r.json()
 			return {
@@ -121,12 +132,20 @@ async def checkout(checkout_body: CheckoutBody, identity: str = Depends(get_jwt_
 			'ipn_callback_url': APISettings.DOMAIN + APISettings.ROUTE_BASE + 'payment/nowpayments/webhook',
 			'order_id': str(order.id)
 		}
+		if NowPaymentsSettings.SANDBOX and checkout_body.case:
+			payload['case'] = checkout_body.case
 		headers = nowpayments_auth_headers | { 'Content-Type': 'application/json' }
 		r = await http_service.request('POST', nowPaymentsApiBase + 'payment', json=payload, headers=headers)
 		if r.status_code == 200:
 			j = r.json()
 			order.gatewayPaymentID = j['payment_id']
-			return 'ok'
+			order.save()
+			return {
+				'pay_addresss': j['pay_address'],
+				'pay_amount': j['pay_amount'],
+				'pay_currency': j['pay_currency'],
+				'created_at': j['created_at']
+			}
 		raise ServiceUnavailableError
 	except DoesNotExist:
 		raise NotFoundError().http_exception
@@ -157,7 +176,8 @@ async def checkout(checkout_body: CheckoutBody, identity: str = Depends(get_jwt_
 			order.gatewayPaymentID = j['payment_id']
 			order.save()
 			return {
-				'invoice_url': j['invoice_url']
+				'invoice_url': j['invoice_url'],
+				'created_at': j['created_at']
 			}
 		raise ServiceUnavailableError
 	except SchemaValidationError:

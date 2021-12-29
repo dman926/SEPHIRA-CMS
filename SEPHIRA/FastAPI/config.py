@@ -95,7 +95,7 @@ class CoinbaseCommerceSettings:
 
 class NowPaymentsSettings:
 	ENABLE: bool = True
-	SANDBOX: bool = True # Set to `True` if you are testing the payment and don't want to send real money. Set to `False` to accept real payments.
+	SANDBOX: bool = False # Set to `True` if you are testing the payment and don't want to send real money. Set to `False` to accept real payments. Keep in mind that a separate account must be created to use the sandbox (https://account.sandbox.nowpayments.io/).
 	API_KEY: str = NOWPAYMENTS_API_KEY # Your API key.
 	IPN_SECRET: str = NOWPAYMENTS_IPN_SECRET # Your IPN (Instant Payment Notifications) secret.
 	STATUS_PING_TIME: int = 60 # Seconds between how often NOWPayments should be pinged if it is working.

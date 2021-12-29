@@ -1,7 +1,21 @@
 <section id="nowpayments-gateway" [class.hidden]="!orderID">
 	<mat-vertical-stepper [linear]="true" #stepper>
+		<mat-step [stepControl]="coinForm" label="Select Coin" *ngIf="checkoutStyle !== 'invoice'">
+			<form [formGroup]="coinForm">
+				<mat-select formControlName="coin" required>
+					<mat-option *ngFor="let coin of availableCoins" [value]="coin">
+						<span>
+							<img [src]="'/assets/img/crypto_logos/' + coin + '.svg'" onerror="this.style.display='none'" />
+							<img [src]="'/assets/img/crypto_logos/' + coin + '.png'" onerror="this.style.display='none'" />
+						</span>
+						<span>{{ coin | uppercase }}</span>
+					</mat-option>
+				</mat-select>
+				<button mat-raised-button color="primary" [disabled]="coinForm.invalid" matStepperNext>Next</button>
+			</form>
+		</mat-step>
 		<mat-step [stepControl]="addressForm" label="Shipping Address">
-			<sephira-checkout-address-form [formGroup]="addressForm"></sephira-checkout-address-form>
+			<sephira-checkout-address-form [formGroup]="addressForm" [allowBack]="checkoutStyle !== 'invoice'"></sephira-checkout-address-form>
 		</mat-step>
 		<mat-step>
 			<button mat-raised-button color="primary" matStepperPrevious>Back</button>

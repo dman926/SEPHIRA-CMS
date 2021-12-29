@@ -20,7 +20,8 @@ export const environment = {
 	paypalCurrency: 'USD', // The currency code you would like to use with PayPal. Required here because of how the script is loaded.
 	enableCoinbaseCommerce: true, // Enables using Coinbase Commerce for checkout. Shop and FastAPI CoinbaseCommerceSettings.ENABLE must be enabled for this to be used.
 	enableNowPayments: true, // Enables using NOWPayments for checkout. Shop and FastAPI NowPaymentSettings.ENABLE must be enabled for this to be used.
-	nowPaymentsCheckoutStyle: 'payment' // Valid choices: `payment`, `invoice`. Defaults to `payment`. `payment` keeps the user on the checkout page. `invoice` sends the user to nowpayments.io to complete payment. `invoice` uses less API calls than `payment` so it is technically better for performance, but might inconvience users by requiring they go to an external site to pay.
+	nowPaymentsCheckoutStyle: 'payment', // Valid choices: `payment`, `invoice`. Defaults to `payment`. `payment` keeps the user on the checkout page. `invoice` sends the user to nowpayments.io to complete payment. `invoice` uses less API calls than `payment` so it is technically better for performance, but might inconvience users by requiring they go to an external site to pay.
+	nowPaymentsSandbox: true // Should be the same as FastAPI NowPaymentsSetings.SANDBOX. Just enables a dropdown to select the payment case.
 };
 
 /*

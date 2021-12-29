@@ -6,6 +6,7 @@ import { CartItem } from 'src/app/models/cart-item';
 import { Coupon } from 'src/app/models/posts/coupon';
 import { ShippingZone } from 'src/app/models/shipping-zone';
 import { TaxRate } from 'src/app/models/tax-rate';
+import { environment } from 'src/environments/environment';
 import { CheckoutService } from '../../../services/checkout/checkout.service';
 
 @Component({
@@ -22,13 +23,21 @@ export class NowpaymentsComponent {
 	taxRate: TaxRate | undefined;
 	shippingZone: ShippingZone | undefined;
 
+	coinForm: FormGroup;
 	addressForm: FormGroup;
+
+	availableCoins: string[];
+
+	readonly checkoutStyle = environment.nowPaymentsCheckoutStyle;
 
 	constructor(private checkout: CheckoutService, private core: CoreService, private platform: PlatformService) {
 		this.cartItems = [];
 		this.orderID = null;
 		this.coupons = [];
-		
+
+		this.coinForm = new FormGroup({
+			coin: new FormControl('', [Validators.required])
+		});
 		this.addressForm = new FormGroup({
 			fullName: new FormControl('', [Validators.required]),
 			country: new FormControl({ value: 'US', disabled: true }, [Validators.required]),
@@ -39,16 +48,20 @@ export class NowpaymentsComponent {
 			zip: new FormControl('', [Validators.required, Validators.pattern('[0-9]{5}')]),
 			phoneNumber: new FormControl('', [Validators.required])
 		});
+
+		this.availableCoins = [];
 	}
 
 	ngOnInit(): void {
 		if (this.platform.isBrowser) {
-			/*this.checkout.createOrder(this.cartItems, 'nowpayments').subscribe(orderID => {
+			this.checkout.createOrder(this.cartItems, 'nowpayments').subscribe(orderID => {
 				this.orderID = orderID;
 			});
-			this.checkout.getNowPaymentsCoins().subscribe(res => {
-				
-			});*/
+			if (this.checkoutStyle !== 'invoice') {
+				this.checkout.getNowPaymentsCoins().subscribe(coins => {
+					this.availableCoins = coins;
+				});
+			}
 		}
 	}
 

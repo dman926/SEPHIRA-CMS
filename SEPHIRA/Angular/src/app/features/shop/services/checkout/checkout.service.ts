@@ -14,6 +14,14 @@ export interface CoinbaseRes {
 	hosted_url: string;
 }
 
+export interface NowPaymnetRes {
+	pay_addresss?: string;
+	pay_amount?: number;
+	pay_currency?: string;
+	invoice_url?: string;
+	created_at: Date;
+}
+
 interface NowPaymentsMinAmountRes {
 	min_amount: number;
 	fiat_equivalent: number;
@@ -155,6 +163,28 @@ export class CheckoutService {
 	public getNowPaymentsMinAmount(coin: string): Observable<NowPaymentsMinAmountRes> {
 		const params = new HttpParams().append('coin', coin);
 		return this.http.get<NowPaymentsMinAmountRes>(this.paymentBase + 'nowpayments/min-amount', { params })
+	}
+
+	public nowPaymentsPaymentCheckout(orderID: string): Observable<NowPaymnetRes> {
+		let headers = this.core.createAuthHeader();
+		if (!headers) {
+			if (this.requiredLoggedIn) {
+				return EMPTY;
+			}
+			headers = new HttpHeaders();
+		}
+		return this.http.post<NowPaymnetRes>(this.paymentBase + 'nowpaymnets/payment-checkout', { orderID }, { headers })
+	}
+
+	public nowPaymentsInvoiceCheckout(orderID: string, location: string): Observable<NowPaymnetRes> {
+		let headers = this.core.createAuthHeader();
+		if (!headers) {
+			if (this.requiredLoggedIn) {
+				return EMPTY;
+			}
+			headers = new HttpHeaders();
+		}
+		return this.http.post<NowPaymnetRes>(this.paymentBase + 'nowpaymnets/invoice-checkout', { orderID, location }, { headers })
 	}
 
 }
