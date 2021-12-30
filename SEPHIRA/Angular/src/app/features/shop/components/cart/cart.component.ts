@@ -9,7 +9,11 @@ import { CartService } from '../../services/cart/cart.service';
 })
 export class CartComponent {
 
-	constructor(public cart: CartService) { }
+	@Input() iconOnly: boolean;
+
+	constructor(public cart: CartService) {
+		this.iconOnly = false;
+	}
 
 	reduceProduct(id: string, event: any): void {
 		event.stopPropagation();

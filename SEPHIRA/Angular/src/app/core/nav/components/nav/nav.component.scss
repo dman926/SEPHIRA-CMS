@@ -43,6 +43,20 @@ section#top-bar-wrapper {
 	}
 }
 
+main {
+	// Define it as 100vh so the entire background is filled.
+	// Also doubles for an easy way to hide the nav bar when `top` for screenshots and what else.
+	min-height: 100vh;
+}
+
+h1.title {
+	cursor: default;
+}
+
+h1.title.clickable {
+	cursor: pointer;
+}
+
 .spacer {
 	flex-grow: 1;
 }

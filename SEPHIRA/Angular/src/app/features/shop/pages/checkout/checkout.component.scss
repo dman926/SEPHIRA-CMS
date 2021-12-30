@@ -1,6 +1,6 @@
 section#cart-section {
 	mat-list {
-		border: 1px solid white;
+		border: 1px solid;
 		border-radius: 0.5em;
 		padding: 0;
 		margin-bottom: 1em;
@@ -19,7 +19,7 @@ section#cart-section {
 			margin-right: 1em;
 		}
 		a {
-			color: white;
+			color: unset;
 		}
 		div.qty-selector {
 			display: flex;
@@ -37,7 +37,7 @@ section#cart-section {
 			button {
 				height: 15em;
 				width: 15em;
-				border: 1px solid white;
+				border: 1px solid;
 				border-radius: 0.5em;
 				padding: 1em;
 				mat-icon, svg {
@@ -45,7 +45,10 @@ section#cart-section {
 					height: 90%;
 					margin: auto;
 				}
-				span#nowpayments-button {
+			}
+			button#nowpayments-button {
+				background: linear-gradient(200deg,#3d3d3d 5%,#000 85.22%);
+				span.nowpayments-wrapper {
 					font-size: 1.9em;
 					text-align: center;
 					font-family: syne,sans-serif;
