@@ -6,14 +6,12 @@
 					<mat-label>Coin To Pay With</mat-label>
 					<mat-select formControlName="coin" required>
 						<mat-option class="coin-option" *ngFor="let coin of availableCoins" [value]="coin">
-							<img [src]="'/assets/img/crypto_logos/' + coin + '.svg'" onerror="this.style.display='none'" matListIcon />
-							<img [src]="'/assets/img/crypto_logos/' + coin + '.png'" onerror="this.style.display='none'" matListIcon />
-							{{ coin | uppercase }}
+							<img *ngIf="coin.ext" [src]="'/assets/img/crypto_logos/' + coin.coin + '.' + coin.ext" matListIcon />
+							{{ coin.coin | uppercase }}
 						</mat-option>
 						<mat-select-trigger class="coin-option" *ngIf="coin.value">
-							<img class="coin-img" [src]="'/assets/img/crypto_logos/' + coin.value + '.svg'" onerror="this.style.display='none'" />
-							<img class="coin-img" [src]="'/assets/img/crypto_logos/' + coin.value + '.png'" onerror="this.style.display='none'" />
-							{{ coin.value | uppercase }}
+							<img *ngIf="coin.value.ext" [src]="'/assets/img/crypto_logos/' + coin.value.coin + '.' + coin.value.ext" matListIcon />
+							{{ coin.value.coin | uppercase }}
 						</mat-select-trigger>
 					</mat-select>
 				</mat-form-field>

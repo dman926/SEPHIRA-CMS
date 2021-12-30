@@ -4,6 +4,8 @@ from datetime import timedelta
 
 from pydantic.networks import HttpUrl
 
+from os import path, getcwd
+
 # This is just for development purposes. Feel free to put the raw values in this file if people seeing them is not an issue (ie. private code base)
 from secret import COINBASE_API_KEY, COINBASE_SHARED_SECRET, NOWPAYMENTS_API_KEY, NOWPAYMENTS_IPN_SECRET, PAYPAL_ID, PAYPAL_SECRET, STRIPE_SK
 
@@ -66,6 +68,10 @@ class UvicornSettings:
 	LOG_LEVEL: str = 'info' # It is recommended to use 'warning' in production to reduce log clutter.
 	PORT: int = 8000 # The port of the ASGI server. Make sure this port is available on your server.
 	MAX_CONTENT_SIZE: Optional[int] = None # The max post content size. Set to `None` for unlimitted (not recommended if users can upload). Should also set this in your web server (NGINX/Apache).
+
+
+class AngularSettings:
+	ASSET_PATH: str = path.join(getcwd(), '..', 'Angular', 'dist', 'sephira', 'browser', 'assets') # The location of the assets folder. Currently, only used for NOWPayments to get the available crypto logo filenames and extensions
 
 
 class ShopSettings:

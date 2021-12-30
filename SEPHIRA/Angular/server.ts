@@ -32,13 +32,20 @@ export function app(): express.Express {
 	server.set('view engine', 'html');
 	server.set('views', distFolder);
 
-	// Example Express Rest API endpoints
-	// server.get('/api/**', (req, res) => { });
+	// Manually define a short-circuited route for assets.
+	// Any call to assets should not be passed down the chain
+	server.get(
+		'/assets/*',
+		express.static(distFolder, {
+			maxAge: '1y',
+			fallthrough: false
+		})
+	);
 	// Serve static files from /browser
 	server.get(
 		'*.*',
 		express.static(distFolder, {
-			maxAge: '1y',
+			maxAge: '1y'
 		})
 	);
 

@@ -22,6 +22,11 @@ export interface NowPaymnetRes {
 	created_at: Date;
 }
 
+export interface NowPaymentCoin {
+	coin: string;
+	ext?: string;
+}
+
 interface NowPaymentsMinAmountRes {
 	min_amount: number;
 	fiat_equivalent: number;
@@ -151,8 +156,8 @@ export class CheckoutService {
 
 	// NOWPayments	
 
-	public getNowPaymentsCoins(): Observable<string[]> {
-		return this.http.get<string[]>(this.paymentBase + 'nowpayments/available-coins');
+	public getNowPaymentsCoins(): Observable<NowPaymentCoin[]> {
+		return this.http.get<NowPaymentCoin[]>(this.paymentBase + 'nowpayments/available-coins');
 	}
 
 	public getNowPaymentsEstimatedAmount(coin: string, amount: number): Observable<number> {

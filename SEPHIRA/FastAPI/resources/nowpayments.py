@@ -1,5 +1,6 @@
+from posixpath import join
 from fastapi import APIRouter
-from config import APISettings, ShopSettings, NowPaymentsSettings
+from config import APISettings, ShopSettings, NowPaymentsSettings, AngularSettings
 
 from fastapi import Depends, Body, Header
 from typing import Literal, Optional
@@ -15,6 +16,7 @@ from datetime import datetime, timedelta
 from json import dumps
 import hmac
 from hashlib import sha256
+import os
 
 router = APIRouter(
 	prefix=APISettings.ROUTE_BASE + 'payment/nowpayments',
@@ -58,7 +60,17 @@ async def get_coins():
 				lastPingPong = newPingPongTime
 				r = await http_service.request('GET', nowPaymentsApiBase + 'currencies', headers=nowpayments_auth_headers)
 				if r.status_code == 200:
-					cachedAvailableCoins = r.json()['currencies']
+					crypto_logos = os.listdir(os.path.join(AngularSettings.ASSET_PATH, 'img', 'crypto_logos'))
+					def mapCrypto(coin: str):
+						ext = None
+						for i in range(len(crypto_logos)):
+							splitCrypto = crypto_logos[i].rsplit('.', 1)
+							if splitCrypto[0] == coin:
+								ext = splitCrypto[1]
+								crypto_logos.pop(i) # Remove from array to make further searches faster
+								break
+						return { 'coin': coin, 'ext': ext }
+					cachedAvailableCoins = list(map(mapCrypto, r.json()['currencies']))
 				else:
 					raise ServiceUnavailableError
 		if not nowPaymentStatus:

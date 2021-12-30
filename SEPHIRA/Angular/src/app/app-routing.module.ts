@@ -31,12 +31,11 @@ if (environment.enableShop) {
 	});
 }
 
-// TODO: wildcard route causes images to fire this route for some reason
 // Finish by adding the page wildcard route
-/*routes.push({
+routes.push({
 	path: '**',
 	loadChildren: () => import('./features/page/page.module').then(m => m.PageModule)
-});*/
+});
 
 @NgModule({
 	imports: [

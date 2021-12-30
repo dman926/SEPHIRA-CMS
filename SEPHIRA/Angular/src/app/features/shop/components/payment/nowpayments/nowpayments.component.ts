@@ -9,7 +9,7 @@ import { Coupon } from 'src/app/models/posts/coupon';
 import { ShippingZone } from 'src/app/models/shipping-zone';
 import { TaxRate } from 'src/app/models/tax-rate';
 import { environment } from 'src/environments/environment';
-import { CheckoutService, NowPaymnetRes } from '../../../services/checkout/checkout.service';
+import { CheckoutService, NowPaymentCoin, NowPaymnetRes } from '../../../services/checkout/checkout.service';
 
 @Component({
 	selector: 'sephira-nowpayments',
@@ -28,7 +28,7 @@ export class NowpaymentsComponent {
 	coinForm: FormGroup;
 	addressForm: FormGroup;
 
-	availableCoins: string[];
+	availableCoins: NowPaymentCoin[];
 
 	nowPaymentRes: NowPaymnetRes | null;
 
@@ -61,6 +61,7 @@ export class NowpaymentsComponent {
 	ngOnInit(): void {
 		if (this.platform.isBrowser) {
 			this.checkout.createOrder(this.cartItems, 'nowpayments').subscribe(orderID => {
+				console.log(orderID);
 				this.orderID = orderID;
 			});
 			if (this.checkoutStyle !== 'invoice') {
