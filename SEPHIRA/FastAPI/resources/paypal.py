@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from fastapi.param_functions import Body
+from mongoengine.connection import disconnect
 from config import APISettings, PayPalSettings
 
 from typing import Optional
@@ -9,8 +10,9 @@ from paypalcheckoutsdk.core import PayPalHttpClient, SandboxEnvironment, LiveEnv
 from paypalcheckoutsdk.orders import OrdersCreateRequest, OrdersCaptureRequest, OrdersGetRequest
 from modules.JWT import get_jwt_identity_optional
 from mongoengine.errors import DoesNotExist
-from resources.errors import NotFoundError
+from resources.errors import NotFoundError, OutOfStockError
 from database.models import Order
+from services import price_service
 
 router = APIRouter(
 	prefix=APISettings.ROUTE_BASE + 'payment/paypal',
@@ -52,7 +54,7 @@ async def create_transaction(transaction_body: CreateTransactionModel, identity:
 		order = Order.objects.get(id=transaction_body.orderID, orderer=identity)
 		shipping = order.addresses['shipping']
 		shipping = {
-			"method": "United States Postal Service",
+			"method": "United States Postal Service", # TODO: make this dynamic
 			"address": {
 				"name": {
 					"full_name": shipping['name']
@@ -65,19 +67,13 @@ async def create_transaction(transaction_body: CreateTransactionModel, identity:
 				"country_code": shipping['country']
 			}
 		}
-		# TODO: calculate order amount with service
-		total = 0
-		discount = 0
-		base_amount = total - discount
-		tax = base_amount * order.taxRate
+		base_amount = price_service.calculate_order_subtotal(order)
+		tax = price_service.calculate_order_tax(order)
 		amount = base_amount + tax
-		shippingAmt = 0
-		if order.shippingType == 'dollar':
-			amount += order.shippingRate
-			shippingAmt = order.shippingRate
-		elif order.shippingType == 'percent':
-			amount += amount * order.shippingRate
-			shippingAmt = amount * order.shippingRate
+		shippingAmt = price_service.calculate_order_shipping(order)
+		total = amount + shippingAmt
+		discount = price_service.calculate_order_discount(order)
+		
 		requestBody = {
 			"intent": "CAPTURE",
 			"application_context": {
@@ -152,18 +148,22 @@ async def capture_transaction(transaction_body: CaptureTransactionModel, identit
 	try:
 		orderResponse = paypal_client.client.execute(OrdersGetRequest(transaction_body.orderID))
 		order = Order.objects.get(id=orderResponse.result.purchase_units[0].custom_id)
-		# TODO: REMOVE STOCK HERE
+		if not price_service.remove_stock(order):
+			raise OutOfStockError
 		response = paypal_client.client.execute(OrdersCaptureRequest(transaction_body.orderID))
 		order.paypalCaptureID = response.result.purchase_units[0].payments.captures[0].id
 		order.orderStatus = 'placed'
 		order.save()
 		return orderResponse.result.purchase_units[0].custom_id
+	except OutOfStockError:
+		raise OutOfStockError().http_exception
 	except Exception as e:
 		raise e
 
 @router.post('/webhook')
 async def webhook(payload: dict = Body(...)):
 	try:
+		# TODO
 		if payload['event_type'] == 'CHECKOUT.ORDER.COMPLETED':
 			pass
 

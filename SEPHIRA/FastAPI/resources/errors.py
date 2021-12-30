@@ -66,3 +66,9 @@ class ServiceUnavailableError(Exception):
 	status_code = 503
 	detail = 'The requested service is unavailable'
 	http_exception = HTTPException(status_code=status_code, detail=detail)
+
+
+class OutOfStockError(Exception):
+	status_code = 409
+	detail = 'A requested item is out of stock'
+	http_exception = HTTPException(status_code=status_code, detail=detail)

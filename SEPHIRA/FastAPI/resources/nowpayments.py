@@ -8,8 +8,8 @@ from mongoengine.errors import DoesNotExist
 
 from modules.JWT import get_jwt_identity_optional
 from database.models import Order
-from resources.errors import NotFoundError, SchemaValidationError, ServiceUnavailableError, UnauthorizedError
-from services import http_service
+from resources.errors import NotFoundError, SchemaValidationError, ServiceUnavailableError, UnauthorizedError, OutOfStockError
+from services import http_service, price_service
 
 from datetime import datetime, timedelta
 from json import dumps
@@ -147,8 +147,7 @@ async def checkout(checkout_body: CheckoutBody, identity: str = Depends(get_jwt_
 		if not checkout_body.coin or not coinInCachedCoins(checkout_body.coin.lower()):
 			raise SchemaValidationError
 		order = Order.objects.get(id=checkout_body.orderID, orderer=identity)
-		# TODO: calculate price
-		price = 5
+		price = price_service.calculate_order_total(order)
 		payload = {
 			'price_amount': price,
 			'price_currency': ShopSettings.CURRENCY_CODE.lower(),
@@ -187,8 +186,7 @@ async def checkout(checkout_body: CheckoutBody, identity: str = Depends(get_jwt_
 		if not checkout_body.location:
 			raise SchemaValidationError
 		order = Order.objects.get(id=checkout_body.orderID, orderer=identity)
-		# TODO: calculate price
-		price = 5
+		price = price_service.calculate_order_total(order)
 		payload = {
 			'price_amount': price,
 			'price_currency': ShopSettings.CURRENCY_CODE.lower(),
