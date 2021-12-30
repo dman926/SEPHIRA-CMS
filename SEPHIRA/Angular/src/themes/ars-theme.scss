@@ -14,3 +14,13 @@ $sephira-dark-theme: mat-dark-theme($sephira-dark-primary, $sephira-dark-accent,
 .sephira-dark {
 	@include angular-material-theme($sephira-dark-theme);
 }
+
+.border {
+	border-color: black;
+}
+
+.sephira-dark {
+	.border {
+		border-color: white;
+	}
+}
