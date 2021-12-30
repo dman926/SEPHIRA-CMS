@@ -10,9 +10,8 @@ import { MenuItemService } from '../../services/menu-item/menu-item.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { AuthService } from 'src/app/features/auth/services/auth/auth.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { User } from 'src/app/models/user';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
-import { CookieService } from 'src/app/core/services/cookie/cookie.service';
+import { ThemeService } from 'src/app/core/services/theme/theme.service';
 
 @Component({
 	selector: 'sephira-nav',
@@ -37,8 +36,6 @@ export class NavComponent implements OnInit {
 
 	menuItems: MenuItem[];
 
-	lightOrDark: 'light' | 'dark';
-
 	readonly siteTitle: string = environment.siteTitle;
 	readonly desktopMenuStyle: string = environment.desktopMenuStyle;
 	readonly mobileMenuStyle: string = environment.mobileMenuStyle;
@@ -62,11 +59,11 @@ export class NavComponent implements OnInit {
 		private breakpointObserver: BreakpointObserver,
 		private menuItemService: MenuItemService,
 		private platform: PlatformService,
-		private cookie: CookieService,
 		private state: TransferState,
 		public router: Router,
 		private snackbar: MatSnackBar,
-		public auth: AuthService
+		public auth: AuthService,
+		public theme: ThemeService
 	) {
 		this.isHandset = false;
 		this.isHandset$.subscribe(val => {
@@ -77,12 +74,6 @@ export class NavComponent implements OnInit {
 			this.router.url.substring(1, this.adminPath.length + 1) ===
 			this.adminPath;
 		this.menuItems = [];
-
-		if (this.cookie.getItem('theme') === 'light') {
-			this.lightOrDark = 'light';
-		} else {
-			this.lightOrDark = 'dark';
-		}
 
 		this.swipeCoord = [0, 0];
 		this.swipeTime = 0;
@@ -124,8 +115,7 @@ export class NavComponent implements OnInit {
 	}
 
 	setTheme(theme: MatSlideToggleChange) {
-		this.lightOrDark = theme.checked ? 'dark' : 'light';
-		this.cookie.setItem('theme', this.lightOrDark, undefined, 'strict');
+		this.theme.theme = theme.checked ? 'dark' : 'light';
 	}
 
 	swipe(e: TouchEvent, when: string): void {
