@@ -59,7 +59,7 @@ export class NavComponent implements OnInit {
 		private menuItemService: MenuItemService,
 		private platform: PlatformService,
 		private state: TransferState,
-		private router: Router,
+		public router: Router,
 		private snackbar: MatSnackBar,
 		public auth: AuthService
 	) {

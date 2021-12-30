@@ -64,6 +64,12 @@ section#cart-section {
 .spacer {
 	flex-grow: 1;
 }
+
+.center {
+	display: grid;
+	place-content: center;
+}
+
 @media screen and (max-width: 726px) {
 	section#cart-section {
 		div#payment-gateways {

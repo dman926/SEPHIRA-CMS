@@ -58,7 +58,7 @@
 </ng-template>
 
 <ng-template #notSignedIn>
-	<button mat-icon-button routerLink="/login">
+	<button mat-icon-button routerLink="/login" [queryParams]="{ return: router.url }">
 		<mat-icon>login</mat-icon>
 	</button>
 </ng-template>

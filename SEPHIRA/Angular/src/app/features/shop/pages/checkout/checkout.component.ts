@@ -9,6 +9,7 @@ import { map, Observable, shareReplay, Subscription } from 'rxjs';
 import { CartItem } from 'src/app/models/cart-item';
 import { Router } from '@angular/router';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { AuthService } from 'src/app/features/auth/services/auth/auth.service';
 
 @Component({
 	selector: 'sephira-checkout',
@@ -37,12 +38,14 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 	readonly enablePayPal = environment.enablePayPal;
 	readonly enableCoinbaseCommerce = environment.enableCoinbaseCommerce;
 	readonly enableNowPayments = environment.enableNowPayments;
+	readonly requireLogIn = environment.requireLoggedInToCheckout;
 	private cartSub: Subscription | null;
 
 	constructor(
 		public cart: CartService,
+		public auth: AuthService,
 		private platform: PlatformService,
-		private router: Router,
+		public router: Router,
 		private iconRegistry: MatIconRegistry,
 		private sanitizer: DomSanitizer,
 		private breakpointObserver: BreakpointObserver,
