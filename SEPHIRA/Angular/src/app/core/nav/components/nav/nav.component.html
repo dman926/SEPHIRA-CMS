@@ -1,4 +1,4 @@
-<div [class.sephira-dark]="lightOrDark !== 'light'" class="mat-app-background">
+<div [class.sephira-dark]="(theme.theme$ | async) !== 'light'" class="mat-app-background">
 	<section id="top-bar-wrapper" *ngIf="isHandset ? mobileMenuStyle === 'top' : desktopMenuStyle === 'top';else sidenav">
 		<mat-toolbar>
 			<h1 class="title" [class.clickable]="router.url !== '/'" routerLink="/">{{ siteTitle }}</h1>
@@ -26,7 +26,7 @@
 				</ng-container>
 				<button mat-menu-item (click)="$event.stopPropagation()">
 					<mat-icon>dark_mode</mat-icon>
-					<mat-slide-toggle color="primary" [checked]="lightOrDark !== 'light'" (change)="setTheme($event)"></mat-slide-toggle>
+					<mat-slide-toggle color="primary" [checked]="(theme.theme$ | async) !== 'light'" (change)="setTheme($event)"></mat-slide-toggle>
 				</button>
 			</mat-menu>
 		</mat-toolbar>
@@ -43,7 +43,7 @@
 					<sephira-menu [menuItems]="isAdmin ? adminMenuItems : menuItems" [isAdmin]="isAdmin"></sephira-menu>
 					<span class="spacer"></span>
 					<div id="sidenav-bottom">
-						<mat-slide-toggle color="primary" [checked]="lightOrDark !== 'light'" labelPosition="before" (change)="setTheme($event)"><mat-icon>dark_mode</mat-icon></mat-slide-toggle>
+						<mat-slide-toggle color="primary" [checked]="(theme.theme$ | async) !== 'light'" labelPosition="before" (change)="setTheme($event)"><mat-icon>dark_mode</mat-icon></mat-slide-toggle>
 						<ng-container *ngIf="auth.isSignedIn;else notSignedIn">
 							<button mat-icon-button [routerLink]="['/' + adminPath]" *ngIf="(auth.user$ | async)?.admin && !isAdmin">
 								<mat-icon>admin_panel_settings</mat-icon>

@@ -1,4 +1,3 @@
-from posixpath import join
 from fastapi import APIRouter
 from config import APISettings, ShopSettings, NowPaymentsSettings, AngularSettings
 
@@ -9,14 +8,15 @@ from mongoengine.errors import DoesNotExist
 
 from modules.JWT import get_jwt_identity_optional
 from database.models import Order
-from resources.errors import NotFoundError, SchemaValidationError, ServiceUnavailableError, UnauthorizedError
-from services import http_service
+from resources.errors import NotFoundError, SchemaValidationError, ServiceUnavailableError, UnauthorizedError, OutOfStockError
+from services import http_service, price_service
 
 from datetime import datetime, timedelta
 from json import dumps
 import hmac
 from hashlib import sha256
 import os
+from httpcore import ReadTimeout
 
 router = APIRouter(
 	prefix=APISettings.ROUTE_BASE + 'payment/nowpayments',
@@ -36,12 +36,40 @@ lastPingPong = datetime.now() - timedelta(seconds=NowPaymentsSettings.STATUS_PIN
 nowPaymentStatus = False
 cachedAvailableCoins = []
 
+def coinInCachedCoins(coin: str) -> bool:
+	for cachedCoin in cachedAvailableCoins:
+		if cachedCoin['coin'] == coin:
+			return True
+	return False
+
+async def setCachedAvailableCoins() -> bool:
+	global cachedAvailableCoins
+	try:
+		r = await http_service.request('GET', nowPaymentsApiBase + 'currencies', headers=nowpayments_auth_headers)
+	except ReadTimeout:
+		return False
+	if r.status_code == 200:
+		crypto_logos = os.listdir(os.path.join(AngularSettings.ASSET_PATH, 'img', 'crypto_logos'))
+		def mapCrypto(coin: str):
+			ext = None
+			for i in range(len(crypto_logos)):
+				splitCrypto = crypto_logos[i].rsplit('.', 1)
+				if splitCrypto[0] == coin:
+					ext = splitCrypto[1]
+					crypto_logos.pop(i) # Remove from array to make further searches faster
+					break
+			return { 'coin': coin, 'ext': ext }
+		cachedAvailableCoins = list(map(mapCrypto, r.json()['currencies']))
+		return True
+	return False
+
 ###########
 # SCHEMAS #
 ###########
 
 class CheckoutBody(BaseModel):
 	orderID: str
+	coin: Optional[str] = None
 	case: Optional[Literal['success', 'fail', 'partially_paid']] = None
 	location: Optional[HttpUrl] = None
 
@@ -58,20 +86,7 @@ async def get_coins():
 			nowPaymentStatus = (await http_service.request('GET', nowPaymentsApiBase + 'status')).status_code == 200
 			if nowPaymentStatus:
 				lastPingPong = newPingPongTime
-				r = await http_service.request('GET', nowPaymentsApiBase + 'currencies', headers=nowpayments_auth_headers)
-				if r.status_code == 200:
-					crypto_logos = os.listdir(os.path.join(AngularSettings.ASSET_PATH, 'img', 'crypto_logos'))
-					def mapCrypto(coin: str):
-						ext = None
-						for i in range(len(crypto_logos)):
-							splitCrypto = crypto_logos[i].rsplit('.', 1)
-							if splitCrypto[0] == coin:
-								ext = splitCrypto[1]
-								crypto_logos.pop(i) # Remove from array to make further searches faster
-								break
-						return { 'coin': coin, 'ext': ext }
-					cachedAvailableCoins = list(map(mapCrypto, r.json()['currencies']))
-				else:
+				if not await setCachedAvailableCoins():
 					raise ServiceUnavailableError
 		if not nowPaymentStatus:
 			raise ServiceUnavailableError
@@ -84,7 +99,7 @@ async def get_coins():
 @router.get('/estimated-amount')
 async def estimated_price(coin: str, amount: float):
 	try:
-		if coin not in cachedAvailableCoins:
+		if not coinInCachedCoins(coin.lower()):
 			raise NotFoundError
 		payload = {
 			'amount': amount,
@@ -105,14 +120,15 @@ async def estimated_price(coin: str, amount: float):
 @router.get('/min-amount')
 async def min_amount(coin: str):
 	try:
-		if coin not in cachedAvailableCoins:
+		if not coinInCachedCoins(coin.lower()):
 			raise NotFoundError
 		currencyTo = NowPaymentsSettings.DEFAULT_CURRENCY_OUTPUT_CODE.lower()
 		if coin in list(map(lambda c: c.lower(), NowPaymentsSettings.DEFINED_WALLETS)):
 			currencyTo = coin
 		payload = {
 			'currency_from': currencyTo,
-			'currency_to': coin
+			'currency_to': coin,
+			'fiat_equivalent': ShopSettings.CURRENCY_CODE.lower()
 		}
 		r = await http_service.request('GET', nowPaymentsApiBase + 'min-amount', params=payload, headers=nowpayments_auth_headers)
 		if r.status_code == 200:
@@ -132,13 +148,14 @@ async def min_amount(coin: str):
 @router.post('/payment-checkout')
 async def checkout(checkout_body: CheckoutBody, identity: str = Depends(get_jwt_identity_optional)):
 	try:
+		if not checkout_body.coin or not coinInCachedCoins(checkout_body.coin.lower()):
+			raise SchemaValidationError
 		order = Order.objects.get(id=checkout_body.orderID, orderer=identity)
-		# TODO: calculate price
-		price = 0
+		price = price_service.calculate_order_total(order)
 		payload = {
 			'price_amount': price,
 			'price_currency': ShopSettings.CURRENCY_CODE.lower(),
-			'pay_currency': '',
+			'pay_currency': checkout_body.coin.lower(),
 			'ipn_callback_url': APISettings.DOMAIN + APISettings.ROUTE_BASE + 'payment/nowpayments/webhook',
 			'order_id': str(order.id)
 		}
@@ -146,6 +163,7 @@ async def checkout(checkout_body: CheckoutBody, identity: str = Depends(get_jwt_
 			payload['case'] = checkout_body.case
 		headers = nowpayments_auth_headers | { 'Content-Type': 'application/json' }
 		r = await http_service.request('POST', nowPaymentsApiBase + 'payment', json=payload, headers=headers)
+		print(r.json())
 		if r.status_code == 200:
 			j = r.json()
 			order.gatewayPaymentID = j['payment_id']
@@ -157,6 +175,8 @@ async def checkout(checkout_body: CheckoutBody, identity: str = Depends(get_jwt_
 				'created_at': j['created_at']
 			}
 		raise ServiceUnavailableError
+	except SchemaValidationError:
+		raise SchemaValidationError().http_exception
 	except DoesNotExist:
 		raise NotFoundError().http_exception
 	except ServiceUnavailableError:
@@ -170,8 +190,7 @@ async def checkout(checkout_body: CheckoutBody, identity: str = Depends(get_jwt_
 		if not checkout_body.location:
 			raise SchemaValidationError
 		order = Order.objects.get(id=checkout_body.orderID, orderer=identity)
-		# TODO: calculate price
-		price = 0
+		price = price_service.calculate_order_total(order)
 		payload = {
 			'price_amount': price,
 			'price_currency': ShopSettings.CURRENCY_CODE.lower(),
@@ -180,6 +199,8 @@ async def checkout(checkout_body: CheckoutBody, identity: str = Depends(get_jwt_
 			'redirect_url': checkout_body.location + '/store/checkout/placed?clear=1?id=' + str(order.id),
 			'cancel_url': checkout_body.location + '/store/checkout',
 		}
+		if checkout_body.coin and coinInCachedCoins(checkout_body.coin.lower()):
+			payload['pay_currency'] = checkout_body.coin.lower()
 		r = await http_service.request('POST', nowPaymentsApiBase + 'invoice', json=payload, headers=nowpayments_auth_headers)
 		if r.status_code == 200:
 			j = r.json()

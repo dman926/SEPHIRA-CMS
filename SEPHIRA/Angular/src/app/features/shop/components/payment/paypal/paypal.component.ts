@@ -1,5 +1,6 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { debounceTime } from 'rxjs';
 import { CoreService } from 'src/app/core/services/core/core.service';
 import { DynamicScriptLoaderService } from 'src/app/core/services/dynamic-script-loader/dynamic-script-loader.service';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
@@ -74,7 +75,28 @@ export class PaypalComponent implements OnInit {
 			});
 			this.checkout.createOrder(this.cartItems, 'paypal').subscribe(orderID => {
 				this.orderID = orderID;
-			})
+			});
+
+			this.addressForm.get('stateProvidenceRegion')!.valueChanges.pipe(debounceTime(500)).subscribe(state => {
+				if (this.addressForm.get('stateProvidenceRegion')!.valid) {
+					const country = this.addressForm.get('country')!.value;
+					if (country) {
+						this.checkout.getShippingZone(country, state).subscribe(shippingZone => {
+							this.shippingZone = shippingZone;
+						});
+					}
+				}
+			});
+			this.billingForm.get('zip')!.valueChanges.pipe(debounceTime(500)).subscribe(zip => {
+				if (this.billingForm.get('zip')!.valid) {
+					const country = this.addressForm.get('country')!.value;
+					if (country) {
+						this.checkout.getTaxRate(country, zip).subscribe(taxRate => {
+							this.taxRate = taxRate;
+						});
+					}
+				}
+			});
 		}
 	}
 

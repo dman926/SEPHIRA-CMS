@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { map } from 'rxjs';
+import { debounceTime, map } from 'rxjs';
 import { CoreService } from 'src/app/core/services/core/core.service';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
 import { CartItem } from 'src/app/models/cart-item';
@@ -9,7 +9,7 @@ import { Coupon } from 'src/app/models/posts/coupon';
 import { ShippingZone } from 'src/app/models/shipping-zone';
 import { TaxRate } from 'src/app/models/tax-rate';
 import { environment } from 'src/environments/environment';
-import { CheckoutService, NowPaymentCoin, NowPaymnetRes } from '../../../services/checkout/checkout.service';
+import { CheckoutService, NowPaymentCoin, NowPaymentRes, NowPaymentsMinAmountRes } from '../../../services/checkout/checkout.service';
 
 @Component({
 	selector: 'sephira-nowpayments',
@@ -29,8 +29,10 @@ export class NowpaymentsComponent {
 	addressForm: FormGroup;
 
 	availableCoins: NowPaymentCoin[];
+	minimalAmount: NowPaymentsMinAmountRes | undefined;
+	coinSelected: boolean;
 
-	nowPaymentRes: NowPaymnetRes | null;
+	nowPaymentRes: NowPaymentRes | null;
 
 	readonly checkoutStyle = environment.nowPaymentsCheckoutStyle;
 
@@ -54,6 +56,7 @@ export class NowpaymentsComponent {
 		});
 
 		this.availableCoins = [];
+		this.coinSelected = false;
 
 		this.nowPaymentRes = null;
 	}
@@ -68,25 +71,55 @@ export class NowpaymentsComponent {
 					this.availableCoins = coins;
 				});
 			}
+			
+			this.coin.valueChanges.subscribe(coin => {
+				this.coinSelected = !!coin;
+				this.minimalAmount = undefined;
+				if (this.coinSelected) {
+					this.checkout.getNowPaymentsMinAmount(coin['coin']).subscribe(amount => {
+						this.minimalAmount = amount;
+					});
+				}
+			});
+			this.addressForm.get('stateProvidenceRegion')!.valueChanges.pipe(debounceTime(1500)).subscribe(state => {
+				if (this.addressForm.get('stateProvidenceRegion')!.valid) {
+					const country = this.addressForm.get('country')!.value;
+					if (country) {
+						this.checkout.getShippingZone(country, state).subscribe(shippingZone => {
+							this.shippingZone = shippingZone;
+						});
+					}
+				}
+			});
+			this.addressForm.get('zip')!.valueChanges.pipe(debounceTime(1500)).subscribe(zip => {
+				if (this.addressForm.get('zip')!.valid) {
+					const country = this.addressForm.get('country')!.value;
+					if (country) {
+						this.checkout.getTaxRate(country, zip).subscribe(taxRate => {
+							this.taxRate = taxRate;
+						});
+					}
+				}
+			});
 		}
 	}
 
 	renderNowPayments(): void {
 		const orderID = this.orderID;
-		if (!orderID) {
+		if (!orderID || !this.coin.value) {
 			return;
 		}
 		const returnLoc = window.location.protocol + '//' + window.location.hostname + ':' + window.location.port;
 		this.checkout.editOrder(orderID, this.cartItems, this.getAddressDetails(), this.coupons).subscribe(res => {
 			if (this.checkoutStyle !== 'invoice') {
-				this.checkout.nowPaymentsPaymentCheckout(orderID).pipe(map(res => {
+				this.checkout.nowPaymentsPaymentCheckout(orderID, this.coin.value['coin']).pipe(map(res => {
 					res.created_at = new Date(res.created_at);
 					return res;
 				})).subscribe(res => {
 					this.nowPaymentRes = res;
 				});
 			} else {
-				this.checkout.nowPaymentsInvoiceCheckout(orderID, returnLoc).pipe(map(res => {
+				this.checkout.nowPaymentsInvoiceCheckout(orderID, this.coin.value['coin'], returnLoc).pipe(map(res => {
 					res.created_at = new Date(res.created_at);
 					return res;
 				})).subscribe(res => {

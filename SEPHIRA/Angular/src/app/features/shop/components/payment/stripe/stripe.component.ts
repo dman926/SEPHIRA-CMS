@@ -1,5 +1,6 @@
-import { AfterContentInit, Component, ElementRef, EventEmitter, Input, OnDestroy, Output, Renderer2, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, Renderer2, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { debounceTime } from 'rxjs';
 import { CoreService } from 'src/app/core/services/core/core.service';
 import { DynamicScriptLoaderService } from 'src/app/core/services/dynamic-script-loader/dynamic-script-loader.service';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
@@ -16,7 +17,7 @@ import { CheckoutService } from '../../../services/checkout/checkout.service';
 	templateUrl: './stripe.component.html',
 	styleUrls: ['./stripe.component.scss'],
 })
-export class StripeComponent implements AfterContentInit, OnDestroy {
+export class StripeComponent implements OnInit, AfterContentInit, OnDestroy {
 
 	@Input() cartItems: CartItem[];
 	@Output() paymentSuccess: EventEmitter<string>;
@@ -76,6 +77,31 @@ export class StripeComponent implements AfterContentInit, OnDestroy {
 		});
 
 		this.stripeCard = null;
+	}
+
+	ngOnInit(): void {
+		if (this.platform.isBrowser) {
+			this.addressForm.get('stateProvidenceRegion')!.valueChanges.pipe(debounceTime(500)).subscribe(state => {
+				if (this.addressForm.get('stateProvidenceRegion')!.valid) {
+					const country = this.addressForm.get('country')!.value;
+					if (country) {
+						this.checkout.getShippingZone(country, state).subscribe(shippingZone => {
+							this.shippingZone = shippingZone;
+						});
+					}
+				}
+			});
+			this.billingForm.get('zip')!.valueChanges.pipe(debounceTime(500)).subscribe(zip => {
+				if (this.billingForm.get('zip')!.valid) {
+					const country = this.addressForm.get('country')!.value;
+					if (country) {
+						this.checkout.getTaxRate(country, zip).subscribe(taxRate => {
+							this.taxRate = taxRate;
+						});
+					}
+				}
+			});
+		}
 	}
 
 	ngAfterContentInit(): void {

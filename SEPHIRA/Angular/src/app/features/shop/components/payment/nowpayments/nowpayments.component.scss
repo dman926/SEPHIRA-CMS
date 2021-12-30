@@ -16,3 +16,8 @@ section#nowpayments-gateway {
 .hidden {
 	display: none !important;
 }
+
+.center {
+	display: grid;
+	place-content: center;
+}

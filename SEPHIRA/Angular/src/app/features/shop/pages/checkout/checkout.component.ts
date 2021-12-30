@@ -10,6 +10,7 @@ import { CartItem } from 'src/app/models/cart-item';
 import { Router } from '@angular/router';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AuthService } from 'src/app/features/auth/services/auth/auth.service';
+import { ThemeService } from 'src/app/core/services/theme/theme.service';
 
 @Component({
 	selector: 'sephira-checkout',
@@ -44,6 +45,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 	constructor(
 		public cart: CartService,
 		public auth: AuthService,
+		public theme: ThemeService,
 		private platform: PlatformService,
 		public router: Router,
 		private iconRegistry: MatIconRegistry,

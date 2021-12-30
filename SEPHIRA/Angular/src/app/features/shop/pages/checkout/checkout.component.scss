@@ -1,4 +1,7 @@
 section#cart-section {
+	.border {
+		border-color: black;
+	}
 	mat-list {
 		border: 1px solid;
 		border-radius: 0.5em;
@@ -61,6 +64,12 @@ section#cart-section {
 				}
 			}
 		}
+	}
+}
+
+section#cart-section.checkout-dark {
+	.border {
+		border-color: white;
 	}
 }
 

@@ -1,4 +1,4 @@
-<section id="cart-section">
+<section id="cart-section" [class.checkout-dark]="(theme.theme$ | async) !== 'light'">
 	<mat-list role="list" class="border">
 		<mat-list-item *ngIf="cartItems.length === 0">No items in your cart!</mat-list-item>
 		<mat-list-item *ngFor="let item of cartItems">

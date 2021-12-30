@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from mongoengine.errors import DoesNotExist
 from config import APISettings, StripeSettings
 
 import stripe
@@ -7,6 +8,8 @@ from typing import Optional
 from pydantic import BaseModel, EmailStr
 from modules.JWT import get_jwt_identity_optional
 from database.models import Order, User
+from resources.errors import NotFoundError, OutOfStockError
+from services import price_service
 
 router = APIRouter(
 	prefix=APISettings.ROUTE_BASE + 'payment/stripe',
@@ -36,9 +39,8 @@ async def stripe_checkout(checkout_body: CheckoutModel, identity: Optional[str] 
 		order.addresses = checkout_body.addresses
 		order.save()
 
-		# TODO
-		#if not remove_stock(order.products):
-		#	raise OutOfStockError
+		if not price_service.remove_stock(order):
+			raise OutOfStockError
 		
 		shipping = checkout_body.addresses['shipping']
 		shipping = {
@@ -53,13 +55,7 @@ async def stripe_checkout(checkout_body: CheckoutModel, identity: Optional[str] 
 			'name': shipping['name'],
 			'phone': shipping['phoneNumber']
 		}
-		# TODO: amount = calculate_discount_price(order.products, order.coupons)
-		amount = 0
-		amount += amount * order.taxRate
-		if order.shippingType == 'dollar':
-			amount += order.shippingRate
-		elif order.shippingType == 'percent':
-			amount += amount * order.shippingRate
+		amount = price_service.calculate_order_total(order)
 		amount = round(amount * 100) # Convert for stripe
 		intent = None
 		if identity:
@@ -99,6 +95,10 @@ async def stripe_checkout(checkout_body: CheckoutModel, identity: Optional[str] 
 		order.save()
 
 		return str(order.id)
+	except DoesNotExist:
+		raise NotFoundError().http_exception
+	except OutOfStockError:
+		raise OutOfStockError().http_exception
 	except Exception as e:
 		raise e
 
@@ -126,8 +126,8 @@ async def webhook(payload: dict = Body(...)):
 			order = Order(id=payment_intent['metadata']['Order object'])
 			order.orderStatus = 'failed'
 			order.save()
+			price_service.add_stock(order)
 			# TODO
-			# add_stock(order.products)
 			# socketio.emit('order ' + str(order.pk), order.orderStatus, namespace='/')
 		elif event.type == 'invoice.paid':
 			# TODO: create order with details

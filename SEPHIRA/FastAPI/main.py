@@ -7,7 +7,7 @@ from starlette.requests import Request
 from starlette.responses import Response
 from starlette.types import ASGIApp
 
-from config import CORSSettings, FastAPISettings, UvicornSettings
+from config import CORSSettings, FastAPISettings, UvicornSettings, NowPaymentsSettings
 import logging
 
 ####
@@ -57,6 +57,14 @@ async def startup():
 	initialize_db()
 	from resources.routes import initialize_routes
 	initialize_routes(app)
+
+	if NowPaymentsSettings.ENABLE:
+		from resources.nowpayments import setCachedAvailableCoins
+		if await setCachedAvailableCoins():
+			print('NOWPayments coins cached')
+		else:
+			print('Failed to get NOWPayments coins')
+	
 	print('-- STARTED UP --')
 	logger.info('-- STARTED UP --')
 
