@@ -14,7 +14,7 @@ from services import price_service
 from coinbase_commerce.client import Client
 from coinbase_commerce.error import WebhookInvalidPayload, SignatureVerificationError
 from coinbase_commerce.webhook import Webhook
-from config import CoinbaseCommerceSettings
+from config import CoinbaseCommerceSettings, ShopSettings
 
 from json import dumps
 
@@ -51,7 +51,7 @@ async def coinbase_checkout(body: CoinbaseCheckoutBody, identity: Optional[str] 
 			'description': CoinbaseCommerceSettings.CHARGE_DESCRIPTION,
 			'local_price': {
 				'amount': amount,
-				'currency': 'USD'
+				'currency': ShopSettings.CURRENCY_CODE.upper()
 			},
 			'pricing_type': 'fixed_price',
 			'redirect_url': body['location'] + '/store/checkout/placed?clear=1?id=' + str(order.id),
@@ -94,6 +94,10 @@ async def webhook(payload: dict = Body(...), X_CC_Webhook_Signature: str = Heade
 			order.orderStatus = 'failed'
 			order.save()
 			price_service.add_stock(order)
+		elif event.type == 'charge:delayed':
+			order.status = 'to refund'
+			order.save()
+			# TODO: send an email to the user that they payed after expiratin, that the order failed, and they will be refunded (minus transaction fees perhaps)
 		return 'ok'
 	except UnauthorizedError:
 		raise UnauthorizedError().http_exception

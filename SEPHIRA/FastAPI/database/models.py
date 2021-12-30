@@ -173,7 +173,7 @@ class User(Document):
 
 class Order(Document):
 	orderer = ReferenceField('User')
-	orderStatus = StringField(choices=['not placed', 'pending', 'partially paid', 'paid', 'shipped', 'completed', 'failed', 'refunded'])
+	orderStatus = StringField(choices=['not placed', 'pending', 'partially paid', 'paid', 'shipped', 'completed', 'failed', 'to refund', 'refunded'])
 	products = EmbeddedDocumentListField('CartItem')
 	coupons = ListField(ReferenceField('Coupon'))
 	taxRate = FloatField()
@@ -184,6 +184,7 @@ class Order(Document):
 	gatewayPaymentID = StringField()
 	createdAt = DateTimeField(default=datetime.datetime.now)
 	modified = DateTimeField(default=datetime.datetime.now)
+	# TOOD: maybe save crypto wallet addresses to make refunding easier
 
 	meta = {
 		'indexes': [

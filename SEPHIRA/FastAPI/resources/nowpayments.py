@@ -16,6 +16,7 @@ from json import dumps
 import hmac
 from hashlib import sha256
 import os
+from httpcore import ReadTimeout
 
 router = APIRouter(
 	prefix=APISettings.ROUTE_BASE + 'payment/nowpayments',
@@ -41,9 +42,12 @@ def coinInCachedCoins(coin: str) -> bool:
 			return True
 	return False
 
-async def setCachedAvailableCoins() -> None:
+async def setCachedAvailableCoins() -> bool:
 	global cachedAvailableCoins
-	r = await http_service.request('GET', nowPaymentsApiBase + 'currencies', headers=nowpayments_auth_headers)
+	try:
+		r = await http_service.request('GET', nowPaymentsApiBase + 'currencies', headers=nowpayments_auth_headers)
+	except ReadTimeout:
+		return False
 	if r.status_code == 200:
 		crypto_logos = os.listdir(os.path.join(AngularSettings.ASSET_PATH, 'img', 'crypto_logos'))
 		def mapCrypto(coin: str):
