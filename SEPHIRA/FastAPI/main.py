@@ -57,6 +57,9 @@ async def startup():
 	initialize_db()
 	from resources.routes import initialize_routes
 	initialize_routes(app)
+
+	# TODO: make a request to /payment/nowpayments/available-coins to refresh the available coins list
+
 	print('-- STARTED UP --')
 	logger.info('-- STARTED UP --')
 

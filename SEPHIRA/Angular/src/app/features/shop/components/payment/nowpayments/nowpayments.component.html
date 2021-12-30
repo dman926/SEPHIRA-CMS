@@ -41,9 +41,17 @@
 			<button mat-button (click)="nowPaymentRes = null" matStepperPrevious>Back</button>
 		</mat-step>
 	</mat-vertical-stepper>
-	<div id="checkout-right">
-		<sephira-price-total-display [cartItems]="cartItems" [coupons]="coupons" [taxRate]="taxRate" [shippingZone]="shippingZone" [minPrice]="5" gateway="NOWPayments"></sephira-price-total-display>
-		<sephira-coupon-input *ngIf="orderID" [orderID]="orderID" [disabled]="stepper.selectedIndex === 2" (couponEmitter)="coupons = $event"></sephira-coupon-input>
+	<div id="checkout-right" *ngIf="coinSelected">
+		<ng-container *ngIf="minimalAmount;else subLoaderSpinner">
+			<sephira-price-total-display [cartItems]="cartItems" [coupons]="coupons" [taxRate]="taxRate" [shippingZone]="shippingZone" [minPrice]="minimalAmount.fiat_equivalent" gateway="NOWPayments"></sephira-price-total-display>
+			<sephira-coupon-input *ngIf="orderID" [orderID]="orderID" [disabled]="stepper.selectedIndex === 2" (couponEmitter)="coupons = $event"></sephira-coupon-input>
+		</ng-container>
+		<ng-template #subLoaderSpinner>
+			<div class="center">
+				<p>Loading price information</p>
+				<sephira-loader-spinner></sephira-loader-spinner>	
+			</div>
+		</ng-template>
 	</div>
 </section>
 

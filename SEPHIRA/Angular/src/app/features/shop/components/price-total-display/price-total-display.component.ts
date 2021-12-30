@@ -88,10 +88,13 @@ export class PriceTotalDisplayComponent implements OnInit {
 				}
 			});
 			let match: ShippingRate | null = null;
-			candidates.forEach(candidate => {
+			for (let i = 0; i < candidates.length; i++) {
+				const candidate = candidates[i];
 				if (match === null) {
 					match = candidate;
 				} else {
+					// TODO: this formula is a little off.
+					// I think I want it to match the closest in range possible, so I need to rework it
 					if (match.minCutoff === undefined && candidate.minCutoff !== undefined) {
 						match = candidate;
 					} else if (match.maxCutoff === undefined && candidate.maxCutoff !== undefined) {
@@ -100,7 +103,14 @@ export class PriceTotalDisplayComponent implements OnInit {
 						match = candidate
 					}
 				}
-			});
+			}
+			if (match) {
+				if (match.type === 'dollar') {
+					return match.rate;
+				} else if (match.type === 'percent') {
+					return price * match.rate;
+				}
+			}
 		}
 		return 0;
 	}

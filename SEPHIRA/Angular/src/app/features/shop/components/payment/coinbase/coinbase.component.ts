@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { map } from 'rxjs';
+import { debounceTime, map } from 'rxjs';
 import { CoreService } from 'src/app/core/services/core/core.service';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
 import { CartItem } from 'src/app/models/cart-item';
@@ -51,6 +51,27 @@ export class CoinbaseComponent implements OnInit {
 		if (this.platform.isBrowser) {
 			this.checkout.createOrder(this.cartItems, 'coinbase').subscribe(orderID => {
 				this.orderID = orderID;
+			});
+
+			this.addressForm.get('stateProvidenceRegion')!.valueChanges.pipe(debounceTime(500)).subscribe(state => {
+				if (this.addressForm.get('stateProvidenceRegion')!.valid) {
+					const country = this.addressForm.get('country')!.value;
+					if (country) {
+						this.checkout.getShippingZone(country, state).subscribe(shippingZone => {
+							this.shippingZone = shippingZone;
+						});
+					}
+				}
+			});
+			this.addressForm.get('zip')!.valueChanges.pipe(debounceTime(500)).subscribe(zip => {
+				if (this.addressForm.get('zip')!.valid) {
+					const country = this.addressForm.get('country')!.value;
+					if (country) {
+						this.checkout.getTaxRate(country, zip).subscribe(taxRate => {
+							this.taxRate = taxRate;
+						});
+					}
+				}
 			});
 		}
 	}

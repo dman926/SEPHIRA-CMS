@@ -1,11 +1,11 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { EMPTY, map, Observable } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import { CoreService } from 'src/app/core/services/core/core.service';
 import { CartItem } from 'src/app/models/cart-item';
 import { AddressForm, Order } from 'src/app/models/order';
 import { Coupon } from 'src/app/models/posts/coupon';
-import { ShippingRate } from 'src/app/models/shipping-zone';
+import { ShippingZone } from 'src/app/models/shipping-zone';
 import { TaxRate } from 'src/app/models/tax-rate';
 import { environment } from 'src/environments/environment';
 
@@ -14,7 +14,7 @@ export interface CoinbaseRes {
 	hosted_url: string;
 }
 
-export interface NowPaymnetRes {
+export interface NowPaymentRes {
 	pay_addresss?: string;
 	pay_amount?: number;
 	pay_currency?: string;
@@ -27,7 +27,7 @@ export interface NowPaymentCoin {
 	ext?: string;
 }
 
-interface NowPaymentsMinAmountRes {
+export interface NowPaymentsMinAmountRes {
 	min_amount: number;
 	fiat_equivalent: number;
 }
@@ -88,20 +88,28 @@ export class CheckoutService {
 		return this.http.get<Order>(this.orderBase + 'order/' + id, { headers });
 	}
 
-	public getShippingRate(country: string, state: string): Observable<ShippingRate[]> {
-		if (this.requiredLoggedIn) {
-			return EMPTY;
+	public getShippingZone(country: string, state: string): Observable<ShippingZone> {
+		let headers = this.core.createAuthHeader();
+		if (!headers) {
+			if (this.requiredLoggedIn) {
+				return EMPTY;
+			}
+			headers = new HttpHeaders();
 		}
-		const params = new HttpParams().append('state', state);
-		return this.http.get<ShippingRate[]>(this.shippingBase + country, { params });
+		const params = new HttpParams().append('state', state.toUpperCase());
+		return this.http.get<ShippingZone>(this.shippingBase + country.toLowerCase(), { params, headers });
 	}
 
 	public getTaxRate(country: string, zip: string): Observable<TaxRate> {
-		if (this.requiredLoggedIn) {
-			return EMPTY;
+		let headers = this.core.createAuthHeader();
+		if (!headers) {
+			if (this.requiredLoggedIn) {
+				return EMPTY;
+			}
+			headers = new HttpHeaders();
 		}
 		const params = new HttpParams().append('zip', zip);
-		return this.http.get<TaxRate>(this.taxBase + country, { params });
+		return this.http.get<TaxRate>(this.taxBase + country.toLowerCase(), { params, headers });
 	}
 
 	// Stripe
@@ -170,7 +178,7 @@ export class CheckoutService {
 		return this.http.get<NowPaymentsMinAmountRes>(this.paymentBase + 'nowpayments/min-amount', { params })
 	}
 
-	public nowPaymentsPaymentCheckout(orderID: string): Observable<NowPaymnetRes> {
+	public nowPaymentsPaymentCheckout(orderID: string, coin: string): Observable<NowPaymentRes> {
 		let headers = this.core.createAuthHeader();
 		if (!headers) {
 			if (this.requiredLoggedIn) {
@@ -178,10 +186,10 @@ export class CheckoutService {
 			}
 			headers = new HttpHeaders();
 		}
-		return this.http.post<NowPaymnetRes>(this.paymentBase + 'nowpaymnets/payment-checkout', { orderID }, { headers })
+		return this.http.post<NowPaymentRes>(this.paymentBase + 'nowpayments/payment-checkout', { orderID, coin }, { headers })
 	}
 
-	public nowPaymentsInvoiceCheckout(orderID: string, location: string): Observable<NowPaymnetRes> {
+	public nowPaymentsInvoiceCheckout(orderID: string, coin: string, location: string): Observable<NowPaymentRes> {
 		let headers = this.core.createAuthHeader();
 		if (!headers) {
 			if (this.requiredLoggedIn) {
@@ -189,7 +197,7 @@ export class CheckoutService {
 			}
 			headers = new HttpHeaders();
 		}
-		return this.http.post<NowPaymnetRes>(this.paymentBase + 'nowpaymnets/invoice-checkout', { orderID, location }, { headers })
+		return this.http.post<NowPaymentRes>(this.paymentBase + 'nowpayments/invoice-checkout', { orderID, coin, location }, { headers })
 	}
 
 }
