@@ -26,7 +26,6 @@ export class PageComponent implements OnInit, OnDestroy {
 	}
 
 	ngOnInit(): void {
-		console.log(this.router.url);
 		if (this.platform.isServer) {
 			this.fetchPage();
 		} else {

@@ -61,7 +61,6 @@ export class NowpaymentsComponent {
 	ngOnInit(): void {
 		if (this.platform.isBrowser) {
 			this.checkout.createOrder(this.cartItems, 'nowpayments').subscribe(orderID => {
-				console.log(orderID);
 				this.orderID = orderID;
 			});
 			if (this.checkoutStyle !== 'invoice') {
