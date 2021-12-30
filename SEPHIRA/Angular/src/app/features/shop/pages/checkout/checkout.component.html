@@ -36,7 +36,7 @@
 			<sephira-nowpayments *ngIf="enableNowPayments" [cartItems]="cartItems"></sephira-nowpayments>
 		</div>
 		<div id="payment-gateways" [@switchTrigger]="'fadeIn'" *ngSwitchDefault>
-			<ng-container *ngIf="(auth.user$ | async);else login">
+			<ng-container *ngIf="!requireLogIn || (auth.user$ | async) && requireLogIn;else login">
 				<h2>Checkout With</h2>
 				<mat-grid-list [cols]="(isHandset$ | async) ? 1 : 2" rowHeight="16em">
 					<mat-grid-tile *ngIf="enableStripe">
