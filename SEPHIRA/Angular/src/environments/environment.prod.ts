@@ -3,9 +3,11 @@ export const environment = {
 	siteTitle: 'SEPHIRA', // This is the name displayed in the navigation bar.
 	desktopMenuStyle: 'side', // Valid choices: `side`, `top`. Defaults to `side`. Must be exactly `side` for swipe gesture to open/close to work.
 	mobileMenuStyle: 'side', // Valid choices: `side`, `top`. Defaults to `side`. Must be exactly `side` for swipe gesture to open/close to work.
-	apiServer: '/', // Must have a trailing `/`.
+	apiServer: 'http://127.0.0.1:8000/', // Must have a trailing `/`.
 	adminPath: 'admin', // The base subdirectory the user must enter to reach the admin section.
-	
+	enableLightDarkToggle: true, // Add a light/dark theme toggle to the nav
+	defaultLightDark: 'dark', // Set the default theme to light or dark. Defaults to 'dark'
+
 	// SHOP SPECIFIC VARIABLES
 	enableShop: true, // Enables the shop. Should be the same as the FastAPI ShopSettings.ENABLE setting.
 	requireLoggedInToCheckout: true, // Requires the user to be logged in to checkout.

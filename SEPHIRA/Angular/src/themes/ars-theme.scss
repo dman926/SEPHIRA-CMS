@@ -1,0 +1,16 @@
+@import '~@angular/material/theming';
+@include mat-core();
+
+$sephira-light-primary: mat-palette($mat-deep-purple);
+$sephira-light-accent: mat-palette($mat-amber);
+$sephira-light-warn: mat-palette($mat-red);
+$sephira-light-theme: mat-light-theme($sephira-light-primary, $sephira-light-accent, $sephira-light-warn);
+@include angular-material-theme($sephira-light-theme);
+
+$sephira-dark-primary: mat-palette($mat-purple);
+$sephira-dark-accent: mat-palette($mat-green);
+$sephira-dark-warn: mat-palette($mat-red);
+$sephira-dark-theme: mat-dark-theme($sephira-dark-primary, $sephira-dark-accent, $sephira-dark-warn);
+.sephira-dark {
+	@include angular-material-theme($sephira-dark-theme);
+}

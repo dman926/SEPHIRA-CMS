@@ -15,6 +15,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatListModule } from '@angular/material/list';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { ShopModule } from 'src/app/features/shop/shop.module';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 
 @NgModule({
@@ -35,6 +36,7 @@ import { ShopModule } from 'src/app/features/shop/shop.module';
 		MatMenuModule,
 		MatListModule,
 		MatSnackBarModule,
+		MatSlideToggleModule,
 
 		ShopModule
 	],
