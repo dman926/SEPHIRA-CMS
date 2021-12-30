@@ -74,6 +74,7 @@ export class NowpaymentsComponent {
 			
 			this.coin.valueChanges.subscribe(coin => {
 				this.coinSelected = !!coin;
+				this.minimalAmount = undefined;
 				if (this.coinSelected) {
 					this.checkout.getNowPaymentsMinAmount(coin['coin']).subscribe(amount => {
 						this.minimalAmount = amount;

@@ -41,6 +41,24 @@ def coinInCachedCoins(coin: str) -> bool:
 			return True
 	return False
 
+async def setCachedAvailableCoins() -> None:
+	global cachedAvailableCoins
+	r = await http_service.request('GET', nowPaymentsApiBase + 'currencies', headers=nowpayments_auth_headers)
+	if r.status_code == 200:
+		crypto_logos = os.listdir(os.path.join(AngularSettings.ASSET_PATH, 'img', 'crypto_logos'))
+		def mapCrypto(coin: str):
+			ext = None
+			for i in range(len(crypto_logos)):
+				splitCrypto = crypto_logos[i].rsplit('.', 1)
+				if splitCrypto[0] == coin:
+					ext = splitCrypto[1]
+					crypto_logos.pop(i) # Remove from array to make further searches faster
+					break
+			return { 'coin': coin, 'ext': ext }
+		cachedAvailableCoins = list(map(mapCrypto, r.json()['currencies']))
+		return True
+	return False
+
 ###########
 # SCHEMAS #
 ###########
@@ -64,20 +82,7 @@ async def get_coins():
 			nowPaymentStatus = (await http_service.request('GET', nowPaymentsApiBase + 'status')).status_code == 200
 			if nowPaymentStatus:
 				lastPingPong = newPingPongTime
-				r = await http_service.request('GET', nowPaymentsApiBase + 'currencies', headers=nowpayments_auth_headers)
-				if r.status_code == 200:
-					crypto_logos = os.listdir(os.path.join(AngularSettings.ASSET_PATH, 'img', 'crypto_logos'))
-					def mapCrypto(coin: str):
-						ext = None
-						for i in range(len(crypto_logos)):
-							splitCrypto = crypto_logos[i].rsplit('.', 1)
-							if splitCrypto[0] == coin:
-								ext = splitCrypto[1]
-								crypto_logos.pop(i) # Remove from array to make further searches faster
-								break
-						return { 'coin': coin, 'ext': ext }
-					cachedAvailableCoins = list(map(mapCrypto, r.json()['currencies']))
-				else:
+				if not await setCachedAvailableCoins():
 					raise ServiceUnavailableError
 		if not nowPaymentStatus:
 			raise ServiceUnavailableError
