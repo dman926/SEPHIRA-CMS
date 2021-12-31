@@ -82,22 +82,25 @@ async def webhook(payload: dict = Body(...), X_CC_Webhook_Signature: str = Heade
 		except (WebhookInvalidPayload, SignatureVerificationError):
 			raise UnauthorizedError
 		
-		order = Order(id=event.data.metadata.order)
+		order = Order.objects.get(id=event.data.metadata.order)
 		if event.type == 'charge:pending':
-			order.orderStatus = 'placed'
-			order.save()
-			price_service.remove_stock(order)
+			if not order.stockRemoved:
+				if price_service.remove_stock(order):
+					order.orderStatus = 'placed'
+					order.stockRemoved = True
+				else:
+					order.orderStatus = 'to refund'
 		elif event.type == 'charge:confirmed':
 			order.orderStatus = 'paid'
-			order.save()
 		elif event.type == 'charge:failed':
 			order.orderStatus = 'failed'
-			order.save()
-			price_service.add_stock(order)
+			if order.stockRemoved:
+				price_service.add_stock(order)
+				order.stockRemoved = False
 		elif event.type == 'charge:delayed':
 			order.status = 'to refund'
-			order.save()
 			# TODO: send an email to the user that they payed after expiratin, that the order failed, and they will be refunded (minus transaction fees perhaps)
+		order.save()
 		return 'ok'
 	except UnauthorizedError:
 		raise UnauthorizedError().http_exception

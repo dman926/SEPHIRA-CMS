@@ -108,3 +108,4 @@ class NowPaymentsSettings:
 	DEFINED_WALLETS: list[str] = ['ADA'] # A list of coins whose wallets are added to your NOWPayments account.
 	DEFAULT_CURRENCY_OUTPUT_CODE: str = 'USD' # If there is no wallet defined for an accepted code, the payment will be converted to this currency (fiat or crypto).
 	DELETE_EXPIRED_ORDERS: bool = False # Set to `True` if you want expired orders (orders that weren't paid in time) to be deleted automatically.
+	STARTUP_COIN_FETCH_AMOUNT: int = 2 # The number of times to try to get NOWPayments's available coins. A higher number could mean a longer startup

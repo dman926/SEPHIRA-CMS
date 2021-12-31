@@ -37,11 +37,13 @@ async def stripe_checkout(checkout_body: CheckoutModel, identity: Optional[str] 
 	try:
 		order = Order.objects.get(id=checkout_body.orderID, orderer=identity)
 		order.addresses = checkout_body.addresses
-		order.save()
 
 		if not price_service.remove_stock(order):
 			raise OutOfStockError
 		
+		order.stockRemoved = True
+		order.save()
+
 		shipping = checkout_body.addresses['shipping']
 		shipping = {
 			'address': {
@@ -114,21 +116,15 @@ async def webhook(payload: dict = Body(...)):
 		except ValueError:
 			return '', 400
 
+		payment_intent = event.data.object # contains a stripe.PaymentIntent
+		order = Order.objects.get(id=payment_intent['metadata']['Order object'])
 		if event.type == 'payment_intent.succeeded':
-			payment_intent = event.data.object # contains a stripe.PaymentIntent
-			order = Order(id=payment_intent['metadata']['Order object'])
 			order.orderStatus = 'paid'
-			order.save()
-			# TODO
-			# socketio.emit('order ' + str(order.pk), order.orderStatus, namespace='/')
 		elif event.type == 'payment_intent.failed':
-			payment_intent = event.data.object # contains a stripe.PaymentIntent
-			order = Order(id=payment_intent['metadata']['Order object'])
 			order.orderStatus = 'failed'
-			order.save()
-			price_service.add_stock(order)
-			# TODO
-			# socketio.emit('order ' + str(order.pk), order.orderStatus, namespace='/')
+			if order.stockRemoved:
+				price_service.add_stock(order)
+				order.stockRemoved = False
 		elif event.type == 'invoice.paid':
 			# TODO: create order with details
 			pass
@@ -139,6 +135,9 @@ async def webhook(payload: dict = Body(...)):
 			print('Unhandled Strip webhook event type {}'.format(event.type))
 			return 'ok', 200
 
+		order.save()
 		return 'ok', 200
+	except DoesNotExist:
+		raise NotFoundError().http_exception
 	except Exception as e:
 		raise e

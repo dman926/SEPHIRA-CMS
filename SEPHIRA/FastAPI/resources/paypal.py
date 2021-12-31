@@ -1,11 +1,10 @@
 from fastapi import APIRouter
 from fastapi.param_functions import Body
-from mongoengine.connection import disconnect
 from config import APISettings, PayPalSettings
 
 from typing import Optional
 from pydantic import BaseModel, AnyHttpUrl
-from fastapi import Depends
+from fastapi import Depends, Header
 from paypalcheckoutsdk.core import PayPalHttpClient, SandboxEnvironment, LiveEnvironment
 from paypalcheckoutsdk.orders import OrdersCreateRequest, OrdersCaptureRequest, OrdersGetRequest
 from modules.JWT import get_jwt_identity_optional
@@ -161,7 +160,7 @@ async def capture_transaction(transaction_body: CaptureTransactionModel, identit
 		raise e
 
 @router.post('/webhook')
-async def webhook(payload: dict = Body(...)):
+async def webhook(payload: dict = Body(...), PAYPAL_TRANSMISSION_SIG: str = Header(None), PAYPAL_AUTH_ALGO: str = Header(None), PAYPAL_CERT_URL: str = Header(None)):
 	try:
 		# TODO
 		if payload['event_type'] == 'CHECKOUT.ORDER.COMPLETED':

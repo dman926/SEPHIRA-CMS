@@ -184,7 +184,8 @@ class Order(Document):
 	gatewayPaymentID = StringField()
 	createdAt = DateTimeField(default=datetime.datetime.now)
 	modified = DateTimeField(default=datetime.datetime.now)
-	# TOOD: maybe save crypto wallet addresses to make refunding easier
+	stockRemoved = BooleanField(default=False)
+	# TODO: maybe save crypto wallet addresses to make refunding easier
 
 	meta = {
 		'indexes': [

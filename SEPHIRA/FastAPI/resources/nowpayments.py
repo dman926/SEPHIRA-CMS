@@ -8,7 +8,7 @@ from mongoengine.errors import DoesNotExist
 
 from modules.JWT import get_jwt_identity_optional
 from database.models import Order
-from resources.errors import NotFoundError, SchemaValidationError, ServiceUnavailableError, UnauthorizedError, OutOfStockError
+from resources.errors import NotFoundError, SchemaValidationError, ServiceUnavailableError, UnauthorizedError
 from services import http_service, price_service
 
 from datetime import datetime, timedelta
@@ -41,6 +41,12 @@ def coinInCachedCoins(coin: str) -> bool:
 		if cachedCoin['coin'] == coin:
 			return True
 	return False
+
+async def getNowPaymentsStatus() -> bool:
+	try:
+		return (await http_service.request('GET', nowPaymentsApiBase + 'status')).status_code == 200
+	except ReadTimeout:
+		return False
 
 async def setCachedAvailableCoins() -> bool:
 	global cachedAvailableCoins
@@ -82,8 +88,8 @@ async def get_coins():
 	global lastPingPong, nowPaymentStatus, cachedAvailableCoins
 	try:
 		newPingPongTime = datetime.now()
-		if lastPingPong + timedelta(seconds=NowPaymentsSettings.STATUS_PING_TIME) < newPingPongTime:
-			nowPaymentStatus = (await http_service.request('GET', nowPaymentsApiBase + 'status')).status_code == 200
+		if lastPingPong + timedelta(seconds=NowPaymentsSettings.STATUS_PING_TIME) < newPingPongTime or not nowPaymentStatus or len(cachedAvailableCoins) == 0:
+			nowPaymentStatus = await getNowPaymentsStatus()
 			if nowPaymentStatus:
 				lastPingPong = newPingPongTime
 				if not await setCachedAvailableCoins():
@@ -231,13 +237,21 @@ async def webhook(payload: dict = Body(...), x_nowpayments_sig: str = Header(Non
 		order = Order.objects.get(id=payload['order_id'])
 		status = payload['payment_status']
 		if status == 'confirming':
-			order.orderStatus = 'pending'
+			if not order.stockRemoved:
+				if price_service.remove_stock(order):
+					order.orderStatus = 'pending'
+					order.stockRemoved = True
+				else:
+					order.orderStatus = 'to refund'
 		elif status == 'confirmed':
 			order.orderStatus = 'placed'
 		elif status == 'partially_paid':
 			order.orderStatus = 'partially paid'
 		elif status == 'failed':
 			order.orderStatus = 'failed'
+			if order.stockRemoved:
+				price_service.add(order)
+				order.stockRemoved = False
 		elif status == 'expired':
 			if NowPaymentsSettings.DELETE_EXPIRED_ORDERS:
 				order.delete()
