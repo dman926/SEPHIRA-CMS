@@ -204,7 +204,8 @@ async def webhook(payload: dict = Body(...), PAYPAL_TRANSMISSION_ID: str = Heade
 			raise UnauthorizedError
 		# Signature verification complete
 
-
+		if payload['event_type'] == 'CHECKOUT.ORDER.COMPLETED':
+			pass
 
 		return 'ok'
 	except ServiceUnavailableError:
