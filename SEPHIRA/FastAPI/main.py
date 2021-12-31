@@ -7,7 +7,7 @@ from starlette.requests import Request
 from starlette.responses import Response
 from starlette.types import ASGIApp
 
-from config import APISettings, CORSSettings, FastAPISettings, UvicornSettings, ShopSettings, NowPaymentsSettings
+from config import APISettings, CORSSettings, FastAPISettings, PayPalSettings, UvicornSettings, ShopSettings, NowPaymentsSettings
 import logging
 
 ####
@@ -58,22 +58,22 @@ async def startup():
 	from resources.routes import initialize_routes
 	initialize_routes(app)
 
-	if ShopSettings.ENABLE and NowPaymentsSettings.ENABLE:
-		from resources.nowpayments import getNowPaymentsStatus, setCachedAvailableCoins
-		if await getNowPaymentsStatus():
-			print('NOWPayments is online. Fetching available coins...')
-			for i in range(NowPaymentsSettings.STARTUP_COIN_FETCH_AMOUNT):
-				if await setCachedAvailableCoins():
-					print('NOWPayments coins cached.')
-					break
-				else:
-					print('Failed to get NOWPayments coins.')
-					if i < NowPaymentsSettings.STARTUP_COIN_FETCH_AMOUNT - 1:
-						print(f'Retrying {NowPaymentsSettings.STARTUP_COIN_FETCH_AMOUNT - 1 - i} time(s).')
-		else:
-			print('NOWPayments not responding.')
-			print(f'Available coins will be set on the next reqest to {APISettings.ROUTE_BASE}payment/nowpayments/available-coins request if NOWPayments is available.')
-
+	if ShopSettings.ENABLE:
+		if NowPaymentsSettings.ENABLE:
+			from resources.nowpayments import getNowPaymentsStatus, setCachedAvailableCoins
+			if await getNowPaymentsStatus():
+				print('NOWPayments is online. Fetching available coins...')
+				for i in range(NowPaymentsSettings.STARTUP_COIN_FETCH_AMOUNT):
+					if await setCachedAvailableCoins():
+						print('NOWPayments coins cached.')
+						break
+					else:
+						print('Failed to get NOWPayments coins.')
+						if i < NowPaymentsSettings.STARTUP_COIN_FETCH_AMOUNT - 1:
+							print(f'Retrying {NowPaymentsSettings.STARTUP_COIN_FETCH_AMOUNT - 1 - i} time(s).')
+			else:
+				print('NOWPayments not responding.')
+				print(f'Available coins will be set on the next reqest to {APISettings.ROUTE_BASE}payment/nowpayments/available-coins request if NOWPayments is available.')
 	
 	print('-- STARTED UP --')
 	logger.info('-- STARTED UP --')
@@ -82,8 +82,15 @@ async def startup():
 async def shutdown():
 	logger.info('-- SHUTTING DOWN --')
 	print('-- SHUTTING DOWN --')
+	
 	from database.db import close_db
 	close_db()
+
+	import os
+	import shutil
+	if os.path.exists('cache'):
+		shutil.rmtree('cache')
+
 	print('-- SHUT DOWN --')
 	logger.info('-- SHUT DOWN --')
 

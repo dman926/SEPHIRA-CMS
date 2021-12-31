@@ -9,9 +9,16 @@ from paypalcheckoutsdk.core import PayPalHttpClient, SandboxEnvironment, LiveEnv
 from paypalcheckoutsdk.orders import OrdersCreateRequest, OrdersCaptureRequest, OrdersGetRequest
 from modules.JWT import get_jwt_identity_optional
 from mongoengine.errors import DoesNotExist
-from resources.errors import NotFoundError, OutOfStockError
+from resources.errors import NotFoundError, OutOfStockError, ServiceUnavailableError, UnauthorizedError
 from database.models import Order
-from services import price_service
+from services import price_service, http_service
+from binascii import crc32
+import os
+import json
+from cryptography import x509
+from cryptography.hazmat import backends
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
 
 router = APIRouter(
 	prefix=APISettings.ROUTE_BASE + 'payment/paypal',
@@ -31,6 +38,23 @@ class PayPalClient:
 		self.client = PayPalHttpClient(self.environment)
 
 paypal_client = PayPalClient()
+
+async def getPayPalCert(url: str) -> Optional[str]:
+	certPath = os.path.join('cache', 'paypal_cert.json')
+	if os.path.exists(certPath):
+		with open(certPath, 'w') as certFile:
+			return json.loads(certFile)['cert']
+	r = await http_service.request('GET', url)
+	if r.status_code == 200:
+		if not os.path.exists('cache'):
+			os.mkdir('cache')
+		with open(certPath, 'w') as certFile:
+			json.dumps({
+				'url': url,
+				'cert': r.text
+			}, certFile)
+		return r.text
+	return
 
 ###########
 # SCHEMAS #
@@ -160,12 +184,32 @@ async def capture_transaction(transaction_body: CaptureTransactionModel, identit
 		raise e
 
 @router.post('/webhook')
-async def webhook(payload: dict = Body(...), PAYPAL_TRANSMISSION_SIG: str = Header(None), PAYPAL_AUTH_ALGO: str = Header(None), PAYPAL_CERT_URL: str = Header(None)):
+async def webhook(payload: dict = Body(...), PAYPAL_TRANSMISSION_ID: str = Header(None), PAYPAL_TRANSMISSION_TIME: str = Header(None),  PAYPAL_TRANSMISSION_SIG: str = Header(None), PAYPAL_AUTH_ALGO: str = Header(None), PAYPAL_CERT_URL: str = Header(None)):
 	try:
-		# TODO
-		if payload['event_type'] == 'CHECKOUT.ORDER.COMPLETED':
-			pass
+		# Verify signature
+		cert = await getPayPalCert(PAYPAL_CERT_URL)
+		if not cert:
+			raise ServiceUnavailableError
+		signature = f'{PAYPAL_TRANSMISSION_ID}|{PAYPAL_TRANSMISSION_TIME}|{PayPalSettings.WEBHOOK_ID}|{crc32(bytes(payload))}'
+		cert = x509.load_pem_x509_certificate(cert.encode('ascii'), backend=backends.default_backend())
+		public_key = cert.public_key()
+		try:
+			public_key.verify(
+				PAYPAL_TRANSMISSION_SIG,
+				signature,
+				padding.PKCS1v15(),
+				hashes.SHA256()
+			)
+		except Exception:
+			raise UnauthorizedError
+		# Signature verification complete
+
+
 
 		return 'ok'
+	except ServiceUnavailableError:
+		raise ServiceUnavailableError().http_exception
+	except UnauthorizedError:
+		raise UnauthorizedError().http_exception
 	except Exception as e:
 		raise e

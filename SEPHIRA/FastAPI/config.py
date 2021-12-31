@@ -7,7 +7,7 @@ from pydantic.networks import HttpUrl
 from os import path, getcwd
 
 # This is just for development purposes. Feel free to put the raw values in this file if people seeing them is not an issue (ie. private code base)
-from secret import COINBASE_API_KEY, COINBASE_SHARED_SECRET, NOWPAYMENTS_API_KEY, NOWPAYMENTS_IPN_SECRET, PAYPAL_ID, PAYPAL_SECRET, STRIPE_SK
+from secret import COINBASE_API_KEY, COINBASE_SHARED_SECRET, NOWPAYMENTS_API_KEY, NOWPAYMENTS_IPN_SECRET, PAYPAL_ID, PAYPAL_SECRET, PAYPAL_WEBHOOK_ID, STRIPE_SK
 
 
 class MongoSettings:
@@ -90,6 +90,7 @@ class PayPalSettings:
 	ENABLE: bool = True
 	CLIENT_ID: str = PAYPAL_ID # Your client ID.
 	CLIENT_SECRET: str = PAYPAL_SECRET # Your client secret.
+	WEBHOOK_ID: str = PAYPAL_WEBHOOK_ID # The ID of your webhook
 	USE_SANDBOX: bool = True # Set to `True` if you would like to test payments without actually getting charged. Remember that your client ID and client secert are different for sandbox and live accounts.
 	
 
