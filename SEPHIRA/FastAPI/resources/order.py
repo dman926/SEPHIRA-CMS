@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-from pydantic.main import BaseModel
 from config import APISettings
 
 from typing import Optional
@@ -7,7 +6,9 @@ from fastapi import Depends
 from modules.JWT.jwt import get_jwt_identity, get_jwt_identity_optional
 from mongoengine.errors import DoesNotExist, ValidationError
 from resources.errors import NotFoundError, SchemaValidationError
-from database.models import CartItem, CartItemIDModel, Coupon, Order, OrderModel, Product, UsShippingZone, UsTaxJurisdiction
+from database.models import CartItem, Coupon, Order, OrderModel, Product, UsShippingZone, UsTaxJurisdiction
+
+from services import price_service
 
 router = APIRouter(
 	prefix=APISettings.ROUTE_BASE + 'order',
@@ -83,8 +84,22 @@ async def modify_order(id: str, order_body: OrderModel, identity: Optional[str] 
 				shippingZone = UsShippingZone.objects.get(applicableStates=order_body.addresses['shipping']['region'])
 			except DoesNotExist:
 				shippingZone = UsShippingZone.objects.get(default=True)
-			rateCandidate = []
-			# TODO: Calculate order tax and shipping rates
+			rateCandidates = []
+			price = price_service.calculate_order_discount(order)
+			for rate in shippingZone.rates:
+				if ((rate.minCutoff != None and rate.minCutoff < price) or rate.minCutoff == None) and ((rate.maxCutoff != None and rate.maxCutoff > price) or rate.maxCutoff == None):
+					rateCandidates.append(rate)
+			match = None
+			for candidate in rateCandidates:
+				if match == None:
+					match = candidate
+				elif match.minCutoff == None and candidate.minCutoff != None:
+					match = candidate
+				elif match.maxCutoff == None and candidate.maxCutoff != None:
+					match = candidate
+				elif match.maxCutoff - match.minCutoff > candidate.maxCutoff - candidate.minCutoff:
+					match = candidate
+			order.update(addressses=order_body.addresses, taxRate=taxJurisdiction.estimatedCombinedRate, shippingType=match.type, shippingRate=match.rate)
 		if order_body.coupons:
 			coupons = list(map(lambda c: Coupon.objects.get(id=c), order_body.coupons))
 			order.update(coupons=coupons)

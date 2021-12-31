@@ -87,21 +87,17 @@ export class PriceTotalDisplayComponent implements OnInit {
 					candidates.push(rate);
 				}
 			});
-			let match: ShippingRate | null = null;
+			let match: ShippingRate | undefined;
 			for (let i = 0; i < candidates.length; i++) {
 				const candidate = candidates[i];
-				if (match === null) {
+				if (match === undefined) {
 					match = candidate;
-				} else {
-					// TODO: this formula is a little off.
-					// I think I want it to match the closest in range possible, so I need to rework it
-					if (match.minCutoff === undefined && candidate.minCutoff !== undefined) {
-						match = candidate;
-					} else if (match.maxCutoff === undefined && candidate.maxCutoff !== undefined) {
-						match = candidate;
-					} else if (match.maxCutoff !== undefined && match.minCutoff !== undefined && candidate.maxCutoff !== undefined && candidate.minCutoff !== undefined && match.maxCutoff - match.minCutoff > candidate.maxCutoff - candidate.minCutoff) {
-						match = candidate
-					}
+				} else if (match.minCutoff === undefined && candidate.minCutoff !== undefined) {
+					match = candidate
+				} else if (match.maxCutoff === undefined && candidate.maxCutoff !== undefined) {
+					match = candidate;
+				} else if ((match.minCutoff !== undefined && match.maxCutoff !== undefined && candidate.minCutoff !== undefined && candidate.maxCutoff !== undefined) && (match.maxCutoff - match.minCutoff > candidate.maxCutoff - candidate.minCutoff) {
+					match = candidate;
 				}
 			}
 			if (match) {
