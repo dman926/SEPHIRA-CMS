@@ -2,14 +2,3 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
-
-section#nowpayments-gateway {
-	.coin-option {
-		display: flex;
-		align-items: center;
-		gap: 1em;
-		img {
-			height: 2em;
-		}
-	}
-}
