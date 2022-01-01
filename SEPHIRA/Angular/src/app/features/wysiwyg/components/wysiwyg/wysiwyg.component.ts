@@ -1,5 +1,6 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { FormGroupDirective } from '@angular/forms';
+import { Component, Input, OnDestroy, OnInit, SecurityContext } from '@angular/core';
+import { FormControl, FormGroupDirective } from '@angular/forms';
+import { DomSanitizer } from '@angular/platform-browser';
 import { Editor, Toolbar } from 'ngx-editor';
 import { ThemeService } from 'src/app/core/services/theme/theme.service';
 import { environment } from 'src/environments/environment';
@@ -16,6 +17,7 @@ export class WysiwygComponent implements OnInit, OnDestroy {
 	@Input() floatingMenu: boolean;
 	@Input() placeholder: string;
 	@Input() disableCodeEditing: boolean;
+	@Input() sanitize: boolean;
 
 	_editor: Editor | undefined;
 	_codeEditor: boolean;
@@ -32,16 +34,29 @@ export class WysiwygComponent implements OnInit, OnDestroy {
 		['align_left', 'align_center', 'align_right', 'align_justify'],
 	];
 
-	constructor(public theme: ThemeService, public rootFormGroup: FormGroupDirective) {
+	constructor(public theme: ThemeService, public rootFormGroup: FormGroupDirective, private sanitizer: DomSanitizer) {
 		this.floatingMenu = environment.wysiwygMenuStyle === 'floating';
 		this.placeholder = 'Type Here...';
 		this.disableCodeEditing = false;
+		this.sanitize = true;
 		this._codeEditor = false;
 	}
 
 	ngOnInit(): void {
 		if (this.controlName === undefined) {
 			throw new Error('`controlName` is a required input');
+		}
+		let control = this.rootFormGroup.control.get(this.controlName);
+		if (control) {
+			if (this.sanitize) {
+				control.valueChanges.subscribe(val => {
+					control?.setValue(this.sanitizer.sanitize(SecurityContext.HTML, this.sanitizer.bypassSecurityTrustHtml(val))?.toString(), {
+						emitEvent: false
+					});
+				});
+			}
+		} else {
+			throw new Error('Supplied control name is not a valid `FormControl`');
 		}
 		this._editor = new Editor();
 	}

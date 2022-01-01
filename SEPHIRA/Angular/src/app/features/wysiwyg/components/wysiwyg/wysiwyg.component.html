@@ -3,10 +3,8 @@
 	<ng-container *ngIf="!_codeEditor;else codeEditor">
 		<ngx-editor-menu *ngIf="!floatingMenu" [editor]="_editor" [toolbar]="_toolbar"></ngx-editor-menu>
 		<ngx-editor [editor]="_editor" [formControlName]="controlName" outputFormat="html" [placeholder]="label ? label : placeholder">
-			<ngx-editor-floating-menu *ngIf="floatingMenu" [editor]="_editor">
-				<ngx-editor-menu [editor]="_editor" [toolbar]="_toolbar"></ngx-editor-menu>
-			</ngx-editor-floating-menu>
-		</ngx-editor>	
+			<ngx-editor-floating-menu *ngIf="floatingMenu" [editor]="_editor"></ngx-editor-floating-menu>
+		</ngx-editor>
 	</ng-container>
 	<ng-template #codeEditor>
 		<mat-form-field *ngIf="!disableCodeEditing" appearance="fill" [style.color]="(theme.theme$ | async) === 'light' ? 'black' : 'white'">
