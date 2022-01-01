@@ -2,7 +2,7 @@
 	<button mat-button *ngIf="!disableCodeEditing" type="button" (click)="_codeEditor = !_codeEditor" [style.color]="(theme.theme$ | async) === 'light' ? 'black' : 'white'"><mat-icon>code</mat-icon> {{ _codeEditor ? 'Disable' : 'Enable' }} raw code editing</button>
 	<ng-container *ngIf="!_codeEditor;else codeEditor">
 		<ngx-editor-menu *ngIf="!floatingMenu" [editor]="_editor" [toolbar]="_toolbar"></ngx-editor-menu>
-		<ngx-editor [editor]="_editor" [formControlName]="controlName" outputFormat="html" [placeholder]="placeholder">
+		<ngx-editor [editor]="_editor" [formControlName]="controlName" outputFormat="html" [placeholder]="label ? label : placeholder">
 			<ngx-editor-floating-menu *ngIf="floatingMenu" [editor]="_editor">
 				<ngx-editor-menu [editor]="_editor" [toolbar]="_toolbar"></ngx-editor-menu>
 			</ngx-editor-floating-menu>
