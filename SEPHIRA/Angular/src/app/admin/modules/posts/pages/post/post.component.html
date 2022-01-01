@@ -26,7 +26,7 @@
 		<mat-checkbox *ngSwitchCase="'checkbox'" color="primary" [formControlName]="schema.name">{{ schema.niceName }}</mat-checkbox>
 
 		<div *ngSwitchCase="'wysiwyg'" class="spaceout">
-			<sephira-wysiwyg [controlName]="schema.name"></sephira-wysiwyg>
+			<sephira-wysiwyg [controlName]="schema.name" [label]="schema.niceName"></sephira-wysiwyg>
 		</div>
 
 		<div *ngSwitchCase="'FormArray'" class="spaceout">

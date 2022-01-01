@@ -1,6 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormGroupDirective } from '@angular/forms';
 import { Editor, Toolbar } from 'ngx-editor';
+import { ThemeService } from 'src/app/core/services/theme/theme.service';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -11,10 +12,13 @@ import { environment } from 'src/environments/environment';
 export class WysiwygComponent implements OnInit, OnDestroy {
 
 	@Input() controlName: string | undefined;
+	@Input() label: string | undefined;
 	@Input() floatingMenu: boolean;
 	@Input() placeholder: string;
+	@Input() disableCodeEditing: boolean;
 
 	_editor: Editor | undefined;
+	_codeEditor: boolean;
 
 	readonly _toolbar: Toolbar = [
 		// default value
@@ -28,9 +32,11 @@ export class WysiwygComponent implements OnInit, OnDestroy {
 		['align_left', 'align_center', 'align_right', 'align_justify'],
 	];
 
-	constructor(public rootFormGroup: FormGroupDirective) {
+	constructor(public theme: ThemeService, public rootFormGroup: FormGroupDirective) {
 		this.floatingMenu = environment.wysiwygMenuStyle === 'floating';
 		this.placeholder = 'Type Here...';
+		this.disableCodeEditing = false;
+		this._codeEditor = false;
 	}
 
 	ngOnInit(): void {

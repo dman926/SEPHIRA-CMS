@@ -1,8 +1,17 @@
 <div *ngIf="_editor && controlName" [formGroup]="rootFormGroup.control">
-	<ngx-editor-menu *ngIf="!floatingMenu" [editor]="_editor" [toolbar]="_toolbar"></ngx-editor-menu>
-	<ngx-editor [editor]="_editor" [formControlName]="controlName" outputFormat="html" [placeholder]="placeholder">
-		<ngx-editor-floating-menu *ngIf="floatingMenu" [editor]="_editor">
-			<ngx-editor-menu [editor]="_editor" [toolbar]="_toolbar"></ngx-editor-menu>
-		</ngx-editor-floating-menu>
-	</ngx-editor>
+	<button mat-button *ngIf="!disableCodeEditing" type="button" (click)="_codeEditor = !_codeEditor" [style.color]="(theme.theme$ | async) === 'light' ? 'black' : 'white'"><mat-icon>code</mat-icon> {{ _codeEditor ? 'Disable' : 'Enable' }} raw code editing</button>
+	<ng-container *ngIf="!_codeEditor;else codeEditor">
+		<ngx-editor-menu *ngIf="!floatingMenu" [editor]="_editor" [toolbar]="_toolbar"></ngx-editor-menu>
+		<ngx-editor [editor]="_editor" [formControlName]="controlName" outputFormat="html" [placeholder]="placeholder">
+			<ngx-editor-floating-menu *ngIf="floatingMenu" [editor]="_editor">
+				<ngx-editor-menu [editor]="_editor" [toolbar]="_toolbar"></ngx-editor-menu>
+			</ngx-editor-floating-menu>
+		</ngx-editor>	
+	</ng-container>
+	<ng-template #codeEditor>
+		<mat-form-field *ngIf="!disableCodeEditing" appearance="fill" [style.color]="(theme.theme$ | async) === 'light' ? 'black' : 'white'">
+			<mat-label *ngIf="label">{{ label }}</mat-label>
+			<textarea matInput [formControlName]="controlName"></textarea>
+		</mat-form-field>
+	</ng-template>	
 </div>
