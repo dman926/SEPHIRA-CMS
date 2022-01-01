@@ -1,0 +1,8 @@
+<div *ngIf="_editor && controlName" [formGroup]="rootFormGroup.control">
+	<ngx-editor-menu *ngIf="!floatingMenu" [editor]="_editor" [toolbar]="_toolbar"></ngx-editor-menu>
+	<ngx-editor [editor]="_editor" [formControlName]="controlName" outputFormat="html" [placeholder]="placeholder">
+		<ngx-editor-floating-menu *ngIf="floatingMenu" [editor]="_editor">
+			<ngx-editor-menu [editor]="_editor" [toolbar]="_toolbar"></ngx-editor-menu>
+		</ngx-editor-floating-menu>
+	</ngx-editor>
+</div>

@@ -18,6 +18,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { LoaderSpinnerModule } from 'src/app/features/loader-spinner/loader-spinner.module';
 import { MediaBrowserModule } from 'src/app/features/media-browser/media-browser.module';
+import { WysiwygModule } from 'src/app/features/wysiwyg/wysiwyg.module';
 
 
 @NgModule({
@@ -41,7 +42,8 @@ import { MediaBrowserModule } from 'src/app/features/media-browser/media-browser
 
 		PostSelectModule,
 		LoaderSpinnerModule,
-		MediaBrowserModule
+		MediaBrowserModule,
+		WysiwygModule
 	]
 })
 export class PostsModule { }
