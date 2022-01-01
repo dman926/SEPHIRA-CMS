@@ -1,7 +1,9 @@
-div {
+div#wysiwyg {
 	color: black;
-}
-
-mat-form-field {
-	display: block;
+	::ng-deep div.NgxEditor__MenuBar {
+		flex-wrap: wrap;
+	}
+	mat-form-field {
+		display: block;
+	}
 }

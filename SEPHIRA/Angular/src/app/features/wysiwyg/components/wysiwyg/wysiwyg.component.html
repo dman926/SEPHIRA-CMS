@@ -1,4 +1,4 @@
-<div *ngIf="_editor && controlName" [formGroup]="rootFormGroup.control">
+<div *ngIf="_editor && controlName" id="wysiwyg" [formGroup]="rootFormGroup.control">
 	<button mat-button *ngIf="!disableCodeEditing" type="button" (click)="_codeEditor = !_codeEditor" [style.color]="(theme.theme$ | async) === 'light' ? 'black' : 'white'"><mat-icon>code</mat-icon> {{ _codeEditor ? 'Disable' : 'Enable' }} raw code editing</button>
 	<ng-container *ngIf="!_codeEditor;else codeEditor">
 		<ngx-editor-menu *ngIf="!floatingMenu" [editor]="_editor" [toolbar]="_toolbar"></ngx-editor-menu>
