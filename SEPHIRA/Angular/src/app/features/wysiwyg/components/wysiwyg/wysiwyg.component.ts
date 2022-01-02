@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit, SecurityContext } from '@angular/core';
-import { FormControl, FormGroupDirective } from '@angular/forms';
+import { FormGroupDirective } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Editor, Toolbar } from 'ngx-editor';
 import { ThemeService } from 'src/app/core/services/theme/theme.service';
@@ -16,11 +16,8 @@ export class WysiwygComponent implements OnInit, OnDestroy {
 	@Input() label: string | undefined;
 	@Input() floatingMenu: boolean;
 	@Input() placeholder: string;
-	@Input() disableCodeEditing: boolean;
-	@Input() sanitize: boolean;
 
 	_editor: Editor | undefined;
-	_codeEditor: boolean;
 
 	readonly _toolbar: Toolbar = [
 		// default value
@@ -37,9 +34,6 @@ export class WysiwygComponent implements OnInit, OnDestroy {
 	constructor(public theme: ThemeService, public rootFormGroup: FormGroupDirective, private sanitizer: DomSanitizer) {
 		this.floatingMenu = environment.wysiwygMenuStyle === 'floating';
 		this.placeholder = 'Type Here...';
-		this.disableCodeEditing = false;
-		this.sanitize = true;
-		this._codeEditor = false;
 	}
 
 	ngOnInit(): void {
@@ -48,13 +42,11 @@ export class WysiwygComponent implements OnInit, OnDestroy {
 		}
 		let control = this.rootFormGroup.control.get(this.controlName);
 		if (control) {
-			if (this.sanitize) {
-				control.valueChanges.subscribe(val => {
-					control?.setValue(this.sanitizer.sanitize(SecurityContext.HTML, this.sanitizer.bypassSecurityTrustHtml(val))?.toString(), {
-						emitEvent: false
-					});
+			control.valueChanges.subscribe(val => {
+				control?.setValue(this.sanitizer.sanitize(SecurityContext.HTML, val), {
+					emitEvent: false
 				});
-			}
+			});
 		} else {
 			throw new Error('Supplied control name is not a valid `FormControl`');
 		}
