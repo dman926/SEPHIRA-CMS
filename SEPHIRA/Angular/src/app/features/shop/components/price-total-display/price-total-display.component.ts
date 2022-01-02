@@ -96,7 +96,7 @@ export class PriceTotalDisplayComponent implements OnInit {
 					match = candidate
 				} else if (match.maxCutoff === undefined && candidate.maxCutoff !== undefined) {
 					match = candidate;
-				} else if ((match.minCutoff !== undefined && match.maxCutoff !== undefined && candidate.minCutoff !== undefined && candidate.maxCutoff !== undefined) && (match.maxCutoff - match.minCutoff > candidate.maxCutoff - candidate.minCutoff) {
+				} else if ((match.minCutoff !== undefined && match.maxCutoff !== undefined && candidate.minCutoff !== undefined && candidate.maxCutoff !== undefined) && (match.maxCutoff - match.minCutoff > candidate.maxCutoff - candidate.minCutoff)) {
 					match = candidate;
 				}
 			}

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { debounceTime, map } from 'rxjs';
 import { CoreService } from 'src/app/core/services/core/core.service';
@@ -16,7 +16,7 @@ import { CheckoutService, NowPaymentCoin, NowPaymentRes, NowPaymentsMinAmountRes
 	templateUrl: './nowpayments.component.html',
 	styleUrls: ['./nowpayments.component.scss']
 })
-export class NowpaymentsComponent {
+export class NowpaymentsComponent implements OnInit {
 
 	@Input() cartItems: CartItem[];
 
