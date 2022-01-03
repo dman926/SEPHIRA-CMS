@@ -43,8 +43,11 @@ def coinInCachedCoins(coin: str) -> bool:
 	return False
 
 async def getNowPaymentsStatus() -> bool:
+	global lastPingPong, nowPaymentStatus
+	lastPingPong = datetime.now()
 	try:
-		return (await http_service.request('GET', nowPaymentsApiBase + 'status')).status_code == 200
+		nowPaymentStatus = (await http_service.request('GET', nowPaymentsApiBase + 'status')).status_code == 200
+		return nowPaymentStatus
 	except ReadTimeout:
 		return False
 
@@ -85,13 +88,10 @@ class CheckoutBody(BaseModel):
 
 @router.get('/available-coins')
 async def get_coins():
-	global lastPingPong, nowPaymentStatus, cachedAvailableCoins
+	global nowPaymentStatus
 	try:
-		newPingPongTime = datetime.now()
-		if lastPingPong + timedelta(seconds=NowPaymentsSettings.STATUS_PING_TIME) < newPingPongTime or not nowPaymentStatus or len(cachedAvailableCoins) == 0:
-			nowPaymentStatus = await getNowPaymentsStatus()
-			if nowPaymentStatus:
-				lastPingPong = newPingPongTime
+		if lastPingPong + timedelta(seconds=NowPaymentsSettings.STATUS_PING_TIME) < datetime.now() or not nowPaymentStatus or len(cachedAvailableCoins) == 0:
+			if await getNowPaymentsStatus():
 				if not await setCachedAvailableCoins():
 					raise ServiceUnavailableError
 		if not nowPaymentStatus:
