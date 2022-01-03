@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
 import { PostService } from 'src/app/core/services/post/post.service';
 import { Product } from 'src/app/models/posts/product';
@@ -11,7 +12,7 @@ import { Product } from 'src/app/models/posts/product';
 	templateUrl: './shop.component.html',
 	styleUrls: ['./shop.component.scss'],
 })
-export class ShopComponent implements OnInit {
+export class ShopComponent implements OnInit, OnDestroy {
 
 	products: Product[];
 	productPageEvent: PageEvent;
@@ -20,6 +21,7 @@ export class ShopComponent implements OnInit {
 	searchTerm: string;
 	loaded: boolean;
 
+	private querySub: Subscription | undefined;
 	private readonly productsStateKey = makeStateKey<Product[]>('products');
 	private readonly productCountStateKey = makeStateKey<number>('productCount');
 	private readonly productStateKey = makeStateKey<Product>('product');
@@ -38,7 +40,7 @@ export class ShopComponent implements OnInit {
 	}
 
 	ngOnInit(): void {
-		this.route.queryParams.subscribe(params => {
+		this.querySub = this.route.queryParams.subscribe(params => {
 			if (params['p']) {
 				// Is individual product page
 				this.isProduct = true;
@@ -75,6 +77,10 @@ export class ShopComponent implements OnInit {
 				}
 			}
 		});
+	}
+
+	ngOnDestroy(): void {
+		this.querySub?.unsubscribe();
 	}
 
 	get shownProducts(): Product[] {

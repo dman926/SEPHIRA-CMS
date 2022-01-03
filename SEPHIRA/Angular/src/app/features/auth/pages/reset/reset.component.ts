@@ -20,7 +20,7 @@ export class ResetComponent implements OnInit, OnDestroy {
 	token: string | undefined;
 	resetting: boolean;
 	
-	private paramSub: Subscription | undefined;
+	private querySub: Subscription | undefined;
 
 	constructor(
 		private auth: AuthService,
@@ -39,14 +39,14 @@ export class ResetComponent implements OnInit, OnDestroy {
 
 	ngOnInit(): void {
 		if (this.platform.isBrowser) {
-			this.paramSub = this.route.queryParams.subscribe(params => {
+			this.querySub = this.route.queryParams.subscribe(params => {
 				this.token = params['t'];
 			});
 		}
 	}
 
 	ngOnDestroy(): void {
-		this.paramSub?.unsubscribe();
+		this.querySub?.unsubscribe();
 	}
 
 	resetPassword(): void {

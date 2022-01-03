@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
 
 @Component({
@@ -7,16 +8,22 @@ import { PlatformService } from 'src/app/core/services/platform/platform.service
 	templateUrl: './redirect.component.html',
 	styleUrls: ['./redirect.component.scss'],
 })
-export class RedirectComponent implements OnInit {
+export class RedirectComponent implements OnInit, OnDestroy {
 	
+	private querySub: Subscription | undefined;
+
 	constructor(private route: ActivatedRoute, private router: Router, private platform: PlatformService) { }
 
 	ngOnInit(): void {
 		if (this.platform.isBrowser) {
-			this.route.queryParams.subscribe(params => {
+			this.querySub = this.route.queryParams.subscribe(params => {
 				this.router.navigateByUrl(params['return']);
 			});	
 		}
+	}
+
+	ngOnDestroy(): void {
+		this.querySub?.unsubscribe();
 	}
 
 }

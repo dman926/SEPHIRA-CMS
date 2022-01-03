@@ -18,6 +18,7 @@ export class CheckoutConfirmComponent implements OnInit, OnDestroy {
 	order: Order | null;
 	loaded: boolean;
 
+	private querySub: Subscription | undefined;
 	private socket: WebSocketSubject<any> | null;
 
 	constructor(private checkout: CheckoutService, private ws: WebsocketService, private route: ActivatedRoute, private platform: PlatformService, private state: TransferState) {
@@ -27,7 +28,7 @@ export class CheckoutConfirmComponent implements OnInit, OnDestroy {
 	}
 
 	ngOnInit(): void {
-		this.route.queryParams.subscribe(params => {
+		this.querySub = this.route.queryParams.subscribe(params => {
 			const id: string = params['id']
 			if (id) {
 				const stateKey = makeStateKey<Order>('Order');
@@ -62,6 +63,7 @@ export class CheckoutConfirmComponent implements OnInit, OnDestroy {
 	}
 
 	ngOnDestroy(): void {
+		this.querySub?.unsubscribe();
 		if (this.socket) {
 			this.ws.close(this.socket);
 		}
