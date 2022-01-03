@@ -30,6 +30,12 @@ class MissingOtpError(Exception):
 	http_exception = HTTPException(status_code=status_code, detail=detail)
 
 
+class NotVerifiedError(Exception):
+	status_code = 401
+	detail = 'Not verified'
+	http_exception = HTTPException(status_code=status_code, detail=detail)
+
+
 class SchemaValidationError(Exception):
 	status_code = 400
 	detail = 'Schmea Validation Error'

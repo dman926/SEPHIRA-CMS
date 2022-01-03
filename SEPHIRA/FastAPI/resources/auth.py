@@ -1,19 +1,19 @@
-from fastapi import APIRouter, Request
-from fastapi.security.oauth2 import OAuth2PasswordRequestForm
+from fastapi import APIRouter
 from config import APISettings
 
-from fastapi import Depends
+from fastapi import Depends, Request, BackgroundTasks
+from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
 from typing import Optional
-from mongoengine.errors import NotUniqueError, DoesNotExist
+from mongoengine.errors import NotUniqueError, DoesNotExist, ValidationError
 
 from modules.JWT import Token, create_access_token, create_refresh_token, get_jwt_identity, get_raw_token
 from database.models import User, UserModel
-from resources.errors import UserAlreadyExistsError, UnauthorizedError, MissingOtpError
-from services.mail_service import send_email_async
+from resources.errors import NotFoundError, NotVerifiedError, UserAlreadyExistsError, UnauthorizedError, MissingOtpError
+from services.mail_service import send_email_backround
 from services.util_service import base_model_to_clean_dict
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 from time import sleep
 import base64
 import os
@@ -47,16 +47,66 @@ class EmailForm(BaseModel):
 ##########
 
 @router.post('/signup')
-async def signup(form_data: EmailPasswordForm):
+async def signup(form_data: EmailPasswordForm, request: Request, background_tasks: BackgroundTasks):
 	try:
-		user = User(email = form_data.username, password = form_data.password)
+		try:
+			user = User(email=form_data.username, password=form_data.password)
+		except NotUniqueError:
+			user = User.objects.get(email=form_data.username, verified=False, created__lt=datetime.now() - timedelta(days=1))
+			user.password = form_data.password
 		if User.objects.count() == 0:
 			user.admin = True
 		user.hash_password()
 		user.save()
+		verify_token = create_access_token(str(user.id), expires_delta=timedelta(days=1))
+		send_email_backround(
+			background_tasks,
+			'Verify Your Email',
+			[user.email],
+			'verify_email.html',
+			{
+				'url': f'{request.client.host}:{request.client.port}/login?t={verify_token}',
+			}
+		)
+		# FOR DEBUG PURPOSES
+		print(request.client.host + '/login?t=' + verify_token)
 		return { 'id': str(user.id) }
-	except NotUniqueError:
+	except DoesNotExist:
 		raise UserAlreadyExistsError().http_exception
+	except Exception as e:
+		raise e
+
+@router.post('/verify')
+async def verify_email(identity: str = Depends(get_jwt_identity)):
+	try:
+		user = User.objects.get(id=identity)
+		user.verified = True
+		user.save()
+		return 'ok'
+	except DoesNotExist:
+		raise UnauthorizedError().http_exception
+	except Exception as e:
+		raise e
+
+@router.post('/resend-verify')
+async def resend_verify_email(form_body: EmailForm, request: Request, background_tasks: BackgroundTasks):
+	try:
+		user = User.objects.get(email=form_body.email)
+		if user.verified:
+			raise UnauthorizedError
+		verify_token = create_access_token(str(user.id), expires_delta=timedelta(days=1))
+		send_email_backround(
+			background_tasks,
+			'Verify Your Email',
+			[user.email],
+			'verify_email.html',
+			{
+				'url': f'{request.client.host}:{request.client.port}/login?t={verify_token}',
+			}
+		)
+		return 'ok'
+	except (DoesNotExist, UnauthorizedError):
+		raise UnauthorizedError().http_exception
 	except Exception as e:
 		raise e
 
@@ -76,6 +126,8 @@ async def login(form_data: EmailPasswordForm):
 					raise MissingOtpError
 				if not user.verify_totp(otp):
 					raise UnauthorizedError
+		if not user.verified:
+			raise NotVerifiedError
 		return {
 			'access_token': create_access_token(identity=str(user.id)),
 			'refresh_token': create_refresh_token(identity=str(user.id))
@@ -85,6 +137,8 @@ async def login(form_data: EmailPasswordForm):
 		raise UnauthorizedError(detail='Incorrect email, password, or otp').http_exception
 	except MissingOtpError:
 		raise MissingOtpError().http_exception
+	except NotVerifiedError:
+		raise NotVerifiedError().http_exception
 	except Exception as e:
 		raise e
 
@@ -104,6 +158,8 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 					raise MissingOtpError
 				if not user.verify_totp(otp):
 					raise UnauthorizedError
+		if not user.verified:
+			raise NotVerifiedError
 		return {
 			'access_token': create_access_token(identity=str(user.id)),
 			'refresh_token': create_refresh_token(identity=str(user.id))
@@ -113,6 +169,8 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 		raise UnauthorizedError(detail='Incorrect email, password, or otp').http_exception
 	except MissingOtpError:
 		raise MissingOtpError().http_exception
+	except NotVerifiedError:
+		raise NotVerifiedError().http_exception
 	except Exception as e:
 		raise e
 
@@ -127,7 +185,6 @@ async def token_refresh2(token: Token = Depends(get_raw_token)):
 			'access_token': create_access_token(identity=identity),
 			'refresh_token': create_refresh_token(identity=identity)
 		}
-		return True
 	except UnauthorizedError:
 		raise UnauthorizedError(detail='Invalid token. Not a refresh token').http_exception
 	except DoesNotExist:
@@ -173,16 +230,17 @@ async def verify_otp_code(otp_body: OtpForm, identity: str = Depends(get_jwt_ide
 		raise e
 
 @router.post('/forgot')
-async def forgot_password(email_body: EmailForm, request: Request):
+async def forgot_password(email_body: EmailForm, request: Request, background_tasks: BackgroundTasks):
 	try:
 		user = User.objects.get(email=email_body.email)
 		reset_token = create_access_token(str(user.id), expires_delta=timedelta(days=1))
-		send_email_async(
-			'[SEPHIRA] Reset Your Password',
+		send_email_backround(
+			background_tasks,
+			'Reset Your Password',
 			[email_body.email],
 			'reset_password.html',
 			{
-				'url': request.client.host + '/reset/?t=' + reset_token,
+				'url': f'{request.client.host}:{request.client.port}/login/reset?t={reset_token}',
 			}
 		)
 		return 'ok'
@@ -193,14 +251,15 @@ async def forgot_password(email_body: EmailForm, request: Request):
 		raise e
 
 @router.post('/reset')
-async def reset_password(password_body: PasswordForm, identity: str = Depends(get_jwt_identity)):
+async def reset_password(password_body: PasswordForm, background_tasks: BackgroundTasks, identity: str = Depends(get_jwt_identity)):
 	try:
 		user = User.objects.get(id=identity)
 		user.modify(password=password_body.password)
 		user.hash_password()
 		user.save()
-		send_email_async(
-			'[SEPHIRA] Password Has Been Reset',
+		send_email_backround(
+			background_tasks,
+			'Password Has Been Reset',
 			[user.email],
 			'password_reset.html'
 		)

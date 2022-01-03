@@ -1,3 +1,5 @@
+@import 'src/theme.scss';
+
 form {
 	display: flex;
 	flex-direction: column;
@@ -8,4 +10,18 @@ form {
 	button:not(:last-child) {
 		margin-bottom: 1em;
 	}
+}
+
+div#verify-email-prompt {
+	text-align: center;
+	max-width: 20em;
+	margin: 1em auto 0;
+	padding: 0.5em;
+	border-radius: 0.5em;
+	background-color: mat-color($sephira-light-primary);
+	color: white;
+}
+
+div#verify-email-prompt.dark {
+	background-color: mat-color($sephira-dark-primary);
 }

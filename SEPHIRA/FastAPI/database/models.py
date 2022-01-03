@@ -136,10 +136,12 @@ class User(Document):
 	password = StringField(required=True, min_length=6)
 	salt = StringField()
 	otpSecret = StringField()
-	twoFactorEnabled = BooleanField()
+	verified = BooleanField(default=False)
+	twoFactorEnabled = BooleanField(default=False)
 	admin = BooleanField()
 	firstName = StringField()
 	lastName = StringField()
+	created = DateTimeField(default=datetime.datetime.now())
 
 	cart = EmbeddedDocumentListField('CartItem')
 	stripeCustomerID = StringField()
@@ -163,6 +165,7 @@ class User(Document):
 		return {
 			'id': str(self.id),
 			'email': self.email,
+			'verified': self.verified,
 			'twoFactorEnabled': self.twoFactorEnabled,
 			'admin': self.admin,
 			'firstName': self.firstName,

@@ -22,7 +22,7 @@ class MailSettings:
 	MAIL_USERNAME: str = ''
 	MAIL_PASSWORD: str = ''
 	MAIL_FROM: EmailStr = 'sephira@sephira.org'
-
+	MAIL_NICENAME: str = 'SEPHIRA' # The name that is displayed in emails. Most likely your business's name
 
 class OAuth2Settings:
 	JWT_SECRET_KEY: str = 'super-secret' # MAKE SURE TO CHANGE THIS FOR PRODUCTION.

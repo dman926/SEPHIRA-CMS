@@ -67,12 +67,29 @@ export class AuthService {
 		this.forceLogoutSubject.next(false);
 	}
 
-	public login(email: string, password: string, otp?: string): Observable<TokenPair> {
-		return this.http.post<TokenPair>(this.authBase + 'login', { username: email, password, client_id: otp });
+	public login(username: string, password: string, otp?: string): Observable<TokenPair> {
+		return this.http.post<TokenPair>(this.authBase + 'login', { username, password, client_id: otp });
 	}
 
-	public signup(email: string, password: string): Observable<Id> {
-		return this.http.post<Id>(this.authBase + 'signup', { email, password });
+	public signup(username: string, password: string): Observable<Id> {
+		return this.http.post<Id>(this.authBase + 'signup', { username, password });
+	}
+
+	public verify(token: string): Observable<string> {
+		if (!this.isSignedIn) {
+			const headers = new HttpHeaders().append('Authorization', `Bearer ${token}`);
+			return this.http.post<string>(this.authBase + 'verify', {}, { headers });
+		} else {
+			return EMPTY;
+		}
+	}
+
+	public resendVerify(email: string): Observable<string> {
+		if (!this.isSignedIn) {
+			return this.http.post<string>(this.authBase + 'resend-verify', { email });
+		} else {
+			return EMPTY;
+		}
 	}
 
 	public setTokens(accessToken: string, refreshToken?: string): void {

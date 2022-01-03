@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -7,13 +7,16 @@ import { SephiraErrorStateMatcher } from 'src/app/core/classes/Error State Match
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
 import { AuthService } from '../../services/auth/auth.service';
 import { OtpDialogComponent } from '../../components/otp-dialog/otp-dialog.component';
+import { ThemeService } from 'src/app/core/services/theme/theme.service';
+import { Location } from '@angular/common';
+import { Subscription } from 'rxjs';
 
 @Component({
 	selector: 'sephira-auth',
 	templateUrl: './auth.component.html',
 	styleUrls: ['./auth.component.scss'],
 })
-export class AuthComponent implements OnInit {
+export class AuthComponent implements OnInit, OnDestroy {
 
 	@Input() hideLogin: boolean;
 	@Input() hideRegister: boolean;
@@ -22,15 +25,21 @@ export class AuthComponent implements OnInit {
 
 	isVisible: boolean;
 	loggingIn: boolean;
+	signupPrompt: string;
+	signupOK: boolean;
+	sendingVerification: boolean;
+	verificationSent: boolean;
 
 	errorMatcher: SephiraErrorStateMatcher;
 
 	private returnUrl: string;
+	private querySub: Subscription | undefined;
 
 	constructor(
 		private auth: AuthService,
 		private dialog: MatDialog,
 		private platform: PlatformService,
+		public theme: ThemeService,
 		private route: ActivatedRoute,
 		private router: Router,
 		private snackbar: MatSnackBar) {
@@ -43,16 +52,33 @@ export class AuthComponent implements OnInit {
 		});
 		this.isVisible = false;
 		this.loggingIn = false;
+		this.signupPrompt = '';
+		this.signupOK = false;
+		this.sendingVerification = false;
+		this.verificationSent = false;
 		this.errorMatcher = new SephiraErrorStateMatcher();
 		this.returnUrl = '';
 	}
 
 	ngOnInit(): void {
 		if (this.platform.isBrowser) {
-			this.route.queryParams.subscribe(params => {
+			this.querySub = this.route.queryParams.subscribe(params => {
 				this.returnUrl = params['return'];
-			});	
+				const token = params['t'];
+				if (token) {
+					this.auth.verify(token).subscribe(res => {
+						const queryParams = {...params};
+						queryParams['t'] = null;
+						console.log(queryParams);
+						this.router.navigate([], { queryParams, replaceUrl: true, queryParamsHandling: 'merge' });
+					});
+				}
+			});
 		}
+	}
+
+	ngOnDestroy(): void {
+		this.querySub?.unsubscribe();
 	}
 
 	login(): void {
@@ -70,17 +96,22 @@ export class AuthComponent implements OnInit {
 					});
 				},
 				error: err => {
-					if (err.status === 401 && err.error.detail === 'Missing otp') {
-						const diag = this.dialog.open(OtpDialogComponent, {
-							width: '250px',
-							data: { email, password, returnUrl: this.returnUrl }
-						});
-						diag.afterClosed().subscribe(val => {
-							if (val) {
-								this.showSnackBar();
-							}
-							this.loggingIn = false;
-						})
+					if (err.status === 401) {
+						if (err.error.detail === 'Missing otp') {
+							const diag = this.dialog.open(OtpDialogComponent, {
+								width: '250px',
+								data: { email, password, returnUrl: this.returnUrl }
+							});
+							diag.afterClosed().subscribe(val => {
+								if (val) {
+									this.showSnackBar();
+								}
+								this.loggingIn = false;
+							})
+						} else if (err.error.detail === 'Not verified') {
+							this.signupPrompt = 'Your email is not verified.';
+							this.signupOK = true;
+						}
 					} else {
 						this.loggingIn = false;
 					}
@@ -96,19 +127,8 @@ export class AuthComponent implements OnInit {
 			const password = this.passwordFormControl.value;
 			this.auth.signup(email, password).subscribe({
 				next: signupRes => {
-					this.auth.login(email, password).subscribe({
-						next: loginRes => {
-							this.auth.setTokens(loginRes.access_token, loginRes.refresh_token);
-							this.auth.getUser().subscribe(user => {
-								this.auth.setUser(user);
-								this.showSnackBar();
-								this.router.navigateByUrl(this.returnUrl);
-							});
-						},
-						error: err => {
-							this.loggingIn = false;
-						}
-					});
+					this.signupPrompt = 'You\'ve signed up.';
+					this.signupOK = true;
 				},
 				error: err => {
 					if (err.status === 400 && err.error.detail === 'User with details already exists') {
@@ -118,6 +138,17 @@ export class AuthComponent implements OnInit {
 				}
 			});
 		}
+	}
+
+	resendVerification(): void {
+		this.sendingVerification = true;
+		this.auth.resendVerify(this.emailFormControl.value).subscribe(res => {
+			this.verificationSent = true;
+			setTimeout(() => {
+				this.sendingVerification = false;
+				this.verificationSent = false;
+			}, 5000);
+		});
 	}
 
 	private showSnackBar(): void {

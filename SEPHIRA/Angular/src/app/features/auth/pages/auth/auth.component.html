@@ -1,4 +1,4 @@
-<form [formGroup]="loginForm" (ngSubmit)="login()">
+<form [formGroup]="loginForm" (ngSubmit)="login()" *ngIf="!signupOK;else verifyPrompt">
 	<mat-form-field appearance="fill">
 		<mat-label>Email</mat-label>
 		<input matInput type="email" formControlName="email" [errorStateMatcher]="errorMatcher" required />
@@ -20,3 +20,12 @@
 	<button mat-raised-button type="submit" color="primary" [disabled]="loginForm.disabled || loggingIn">Log In</button>
 	<button mat-raised-button type="button" color="primary" [disabled]="loginForm.disabled || loggingIn" (click)="register()">Register</button>
 </form>
+
+<ng-template #verifyPrompt>
+	<div id="verify-email-prompt" [class.dark]="(theme.theme$ | async) !== 'light'">
+		<h2>{{ signupPrompt }}</h2>
+		<h3>Please check your email to verify.</h3>
+		<p>Didn't get the email? <button mat-raised-button color="accent" (click)="resendVerification()" [disabled]="sendingVerification">Click here to resend it</button></p>
+		<p class="hint" *ngIf="verificationSent">Verification sent.</p>
+	</div>
+</ng-template>

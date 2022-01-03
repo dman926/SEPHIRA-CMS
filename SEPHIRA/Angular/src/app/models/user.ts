@@ -3,6 +3,8 @@ import { CartItem } from "./cart-item";
 export interface User {
 	/** Email address. Must be unique */
 	email?: string;
+	/** If the email is verified */
+	verified?: boolean;
 	/** If two factor authentication is enabled */
 	twoFactorEnabled?: boolean;
 	/** Is the `User` an admin */

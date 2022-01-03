@@ -13,28 +13,31 @@ _conf = ConnectionConfig(
 	MAIL_TLS=MailSettings.MAIL_TLS,
 	MAIL_SSL=MailSettings.MAIL_SSL,
 	MAIL_FROM=MailSettings.MAIL_FROM,
+	MAIL_FROM_NAME=MailSettings.MAIL_NICENAME,
 	USE_CREDENTIALS=True,
 	TEMPLATE_FOLDER=path.join(path.dirname(__file__), '..', 'templates', 'email')
 )
 
-async def send_email_async(subject: str, recipients: list[EmailStr], template: str, body: dict = {}):
+async def send_email_async(subject: str, recipients: list[EmailStr], template: str, body: dict = {}, attachments: list[dict] = []):
 	message = MessageSchema(
 		subject=subject,
 		recipients=recipients,
-		body=body,
-		subtype='html'
+		template_body=body,
+		subtype='html',
+		attachments=attachments
 	)
 
 	fm = FastMail(_conf)
 
 	await fm.send_message(message, template_name=template)
 
-def send_email_backround(background_tasks: BackgroundTasks, subject: str, recipients: list[EmailStr], body: dict, template):
+def send_email_backround(background_tasks: BackgroundTasks, subject: str, recipients: list[EmailStr], template: str, body: dict, attachments: list[dict] = []):
 	message = MessageSchema(
 		subject=subject,
 		recipients=recipients,
-		body=body,
-		subtype='html'
+		template_body=body,
+		subtype='html',
+		attachments=attachments
 	)
 
 	fm = FastMail(_conf)
