@@ -1,1 +1,11 @@
-<p>reset works!</p>
+<form [formGroup]="resetForm" (ngSubmit)="resetPassword()" *ngIf="token">
+	<mat-form-field appearance="fill">
+		<mat-label>Password</mat-label>
+		<input matInput [type]="isVisible ? 'text' : 'password'" formControlName="password" [errorStateMatcher]="errorMatcher" required />
+		<button mat-icon-button matSuffix type="button" (click)="isVisible = !isVisible"><mat-icon>{{ isVisible ? 'visibility' : 'visibility_off' }}</mat-icon></button>
+		<mat-error *ngIf="passwordControl.hasError('required')">
+			Password is <strong>required</strong>
+		</mat-error>
+	</mat-form-field>
+	<button mat-raised-button type="submit" color="primary" [disabled]="resetForm.invalid || resetting">Log In</button>
+</form>

@@ -17,8 +17,8 @@
 			Password is <strong>required</strong>
 		</mat-error>
 	</mat-form-field>
-	<button mat-raised-button type="submit" color="primary" [disabled]="loginForm.disabled || loggingIn">Log In</button>
-	<button mat-raised-button type="button" color="primary" [disabled]="loginForm.disabled || loggingIn" (click)="register()">Register</button>
+	<button mat-raised-button type="submit" color="primary" [disabled]="loginForm.invalid || loggingIn">Log In</button>
+	<button mat-raised-button type="button" color="primary" [disabled]="loginForm.invalid || loggingIn" (click)="register()">Register</button>
 </form>
 
 <ng-template #verifyPrompt>

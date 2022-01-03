@@ -69,6 +69,7 @@ async def signup(form_data: EmailPasswordForm, request: Request, background_task
 			}
 		)
 		# FOR DEBUG PURPOSES
+		# TODO: remove in production
 		print(request.client.host + '/login?t=' + verify_token)
 		return { 'id': str(user.id) }
 	except DoesNotExist:
@@ -263,6 +264,11 @@ async def reset_password(password_body: PasswordForm, background_tasks: Backgrou
 			[user.email],
 			'password_reset.html'
 		)
+		if user.verified:
+			return {
+				'access_token': create_access_token(identity=str(user.id)),
+				'refresh_token': create_refresh_token(identity=str(user.id))
+			}
 		return 'ok'
 	except Exception as e:
 		raise e

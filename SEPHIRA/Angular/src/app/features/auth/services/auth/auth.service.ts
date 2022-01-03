@@ -162,6 +162,23 @@ export class AuthService {
 		}
 	}
 
+	public forgotPassword(email: string): Observable<string> {
+		if (!this.isSignedIn) {
+			return this.http.post<string>(this.authBase + 'forgot', { email });
+		} else {
+			return EMPTY;
+		}
+	}
+
+	public resetPassword(password: string, token: string): Observable<TokenPair | string> {
+		if (!this.isSignedIn) {
+			const headers = new HttpHeaders().append('Authorization', `Bearer ${token}`);
+			return this.http.post<string>(this.authBase + 'reset', { password }, { headers });
+		} else {
+			return EMPTY;
+		}
+	}
+
 	get isSignedIn(): boolean {
 		return this.cookie.getItem('accessToken') !== null;
 	}
