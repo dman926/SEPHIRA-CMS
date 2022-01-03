@@ -27,6 +27,7 @@ export class AuthComponent implements OnInit, OnDestroy {
 	loggingIn: boolean;
 	signupPrompt: string;
 	signupOK: boolean;
+	resettingPassword: boolean;
 	sendingVerification: boolean;
 	verificationSent: boolean;
 
@@ -54,6 +55,7 @@ export class AuthComponent implements OnInit, OnDestroy {
 		this.loggingIn = false;
 		this.signupPrompt = '';
 		this.signupOK = false;
+		this.resettingPassword = false;
 		this.sendingVerification = false;
 		this.verificationSent = false;
 		this.errorMatcher = new SephiraErrorStateMatcher();
@@ -137,6 +139,23 @@ export class AuthComponent implements OnInit, OnDestroy {
 					this.loggingIn = false;
 				}
 			});
+		}
+	}
+
+	resetPassword(): void {
+		if (this.emailFormControl.valid) {
+			this.resettingPassword = true;
+			this.auth.forgotPassword(this.emailFormControl.value).subscribe({
+				next: res => {
+					this.snackbar.open('Sent. Check Your Email', 'Close', { duration: 2500 })
+					setTimeout(() => {
+						this.resettingPassword = false;
+					}, 2500);
+				},
+				error: err => {
+					this.resettingPassword = false;
+				}
+			})
 		}
 	}
 
