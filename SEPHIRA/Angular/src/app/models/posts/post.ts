@@ -18,6 +18,8 @@ export interface Post {
 	slug?: string;
 	/** The content of the post. Arrives as a `string` and is converted to `SafeHtml` with the use of `DomSanitizer` */
 	content?: string | SafeHtml;
+	/** The format of the content */
+	contentType?: 'html' | 'markdown';
 	/** The excerpt of the post. Mostly used for the search page to safely and easily display the content in a short form */
 	excerpt?: string;
 	/** The status of the post */

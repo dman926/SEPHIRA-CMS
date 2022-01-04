@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { PageRoutingModule } from './page-routing.module';
 import { PageComponent } from './pages/page/page.component';
 import { LoaderSpinnerModule } from '../loader-spinner/loader-spinner.module';
+import { MarkdownEditorModule } from '../markdown-editor/markdown-editor.module';
 
 
 @NgModule({
@@ -14,7 +15,8 @@ import { LoaderSpinnerModule } from '../loader-spinner/loader-spinner.module';
 		CommonModule,
 		PageRoutingModule,
 
-		LoaderSpinnerModule
+		LoaderSpinnerModule,
+		MarkdownEditorModule
 	]
 })
 export class PageModule { }

@@ -389,6 +389,7 @@ class Post(Document):
 	title = StringField()
 	slug = StringField(unique=True, regex=re.compile('^([/]?)+([a-z0-9]?)+(?:-[a-z0-9]+)*$'))
 	content = StringField()
+	contentType = StringField(choices=['html', 'markdown'])
 	excerpt = StringField()
 	status = StringField(choices=['publish', 'draft', 'private', 'deactivated'], default='draft')
 	categories = ListField(StringField())
@@ -491,6 +492,7 @@ class Post(Document):
 			'title': self.title,
 			'slug': self.slug,
 			'content': self.content,
+			'contentType': self.contentType,
 			'excerpt': self.excerpt,
 			'status': self.status,
 			'categories': self.categories,

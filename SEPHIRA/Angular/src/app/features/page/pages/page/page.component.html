@@ -1,6 +1,11 @@
 <section *ngIf="loaded;else loaderSpinner">
     <ng-container *ngIf="page;else notFound">
-        <div [innerHtml]="page.content"></div>
+		<ng-container *ngIf="page.contentType === 'html'">
+			<div [innerHtml]="page.content"></div>
+		</ng-container>
+		<ng-container *ngIf="page.contentType === 'markdown'">
+			<sephira-markdown-editor [data]="$any(page.content)"></sephira-markdown-editor>
+		</ng-container>
     </ng-container>
     <ng-template #notFound>
         <h1>404</h1>

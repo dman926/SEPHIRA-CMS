@@ -1,0 +1,10 @@
+<div *ngIf="controlName && rootFormGroup;else content" [formGroup]="rootFormGroup.control">
+	<mat-form-field appearance="fill">
+		<mat-label>{{ label }}</mat-label>
+		<textarea matInput [formControlName]="controlName" [required]="isRequired"></textarea>
+	</mat-form-field>
+</div>
+
+<ng-template #content>
+	<markdown *ngIf="data" lineNumbers emoji katex ngPreserveWhitespaces [data]="data"></markdown>
+</ng-template>

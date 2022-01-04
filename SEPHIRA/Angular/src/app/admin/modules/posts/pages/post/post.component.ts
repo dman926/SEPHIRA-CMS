@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { AbstractControl, AsyncValidatorFn, FormArray, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AdminService } from 'src/app/admin/servies/admin.service';
 import { CoreService } from 'src/app/core/services/core/core.service';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
 import { Post, PostSchema } from 'src/app/models/posts/post';
+import { environment } from 'src/environments/environment';
 
 @Component({
 	selector: 'sephira-post',
@@ -20,13 +21,24 @@ export class PostComponent implements OnInit {
 	saved: boolean;
 	loaded: boolean;
 
+	editorStyle: 'html' | 'markdown';
+
 	private id: string | undefined;
 	private postType: string | undefined;
 
-	constructor(private admin: AdminService, private core: CoreService, private router: Router, private route: ActivatedRoute, private platform: PlatformService) {
+	constructor(
+		private admin: AdminService,
+		private core: CoreService,
+		private router: Router,
+		private route: ActivatedRoute,
+		private platform: PlatformService,
+		public cd: ChangeDetectorRef
+	) {
 		this.saving = false;
 		this.saved = false;
 		this.loaded = false;
+
+		this.editorStyle = environment.defaultEditorStyle !== 'markdown' ? 'html' : 'markdown';
 	}
 
 	ngOnInit(): void {
@@ -52,6 +64,7 @@ export class PostComponent implements OnInit {
 	editPost(): void {
 		if (this.postFormGroup!.valid) {
 			const post: Post = this.postFormGroup!.value;
+			post.contentType = this.editorStyle;
 			post.id = this.id!;
 			this.saving = true;
 			this.admin.editPost(this.postType!, post).subscribe(res => {

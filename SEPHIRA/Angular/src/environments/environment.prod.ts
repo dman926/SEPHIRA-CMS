@@ -7,6 +7,7 @@ export const environment = {
 	adminPath: 'admin', // The base subdirectory the user must enter to reach the admin section.
 	enableLightDarkToggle: true, // Add a light/dark theme toggle to the nav
 	defaultLightDark: 'dark', // Set the default theme to light or dark. Defaults to 'dark'
+	defaultEditorStyle: 'markdown', // Valid choices: `wysiwyg`, `markdown`. Set the content editor style. Defaults to `wysiwyg`.
 	wysiwygMenuStyle: 'menu', // Valid choices: `menu`, `floating`. Set the default menu style for the WYSIWYG editor. Can always be overriden with [floatingMenu]="true" in component creation. Defaults to `menu`
 
 	// SHOP SPECIFIC VARIABLES
