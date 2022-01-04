@@ -18,7 +18,8 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { LoaderSpinnerModule } from 'src/app/features/loader-spinner/loader-spinner.module';
 import { MediaBrowserModule } from 'src/app/features/media-browser/media-browser.module';
-import { WysiwygModule } from 'src/app/features/wysiwyg/wysiwyg.module';
+import { WysiwygEditorModule } from 'src/app/features/wysiwyg-editor/wysiwyg-editor.module';
+import { MarkdownEditorModule } from 'src/app/features/markdown-editor/markdown-editor.module';
 
 
 @NgModule({
@@ -43,7 +44,8 @@ import { WysiwygModule } from 'src/app/features/wysiwyg/wysiwyg.module';
 		PostSelectModule,
 		LoaderSpinnerModule,
 		MediaBrowserModule,
-		WysiwygModule
+		WysiwygEditorModule,
+		MarkdownEditorModule
 	]
 })
 export class PostsModule { }

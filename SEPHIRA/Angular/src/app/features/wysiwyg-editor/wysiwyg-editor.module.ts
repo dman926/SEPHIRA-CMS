@@ -27,4 +27,4 @@ import { MatInputModule } from '@angular/material/input';
 		WysiwygComponent
 	]
 })
-export class WysiwygModule { }
+export class WysiwygEditorModule { }

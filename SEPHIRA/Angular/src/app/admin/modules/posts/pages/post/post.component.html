@@ -25,8 +25,27 @@
 
 		<mat-checkbox *ngSwitchCase="'checkbox'" color="primary" [formControlName]="schema.name">{{ schema.niceName }}</mat-checkbox>
 
-		<div *ngSwitchCase="'wysiwyg'" class="spaceout">
-			<sephira-wysiwyg [controlName]="schema.name" [label]="schema.niceName"></sephira-wysiwyg>
+		<div *ngSwitchCase="'wysiwyg'" [class.spaceout]="editorStyle !== 'markdown'">
+			<mat-form-field appearance="fill">
+				<mat-label>{{ schema.niceName }} type</mat-label>
+				<!--
+					There's a bug somewhere in wysiwyg component/ngx-editor where the change detector doesn't work 100% causing an ExpressionChangedAfterItHasBeenCheckedError. Manually calling change detector fixes it.
+					Shouldn't be a big deal since it's called manually.
+					Also fixes a weird bug where non-first options don't propogate and close the select menu.
+				-->
+				<mat-select (selectionChange)="editorStyle = $event.value;cd.detectChanges()" [value]="editorStyle">
+					<mat-option value="html">
+						WYSIWYG
+					</mat-option>
+					<mat-option value="markdown">
+						Markdown
+					</mat-option>
+				</mat-select>
+			</mat-form-field>
+			<sephira-wysiwyg-editor *ngIf="editorStyle !== 'markdown'else markdownEditor" [controlName]="schema.name" [label]="schema.niceName"></sephira-wysiwyg-editor>
+			<ng-template #markdownEditor>
+				<sephira-markdown-editor [controlName]="schema.name" [label]="schema.niceName"></sephira-markdown-editor>
+			</ng-template>
 		</div>
 
 		<div *ngSwitchCase="'FormArray'" class="spaceout">

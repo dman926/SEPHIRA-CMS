@@ -9,9 +9,10 @@ export const environment = {
 	mobileMenuStyle: 'side', // Valid choices: `side`, `top`. Defaults to `side`. Must be exactly `side` for swipe gesture to open/close to work.
 	apiServer: 'http://127.0.0.1:8000/', // Must have a trailing `/`.
 	adminPath: 'admin', // The base subdirectory the user must enter to reach the admin section.
-	enableLightDarkToggle: true, // Add a light/dark theme toggle to the nav
-	defaultLightDark: 'dark', // Set the default theme to light or dark. Defaults to 'dark'
-	wysiwygMenuStyle: 'menu', // Valid choices: `menu`, `floating`. Set the default menu style for the WYSIWYG editor. Can always be overriden with [floatingMenu]="true" in component creation. Defaults to `menu`
+	enableLightDarkToggle: true, // Add a light/dark theme toggle to the nav.
+	defaultLightDark: 'dark', // Set the default theme to light or dark. Defaults to 'dark'.
+	defaultEditorStyle: 'markdown', // Valid choices: `wysiwyg`, `markdown`. Set the content editor style. Defaults to `wysiwyg`.
+	wysiwygMenuStyle: 'menu', // Valid choices: `menu`, `floating`. Set the default menu style for the WYSIWYG editor. Only used if `editorStyle == 'wysiwyg'` Can always be overriden with [floatingMenu]="true" in component creation. Defaults to `menu`.
 
 	// SHOP SPECIFIC VARIABLES
 	enableShop: true, // Enables the shop. Should be the same as the FastAPI ShopSettings.ENABLE setting.

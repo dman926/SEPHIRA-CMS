@@ -6,7 +6,7 @@ import { ThemeService } from 'src/app/core/services/theme/theme.service';
 import { environment } from 'src/environments/environment';
 
 @Component({
-	selector: 'sephira-wysiwyg',
+	selector: 'sephira-wysiwyg-editor',
 	templateUrl: './wysiwyg.component.html',
 	styleUrls: ['./wysiwyg.component.scss']
 })

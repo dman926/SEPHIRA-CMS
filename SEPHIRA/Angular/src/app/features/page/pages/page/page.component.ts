@@ -33,7 +33,7 @@ export class PageComponent implements OnInit, OnDestroy {
 			if (!this.page || this.page.slug !== this.router.url) {
 				this.fetchPage();
 			} else if (this.page) {
-				if (this.page.content && typeof this.page.content === 'string') {
+				if (this.page.content && this.page.contentType === 'html' && typeof this.page.content === 'string') {
 					this.page.content = this.sanitizer.bypassSecurityTrustHtml(this.page.content as string);
 				}
 				this.loaded = true;
@@ -61,7 +61,7 @@ export class PageComponent implements OnInit, OnDestroy {
 				// Do it this way instead of direct assignment because sanitization doesn't work correctly with TransferState.
 				// So make a copy of the object instead.
 				this.page = {...page};
-				if (this.page && this.page.content && typeof this.page.content === 'string') {
+				if (this.page && this.page.content && this.page.contentType === 'html' && typeof this.page.content === 'string') {
 					this.page.content = this.sanitizer.bypassSecurityTrustHtml(this.page.content as string);
 				}
 				this.loaded = true;

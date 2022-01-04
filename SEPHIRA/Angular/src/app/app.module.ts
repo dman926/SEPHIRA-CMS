@@ -7,6 +7,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
 import { NavModule } from './core/nav/nav.module';
+import { MarkdownModule } from 'ngx-markdown';
 
 @NgModule({
 	declarations: [AppComponent],
@@ -22,7 +23,9 @@ import { NavModule } from './core/nav/nav.module';
 			registrationStrategy: 'registerWhenStable:30000',
 		}),
 
-		NavModule
+		NavModule,
+
+		MarkdownModule.forRoot()
 	],
 	providers: [],
 	bootstrap: [AppComponent],
