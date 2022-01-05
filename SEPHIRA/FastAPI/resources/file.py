@@ -35,6 +35,9 @@ def allowed_file(filename: str) -> bool:
 		return True
 	return '.' in filename and filename.rsplit('.', 1)[1].lower() in FileSettings.ALLOWED_EXTENSIONS
 
+# TODO: https://developers.google.com/media/vp9/settings/vod
+# Use this guide to better process the media into a single video file instead of the current decomposed container.
+# Keep the associated media aspect as that is useful for posters and additional media that isn't already part of the file.
 def processMedia(mainMedia: Media, file: UploadFile, container: str) -> None:
 	# TODO: better Media filename checking for sub media objects as there can be collisions right now which cause the decomposition to fail
 	try:
