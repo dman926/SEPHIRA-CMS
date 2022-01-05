@@ -71,7 +71,6 @@ export class AuthComponent implements OnInit, OnDestroy {
 					this.auth.verify(token).subscribe(res => {
 						const queryParams = {...params};
 						queryParams['t'] = null;
-						console.log(queryParams);
 						this.router.navigate([], { queryParams, replaceUrl: true, queryParamsHandling: 'merge' });
 					});
 				}
