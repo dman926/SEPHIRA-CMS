@@ -169,7 +169,6 @@ async def checkout(checkout_body: CheckoutBody, identity: str = Depends(get_jwt_
 			payload['case'] = checkout_body.case
 		headers = nowpayments_auth_headers | { 'Content-Type': 'application/json' }
 		r = await http_service.request('POST', nowPaymentsApiBase + 'payment', json=payload, headers=headers)
-		print(r.json())
 		if r.status_code == 200:
 			j = r.json()
 			order.gatewayPaymentID = j['payment_id']

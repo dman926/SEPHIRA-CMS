@@ -3,12 +3,11 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
-import { SephiraErrorStateMatcher } from 'src/app/core/classes/Error State Matcher/sephira-error-state-matcher';
+import { SephiraErrorStateMatcher } from 'src/app/core/classes/error-state-matcher/sephira-error-state-matcher';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
 import { AuthService } from '../../services/auth/auth.service';
 import { OtpDialogComponent } from '../../components/otp-dialog/otp-dialog.component';
 import { ThemeService } from 'src/app/core/services/theme/theme.service';
-import { Location } from '@angular/common';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -71,7 +70,6 @@ export class AuthComponent implements OnInit, OnDestroy {
 					this.auth.verify(token).subscribe(res => {
 						const queryParams = {...params};
 						queryParams['t'] = null;
-						console.log(queryParams);
 						this.router.navigate([], { queryParams, replaceUrl: true, queryParamsHandling: 'merge' });
 					});
 				}
@@ -102,6 +100,7 @@ export class AuthComponent implements OnInit, OnDestroy {
 						if (err.error.detail === 'Missing otp') {
 							const diag = this.dialog.open(OtpDialogComponent, {
 								width: '250px',
+								panelClass: this.theme.theme === 'light' ? '' : 'sephira-dark',
 								data: { email, password, returnUrl: this.returnUrl }
 							});
 							diag.afterClosed().subscribe(val => {

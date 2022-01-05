@@ -30,7 +30,13 @@ export class ProductDisplayComponent implements OnInit {
 	private readonly reviewCountStateKey = makeStateKey<number>('reviewCount');
 	private readonly reviewAllowedStateKey = makeStateKey<boolean>('reviewAllowed');
 
-	constructor(private productService: ProductService, private platform: PlatformService, private state: TransferState, public cart: CartService, public router: Router) {
+	constructor(
+		private productService: ProductService,
+		private platform: PlatformService,
+		private state: TransferState,
+		public cart: CartService,
+		public router: Router
+	) {
 		this.product = null;
 		this.card = false;
 		this.selectedImg = 0;

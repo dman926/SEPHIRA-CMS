@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
+import { ThemeService } from 'src/app/core/services/theme/theme.service';
 import { AuthService } from 'src/app/features/auth/services/auth/auth.service';
 import { User } from 'src/app/models/user';
 import { TwoFaDialogComponent } from '../../components/two-fa-dialog/two-fa-dialog.component';
@@ -23,6 +24,7 @@ export class SettingsComponent implements OnInit {
 	constructor(
 		private auth: AuthService,
 		private platform: PlatformService,
+		private theme: ThemeService,
 		private dialog: MatDialog
 	) {
 		this.user = null;
@@ -63,7 +65,8 @@ export class SettingsComponent implements OnInit {
 			// Open two factor confirmation only if it's being enabled and previously was disabled
 			if (newUser.twoFactorEnabled && !this.user.twoFactorEnabled) {
 				this.dialog.open(TwoFaDialogComponent, {
-					width: '250px'
+					width: '250px',
+					panelClass: this.theme.theme === 'light' ? '' : 'sephira-dark'
 				}).afterClosed().subscribe(res => {
 					if (res) {
 						this.updateUser(newUser);

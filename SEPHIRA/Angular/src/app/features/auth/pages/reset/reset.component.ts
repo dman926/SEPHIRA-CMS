@@ -3,7 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { SephiraErrorStateMatcher } from 'src/app/core/classes/Error State Matcher/sephira-error-state-matcher';
+import { SephiraErrorStateMatcher } from 'src/app/core/classes/error-state-matcher/sephira-error-state-matcher';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
 import { AuthService } from '../../services/auth/auth.service';
 

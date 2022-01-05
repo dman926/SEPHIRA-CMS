@@ -15,6 +15,7 @@ export class RedirectComponent implements OnInit, OnDestroy {
 	constructor(private route: ActivatedRoute, private router: Router, private platform: PlatformService) { }
 
 	ngOnInit(): void {
+		// TODO: try out removing 19 and 23 and see if SSR works on it
 		if (this.platform.isBrowser) {
 			this.querySub = this.route.queryParams.subscribe(params => {
 				this.router.navigateByUrl(params['return']);

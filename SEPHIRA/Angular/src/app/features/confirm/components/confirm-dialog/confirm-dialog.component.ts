@@ -2,9 +2,9 @@ import { Component, Inject, Input } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 interface Data {
-	content: string;
-	cancelText: string;
-	confirmText: string;
+	content?: string;
+	cancelText?: string;
+	confirmText?: string;
 }
 
 @Component({

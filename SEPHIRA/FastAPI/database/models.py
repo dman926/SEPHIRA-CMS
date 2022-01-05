@@ -11,6 +11,7 @@ from passlib.context import CryptContext
 from pydantic import BaseModel, EmailStr
 import onetimepass
 
+from config import MongoSettings
 from services.util_service import make_ngrams
 from resources.sockets import mediaBrowserManager
 
@@ -311,6 +312,11 @@ class Media(Document):
 	percentDone = FloatField()
 	private = BooleanField(default=False)
 	associatedMedia = ListField(LazyReferenceField('Media', reverse_delete_rule=PULL))
+
+	if MongoSettings.DEFAULT_CONNECT_URI != MongoSettings.MEDIA_CONNECT_URI:
+		meta = {
+			'db_alias': 'media-db'
+		}
 
 	@classmethod
 	def post_save(cls, sender, document: Media, **kwargs):

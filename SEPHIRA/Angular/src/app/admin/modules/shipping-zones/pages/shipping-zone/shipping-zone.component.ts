@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { AdminService } from 'src/app/admin/servies/admin.service';
+import { AdminService } from 'src/app/admin/services/admin.service';
 import { ShippingZone } from 'src/app/models/shipping-zone';
 
 interface Rate {
