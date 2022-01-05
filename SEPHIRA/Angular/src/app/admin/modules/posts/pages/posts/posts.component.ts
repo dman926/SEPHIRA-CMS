@@ -3,7 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { PageEvent } from '@angular/material/paginator';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
-import { AdminService } from 'src/app/admin/servies/admin.service';
+import { AdminService } from 'src/app/admin/services/admin.service';
 import { CoreService } from 'src/app/core/services/core/core.service';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
 import { Post } from 'src/app/models/posts/post';

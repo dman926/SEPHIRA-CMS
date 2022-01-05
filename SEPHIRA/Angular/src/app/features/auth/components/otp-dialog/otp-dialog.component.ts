@@ -2,7 +2,7 @@ import { Component, Inject } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { SephiraErrorStateMatcher } from 'src/app/core/classes/Error State Matcher/sephira-error-state-matcher';
+import { SephiraErrorStateMatcher } from 'src/app/core/classes/error-state-matcher/sephira-error-state-matcher';
 import { AuthService } from '../../services/auth/auth.service';
 
 interface DialogData {

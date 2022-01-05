@@ -3,12 +3,11 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
-import { SephiraErrorStateMatcher } from 'src/app/core/classes/Error State Matcher/sephira-error-state-matcher';
+import { SephiraErrorStateMatcher } from 'src/app/core/classes/error-state-matcher/sephira-error-state-matcher';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
 import { AuthService } from '../../services/auth/auth.service';
 import { OtpDialogComponent } from '../../components/otp-dialog/otp-dialog.component';
 import { ThemeService } from 'src/app/core/services/theme/theme.service';
-import { Location } from '@angular/common';
 import { Subscription } from 'rxjs';
 
 @Component({

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
-import { AdminService } from 'src/app/admin/servies/admin.service';
+import { AdminService } from 'src/app/admin/services/admin.service';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
 import { MenuItem } from 'src/app/models/menu-item';
 

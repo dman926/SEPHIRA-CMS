@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { FormArray, FormControl, FormGroupDirective } from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { PageEvent } from '@angular/material/paginator';
-import { AdminService } from 'src/app/admin/servies/admin.service';
+import { AdminService } from 'src/app/admin/services/admin.service';
 import { Post } from 'src/app/models/posts/post';
 
 @Component({
