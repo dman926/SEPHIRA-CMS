@@ -102,6 +102,7 @@ export class AuthComponent implements OnInit, OnDestroy {
 						if (err.error.detail === 'Missing otp') {
 							const diag = this.dialog.open(OtpDialogComponent, {
 								width: '250px',
+								panelClass: this.theme.theme === 'light' ? '' : 'sephira-dark',
 								data: { email, password, returnUrl: this.returnUrl }
 							});
 							diag.afterClosed().subscribe(val => {

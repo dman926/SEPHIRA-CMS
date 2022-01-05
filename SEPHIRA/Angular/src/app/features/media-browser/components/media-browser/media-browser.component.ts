@@ -8,6 +8,7 @@ import { retry } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { CoreService } from 'src/app/core/services/core/core.service';
 import { PlatformService } from 'src/app/core/services/platform/platform.service';
+import { ThemeService } from 'src/app/core/services/theme/theme.service';
 import { Payload, WebsocketService } from 'src/app/core/services/websocket/websocket.service';
 import { ConfirmDialogComponent } from 'src/app/features/confirm/components/confirm-dialog/confirm-dialog.component';
 import { VideoPlayerComponent } from 'src/app/features/video-player/components/video-player/video-player.component';
@@ -68,7 +69,14 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 	now: number;
 	readonly updatedListRemoveTime: number = 15; // in seconds
 
-	constructor(public core: CoreService, private file: FileService, private platform: PlatformService, private ws: WebsocketService, private dialog: MatDialog, private rootFormGroup: FormGroupDirective) {
+	constructor(
+		public core: CoreService,
+		private file: FileService,
+		private platform: PlatformService,
+		private ws: WebsocketService,
+		private theme: ThemeService,
+		private dialog: MatDialog,
+		private rootFormGroup: FormGroupDirective) {
 		this.allowMultiple = false;
 		this.allowUpload = true;
 		this.opened = false;
@@ -164,7 +172,7 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 					} else {
 						this.files.push(file);
 					}
-				})
+				});
 				this.loaded = true;
 			},
 			error: err => this.loaded = true,
@@ -178,7 +186,8 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 		}
 		if (file) {
 			this.dialog.open(AssociatedMediaDialogComponent, {
-				maxWidth: '800px'
+				maxWidth: '800px',
+				panelClass: this.theme.theme === 'light' ? '' : 'sephira-dark'
 			}).afterClosed().subscribe((media: string[] | undefined) => {
 				if (media) {
 					this.uploadPercent = 0;
@@ -212,6 +221,7 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 		if (this.lastSelectedFile) {
 			this.dialog.open(MetadataEditorComponent, {
 				maxWidth: '600px',
+				panelClass: this.theme.theme === 'light' ? '' : 'sephira-dark',
 				data: { media: this.lastSelectedFile }
 			}).afterClosed().subscribe((metadata: Metadata | undefined) => {
 				if (metadata && this.lastSelectedFile && this.lastSelectedFile.id) {
@@ -229,6 +239,7 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 		if (this.lastSelectedFile) {
 			this.dialog.open(ConfirmDialogComponent, {
 				width: '250px',
+				panelClass: this.theme.theme === 'light' ? '' : 'sephira-dark',
 				data: {
 					content: 'Are you sure you want to delete ' + this.lastSelectedFile.filename + '?',
 					confirmText: 'Delete'
@@ -266,7 +277,8 @@ export class MediaBrowserComponent implements OnInit, OnDestroy {
 
 	openCreateFolder(): void {
 		this.dialog.open(CreateFolderDialogComponent, {
-			width: '250px'
+			width: '250px',
+			panelClass: this.theme.theme === 'light' ? '' : 'sephira-dark'
 		}).afterClosed().subscribe(folder => {
 			if (folder) {
 				this.file.createFolder(this.folder ? this.folder + '/' + folder : folder).subscribe(res => {

@@ -11,7 +11,9 @@ from secret import COINBASE_API_KEY, COINBASE_SHARED_SECRET, NOWPAYMENTS_API_KEY
 
 
 class MongoSettings:
-	CONNECT_URI: str = 'mongodb://localhost/sephira-test' # The URI of the mongo server. (mongodb://[username:password@]host1[:port1][,...hostN[:portN]][/[defaultauthdb][?options]]).
+	# The URIs of the mongo server(s). (mongodb://[username:password@]host1[:port1][,...hostN[:portN]][/[defaultauthdb][?options]]).
+	DEFAULT_CONNECT_URI: str = 'mongodb://localhost/sephira-test'
+	MEDIA_CONNECT_URI: str = 'mongodb://localhost/sephira-media-test' # Because `Media` can take up a lot of space, you have the option to use a different database.
 
 
 class MailSettings:
