@@ -11,7 +11,8 @@
     "serve:ssr": "node dist/sephira/server/main.js",
     "build:ssr": "ng build && ng run sephira:server",
     "prerender": "ng run sephira:prerender",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "preinstall": "npx npm-force-resolutions"
   },
   "private": true,
   "dependencies": {
@@ -66,5 +67,9 @@
     "karma-jasmine-html-reporter": "~1.7.0",
     "typescript": "~4.4.3",
     "video.js": "^7.17.0"
+  },
+  "resolutions": {
+    "postcss": "8.4.5",
+    "node-forge": "1.2.0"
   }
 }
