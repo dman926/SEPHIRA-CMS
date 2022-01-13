@@ -7,7 +7,7 @@ from pydantic.networks import HttpUrl
 from os import path, getcwd
 
 # This is just for development purposes. Feel free to put the raw values in this file if people seeing them is not an issue (ie. private code base)
-from secret import COINBASE_API_KEY, COINBASE_SHARED_SECRET, NOWPAYMENTS_API_KEY, NOWPAYMENTS_IPN_SECRET, PAYPAL_ID, PAYPAL_SECRET, PAYPAL_WEBHOOK_ID, STRIPE_SK
+from secret import COINBASE_API_KEY, COINBASE_SHARED_SECRET, NOWPAYMENTS_API_KEY, NOWPAYMENTS_IPN_SECRET, PAYPAL_ID, PAYPAL_SECRET, PAYPAL_WEBHOOK_ID, STRIPE_SK, STRIPE_SIGNING_SECRET
 
 
 class MongoSettings:
@@ -86,6 +86,8 @@ class ShopSettings:
 class StripeSettings:
 	ENABLE: bool = True
 	SECRET_KEY: str = STRIPE_SK # Your secret key.
+	USE_SIGNING_SECRET: bool = True # If webhooks should be contructed from `SIGNING_SECRET` (True) or `SECRET_KEY` (False).
+	SIGNING_SECRET: str = STRIPE_SIGNING_SECRET # Your webhook signing secret. Only used if `USE_SIGNING_SECRET` is True.
 
 
 class PayPalSettings:

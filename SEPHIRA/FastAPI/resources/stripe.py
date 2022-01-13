@@ -1,13 +1,13 @@
 from fastapi import APIRouter
-from mongoengine.errors import DoesNotExist
 from config import APISettings, StripeSettings
 
 import stripe
-from fastapi import Body, Depends
+from fastapi import Body, Depends, Header
 from typing import Optional
 from pydantic import BaseModel, EmailStr
 from modules.JWT import get_jwt_identity_optional
 from database.models import Order, User
+from mongoengine.errors import DoesNotExist
 from resources.errors import NotFoundError, OutOfStockError
 from services import price_service
 
@@ -105,14 +105,19 @@ async def stripe_checkout(checkout_body: CheckoutModel, identity: Optional[str] 
 		raise e
 
 @router.post('/webhook')
-async def webhook(payload: dict = Body(...)):
+async def webhook(payload: dict = Body(...), Stripe_Signature: str = Header(...)):
 	try:
 		event = None
 
 		try:
-			event = stripe.Event.construct_from(
-				payload, stripe.api_key
-			)
+			if StripeSettings.USE_SIGNING_SECRET and StripeSettings.SIGNING_SECRET:
+				event = stripe.Webhook.construct_event(
+					payload, Stripe_Signature, StripeSettings.SIGNING_SECRET
+				)
+			else:
+				event = stripe.Event.construct_from(
+					payload, stripe.api_key
+				)
 		except ValueError:
 			return '', 400
 
