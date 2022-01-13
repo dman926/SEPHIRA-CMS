@@ -70,7 +70,7 @@ async def signup(form_data: EmailPasswordForm, request: Request, background_task
 		)
 		# FOR DEBUG PURPOSES
 		# TODO: remove in production
-		print(request.client.host + '/login?t=' + verify_token)
+		print(request.client.host + ':' + request.client.port + '/login?t=' + verify_token)
 		return { 'id': str(user.id) }
 	except DoesNotExist:
 		raise UserAlreadyExistsError().http_exception

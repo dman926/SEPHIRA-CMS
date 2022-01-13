@@ -29,6 +29,7 @@ export class AuthComponent implements OnInit, OnDestroy {
 	resettingPassword: boolean;
 	sendingVerification: boolean;
 	verificationSent: boolean;
+	verified: boolean;
 
 	errorMatcher: SephiraErrorStateMatcher;
 
@@ -57,6 +58,7 @@ export class AuthComponent implements OnInit, OnDestroy {
 		this.resettingPassword = false;
 		this.sendingVerification = false;
 		this.verificationSent = false;
+		this.verified = false;
 		this.errorMatcher = new SephiraErrorStateMatcher();
 		this.returnUrl = '';
 	}
@@ -66,10 +68,12 @@ export class AuthComponent implements OnInit, OnDestroy {
 			this.querySub = this.route.queryParams.subscribe(params => {
 				this.returnUrl = params['return'];
 				const token = params['t'];
+				this.verified = params['v'];
 				if (token) {
 					this.auth.verify(token).subscribe(res => {
 						const queryParams = {...params};
 						queryParams['t'] = null;
+						queryParams['v'] = true;
 						this.router.navigate([], { queryParams, replaceUrl: true, queryParamsHandling: 'merge' });
 					});
 				}

@@ -20,6 +20,9 @@
 	<button mat-raised-button type="submit" color="primary" [disabled]="loginForm.invalid || loggingIn">Log In</button>
 	<button mat-raised-button type="button" color="primary" [disabled]="loginForm.invalid || loggingIn" (click)="register()">Register</button>
 	<button mat-raised-button type="button" color="accent" [disabled]="emailFormControl.invalid || resettingPassword" (click)="resetPassword()">Forgot Password</button>
+	<div class="card" [class.dark]="(theme.theme$ | async) !== 'light'" *ngIf="verified">
+		<p>Email verified. Please log in to continue.</p>
+	</div>
 </form>
 
 <ng-template #verifyPrompt>
