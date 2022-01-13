@@ -1,6 +1,6 @@
 aioredis==2.0.1
 aiosmtplib==1.1.6
-anyio==3.4.0
+anyio==3.5.0
 asgiref==3.4.1
 async-timeout==4.0.2
 bcrypt==3.2.0
@@ -44,7 +44,7 @@ python-jose==3.3.0
 python-multipart==0.0.5
 PyYAML==6.0
 redis==4.0.2
-requests==2.27.0
+requests==2.27.1
 rfc3986==1.5.0
 rsa==4.8
 six==1.16.0
@@ -52,8 +52,8 @@ sniffio==1.2.0
 sortedcontainers==2.4.0
 starlette==0.16.0
 stripe==2.64.0
-typing-extensions==4.0.1
-urllib3==1.26.7
+typing_extensions==4.0.1
+urllib3==1.26.8
 uvicorn==0.16.0
 uvloop==0.16.0
 watchgod==0.7
