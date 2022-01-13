@@ -30,7 +30,7 @@
     "@angular/service-worker": "~13.1.2",
     "@nguniversal/express-engine": "^13.0.1",
     "@videojs/http-streaming": "^2.13.1",
-    "ajv": "^6.12.6",
+    "ajv": "^8.8.2",
     "cors": "^2.8.5",
     "express": "^4.17.2",
     "ng-qrcode": "^6.0.0",
@@ -69,7 +69,6 @@
     "video.js": "^7.17.0"
   },
   "resolutions": {
-    "postcss": "8.4.5",
-    "node-forge": "1.2.0"
+    
   }
 }
