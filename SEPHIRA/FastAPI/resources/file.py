@@ -446,7 +446,7 @@ async def set_metadata(id: str, metadata_body: MetadataForm, identity: str = Dep
 		raise e
 
 @router.get('/stream')
-def stream(filename: Optional[str] = '', folder: Optional[str] = '', id: Optional[str] = None, range: Optional[str] = Header(None)):
+def stream(filename: Optional[str] = '', folder: Optional[str] = '', id: Optional[str] = None, range: str = Header('bytes=0-')):
 	try:
 		def iterfile(file, chunk_size, start, size):
 			bytes_read = 0
@@ -455,14 +455,13 @@ def stream(filename: Optional[str] = '', folder: Optional[str] = '', id: Optiona
 				bytes_to_read = min(chunk_size, size - bytes_read)
 				yield file.read(bytes_to_read)
 				bytes_read += bytes_to_read
-		asked = range or 'bytes=0-'
 		if id:
 			media = Media.objects.get(id=id)
 		else:
 			media = Media.objects.get(folder=folder, filename=filename)
 		if not media.file:
 			raise DoesNotExist
-		start_byte = int(asked.split('=')[-1].split('-')[0])
+		start_byte = int(range.split('=')[-1].split('-')[0])
 		chunk_size = FileSettings.MAX_STREAM_CHUNK_SIZE
 		size = media.file.length
 		if start_byte + chunk_size  > size:

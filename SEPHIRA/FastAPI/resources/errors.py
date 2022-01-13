@@ -38,7 +38,7 @@ class NotVerifiedError(Exception):
 
 class SchemaValidationError(Exception):
 	status_code = 400
-	detail = 'Schmea Validation Error'
+	detail = 'Schema Validation Error'
 	http_exception = HTTPException(status_code=status_code, detail=detail)
 
 
