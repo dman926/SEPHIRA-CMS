@@ -28,7 +28,7 @@
     "@angular/platform-server": "~13.1.2",
     "@angular/router": "~13.1.2",
     "@angular/service-worker": "~13.1.2",
-    "@nguniversal/express-engine": "^13.0.1",
+    "@nguniversal/express-engine": "^13.0.2",
     "@videojs/http-streaming": "^2.13.1",
     "ajv": "^8.8.2",
     "cors": "^2.8.5",
