@@ -30,7 +30,7 @@
     "@angular/service-worker": "~13.1.2",
     "@nguniversal/express-engine": "^13.0.1",
     "@videojs/http-streaming": "^2.13.1",
-    "ajv": "^8.8.2",
+    "ajv": "^8.9.0",
     "cors": "^2.8.5",
     "express": "^4.17.2",
     "ng-qrcode": "^6.0.0",
