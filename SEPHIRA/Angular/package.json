@@ -36,7 +36,7 @@
     "ng-qrcode": "^6.0.0",
     "ngx-editor": "^12.0.0",
     "ngx-markdown": "^13.0.0",
-    "rxjs": "~7.4.0",
+    "rxjs": "~7.5.1",
     "tslib": "^2.3.0",
     "zone.js": "~0.11.4"
   },
