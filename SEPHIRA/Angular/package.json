@@ -34,7 +34,7 @@
     "cors": "^2.8.5",
     "express": "^4.17.2",
     "ng-qrcode": "^6.0.0",
-    "ngx-editor": "^12.0.0",
+    "ngx-editor": "^12.1.1",
     "ngx-markdown": "^13.0.0",
     "rxjs": "~7.4.0",
     "tslib": "^2.3.0",
